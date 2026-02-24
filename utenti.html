@@ -22,10 +22,6 @@
         .blocked-icon { display: none; color: #ff3b3b; font-size: 18px; margin-left: 8px; }
         a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
         a.back:hover { background-color: #cc0000; }
-        #logContainer { margin-top: 50px; text-align: left; width: 90%; margin-left: auto; margin-right: auto; }
-        #logContainer h2 { color: #ff3b3b; text-shadow: 0 0 10px #ff3b3b80; }
-        #logContainer ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ff3b3b33; border-radius: 6px; background-color: #1e1e1e; }
-        #logContainer ul li { padding: 8px 12px; border-bottom: 1px solid #ff3b3b22; }
     </style>
 </head>
 <body>
@@ -46,11 +42,6 @@
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
 
-<div id="logContainer">
-    <h2>Log Attività</h2>
-    <ul id="logList"></ul>
-</div>
-
 <script>
 const myRole = "Owner"; // Cambia a Boss o Vice Boss per test
 const users = [
@@ -66,16 +57,17 @@ const ruoli = [
 ];
 
 const tbody = document.getElementById('usersTableBody');
-const logList = document.getElementById('logList');
 
-function addLog(user, action) {
-    const li = document.createElement('li');
-    const now = new Date();
-    li.textContent = `[${now.toLocaleString()}] ${user}: ${action}`;
-    logList.prepend(li); // voce in cima
+function sendToLog(user, action){
+    let logWindow = window.open("log.html", "logWindow");
+    if(!logWindow) return alert("Apri log.html in un'altra scheda prima di testare!");
+    if(!logWindow.addLog){
+        logWindow.onload = () => logWindow.addLog(user, action);
+    } else {
+        logWindow.addLog(user, action);
+    }
 }
 
-// Genera tabella utenti
 users.forEach(user => {
     const tr = document.createElement('tr');
 
@@ -119,7 +111,7 @@ users.forEach(user => {
             user.blocked = true;
             blockedIcon.style.display='inline';
             menu.style.display='none';
-            addLog(user.name, "Bloccato");
+            sendToLog(user.name, "Bloccato");
         } else alert("Non hai permessi per bloccare");
     };
 
@@ -130,7 +122,7 @@ users.forEach(user => {
             user.blocked = false;
             blockedIcon.style.display='none';
             menu.style.display='none';
-            addLog(user.name, "Sbloccato");
+            sendToLog(user.name, "Sbloccato");
         } else alert("Non hai permessi per sbloccare");
     };
 
@@ -139,7 +131,7 @@ users.forEach(user => {
     btnEspelli.onclick = () => {
         menu.style.display='none';
         alert(`${user.name} espulso`);
-        addLog(user.name, "Espulso");
+        sendToLog(user.name, "Espulso");
     };
 
     menu.appendChild(btnBlocca);
