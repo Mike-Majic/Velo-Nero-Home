@@ -1,75 +1,705 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html>
 <head>
-    <title>VELO NERO - Dashboard</title>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            background-color: #0d0d0d;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 100px 20px;
-        }
+  <title>VELO NERO - Dashboard</title>
+  <meta charset="UTF-8" />
+  <style>
+    body { background-color:#0d0d0d; color:#fff; font-family:Arial,sans-serif; text-align:center; padding:60px 20px; margin:0; }
+    h1 { font-size:60px; letter-spacing:5px; color:#ff1a1a; text-shadow:0 0 12px #ff000080; margin:0 0 10px 0; }
+    p.subtitle { font-size:20px; color:#ff6666; margin:0 0 35px 0; }
 
-        h1 {
-            font-size: 60px;
-            letter-spacing: 5px;
-            color: #ff1a1a;
-            text-shadow: 0 0 12px #ff000080;
-            margin-bottom: 10px;
-        }
+    .nav { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:35px; }
+    .nav button {
+      background-color:#1a1a1a; color:#fff; border:1px solid #ff1a1a55;
+      padding:10px 16px; border-radius:10px; cursor:pointer;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow:0 0 10px #ff1a1a44 inset, 0 0 12px #ff000066; font-size:14px;
+    }
+    .nav button:hover { transform:scale(1.03); box-shadow:0 0 16px #ff1a1a77 inset, 0 0 16px #ff000088; }
+    .nav button.active { background-color:#2b0000; border-color:#ff1a1aaa; box-shadow:0 0 18px #ff1a1a88 inset, 0 0 18px #ff0000aa; }
 
-        p.subtitle {
-            font-size: 20px;
-            color: #ff6666;
-            margin-bottom: 50px;
-        }
+    .section { display:none; max-width:1200px; margin:0 auto; text-align:left; }
+    .section.active { display:block; }
 
-        .box {
-            display: inline-block;
-            background-color: #1a1a1a;
-            padding: 40px 60px;
-            margin: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: #fff;
-        }
+    .cards { text-align:center; }
+    .box {
+      display:inline-block; background-color:#1a1a1a; padding:40px 60px; margin:12px;
+      border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
+      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
+    }
+    .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
+    .box h2 { font-size:28px; margin:0 0 10px 0; color:#ff1a1a; text-align:center; }
+    .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; }
 
-        .box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc;
-        }
+    .hint { color:#ff7b7b; font-size:14px; margin-top:6px; }
 
-        .box h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #ff1a1a;
-        }
+    /* Tabs / panels */
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .tabs button {
+      background-color:#1a1a1a; color:#fff; border:1px solid #ff1a1a55;
+      padding:8px 12px; border-radius:10px; cursor:pointer;
+      box-shadow:0 0 8px #ff1a1a33 inset, 0 0 10px #ff000055;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+      font-size:13px;
+    }
+    .tabs button:hover { transform:scale(1.02); box-shadow:0 0 12px #ff1a1a55 inset, 0 0 12px #ff000077; }
+    .tabs button.active { background-color:#2b0000; border-color:#ff1a1aaa; }
 
-        .box p {
-            font-size: 16px;
-            color: #ff6666;
-        }
-    </style>
+    .panel {
+      display:none; margin-top:14px; padding:18px 18px;
+      background:linear-gradient(145deg,#1a1a1a,#2b0000);
+      border-radius:12px; box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
+    }
+    .panel.active { display:block; }
+
+    /* Forms / tables */
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
+    label { color:#ff7b7b; font-size:13px; }
+    input, select, textarea {
+      background:#121212; border:1px solid #ff1a1a55; color:#fff; border-radius:10px;
+      padding:10px 12px; outline:none;
+    }
+    textarea { min-height:70px; resize:vertical; }
+
+    .btn {
+      background:#1a1a1a; border:1px solid #ff1a1aaa; color:#fff; border-radius:10px;
+      padding:10px 14px; cursor:pointer;
+      box-shadow:0 0 12px #ff1a1a44 inset, 0 0 12px #ff000066;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
+
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { padding:10px 12px; border:1px solid #ff1a1a33; text-align:left; background-color:#1e1e1e; vertical-align:top; }
+    th { color:#ff3b3b; }
+    tr:hover td { background-color:#3a0000; }
+
+    .pill {
+      display:inline-block; padding:4px 8px; border-radius:999px;
+      border:1px solid #ff1a1a55; color:#fff; font-size:12px;
+    }
+
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+    @media (max-width: 900px) { .split { grid-template-columns:1fr; } }
+
+    .danger {
+      border-color:#ff1a1aaa;
+      background:#2b0000;
+    }
+
+    .muted { color:#ffaaaa; font-size:13px; }
+  </style>
 </head>
+
 <body>
+  <h1>VELO NERO</h1>
+  <p class="subtitle">Sistema Privato Interno</p>
 
-<h1>VELO NERO</h1>
-<p class="subtitle">Sistema Privato Interno</p>
+  <div class="nav">
+    <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
+    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
+    <button id="btnOperazioni" onclick="showSection('operazioni')">Operazioni</button>
+  </div>
 
-<a href="utenti.html" class="box">
-    <h2>Utenti</h2>
-    <p>Gestione ruoli, azioni e log</p>
-</a>
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="section">
+    <div class="cards">
+      <div class="box" onclick="showSection('operazioni')">
+        <h2>Operazioni</h2>
+        <p>Esiti + calcoli automatici</p>
+      </div>
 
-<a href="comandi.html" class="box">
-    <h2>Comandi</h2>
-    <p>Esegui azioni interne</p>
-</a>
+      <div class="box" id="cardUtenti" onclick="showSection('utenti')">
+        <h2>Utenti</h2>
+        <p>Gestione ruoli e log</p>
+      </div>
+    </div>
+  </div>
 
+  <!-- UTENTI (solo admin) -->
+  <div id="utenti" class="section">
+    <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Utenti</h2>
+    <div class="hint">Sezione riservata a Owner, Boss, Vice Boss.</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Ruolo</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- OPERAZIONI -->
+  <div id="operazioni" class="section">
+    <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Operazioni</h2>
+    <div class="hint">Qui gli utenti inseriscono gli esiti (ottenuto/perso). Totali calcolati in automatico.</div>
+
+    <div class="tabs" id="opsTabs"></div>
+
+    <div id="panelWrapper"></div>
+
+    <!-- GESTIONE (solo Boss + Vice Boss) -->
+    <div id="managePanel" class="panel" style="display:none;">
+      <h3 style="margin:0 0 8px 0; color:#ff3b3b;">Gestione (Boss/Vice Boss)</h3>
+      <div class="muted">Qui vedrai lo specchio totale e puoi azzerare i dati. (In futuro qui mettiamo anche “cassa”, inventario, ecc.)</div>
+
+      <div class="split">
+        <div>
+          <h4 style="margin:12px 0 6px 0;">Specchio Totale Soldi</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Ottenuto</th>
+                <th>Perso</th>
+                <th>Netto</th>
+              </tr>
+            </thead>
+            <tbody id="moneySummaryBody"></tbody>
+          </table>
+        </div>
+
+        <div>
+          <h4 style="margin:12px 0 6px 0;">Specchio Totale Oggetti/Armi</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Ottenuto</th>
+                <th>Perso</th>
+                <th>Netto</th>
+              </tr>
+            </thead>
+            <tbody id="itemsSummaryBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <button class="btn danger" onclick="resetAllData()">AZZERA TUTTO</button>
+        <div class="muted">Attenzione: cancella tutte le registrazioni salvate sul browser.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================
+    // CONFIG (per ora test)
+    // =========================
+    const myRole = "Owner"; // TEST: "Soldato" per vedere l'accesso bloccato a Utenti e gestione
+    const currentUserName = "Mike"; // chi sta inserendo i dati (per ora fisso)
+
+    // Utenti di esempio (poi li renderemo dinamici)
+    const users = [
+      { name: "Mike", role: "Owner" },
+      { name: "Giulia", role: "Soldato" },
+      { name: "Luca", role: "Vice Boss" },
+      { name: "Franco", role: "Boss" }
+    ];
+
+    // Operazioni richieste
+    const categories = [
+      "Esiti Campi",
+      "Esiti Rapine",
+      "Esiti Freeroom",
+      "Furti in casa",
+      "Auto Rubata"
+    ];
+
+    // =========================
+    // PERMESSI
+    // =========================
+    const canSeeUsersSection = () => ["Owner","Boss","Vice Boss"].includes(myRole);
+    const canSeeManage = () => ["Boss","Vice Boss"].includes(myRole);
+
+    // =========================
+    // STORAGE
+    // =========================
+    const STORAGE_KEY = "veloNero_ops_v1";
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed;
+      } catch {
+        return [];
+      }
+    }
+
+    function saveData(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    // record schema:
+    // { id, ts, user, category, type: "ottenuto"|"perso", money, itemsText }
+    // itemsText: multiline "AK-47 x1", "Pistola x2", "Giubbotti x3"
+
+    function uid() {
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+
+    // =========================
+    // NAV SEZIONI
+    // =========================
+    function showSection(id) {
+      if (id === "utenti" && !canSeeUsersSection()) {
+        return showSection("operazioni");
+      }
+
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      if (id === "dashboard") document.getElementById("btnDashboard").classList.add("active");
+      if (id === "utenti") document.getElementById("btnUtenti").classList.add("active");
+      if (id === "operazioni") document.getElementById("btnOperazioni").classList.add("active");
+    }
+
+    // =========================
+    // RENDER UTENTI
+    // =========================
+    function renderUsers() {
+      const tbody = document.getElementById("usersTableBody");
+      tbody.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${u.name}</td><td><span class="pill">${u.role}</span></td><td class="muted">—</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // =========================
+    // OPERAZIONI UI
+    // =========================
+    const opsTabs = document.getElementById("opsTabs");
+    const panelWrapper = document.getElementById("panelWrapper");
+
+    function tabIdFromName(name) {
+      return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+    }
+
+    function showCat(catName) {
+      // activate tab
+      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
+      document.getElementById("tab_" + tabIdFromName(catName)).classList.add("active");
+
+      // activate panel
+      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
+      document.getElementById("panel_" + tabIdFromName(catName)).classList.add("active");
+
+      // refresh table for that category
+      renderCategoryTable(catName);
+    }
+
+    function renderTabsAndPanels() {
+      opsTabs.innerHTML = "";
+      panelWrapper.innerHTML = "";
+
+      categories.forEach((cat, idx) => {
+        const tid = tabIdFromName(cat);
+
+        const btn = document.createElement("button");
+        btn.id = "tab_" + tid;
+        btn.textContent = cat;
+        btn.onclick = () => showCat(cat);
+        opsTabs.appendChild(btn);
+
+        const panel = document.createElement("div");
+        panel.className = "panel opPanel";
+        panel.id = "panel_" + tid;
+
+        panel.innerHTML = `
+          <h3 style="margin:0 0 6px 0; color:#ff3b3b;">${cat}</h3>
+          <div class="muted">Inserisci esito: soldi sporchi + armi/oggetti. Scegli se è OTTENUTO o PERSO.</div>
+
+          <div class="row">
+            <div class="field" style="min-width:180px;">
+              <label>Tipo</label>
+              <select id="type_${tid}">
+                <option value="ottenuto">OTTENUTO</option>
+                <option value="perso">PERSO</option>
+              </select>
+            </div>
+
+            <div class="field" style="min-width:240px;">
+              <label>Soldi sporchi ($)</label>
+              <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" />
+            </div>
+
+            <div class="field" style="flex:1; min-width:280px;">
+              <label>Armi/Oggetti (uno per riga, formato: Nome xQuantità)</label>
+              <textarea id="items_${tid}" placeholder="Esempio:
+AK-47 x1
+Pistola x2
+Giubbotto x3"></textarea>
+            </div>
+
+            <div class="field" style="min-width:180px;">
+              <button class="btn" onclick="addRecord('${cat}')">Aggiungi</button>
+              <div class="hint">Salva sul browser</div>
+            </div>
+          </div>
+
+          <div class="split">
+            <div>
+              <h4 style="margin:12px 0 6px 0;">Totali ${cat} (Soldi)</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ottenuto</th>
+                    <th>Perso</th>
+                    <th>Netto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td id="m_get_${tid}">$0</td>
+                    <td id="m_lost_${tid}">$0</td>
+                    <td id="m_net_${tid}">$0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div>
+              <h4 style="margin:12px 0 6px 0;">Totali ${cat} (Oggetti/Armi)</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Ottenuto</th>
+                    <th>Perso</th>
+                    <th>Netto</th>
+                  </tr>
+                </thead>
+                <tbody id="itemsTotals_${tid}">
+                  <tr><td class="muted" colspan="4">Nessun dato</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h4 style="margin:16px 0 6px 0;">Registrazioni ${cat}</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Quando</th>
+                <th>Chi</th>
+                <th>Tipo</th>
+                <th>Soldi</th>
+                <th>Armi/Oggetti</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="table_${tid}">
+              <tr><td class="muted" colspan="6">Nessuna registrazione</td></tr>
+            </tbody>
+          </table>
+        `;
+
+        panelWrapper.appendChild(panel);
+
+        if (idx === 0) {
+          btn.classList.add("active");
+          panel.classList.add("active");
+        }
+      });
+    }
+
+    // =========================
+    // PARSE ITEMS
+    // =========================
+    function parseItems(text) {
+      // returns map { itemName: qty }
+      const map = {};
+      const lines = (text || "").split("\n").map(l => l.trim()).filter(Boolean);
+      lines.forEach(line => {
+        // Accept formats:
+        // "AK-47 x1" | "AK-47 1" | "AK-47:1"
+        let name = line;
+        let qty = 1;
+
+        const matchX = line.match(/^(.*?)(?:\s*[xX]\s*|\s*:\s*)(\d+)\s*$/);
+        if (matchX) {
+          name = matchX[1].trim();
+          qty = parseInt(matchX[2], 10);
+        } else {
+          const matchSpace = line.match(/^(.*)\s+(\d+)\s*$/);
+          if (matchSpace) {
+            name = matchSpace[1].trim();
+            qty = parseInt(matchSpace[2], 10);
+          }
+        }
+
+        if (!name) return;
+        if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+        const key = name.toLowerCase();
+        if (!map[key]) map[key] = { label: name, qty: 0 };
+        map[key].qty += qty;
+      });
+      return map; // {key:{label,qty}}
+    }
+
+    function formatMoney(n) {
+      const v = Math.round(Number(n || 0));
+      return "$" + v.toLocaleString();
+    }
+
+    // =========================
+    // RECORDS CRUD
+    // =========================
+    function addRecord(category) {
+      const tid = tabIdFromName(category);
+      const type = document.getElementById("type_" + tid).value;
+      const moneyRaw = document.getElementById("money_" + tid).value;
+      const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
+      const itemsText = document.getElementById("items_" + tid).value || "";
+
+      if (money === 0 && itemsText.trim() === "") {
+        return alert("Inserisci almeno soldi o un oggetto/arma.");
+      }
+
+      const records = loadData();
+      records.push({
+        id: uid(),
+        ts: Date.now(),
+        user: currentUserName,
+        category,
+        type, // ottenuto | perso
+        money,
+        itemsText
+      });
+      saveData(records);
+
+      document.getElementById("money_" + tid).value = "";
+      document.getElementById("items_" + tid).value = "";
+
+      renderCategoryTable(category);
+      renderManageSummaries();
+    }
+
+    function deleteRecord(id, category) {
+      const records = loadData().filter(r => r.id !== id);
+      saveData(records);
+      renderCategoryTable(category);
+      renderManageSummaries();
+    }
+
+    function resetAllData() {
+      const ok = confirm("Confermi AZZERA TUTTO? Questa azione cancella tutte le registrazioni.");
+      if (!ok) return;
+      localStorage.removeItem(STORAGE_KEY);
+      // refresh UI
+      categories.forEach(c => renderCategoryTable(c));
+      renderManageSummaries();
+      alert("Dati azzerati.");
+    }
+
+    // =========================
+    // CALCOLI & RENDER CATEGORY
+    // =========================
+    function computeCategory(category) {
+      const records = loadData().filter(r => r.category === category);
+
+      let moneyGet = 0, moneyLost = 0;
+      const itemsGet = {};  // key -> {label, qty}
+      const itemsLost = {};
+
+      records.forEach(r => {
+        if (r.type === "ottenuto") moneyGet += (r.money || 0);
+        if (r.type === "perso") moneyLost += (r.money || 0);
+
+        const parsed = parseItems(r.itemsText);
+        Object.keys(parsed).forEach(k => {
+          const { label, qty } = parsed[k];
+          if (r.type === "ottenuto") {
+            if (!itemsGet[k]) itemsGet[k] = { label, qty: 0 };
+            itemsGet[k].qty += qty;
+          } else {
+            if (!itemsLost[k]) itemsLost[k] = { label, qty: 0 };
+            itemsLost[k].qty += qty;
+          }
+        });
+      });
+
+      return { records, moneyGet, moneyLost, itemsGet, itemsLost };
+    }
+
+    function renderCategoryTable(category) {
+      const tid = tabIdFromName(category);
+      const tableBody = document.getElementById("table_" + tid);
+
+      const { records, moneyGet, moneyLost, itemsGet, itemsLost } = computeCategory(category);
+      const moneyNet = moneyGet - moneyLost;
+
+      // money totals
+      document.getElementById("m_get_" + tid).textContent = formatMoney(moneyGet);
+      document.getElementById("m_lost_" + tid).textContent = formatMoney(moneyLost);
+      document.getElementById("m_net_" + tid).textContent = formatMoney(moneyNet);
+
+      // items totals per category
+      const itemsTotalsBody = document.getElementById("itemsTotals_" + tid);
+      const keys = Array.from(new Set([...Object.keys(itemsGet), ...Object.keys(itemsLost)]));
+
+      if (keys.length === 0) {
+        itemsTotalsBody.innerHTML = `<tr><td class="muted" colspan="4">Nessun dato</td></tr>`;
+      } else {
+        itemsTotalsBody.innerHTML = "";
+        keys.sort((a,b) => (itemsGet[a]?.label || itemsLost[a]?.label || a).localeCompare(itemsGet[b]?.label || itemsLost[b]?.label || b));
+        keys.forEach(k => {
+          const label = itemsGet[k]?.label || itemsLost[k]?.label || k;
+          const g = itemsGet[k]?.qty || 0;
+          const l = itemsLost[k]?.qty || 0;
+          const n = g - l;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${label}</td><td>${g}</td><td>${l}</td><td>${n}</td>`;
+          itemsTotalsBody.appendChild(tr);
+        });
+      }
+
+      // records table
+      if (records.length === 0) {
+        tableBody.innerHTML = `<tr><td class="muted" colspan="6">Nessuna registrazione</td></tr>`;
+        return;
+      }
+
+      const sorted = records.slice().sort((a,b) => b.ts - a.ts);
+      tableBody.innerHTML = "";
+      sorted.forEach(r => {
+        const when = new Date(r.ts).toLocaleString();
+        const tipoPill = r.type === "ottenuto" ? `<span class="pill">OTTENUTO</span>` : `<span class="pill">PERSO</span>`;
+        const itemsHtml = (r.itemsText || "").trim()
+          ? `<div style="white-space:pre-wrap; font-size:13px; color:#fff;">${escapeHtml(r.itemsText.trim())}</div>`
+          : `<span class="muted">—</span>`;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${when}</td>
+          <td>${escapeHtml(r.user)}</td>
+          <td>${tipoPill}</td>
+          <td>${formatMoney(r.money || 0)}</td>
+          <td>${itemsHtml}</td>
+          <td><button class="btn danger" onclick="deleteRecord('${r.id}','${escapeJs(category)}')">Elimina</button></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function escapeJs(s) {
+      return String(s).replaceAll("\\","\\\\").replaceAll("'","\\'");
+    }
+
+    // =========================
+    // MANAGE SUMMARIES (Boss/Vice)
+    // =========================
+    function computeAll() {
+      const records = loadData();
+
+      const moneyByCategory = {}; // cat -> {get,lost}
+      const itemsByKey = {}; // key -> {label,get,lost}
+
+      records.forEach(r => {
+        if (!moneyByCategory[r.category]) moneyByCategory[r.category] = { get:0, lost:0 };
+        if (r.type === "ottenuto") moneyByCategory[r.category].get += (r.money || 0);
+        else moneyByCategory[r.category].lost += (r.money || 0);
+
+        const parsed = parseItems(r.itemsText);
+        Object.keys(parsed).forEach(k => {
+          const { label, qty } = parsed[k];
+          if (!itemsByKey[k]) itemsByKey[k] = { label, get:0, lost:0 };
+          if (r.type === "ottenuto") itemsByKey[k].get += qty;
+          else itemsByKey[k].lost += qty;
+        });
+      });
+
+      return { moneyByCategory, itemsByKey };
+    }
+
+    function renderManageSummaries() {
+      const managePanel = document.getElementById("managePanel");
+      if (!canSeeManage()) {
+        managePanel.style.display = "none";
+        return;
+      }
+      managePanel.style.display = "block";
+
+      const { moneyByCategory, itemsByKey } = computeAll();
+
+      // money summary per category
+      const moneyBody = document.getElementById("moneySummaryBody");
+      moneyBody.innerHTML = "";
+      categories.forEach(cat => {
+        const m = moneyByCategory[cat] || { get:0, lost:0 };
+        const net = m.get - m.lost;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${cat}</td><td>${formatMoney(m.get)}</td><td>${formatMoney(m.lost)}</td><td>${formatMoney(net)}</td>`;
+        moneyBody.appendChild(tr);
+      });
+
+      // items summary global
+      const itemsBody = document.getElementById("itemsSummaryBody");
+      const keys = Object.keys(itemsByKey);
+      if (keys.length === 0) {
+        itemsBody.innerHTML = `<tr><td class="muted" colspan="4">Nessun dato</td></tr>`;
+      } else {
+        itemsBody.innerHTML = "";
+        keys.sort((a,b) => itemsByKey[a].label.localeCompare(itemsByKey[b].label));
+        keys.forEach(k => {
+          const it = itemsByKey[k];
+          const net = it.get - it.lost;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${it.label}</td><td>${it.get}</td><td>${it.lost}</td><td>${net}</td>`;
+          itemsBody.appendChild(tr);
+        });
+      }
+    }
+
+    // =========================
+    // INIT
+    // =========================
+    function init() {
+      // menu visibility
+      const btnUtenti = document.getElementById("btnUtenti");
+      const btnDashboard = document.getElementById("btnDashboard");
+      const cardUtenti = document.getElementById("cardUtenti");
+
+      if (!canSeeUsersSection()) {
+        btnUtenti.style.display = "none";
+        btnDashboard.style.display = "none";
+        cardUtenti.style.display = "none";
+        showSection("operazioni");
+      } else {
+        showSection("dashboard");
+      }
+
+      renderUsers();
+
+      renderTabsAndPanels();
+      categories.forEach(c => renderCategoryTable(c));
+
+      renderManageSummaries();
+    }
+
+    init();
+  </script>
 </body>
 </html>
