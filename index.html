@@ -9,7 +9,7 @@
             color: #fff;
             font-family: 'Arial', sans-serif;
             text-align: center;
-            padding-top: 80px;
+            padding: 50px 20px;
         }
 
         h1 {
@@ -22,15 +22,21 @@
         p.subtitle {
             font-size: 22px;
             color: #ff4d4d;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
         }
 
         .box {
-            margin-top: 40px;
             background: linear-gradient(145deg, #1a1a1a, #2b0000);
-            display: inline-block;
-            padding: 40px 60px;
+            padding: 40px 30px;
             border-radius: 12px;
+            width: 280px;
             box-shadow: 0 0 20px #ff1a1a50;
             transition: transform 0.3s ease;
         }
@@ -45,26 +51,33 @@
         }
 
         p {
-            font-size: 18px;
+            font-size: 16px;
             color: #ff6666;
+            margin-bottom: 20px;
         }
 
         .btn {
             display: inline-block;
-            margin-top: 20px;
-            padding: 10px 25px;
+            padding: 10px 20px;
             color: #fff;
             background-color: #ff1a1a;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s ease;
+            font-size: 14px;
             text-decoration: none;
+            transition: background 0.3s ease;
         }
 
         .btn:hover {
             background-color: #cc0000;
+        }
+
+        @media(max-width: 900px) {
+            .dashboard {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -74,10 +87,22 @@
     <h1>VELO NERO</h1>
     <p class="subtitle">Sistema Privato Interno</p>
 
-    <div class="box">
-        <h2>Accesso Riservato</h2>
-        <p>Dashboard in costruzione...</p>
-        <a href="#" class="btn">Entra</a>
+    <div class="dashboard">
+        <div class="box">
+            <h2>Utenti</h2>
+            <p>Gestione accessi e permessi</p>
+            <a href="#" class="btn">Apri</a>
+        </div>
+        <div class="box">
+            <h2>Logs</h2>
+            <p>Controllo attività interne</p>
+            <a href="#" class="btn">Apri</a>
+        </div>
+        <div class="box">
+            <h2>Comandi</h2>
+            <p>Esegui operazioni interne</p>
+            <a href="#" class="btn">Apri</a>
+        </div>
     </div>
 
 </body>
