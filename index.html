@@ -4,6 +4,12 @@
     <title>VELO NERO</title>
     <meta charset="UTF-8">
     <style>
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset; }
+            50% { box-shadow: 0 0 30px #ff0000aa, 0 0 50px #ff0000 inset; }
+            100% { box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset; }
+        }
+
         body {
             background-color: #0b0b0b;
             color: #fff;
@@ -40,6 +46,7 @@
             width: 280px;
             box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset;
             transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
         }
 
         .box:hover {
@@ -79,6 +86,19 @@
             transform: scale(1.05);
         }
 
+        /* Badge notifiche */
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #ff1a1a;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            animation: glow 1.5s infinite;
+        }
+
         @media(max-width: 900px) {
             .dashboard {
                 flex-direction: column;
@@ -95,16 +115,19 @@
 
     <div class="dashboard">
         <div class="box">
+            <span class="badge">3</span>
             <h2>Utenti</h2>
             <p>Gestione accessi e permessi</p>
             <a href="utenti.html" class="btn">Apri</a>
         </div>
         <div class="box">
+            <span class="badge">7</span>
             <h2>Logs</h2>
             <p>Controllo attività interne</p>
             <a href="logs.html" class="btn">Apri</a>
         </div>
         <div class="box">
+            <span class="badge">!</span>
             <h2>Comandi</h2>
             <p>Esegui operazioni interne</p>
             <a href="comandi.html" class="btn">Apri</a>
