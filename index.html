@@ -34,7 +34,6 @@
     .hint { color:#ff7b7b; font-size:14px; margin-top:6px; }
     .muted { color:#ffaaaa; font-size:13px; }
 
-    /* Tabs / panels */
     .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .tabs button {
       background-color:#1a1a1a; color:#fff; border:1px solid #ff1a1a55;
@@ -53,7 +52,6 @@
     }
     .panel.active { display:block; }
 
-    /* Forms / tables */
     .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
     .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
     label { color:#ff7b7b; font-size:13px; }
@@ -64,13 +62,14 @@
     textarea { min-height:70px; resize:vertical; }
 
     .btn {
-      background:#1a1a1a; border:1px solid #ff1a1aaa; color:#fff; border-radius:10px;
+      background:#1a1a1a; border:1px solid #ff1a1a99; color:#fff; border-radius:10px;
       padding:10px 14px; cursor:pointer;
       box-shadow:0 0 12px #ff1a1a44 inset, 0 0 12px #ff000066;
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
     }
     .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
     .danger { background:#2b0000; border-color:#ff1a1aaa; }
+    .small { padding:7px 10px; font-size:13px; border-radius:9px; }
 
     table { width:100%; border-collapse:collapse; margin-top:12px; }
     th, td { padding:10px 12px; border:1px solid #ff1a1a33; text-align:left; background-color:#1e1e1e; vertical-align:top; }
@@ -103,6 +102,33 @@
     #adminLogContainer h3 { color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; }
     #adminLogList { list-style:none; padding:0; margin:0; max-height:220px; overflow-y:auto; border:1px solid #ff3b3b33; border-radius:10px; background-color:#1e1e1e; }
     #adminLogList li { padding:10px 12px; border-bottom:1px solid #ff3b3b22; font-size:14px; }
+
+    /* Inline editor for items (modal-like) */
+    #editOverlay {
+      display:none;
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1000;
+      padding:24px;
+    }
+    #editModal {
+      max-width:900px; margin:0 auto;
+      background:#121212;
+      border:1px solid #ff1a1a77;
+      border-radius:14px;
+      box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset;
+      padding:18px;
+      text-align:left;
+    }
+    #editModal h3 { margin:0 0 10px 0; color:#ff3b3b; text-shadow:0 0 10px #ff3b3b80; }
+    #editItemsList { margin-top:10px; }
+    .itemRow {
+      display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+      padding:10px; border:1px solid #ff1a1a33; border-radius:12px; margin-bottom:10px; background:#1a1a1a;
+    }
+    .itemRow .field { min-width:240px; }
+    .itemRow .field.smallW { min-width:140px; }
+    .right { margin-left:auto; display:flex; gap:10px; }
   </style>
 </head>
 
@@ -131,7 +157,7 @@
     </div>
   </div>
 
-  <!-- UTENTI (solo admin) -->
+  <!-- UTENTI -->
   <div id="utenti" class="section">
     <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Utenti</h2>
     <div class="hint">Modifica ruoli + azioni. ⛔ = bloccato.</div>
@@ -158,14 +184,14 @@
   <!-- OPERAZIONI -->
   <div id="operazioni" class="section">
     <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Operazioni</h2>
-    <div class="hint">Inserisci esiti (ottenuto/perso). Totali calcolati in automatico.</div>
+    <div class="hint">Inserisci esiti (ottenuto/perso). Oggetti/armi da lista fissa + quantità.</div>
 
     <div class="tabs" id="opsTabs"></div>
     <div id="panelWrapper"></div>
 
     <div id="managePanel" class="panel" style="display:none;">
       <h3 style="margin:0 0 8px 0; color:#ff3b3b;">Gestione (Boss/Vice Boss)</h3>
-      <div class="muted">Specchio totale + reset dati. (Prossimo step: modifica righe.)</div>
+      <div class="muted">Specchio totale + reset dati. Owner/Boss/Vice Boss possono modificare le righe.</div>
 
       <div class="split">
         <div>
@@ -200,18 +226,67 @@
       </div>
 
       <div class="row" style="margin-top:14px;">
-        <button class="btn danger" onclick="resetAllData()">AZZERA OPERAZIONI</button>
+        <button class="btn danger" onclick="resetAllOps()">AZZERA OPERAZIONI</button>
         <div class="muted">Cancella tutte le registrazioni delle operazioni.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT OVERLAY (items editor) -->
+  <div id="editOverlay">
+    <div id="editModal">
+      <h3>Modifica registrazione</h3>
+      <div class="muted" id="editInfo"></div>
+
+      <div class="row">
+        <div class="field" style="min-width:180px;">
+          <label>Tipo</label>
+          <select id="editType">
+            <option value="ottenuto">OTTENUTO</option>
+            <option value="perso">PERSO</option>
+          </select>
+        </div>
+
+        <div class="field" style="min-width:240px;">
+          <label>Soldi sporchi ($)</label>
+          <input id="editMoney" type="number" min="0" step="1" />
+        </div>
+
+        <div class="right">
+          <button class="btn small" onclick="closeEdit()">Chiudi</button>
+          <button class="btn small" onclick="saveEdit()">Salva</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <h4 style="margin:10px 0 8px 0; color:#ff3b3b;">Items (lista fissa + quantità)</h4>
+
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <select id="editItemSelect"></select>
+          </div>
+          <div class="field smallW">
+            <label>Quantità</label>
+            <input id="editItemQty" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field smallW">
+            <button class="btn" onclick="editAddItem()">Aggiungi item</button>
+          </div>
+        </div>
+
+        <div id="editItemsList"></div>
+        <div class="hint">Puoi aggiungere più item. Se aggiungi lo stesso item, somma le quantità.</div>
       </div>
     </div>
   </div>
 
   <script>
     // =========================
-    // CONFIG TEST (poi lo colleghiamo al login vero)
+    // CONFIG TEST (poi login)
     // =========================
-    const myRole = "Owner";       // prova: "Soldato"
-    const currentUserName = "Mike";
+    const myRole = "Owner";          // prova "Soldato"
+    const currentUserName = "Mike";  // chi inserisce
 
     const RUOLI = [
       "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
@@ -228,6 +303,30 @@
       "Auto Rubata"
     ];
 
+    // LISTA FISSA ITEM (modificala quando vuoi)
+    const FIXED_ITEMS = [
+      "Pistola",
+      "Pistola Pesante",
+      "SMG",
+      "Micro SMG",
+      "Carabina",
+      "AK-47",
+      "Fucile a pompa",
+      "Munizioni",
+      "Giubbotto antiproiettile",
+      "Radio",
+      "Kit scasso",
+      "Lockpick",
+      "Computer portatile",
+      "Telefono criptato",
+      "Chiavi auto",
+      "Maschera",
+      "Guanti",
+      "C4 (solo RP)",
+      "Documenti falsi",
+      "Altro oggetto"
+    ];
+
     // =========================
     // PERMESSI
     // =========================
@@ -237,11 +336,14 @@
     const canExpel = () => ["Owner","Boss","Vice Boss"].includes(myRole);
     const canSeeManage = () => ["Boss","Vice Boss"].includes(myRole);
 
+    // MODIFICA OPERAZIONI: Owner/Boss/ViceBoss SEMPRE
+    const canEditOps = () => ["Owner","Boss","Vice Boss"].includes(myRole);
+
     // =========================
     // STORAGE KEYS
     // =========================
     const USERS_KEY = "veloNero_users_v1";
-    const OPS_KEY = "veloNero_ops_v1";
+    const OPS_KEY = "veloNero_ops_v2";           // nuova versione
     const ADMINLOG_KEY = "veloNero_adminlog_v1";
 
     // =========================
@@ -249,7 +351,6 @@
     // =========================
     function uid() { return Math.random().toString(16).slice(2) + Date.now().toString(16); }
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString(); }
-
     function escapeHtml(s) {
       return String(s)
         .replaceAll("&","&amp;")
@@ -268,9 +369,7 @@
     function loadAdminLog() {
       try { return JSON.parse(localStorage.getItem(ADMINLOG_KEY)) || []; } catch { return []; }
     }
-    function saveAdminLog(arr) {
-      localStorage.setItem(ADMINLOG_KEY, JSON.stringify(arr));
-    }
+    function saveAdminLog(arr) { localStorage.setItem(ADMINLOG_KEY, JSON.stringify(arr)); }
     function addAdminLog(text) {
       if (!canSeeAdminLog()) return;
       const arr = loadAdminLog();
@@ -294,7 +393,7 @@
     }
 
     // =========================
-    // USERS DATA
+    // USERS
     // =========================
     function defaultUsers() {
       return [
@@ -316,18 +415,13 @@
         return defaultUsers();
       }
     }
-
-    function saveUsers(users) {
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
+    function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
 
     // =========================
-    // NAV SEZIONI
+    // NAV
     // =========================
     function showSection(id) {
-      if (id === "utenti" && !canSeeUsersSection()) {
-        return showSection("operazioni");
-      }
+      if (id === "utenti" && !canSeeUsersSection()) return showSection("operazioni");
 
       document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
       document.getElementById(id).classList.add("active");
@@ -339,7 +433,7 @@
     }
 
     // =========================
-    // RENDER USERS TABLE (con azioni)
+    // USERS TABLE (ruoli + blocchi)
     // =========================
     const usersTableBody = document.getElementById("usersTableBody");
 
@@ -350,7 +444,6 @@
       users.forEach(u => {
         const tr = document.createElement("tr");
 
-        // Nome + icon
         const tdName = document.createElement("td");
         tdName.textContent = u.name;
         const blockedIcon = document.createElement("span");
@@ -359,7 +452,6 @@
         blockedIcon.style.display = u.blocked ? "inline" : "none";
         tdName.appendChild(blockedIcon);
 
-        // Ruolo select (salvato)
         const tdRole = document.createElement("td");
         const sel = document.createElement("select");
         RUOLI.forEach(r => {
@@ -376,11 +468,9 @@
         };
         tdRole.appendChild(sel);
 
-        // Stato
         const tdState = document.createElement("td");
         tdState.innerHTML = u.blocked ? `<span class="pill">BLOCCATO</span>` : `<span class="pill">ATTIVO</span>`;
 
-        // Azioni (matita)
         const tdActions = document.createElement("td");
         const wrap = document.createElement("div");
         wrap.style.position = "relative";
@@ -428,7 +518,6 @@
           renderUsersTable();
         };
 
-        // Vice Boss: solo Espelli (come richiesto)
         if (myRole === "Vice Boss") {
           btnBlocca.style.display = "none";
           btnSblocca.style.display = "none";
@@ -437,11 +526,7 @@
         menu.appendChild(btnBlocca);
         menu.appendChild(btnSblocca);
         menu.appendChild(btnEspelli);
-
         wrap.appendChild(menu);
-
-        // se non autorizzato alle azioni, nascondi matita
-        if (!canSeeUsersSection()) btnEdit.style.display = "none";
 
         btnEdit.onclick = (e) => {
           e.stopPropagation();
@@ -465,52 +550,55 @@
     });
 
     // =========================
-    // OPERAZIONI DATA
+    // OPS DATA (v2: items array)
+    // record:
+    // {id, ts, user, category, type, money, items:[{name,qty}]}
     // =========================
     function loadOps() {
-      try { return JSON.parse(localStorage.getItem(OPS_KEY)) || []; } catch { return []; }
+      try {
+        const raw = localStorage.getItem(OPS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
     }
     function saveOps(arr) { localStorage.setItem(OPS_KEY, JSON.stringify(arr)); }
+
+    // =========================
+    // OPERAZIONI UI
+    // =========================
+    const opsTabs = document.getElementById("opsTabs");
+    const panelWrapper = document.getElementById("panelWrapper");
 
     function tabIdFromName(name) {
       return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
     }
 
-    function parseItems(text) {
-      const map = {};
-      const lines = (text || "").split("\n").map(l => l.trim()).filter(Boolean);
+    function showCat(catName) {
+      const tid = tabIdFromName(catName);
 
-      lines.forEach(line => {
-        let name = line;
-        let qty = 1;
+      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
+      document.getElementById("tab_" + tid).classList.add("active");
 
-        const matchX = line.match(/^(.*?)(?:\s*[xX]\s*|\s*:\s*)(\d+)\s*$/);
-        if (matchX) {
-          name = matchX[1].trim();
-          qty = parseInt(matchX[2], 10);
-        } else {
-          const matchSpace = line.match(/^(.*)\s+(\d+)\s*$/);
-          if (matchSpace) {
-            name = matchSpace[1].trim();
-            qty = parseInt(matchSpace[2], 10);
-          }
-        }
+      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
+      document.getElementById("panel_" + tid).classList.add("active");
 
-        if (!name) return;
-        if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      renderCategory(catName);
+    }
 
-        const key = name.toLowerCase();
-        if (!map[key]) map[key] = { label: name, qty: 0 };
-        map[key].qty += qty;
+    function fillItemSelect(selectEl) {
+      selectEl.innerHTML = "";
+      FIXED_ITEMS.forEach(it => {
+        const opt = document.createElement("option");
+        opt.value = it;
+        opt.textContent = it;
+        selectEl.appendChild(opt);
       });
-
-      return map;
     }
 
     function renderTabsAndPanels() {
-      const opsTabs = document.getElementById("opsTabs");
-      const panelWrapper = document.getElementById("panelWrapper");
-
       opsTabs.innerHTML = "";
       panelWrapper.innerHTML = "";
 
@@ -529,7 +617,7 @@
 
         panel.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:#ff3b3b;">${cat}</h3>
-          <div class="muted">Inserisci esito: soldi sporchi + armi/oggetti. Scegli OTTENUTO o PERSO.</div>
+          <div class="muted">Aggiungi esito: scegli tipo, soldi, poi items da lista fissa + quantità.</div>
 
           <div class="row">
             <div class="field" style="min-width:180px;">
@@ -544,19 +632,34 @@
               <label>Soldi sporchi ($)</label>
               <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" />
             </div>
+          </div>
 
-            <div class="field" style="flex:1; min-width:280px;">
-              <label>Armi/Oggetti (uno per riga: Nome xQuantità)</label>
-              <textarea id="items_${tid}" placeholder="Esempio:
-AK-47 x1
-Pistola x2
-Giubbotto x3"></textarea>
+          <div class="row">
+            <div class="field" style="min-width:320px;">
+              <label>Item</label>
+              <select id="item_${tid}"></select>
+            </div>
+
+            <div class="field" style="min-width:160px;">
+              <label>Quantità</label>
+              <input id="qty_${tid}" type="number" min="1" step="1" value="1" />
             </div>
 
             <div class="field" style="min-width:180px;">
-              <button class="btn" onclick="addRecord('${escapeHtml(cat)}')">Aggiungi</button>
+              <button class="btn" onclick="addItemToDraft('${cat}')">Aggiungi item</button>
+              <div class="hint">Compone la registrazione</div>
+            </div>
+
+            <div class="field" style="min-width:180px;">
+              <button class="btn" onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
               <div class="hint">Salva sul browser</div>
             </div>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:#ff3b3b;">Bozza items</h4>
+            <div class="muted">Qui vedi cosa stai per salvare. Puoi rimuovere singoli item.</div>
+            <div id="draft_${tid}" style="margin-top:10px;"></div>
           </div>
 
           <div class="split">
@@ -591,7 +694,7 @@ Giubbotto x3"></textarea>
                 <th>Chi</th>
                 <th>Tipo</th>
                 <th>Soldi</th>
-                <th>Armi/Oggetti</th>
+                <th>Items</th>
                 <th>Azioni</th>
               </tr>
             </thead>
@@ -603,6 +706,12 @@ Giubbotto x3"></textarea>
 
         panelWrapper.appendChild(panel);
 
+        // fill selects after in DOM
+        setTimeout(() => {
+          const itemSel = document.getElementById("item_" + tid);
+          if (itemSel) fillItemSelect(itemSel);
+        }, 0);
+
         if (idx === 0) {
           btn.classList.add("active");
           panel.classList.add("active");
@@ -610,58 +719,216 @@ Giubbotto x3"></textarea>
       });
     }
 
-    function showCat(catName) {
-      const tid = tabIdFromName(catName);
-      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
-      document.getElementById("tab_" + tid).classList.add("active");
+    // Draft items per category in memory (not saved until saveDraftRecord)
+    const drafts = {}; // category -> [{name,qty}]
 
-      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
-      document.getElementById("panel_" + tid).classList.add("active");
-
-      renderCategoryTable(catName);
+    function getDraft(category) {
+      if (!drafts[category]) drafts[category] = [];
+      return drafts[category];
     }
 
-    function addRecord(category) {
+    function addItemToDraft(category) {
+      const tid = tabIdFromName(category);
+      const name = document.getElementById("item_" + tid).value;
+      let qty = parseInt(document.getElementById("qty_" + tid).value || "1", 10);
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const draft = getDraft(category);
+      const existing = draft.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else draft.push({ name, qty });
+
+      document.getElementById("qty_" + tid).value = "1";
+      renderDraft(category);
+    }
+
+    function removeDraftItem(category, name) {
+      const draft = getDraft(category);
+      drafts[category] = draft.filter(x => x.name !== name);
+      renderDraft(category);
+    }
+
+    function renderDraft(category) {
+      const tid = tabIdFromName(category);
+      const wrap = document.getElementById("draft_" + tid);
+      const draft = getDraft(category);
+
+      if (!wrap) return;
+      if (draft.length === 0) {
+        wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
+        return;
+      }
+
+      wrap.innerHTML = "";
+      draft.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field smallW">
+            <label>Quantità</label>
+            <input value="${it.qty}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="removeDraftItem('${escapeHtml(category)}','${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function saveDraftRecord(category) {
       const tid = tabIdFromName(category);
       const type = document.getElementById("type_" + tid).value;
       const moneyRaw = document.getElementById("money_" + tid).value;
       const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
-      const itemsText = document.getElementById("items_" + tid).value || "";
+      const items = getDraft(category);
 
-      if (money === 0 && itemsText.trim() === "") {
-        return alert("Inserisci almeno soldi o un oggetto/arma.");
+      if (money === 0 && items.length === 0) {
+        return alert("Inserisci almeno soldi o almeno un item.");
       }
 
       const ops = loadOps();
-      ops.push({ id: uid(), ts: Date.now(), user: currentUserName, category, type, money, itemsText });
+      ops.push({
+        id: uid(),
+        ts: Date.now(),
+        user: currentUserName,
+        category,
+        type,
+        money,
+        items: items.map(x => ({ name: x.name, qty: x.qty }))
+      });
       saveOps(ops);
 
+      // reset inputs + draft
       document.getElementById("money_" + tid).value = "";
-      document.getElementById("items_" + tid).value = "";
+      drafts[category] = [];
+      renderDraft(category);
 
       addAdminLog(`Operazione registrata: ${category} (${type}) da ${currentUserName}`);
-      renderCategoryTable(category);
+      renderCategory(category);
       renderManageSummaries();
     }
 
     function deleteRecord(id, category) {
+      if (!canEditOps()) return alert("Non hai permessi per eliminare");
       const ops = loadOps().filter(r => r.id !== id);
       saveOps(ops);
-      addAdminLog(`Operazione eliminata: ${category} (ID ${id})`);
-      renderCategoryTable(category);
+      addAdminLog(`Operazione eliminata: ${category}`);
+      renderCategory(category);
       renderManageSummaries();
     }
 
-    function resetAllData() {
-      const ok = confirm("Confermi AZZERA OPERAZIONI? Cancella tutte le registrazioni.");
-      if (!ok) return;
-      localStorage.removeItem(OPS_KEY);
-      addAdminLog("Operazioni azzerate");
-      CATEGORIES.forEach(c => renderCategoryTable(c));
-      renderManageSummaries();
-      alert("Operazioni azzerate.");
+    // =========================
+    // EDIT MODAL
+    // =========================
+    const editOverlay = document.getElementById("editOverlay");
+    const editInfo = document.getElementById("editInfo");
+    const editType = document.getElementById("editType");
+    const editMoney = document.getElementById("editMoney");
+    const editItemSelect = document.getElementById("editItemSelect");
+    const editItemQty = document.getElementById("editItemQty");
+    const editItemsList = document.getElementById("editItemsList");
+
+    fillItemSelect(editItemSelect);
+
+    let editing = null; // {id, category}
+    let editingItems = []; // [{name,qty}]
+
+    function openEdit(id, category) {
+      if (!canEditOps()) return alert("Non hai permessi per modificare");
+
+      const ops = loadOps();
+      const rec = ops.find(r => r.id === id);
+      if (!rec) return;
+
+      editing = { id, category };
+      editingItems = (rec.items || []).map(x => ({ name: x.name, qty: x.qty }));
+
+      editInfo.textContent = `${rec.category} — ${rec.user} — ${new Date(rec.ts).toLocaleString()}`;
+      editType.value = rec.type;
+      editMoney.value = String(rec.money || 0);
+
+      renderEditItems();
+      editOverlay.style.display = "block";
     }
 
+    function closeEdit() {
+      editOverlay.style.display = "none";
+      editing = null;
+      editingItems = [];
+    }
+
+    function editAddItem() {
+      const name = editItemSelect.value;
+      let qty = parseInt(editItemQty.value || "1", 10);
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = editingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else editingItems.push({ name, qty });
+
+      editItemQty.value = "1";
+      renderEditItems();
+    }
+
+    function editRemoveItem(name) {
+      editingItems = editingItems.filter(x => x.name !== name);
+      renderEditItems();
+    }
+
+    function renderEditItems() {
+      if (editingItems.length === 0) {
+        editItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      editItemsList.innerHTML = "";
+      editingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field smallW">
+            <label>Quantità</label>
+            <input value="${it.qty}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="editRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        editItemsList.appendChild(div);
+      });
+    }
+
+    function saveEdit() {
+      if (!editing) return;
+
+      const ops = loadOps();
+      const rec = ops.find(r => r.id === editing.id);
+      if (!rec) return;
+
+      rec.type = editType.value;
+      rec.money = Math.max(0, parseInt(editMoney.value || "0", 10) || 0);
+      rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
+
+      saveOps(ops);
+
+      addAdminLog(`Operazione modificata: ${rec.category} (da ${rec.user})`);
+      closeEdit();
+
+      renderCategory(rec.category);
+      renderManageSummaries();
+    }
+
+    // =========================
+    // CALCOLI + RENDER CATEGORY
+    // =========================
     function computeCategory(category) {
       const records = loadOps().filter(r => r.category === category);
 
@@ -673,15 +940,16 @@ Giubbotto x3"></textarea>
         if (r.type === "ottenuto") moneyGet += (r.money || 0);
         else moneyLost += (r.money || 0);
 
-        const parsed = parseItems(r.itemsText);
-        Object.keys(parsed).forEach(k => {
-          const { label, qty } = parsed[k];
+        (r.items || []).forEach(it => {
+          const key = it.name.toLowerCase();
+          const qty = Number(it.qty || 0);
+
           if (r.type === "ottenuto") {
-            if (!itemsGet[k]) itemsGet[k] = { label, qty: 0 };
-            itemsGet[k].qty += qty;
+            if (!itemsGet[key]) itemsGet[key] = { label: it.name, qty: 0 };
+            itemsGet[key].qty += qty;
           } else {
-            if (!itemsLost[k]) itemsLost[k] = { label, qty: 0 };
-            itemsLost[k].qty += qty;
+            if (!itemsLost[key]) itemsLost[key] = { label: it.name, qty: 0 };
+            itemsLost[key].qty += qty;
           }
         });
       });
@@ -689,9 +957,9 @@ Giubbotto x3"></textarea>
       return { records, moneyGet, moneyLost, itemsGet, itemsLost };
     }
 
-    function renderCategoryTable(category) {
+    function renderCategory(category) {
       const tid = tabIdFromName(category);
-      const tableBody = document.getElementById("table_" + tid);
+      renderDraft(category);
 
       const { records, moneyGet, moneyLost, itemsGet, itemsLost } = computeCategory(category);
       const moneyNet = moneyGet - moneyLost;
@@ -719,7 +987,8 @@ Giubbotto x3"></textarea>
         });
       }
 
-      if (records.length === 0) {
+      const tableBody = document.getElementById("table_" + tid);
+      if (!records || records.length === 0) {
         tableBody.innerHTML = `<tr><td class="muted" colspan="6">Nessuna registrazione</td></tr>`;
         return;
       }
@@ -729,8 +998,16 @@ Giubbotto x3"></textarea>
       sorted.forEach(r => {
         const when = new Date(r.ts).toLocaleString();
         const tipoPill = r.type === "ottenuto" ? `<span class="pill">OTTENUTO</span>` : `<span class="pill">PERSO</span>`;
-        const itemsHtml = (r.itemsText || "").trim()
-          ? `<div style="white-space:pre-wrap; font-size:13px; color:#fff;">${escapeHtml(r.itemsText.trim())}</div>`
+
+        const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
+        const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
+
+        const canEdit = canEditOps();
+        const actionsHtml = canEdit
+          ? `
+            <button class="btn small" onclick="openEdit('${r.id}','${escapeHtml(r.category)}')">Modifica</button>
+            <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+          `
           : `<span class="muted">—</span>`;
 
         const tr = document.createElement("tr");
@@ -740,14 +1017,18 @@ Giubbotto x3"></textarea>
           <td>${tipoPill}</td>
           <td>${formatMoney(r.money || 0)}</td>
           <td>${itemsHtml}</td>
-          <td><button class="btn danger" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button></td>
+          <td>${actionsHtml}</td>
         `;
         tableBody.appendChild(tr);
       });
     }
 
+    // =========================
+    // MANAGE SUMMARIES
+    // =========================
     function computeAll() {
       const ops = loadOps();
+
       const moneyByCategory = {};
       const itemsByKey = {};
 
@@ -756,12 +1037,11 @@ Giubbotto x3"></textarea>
         if (r.type === "ottenuto") moneyByCategory[r.category].get += (r.money || 0);
         else moneyByCategory[r.category].lost += (r.money || 0);
 
-        const parsed = parseItems(r.itemsText);
-        Object.keys(parsed).forEach(k => {
-          const { label, qty } = parsed[k];
-          if (!itemsByKey[k]) itemsByKey[k] = { label, get:0, lost:0 };
-          if (r.type === "ottenuto") itemsByKey[k].get += qty;
-          else itemsByKey[k].lost += qty;
+        (r.items || []).forEach(it => {
+          const key = it.name.toLowerCase();
+          if (!itemsByKey[key]) itemsByKey[key] = { label: it.name, get:0, lost:0 };
+          if (r.type === "ottenuto") itemsByKey[key].get += Number(it.qty || 0);
+          else itemsByKey[key].lost += Number(it.qty || 0);
         });
       });
 
@@ -805,6 +1085,15 @@ Giubbotto x3"></textarea>
       }
     }
 
+    function resetAllOps() {
+      const ok = confirm("Confermi AZZERA OPERAZIONI?");
+      if (!ok) return;
+      localStorage.removeItem(OPS_KEY);
+      addAdminLog("Operazioni azzerate");
+      CATEGORIES.forEach(c => renderCategory(c));
+      renderManageSummaries();
+    }
+
     // =========================
     // INIT
     // =========================
@@ -822,20 +1111,23 @@ Giubbotto x3"></textarea>
         showSection("dashboard");
       }
 
-      // users
-      if (canSeeUsersSection()) {
-        renderUsersTable();
-      }
-
-      // admin log visibility
       if (canSeeAdminLog()) {
         adminLogContainer.style.display = "block";
         renderAdminLog();
       }
 
-      // ops
+      if (canSeeUsersSection()) {
+        renderUsersTable();
+      }
+
       renderTabsAndPanels();
-      CATEGORIES.forEach(c => renderCategoryTable(c));
+
+      // fill drafts + renders
+      CATEGORIES.forEach(c => {
+        drafts[c] = [];
+        renderCategory(c);
+      });
+
       renderManageSummaries();
     }
 
