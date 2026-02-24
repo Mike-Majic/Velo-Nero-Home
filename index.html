@@ -103,7 +103,7 @@
     .btn-edit:hover { transform:scale(1.2); text-shadow:0 0 6px #ff000080; }
     .action-menu {
       display:none; position:absolute; top:32px; left:0; background-color:#1a1a1a;
-      border:1px solid #ff3b3b66; border-radius:8px; padding:10px; text-align:left; z-index:100; min-width:160px;
+      border:1px solid #ff3b3b66; border-radius:8px; padding:10px; text-align:left; z-index:100; min-width:180px;
     }
     .action-menu button {
       display:block; background:none; border:1px solid #ff3b3b44; color:#fff; padding:7px 10px;
@@ -127,15 +127,6 @@
     }
     .right { margin-left:auto; display:flex; gap:10px; }
 
-    /* 2FA setup modal */
-    #twofaOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000; padding:24px; }
-    #twofaModal{
-      max-width:760px; margin:0 auto; background:#121212;
-      border:1px solid #ff1a1a77; border-radius:14px;
-      box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset;
-      padding:18px; text-align:left;
-    }
-    #twofaModal h3 { margin:0 0 10px 0; color:#ff3b3b; text-shadow:0 0 10px #ff3b3b80; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; word-break:break-all; }
   </style>
 </head>
@@ -160,39 +151,122 @@
     <button id="btnLog" onclick="goToLogs()" style="display:none;">📋 Log</button>
   </div>
 
-  <!-- LOGIN -->
+  <!-- LOGIN (Amazon-style) -->
   <div id="login" class="section">
     <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Accesso</h2>
-    <div class="hint">Per entrare devi registrarti / accedere. Al primo accesso il ruolo è “Nessuno” finché un admin non lo assegna.</div>
+    <div class="hint">Accesso in 3 passaggi: Email → Password → Codice 2FA.</div>
 
-    <div class="panel active" style="display:block;">
+    <!-- STEP 1: EMAIL -->
+    <div class="panel active" id="stepEmail" style="display:block;">
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
           <label>Email</label>
           <input id="loginEmail" type="email" placeholder="nome@gmail.com" />
+          <div class="hint">Inserisci la tua email per continuare</div>
         </div>
         <div class="field" style="min-width:220px;">
+          <button class="btn" onclick="loginStepEmail()">Continua</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2A: PASSWORD (LOGIN) -->
+    <div class="panel" id="stepPassword">
+      <div class="row">
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Email</label>
+          <input id="pwEmail" type="email" disabled />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <input id="loginPassword" type="password" placeholder="Password" />
+          <div class="hint">Inserisci la password per continuare</div>
+        </div>
+        <div class="field" style="min-width:220px;">
+          <button class="btn" onclick="loginStepPassword()">Accedi</button>
+          <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
+        </div>
+      </div>
+
+      <div class="row" id="pwResetBox" style="display:none;">
+        <div class="field" style="min-width:320px; flex:1;">
+          <div class="hint">⚠️ Password resettata da un admin: devi impostarne una nuova.</div>
+          <label>Nuova password</label>
+          <input id="newPassword" type="password" placeholder="Nuova password" />
+          <label>Conferma nuova password</label>
+          <input id="newPassword2" type="password" placeholder="Conferma" />
+        </div>
+        <div class="field" style="min-width:220px;">
+          <button class="btn" onclick="saveNewPassword()">Salva password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2B: REGISTRAZIONE -->
+    <div class="panel" id="stepRegister">
+      <div class="row">
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Email</label>
+          <input id="regEmail" type="email" disabled />
+          <div class="hint">Email non trovata: crea un account</div>
         </div>
       </div>
 
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
           <label>Nome utente in game</label>
-          <input id="loginGameName" type="text" placeholder="Il tuo nick in game" />
+          <input id="regGameName" type="text" placeholder="Il tuo nick in game" />
         </div>
-        <div class="field" style="min-width:220px;">
-          <label>Codice 2FA (6 cifre)</label>
-          <input id="login2fa" type="text" inputmode="numeric" placeholder="123456" maxlength="6" />
-          <div class="hint">Obbligatorio: password + codice Authenticator</div>
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Password</label>
+          <input id="regPassword" type="password" placeholder="Password" />
+          <label>Conferma password</label>
+          <input id="regPassword2" type="password" placeholder="Conferma password" />
         </div>
       </div>
 
       <div class="row">
         <div class="field" style="min-width:220px;">
-          <button class="btn" onclick="loginWithEmail()">Entra / Registrati</button>
-          <div class="hint">Funziona subito su Vercel</div>
+          <button class="btn" onclick="registerAccount()">Crea account</button>
+          <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: 2FA -->
+    <div class="panel" id="step2FA">
+      <div class="row">
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Email</label>
+          <input id="twofaEmailInline" disabled />
+        </div>
+      </div>
+
+      <div class="row" id="twofaSetupBox" style="display:none;">
+        <div class="field" style="min-width:320px; flex:1;">
+          <div class="hint">Configura 2FA (obbligatorio) su Google Authenticator (o simili) usando la chiave qui sotto.</div>
+          <label>Chiave segreta 2FA</label>
+          <input id="twofaSecretInline" class="mono" disabled />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="min-width:240px;">
+          <label>Codice 2FA (6 cifre)</label>
+          <input id="login2fa" type="text" inputmode="numeric" maxlength="6" placeholder="123456" />
+          <div class="hint" id="twofaHintInline"></div>
+        </div>
+
+        <div class="field" style="min-width:320px;">
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input id="rememberDevice" type="checkbox" />
+            Ricorda questo dispositivo per 30 giorni
+          </label>
+          <button class="btn" onclick="loginStep2FA()">Verifica e entra</button>
+          <button class="btn danger" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
     </div>
@@ -325,48 +399,9 @@
     </div>
   </div>
 
-  <!-- 2FA SETUP MODAL -->
-  <div id="twofaOverlay">
-    <div id="twofaModal">
-      <h3>Configura 2FA (Obbligatorio)</h3>
-      <div class="muted" style="margin-bottom:10px;">
-        Apri Google Authenticator (o simili) → aggiungi account → inserisci manualmente la chiave segreta qui sotto.
-        Poi inserisci il codice a 6 cifre per completare l’accesso.
-      </div>
-
-      <div class="row">
-        <div class="field" style="flex:1; min-width:260px;">
-          <label>Email</label>
-          <input id="twofaEmail" disabled />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field" style="flex:1; min-width:260px;">
-          <label>Chiave segreta (conservala!)</label>
-          <input id="twofaSecret" class="mono" disabled />
-          <div class="hint">Se la perdi, dovrai essere “resettato” da un admin (in questo sistema local)</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field" style="min-width:240px;">
-          <label>Codice Authenticator</label>
-          <input id="twofaCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" />
-        </div>
-        <div class="field" style="min-width:240px;">
-          <button class="btn" onclick="confirmTwoFA()">Conferma e accedi</button>
-          <button class="btn danger" onclick="cancelTwoFA()" style="margin-left:10px;">Annulla</button>
-        </div>
-      </div>
-
-      <div class="hint" id="twofaHint"></div>
-    </div>
-  </div>
-
   <script>
     // =========================
-    // CONFIG (IMPORTANTI)
+    // CONFIG
     // =========================
     const OWNER_EMAIL = "M.COLURCI@GMAIL.COM";
 
@@ -508,6 +543,7 @@
     function canBlockUnblock() { return ["Owner","Boss"].includes(myRole()); }
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canReset2FA() { return ["Owner","Boss"].includes(myRole()); }
+    function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); } // chi può modificare ruoli
 
     // =========================
     // UI STATE
@@ -536,6 +572,7 @@
       const s = loadSession();
       if (!s?.email) {
         showOnly("login");
+        showLoginStep("stepEmail");
         return false;
       }
       return true;
@@ -572,6 +609,7 @@
       clearSession();
       setHeaderUser();
       showOnly("login");
+      showLoginStep("stepEmail");
     }
 
     // =========================
@@ -675,49 +713,76 @@
       return c === a || c === b || c === d;
     }
 
-    // 2FA modal state
-    const twofaOverlay = document.getElementById("twofaOverlay");
-    const twofaEmailEl = document.getElementById("twofaEmail");
-    const twofaSecretEl = document.getElementById("twofaSecret");
-    const twofaCodeEl = document.getElementById("twofaCode");
-    const twofaHintEl = document.getElementById("twofaHint");
-    let pendingLoginEmail = null;
+    // =========================
+    // TRUST DEVICE 30gg (salta 2FA)
+    // =========================
+    const TRUST_KEY = "vn_trusted_devices_v1";
+    const DEVICE_ID_KEY = "vn_device_id_v1";
 
-    function openTwoFASetup(email, secret) {
-      pendingLoginEmail = email;
-      twofaEmailEl.value = email;
-      twofaSecretEl.value = secret;
-      twofaCodeEl.value = "";
-      twofaHintEl.textContent = "Inserisci il codice a 6 cifre generato dall’app per verificare.";
-      twofaOverlay.style.display = "block";
-    }
-    function cancelTwoFA() {
-      pendingLoginEmail = null;
-      twofaOverlay.style.display = "none";
-    }
-    async function confirmTwoFA() {
-      if (!pendingLoginEmail) return;
-
-      const users = loadUsers();
-      const u = users.find(x => (x.email || "").toLowerCase() === pendingLoginEmail.toLowerCase());
-      if (!u || !u.totpSecret) {
-        twofaHintEl.textContent = "Errore: utente o segreto mancante.";
-        return;
+    function getDeviceId() {
+      let id = localStorage.getItem(DEVICE_ID_KEY);
+      if (!id) {
+        id = (Math.random().toString(16).slice(2) + Date.now().toString(16));
+        localStorage.setItem(DEVICE_ID_KEY, id);
       }
-
-      const ok = await verifyTotp(u.totpSecret, twofaCodeEl.value);
-      if (!ok) {
-        twofaHintEl.textContent = "Codice non valido. Controlla l’orario del telefono e riprova.";
-        return;
+      return id;
+    }
+    function loadTrusted() {
+      try { return JSON.parse(localStorage.getItem(TRUST_KEY)) || {}; } catch { return {}; }
+    }
+    function saveTrusted(obj) { localStorage.setItem(TRUST_KEY, JSON.stringify(obj)); }
+    function isTrustedForEmail(email) {
+      const deviceId = getDeviceId();
+      const t = loadTrusted();
+      const e = (email || "").toLowerCase();
+      const entry = t?.[e]?.[deviceId];
+      if (!entry) return false;
+      return Date.now() < Number(entry.expires || 0);
+    }
+    function setTrustedForEmail(email, days = 30) {
+      const deviceId = getDeviceId();
+      const t = loadTrusted();
+      const e = (email || "").toLowerCase();
+      if (!t[e]) t[e] = {};
+      t[e][deviceId] = { expires: Date.now() + (days * 24 * 60 * 60 * 1000) };
+      saveTrusted(t);
+    }
+    function clearTrustedForEmail(email) {
+      const deviceId = getDeviceId();
+      const t = loadTrusted();
+      const e = (email || "").toLowerCase();
+      if (t[e] && t[e][deviceId]) {
+        delete t[e][deviceId];
+        saveTrusted(t);
       }
-
-      twofaOverlay.style.display = "none";
-      finishLogin(u);
     }
 
-    function clearLoginFields() {
-      document.getElementById("loginPassword").value = "";
-      document.getElementById("login2fa").value = "";
+    // =========================
+    // LOGIN "AMAZON STYLE"
+    // =========================
+    let pendingEmail = null;
+    let pendingMode = null;  // "login" | "register" | "resetpw"
+    let pendingUser = null;
+
+    function showLoginStep(stepId) {
+      ["stepEmail","stepPassword","stepRegister","step2FA"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove("active"); el.style.display = "none"; }
+      });
+      const s = document.getElementById(stepId);
+      if (s) { s.classList.add("active"); s.style.display = "block"; }
+    }
+
+    function backToEmail() {
+      pendingEmail = null; pendingMode = null; pendingUser = null;
+      document.getElementById("loginEmail").value = "";
+      document.getElementById("pwResetBox").style.display = "none";
+      showLoginStep("stepEmail");
+    }
+
+    function backToPasswordOrEmail() {
+      if (pendingMode === "login" || pendingMode === "resetpw") showLoginStep("stepPassword");
+      else showLoginStep("stepEmail");
     }
 
     function finishLogin(user) {
@@ -725,81 +790,173 @@
       saveSession({ email: user.email });
       setHeaderUser();
       initAfterLogin();
-      clearLoginFields();
-      document.getElementById("loginGameName").value = "";
+      // cleanup form
+      document.getElementById("loginPassword").value = "";
+      document.getElementById("login2fa").value = "";
     }
 
-    // =========================
-    // LOGIN (email + 2FA)
-    // =========================
-    async function loginWithEmail() {
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
-      const gameName = document.getElementById("loginGameName").value.trim();
-      const code2fa = document.getElementById("login2fa").value.trim();
-
+    function loginStepEmail() {
+      const email = (document.getElementById("loginEmail").value || "").trim().toLowerCase();
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
-      if (!password) return alert("Inserisci una password");
-      if (!gameName) return alert("Inserisci il tuo nome utente in game");
 
-      let existingUser = findUserByEmail(email);
+      pendingEmail = email;
 
-      // nuovo utente
-      if (!existingUser) {
-        const u = upsertUser(email, password, gameName);
-
-        // forza setup 2FA prima di creare sessione
-        const users = loadUsers();
-        const ref = users.find(x => x.email === u.email);
-        ref.totpSecret = generateTotpSecret();
-        saveUsers(users);
-
-        alert("Registrazione completata. Ora devi configurare il 2FA per accedere.");
-        openTwoFASetup(ref.email, ref.totpSecret);
-        clearLoginFields();
+      const existing = findUserByEmail(email);
+      if (!existing) {
+        pendingMode = "register";
+        document.getElementById("regEmail").value = email;
+        document.getElementById("regGameName").value = "";
+        document.getElementById("regPassword").value = "";
+        document.getElementById("regPassword2").value = "";
+        showLoginStep("stepRegister");
         return;
       }
 
-      if (existingUser.blocked) return alert("Account bloccato.");
+      if (existing.blocked) return alert("Account bloccato.");
 
-      // password
-      const passwordHash = simpleHash(password);
-      if (existingUser.passwordHash !== passwordHash) return alert("Email o password errata");
-
-      // aggiorna gameName
-      if (gameName && existingUser.gameName !== gameName) {
-        const users = loadUsers();
-        const u = users.find(x => x.email === existingUser.email);
-        if (u) {
-          u.gameName = gameName;
-          saveUsers(users);
-          existingUser = u;
-        }
-      }
-
-      // se manca secret -> setup
-      if (!existingUser.totpSecret) {
-        const users = loadUsers();
-        const u = users.find(x => x.email === existingUser.email);
-        if (u) {
-          u.totpSecret = generateTotpSecret();
-          saveUsers(users);
-          existingUser = u;
-        }
-        alert("Devi configurare il 2FA per continuare.");
-        openTwoFASetup(existingUser.email, existingUser.totpSecret);
-        clearLoginFields();
-        return;
-      }
-
-      // verifica 2FA
-      if (!/^\d{6}$/.test(code2fa)) return alert("Inserisci il codice 2FA a 6 cifre");
-      const ok2 = await verifyTotp(existingUser.totpSecret, code2fa);
-      if (!ok2) return alert("Codice 2FA non valido");
-
-      finishLogin(existingUser);
+      pendingMode = existing.passwordHash ? "login" : "resetpw";
+      document.getElementById("pwEmail").value = email;
+      document.getElementById("loginPassword").value = "";
+      document.getElementById("pwResetBox").style.display = (pendingMode === "resetpw") ? "block" : "none";
+      showLoginStep("stepPassword");
     }
 
+    function registerAccount() {
+      if (!pendingEmail) return backToEmail();
+
+      const gameName = (document.getElementById("regGameName").value || "").trim();
+      const p1 = document.getElementById("regPassword").value || "";
+      const p2 = document.getElementById("regPassword2").value || "";
+      if (!gameName) return alert("Inserisci il tuo nome utente in game");
+      if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
+      if (p1 !== p2) return alert("Le password non coincidono");
+
+      const u = upsertUser(pendingEmail, p1, gameName);
+
+      // crea secret 2FA
+      const users = loadUsers();
+      const ref = users.find(x => x.email === u.email);
+      ref.totpSecret = generateTotpSecret();
+      saveUsers(users);
+      pendingUser = ref;
+
+      document.getElementById("twofaEmailInline").value = ref.email;
+      document.getElementById("twofaSetupBox").style.display = "block";
+      document.getElementById("twofaSecretInline").value = ref.totpSecret;
+      document.getElementById("twofaHintInline").textContent = "Inserisci il codice dell’app per completare la registrazione.";
+      document.getElementById("login2fa").value = "";
+      document.getElementById("rememberDevice").checked = true;
+      pendingMode = "register";
+      showLoginStep("step2FA");
+    }
+
+    function loginStepPassword() {
+      if (!pendingEmail) return backToEmail();
+      const existing = findUserByEmail(pendingEmail);
+      if (!existing) return backToEmail();
+      if (existing.blocked) return alert("Account bloccato.");
+
+      if (!existing.passwordHash) {
+        pendingMode = "resetpw";
+        document.getElementById("pwResetBox").style.display = "block";
+        return alert("Devi impostare una nuova password (reset admin).");
+      }
+
+      const pw = document.getElementById("loginPassword").value || "";
+      if (!pw) return alert("Inserisci la password");
+
+      if (simpleHash(pw) !== existing.passwordHash) return alert("Email o password errata");
+
+      pendingUser = existing;
+      pendingMode = "login";
+
+      // se trusted -> salta 2FA
+      if (isTrustedForEmail(existing.email)) {
+        finishLogin(existing);
+        return;
+      }
+
+      // 2FA
+      document.getElementById("twofaEmailInline").value = existing.email;
+      document.getElementById("twofaSetupBox").style.display = "none";
+      document.getElementById("twofaSecretInline").value = "";
+      document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA per completare l’accesso.";
+      document.getElementById("login2fa").value = "";
+      document.getElementById("rememberDevice").checked = true;
+      showLoginStep("step2FA");
+    }
+
+    function saveNewPassword() {
+      if (!pendingEmail) return backToEmail();
+      const users = loadUsers();
+      const u = users.find(x => (x.email || "").toLowerCase() === pendingEmail.toLowerCase());
+      if (!u) return backToEmail();
+
+      const p1 = document.getElementById("newPassword").value || "";
+      const p2 = document.getElementById("newPassword2").value || "";
+      if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
+      if (p1 !== p2) return alert("Le password non coincidono");
+
+      u.passwordHash = simpleHash(p1);
+      saveUsers(users);
+
+      document.getElementById("newPassword").value = "";
+      document.getElementById("newPassword2").value = "";
+      document.getElementById("pwResetBox").style.display = "none";
+
+      pendingUser = u;
+      pendingMode = "login";
+
+      // se trusted -> salta 2FA
+      if (isTrustedForEmail(u.email)) {
+        finishLogin(u);
+        return;
+      }
+
+      document.getElementById("twofaEmailInline").value = u.email;
+      document.getElementById("twofaSetupBox").style.display = "none";
+      document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA per completare l’accesso.";
+      document.getElementById("login2fa").value = "";
+      document.getElementById("rememberDevice").checked = true;
+      showLoginStep("step2FA");
+    }
+
+    async function loginStep2FA() {
+      if (!pendingUser?.email) return backToEmail();
+
+      const code = (document.getElementById("login2fa").value || "").trim();
+      if (!/^\d{6}$/.test(code)) return alert("Inserisci il codice 2FA a 6 cifre");
+
+      const fresh = findUserByEmail(pendingUser.email);
+      if (!fresh) return backToEmail();
+      if (fresh.blocked) return alert("Account bloccato.");
+
+      if (!fresh.totpSecret) {
+        // se manca (caso raro) forziamo setup
+        const users = loadUsers();
+        const u = users.find(x => x.email === fresh.email);
+        u.totpSecret = generateTotpSecret();
+        saveUsers(users);
+        document.getElementById("twofaSetupBox").style.display = "block";
+        document.getElementById("twofaSecretInline").value = u.totpSecret;
+        document.getElementById("twofaHintInline").textContent = "Configura 2FA e inserisci il codice dell’app.";
+        pendingUser = u;
+        return;
+      }
+
+      const ok = await verifyTotp(fresh.totpSecret, code);
+      if (!ok) return alert("Codice 2FA non valido");
+
+      if (document.getElementById("rememberDevice").checked) {
+        setTrustedForEmail(fresh.email, 30);
+      }
+
+      finishLogin(fresh);
+    }
+
+    // =========================
+    // POST LOGIN UI
+    // =========================
     function initAfterLogin() {
       const btnUtenti = document.getElementById("btnUtenti");
       const cardUtenti = document.getElementById("cardUtenti");
@@ -829,7 +986,7 @@
     }
 
     // =========================
-    // USERS TABLE (con Reset 2FA)
+    // USERS TABLE (Reset 2FA + Reset Password)
     // =========================
     const usersTableBody = document.getElementById("usersTableBody");
 
@@ -887,10 +1044,25 @@
           const ok = confirm("Confermi RESET 2FA per " + u.email + "?\nL'utente dovrà riconfigurare Authenticator al prossimo login.");
           if (!ok) return;
           u.totpSecret = generateTotpSecret();
+          clearTrustedForEmail(u.email);
           saveUsers(users);
           menu.style.display = "none";
           renderUsersTable();
-          alert("2FA resettato.\nL'utente vedrà la nuova chiave al prossimo login (setup 2FA).");
+          alert("2FA resettato. Al prossimo login vedrà la chiave e dovrà riconfigurare.");
+        };
+
+        const b5 = document.createElement("button");
+        b5.textContent = "Reset Password";
+        b5.onclick = () => {
+          if (!canResetPassword()) return alert("Permesso negato");
+          const ok = confirm("Confermi RESET PASSWORD per " + u.email + "?\nL'utente dovrà impostarne una nuova al prossimo accesso.");
+          if (!ok) return;
+          u.passwordHash = null;
+          clearTrustedForEmail(u.email);
+          saveUsers(users);
+          menu.style.display = "none";
+          renderUsersTable();
+          alert("Password resettata. Al prossimo accesso l'utente imposterà una nuova password.");
         };
 
         const b1 = document.createElement("button");
@@ -929,14 +1101,15 @@
           if (s?.email === u.email) logout();
         };
 
-        // Vice Boss: no blocca/sblocca e no reset 2FA
+        // Vice Boss: no blocca/sblocca, ma può resettare password (come richiesto).
         if (myRole() === "Vice Boss") {
           b1.style.display = "none";
           b2.style.display = "none";
-          b4.style.display = "none";
+          b4.style.display = "none"; // reset 2FA solo Owner/Boss
         }
 
         menu.appendChild(b4);
+        menu.appendChild(b5);
         menu.appendChild(b1);
         menu.appendChild(b2);
         menu.appendChild(b3);
@@ -965,7 +1138,7 @@
     });
 
     // =========================
-    // AZIONI UI + LOGICA (uguale al tuo)
+    // AZIONI UI + LOGICA (come tuo)
     // =========================
     const opsTabs = document.getElementById("opsTabs");
     const panelWrapper = document.getElementById("panelWrapper");
@@ -1084,7 +1257,7 @@
       renderManageSummaries();
     }
 
-    // Edit modal (uguale)
+    // Edit modal
     const editOverlay = document.getElementById("editOverlay");
     const editInfo = document.getElementById("editInfo");
     const editType = document.getElementById("editType");
@@ -1480,10 +1653,10 @@
       const s = loadSession();
       if (!s?.email) {
         showOnly("login");
+        showLoginStep("stepEmail");
         return;
       }
 
-      // blocked check
       const u = getMyUser();
       if (u?.blocked) {
         alert("Account bloccato.");
