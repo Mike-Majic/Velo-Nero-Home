@@ -5,52 +5,25 @@
     <meta charset="UTF-8">
     <style>
         body {
-            background-color: #0b0b0b;
+            background-color: #0d0d0d;
             color: #fff;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #1a1a1a;
-            padding: 20px;
+            font-family: Arial, sans-serif;
             text-align: center;
-            box-shadow: 0 0 10px #ff1a1a50;
+            padding: 100px 20px;
         }
 
-        header h1 {
+        h1 {
+            font-size: 60px;
+            letter-spacing: 5px;
             color: #ff1a1a;
-            font-size: 48px;
-            margin: 0;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px #ff000080;
+            text-shadow: 0 0 15px #ff000080;
+            margin-bottom: 10px;
         }
 
-        nav {
-            background-color: #2b0000;
-            display: flex;
-            justify-content: center;
-            padding: 15px 0;
-        }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 20px;
-            font-size: 16px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: background 0.3s ease;
-        }
-
-        nav a:hover {
-            background-color: #ff1a1a;
-        }
-
-        main {
-            text-align: center;
-            padding: 80px 20px;
+        p.subtitle {
+            font-size: 20px;
+            color: #ff6666;
+            margin-bottom: 50px;
         }
 
         .box {
@@ -61,6 +34,9 @@
             border-radius: 12px;
             box-shadow: 0 0 20px #ff1a1a50 inset, 0 0 20px #ff000080;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: #fff;
         }
 
         .box:hover {
@@ -69,45 +45,36 @@
         }
 
         .box h2 {
-            color: #ff1a1a;
+            font-size: 28px;
             margin-bottom: 10px;
-            font-size: 24px;
+            color: #ff1a1a;
         }
 
         .box p {
-            color: #ff6666;
             font-size: 16px;
+            color: #ff6666;
         }
-
     </style>
 </head>
 <body>
 
-<header>
     <h1>VELO NERO</h1>
-</header>
+    <p class="subtitle">Sistema Privato Interno</p>
 
-<nav>
-    <a href="index.html">Dashboard</a>
-    <a href="utenti.html">Utenti</a>
-    <a href="logs.html">Logs</a>
-    <a href="comandi.html">Comandi</a>
-</nav>
-
-<main>
-    <div class="box">
+    <a href="utenti.html" class="box">
         <h2>Utenti</h2>
         <p>Gestione ruoli e accessi</p>
-    </div>
-    <div class="box">
+    </a>
+
+    <a href="logs.html" class="box">
         <h2>Logs</h2>
         <p>Attività interne recenti</p>
-    </div>
-    <div class="box">
+    </a>
+
+    <a href="comandi.html" class="box">
         <h2>Comandi</h2>
         <p>Esegui azioni interne</p>
-    </div>
-</main>
+    </a>
 
 </body>
 </html>
