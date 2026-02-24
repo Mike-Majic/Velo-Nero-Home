@@ -1,189 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Utenti - VELO NERO</title>
+    <title>VELO NERO - Dashboard</title>
     <meta charset="UTF-8">
     <style>
         body {
-            background-color: #121212; /* più luminoso */
+            background-color: #0d0d0d;
             color: #fff;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             text-align: center;
-            padding: 50px 20px;
+            padding: 100px 20px;
         }
 
         h1 {
-            color: #ff3b3b;
-            font-size: 50px;
+            font-size: 60px;
+            letter-spacing: 5px;
+            color: #ff1a1a;
+            text-shadow: 0 0 15px #ff000080;
             margin-bottom: 10px;
-            text-shadow: 0 0 15px #ff3b3b80;
         }
 
         p.subtitle {
-            color: #ff7b7b;
-            font-size: 18px;
-            margin-bottom: 40px;
+            font-size: 20px;
+            color: #ff6666;
+            margin-bottom: 50px;
         }
 
-        table {
-            width: 90%;
-            margin: 0 auto 50px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 20px;
-            border: 1px solid #ff3b3b33;
-            text-align: left;
-        }
-
-        th {
-            background-color: #1e1e1e;
-            color: #ff3b3b;
-        }
-
-        td {
-            background-color: #1e1e1e;
-            color: #fff;
-        }
-
-        tr:hover td {
-            background-color: #3a0000;
-        }
-
-        select {
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: none;
-            background-color: #2b2b2b;
-            color: #fff;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        select:hover {
-            background-color: #3a0000;
-        }
-
-        .btn-edit {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #ff3b3b;
-            font-size: 18px;
-            transition: transform 0.2s ease;
-        }
-
-        .btn-edit:hover {
-            transform: scale(1.2);
-        }
-
-        a.back {
+        .box {
             display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #ff3b3b;
-            border-radius: 6px;
+            background-color: #1a1a1a;
+            padding: 40px 60px;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px #ff1a1a50 inset, 0 0 20px #ff000080;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
             text-decoration: none;
-            transition: background 0.3s ease;
+            color: #fff;
         }
 
-        a.back:hover {
-            background-color: #cc0000;
+        .box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #ff1a1a80 inset, 0 0 30px #ff000080;
+        }
+
+        .box h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ff1a1a;
+        }
+
+        .box p {
+            font-size: 16px;
+            color: #ff6666;
         }
     </style>
 </head>
 <body>
 
-<h1>Utenti</h1>
-<p class="subtitle">Gestione ruoli e accessi</p>
+    <h1>VELO NERO</h1>
+    <p class="subtitle">Sistema Privato Interno</p>
 
-<table>
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Ruolo</th>
-            <th>Azioni</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Mike</td>
-            <td>
-                <select id="role-Mike">
-                    <option>Owner</option>
-                    <option>Boss</option>
-                    <option>Vice Boss</option>
-                    <option>Consigliere</option>
-                    <option>Gestore incontri</option>
-                    <option>Gestore Gang</option>
-                    <option>Gestore droga</option>
-                    <option>Resp. reperimento droga</option>
-                    <option>Gestore armi</option>
-                    <option>Resp. Craft armi</option>
-                    <option>Capo Gestore braccio armato</option>
-                    <option>Gestore braccio a.</option>
-                    <option>Capo sq. d'assalto Est.</option>
-                    <option>Guardia del corpo</option>
-                    <option>Soldato</option>
-                    <option>Scagnozzo</option>
-                    <option>Scagnozzo in prova</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn-edit" onclick="modificaRuolo('Mike')">✎</button>
-            </td>
-        </tr>
-        <tr>
-            <td>Giulia</td>
-            <td>
-                <select id="role-Giulia">
-                    <option>Owner</option>
-                    <option>Boss</option>
-                    <option>Vice Boss</option>
-                    <option>Consigliere</option>
-                    <option>Gestore incontri</option>
-                    <option>Gestore Gang</option>
-                    <option>Gestore droga</option>
-                    <option>Resp. reperimento droga</option>
-                    <option>Gestore armi</option>
-                    <option>Resp. Craft armi</option>
-                    <option>Capo Gestore braccio armato</option>
-                    <option>Gestore braccio a.</option>
-                    <option>Capo sq. d'assalto Est.</option>
-                    <option>Guardia del corpo</option>
-                    <option>Soldato</option>
-                    <option>Scagnozzo</option>
-                    <option>Scagnozzo in prova</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn-edit" onclick="modificaRuolo('Giulia')">✎</button>
-            </td>
-        </tr>
-    </tbody>
-</table>
+    <a href="utenti.html" class="box">
+        <h2>Utenti</h2>
+        <p>Gestione ruoli e accessi</p>
+    </a>
 
-<a href="index.html" class="back">Torna alla Dashboard</a>
+    <a href="logs.html" class="box">
+        <h2>Logs</h2>
+        <p>Attività interne recenti</p>
+    </a>
 
-<script>
-    const myRole = "Boss"; // ruolo di chi sta usando la dashboard
-
-    // Controllo visibilità tasto modifica
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        if(!["Owner","Boss","Vice Boss"].includes(myRole)) {
-            btn.style.display = 'none';
-        }
-    });
-
-    function modificaRuolo(user) {
-        const select = document.getElementById(`role-${user}`);
-        const nuovoRuolo = select.value;
-        alert(`Ruolo di ${user} aggiornato a: ${nuovoRuolo}`);
-        // qui poi si può aggiungere codice per salvare il ruolo sul server
-    }
-</script>
+    <a href="comandi.html" class="box">
+        <h2>Comandi</h2>
+        <p>Esegui azioni interne</p>
+    </a>
 
 </body>
 </html>
