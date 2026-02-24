@@ -1,64 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Logs - VELO NERO</title>
+    <title>Utenti - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
         body {
             background-color: #121212;
             color: #fff;
             font-family: Arial, sans-serif;
-            padding: 50px 20px;
             text-align: center;
+            padding: 50px 20px;
         }
-
         h1 {
             color: #ff3b3b;
             font-size: 50px;
             margin-bottom: 10px;
             text-shadow: 0 0 12px #ff3b3b80;
         }
-
         p.subtitle {
             color: #ff7b7b;
             font-size: 18px;
             margin-bottom: 40px;
         }
-
-        ul#logList {
-            list-style: none;
-            padding: 0;
-            max-width: 800px;
+        table {
+            width: 90%;
             margin: 0 auto 50px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 20px;
+            border: 1px solid #ff3b3b33;
             text-align: left;
         }
-
-        ul#logList li {
+        th {
             background-color: #1e1e1e;
-            margin: 10px 0;
-            padding: 15px 20px;
-            border-left: 6px solid #ff3b3b;
-            border-radius: 6px;
-            position: relative;
-            transition: background 0.2s ease;
+            color: #ff3b3b;
         }
-
-        ul#logList li:hover {
+        td {
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+        tr:hover td {
             background-color: #3a0000;
         }
-
-        span.badge {
-            background-color: #ff3b3b;
+        select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: none;
+            background-color: #2b2b2b;
             color: #fff;
-            border-radius: 12px;
-            padding: 2px 8px;
             font-size: 12px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            box-shadow: 0 0 8px #ff000080;
+            cursor: pointer;
         }
-
+        select:hover { background-color: #3a0000; }
+        .btn-edit {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #ff3b3b;
+            font-size: 18px;
+            transition: transform 0.2s ease, text-shadow 0.2s ease;
+            position: relative;
+        }
+        .btn-edit:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 6px #ff000080;
+        }
+        .action-menu {
+            display: none;
+            position: absolute;
+            top: 25px;
+            left: -10px;
+            background-color: #1a1a1a;
+            border: 1px solid #ff3b3b66;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: left;
+            z-index: 100;
+        }
+        .action-menu button {
+            display: block;
+            background: none;
+            border: 1px solid #ff3b3b44;
+            color: #fff;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .action-menu button:hover { background-color: #3a0000; }
         a.back {
             display: inline-block;
             margin-top: 20px;
@@ -69,50 +100,122 @@
             text-decoration: none;
             transition: background 0.3s ease;
         }
-
-        a.back:hover {
-            background-color: #cc0000;
-        }
+        a.back:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
 
-<h1>Logs</h1>
-<p class="subtitle">Azioni recenti sugli utenti</p>
+<h1>Utenti</h1>
+<p class="subtitle">Gestione ruoli e azioni rapide</p>
 
-<ul id="logList">
-    <!-- i log verranno inseriti qui -->
-</ul>
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Ruolo</th>
+            <th>Azioni</th>
+        </tr>
+    </thead>
+    <tbody id="usersTableBody">
+        <!-- righe generate dinamicamente -->
+    </tbody>
+</table>
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
 
 <script>
-    // funzione per aggiungere un log
-    function aggiungiLog(user, azione) {
-        const logList = document.getElementById('logList');
-        const li = document.createElement('li');
-        const timestamp = new Date().toLocaleTimeString();
-        li.textContent = `[${timestamp}] ${azione} eseguita su ${user}`;
-        
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = '!';
-        li.appendChild(badge);
+    // Ruolo dell'utente che sta usando la dashboard
+    const myRole = "Owner"; // cambia qui a Boss o Vice Boss per test
 
-        logList.prepend(li); // mostra i log più recenti in cima
-    }
+    // Lista utenti reali, puoi aggiungere altri
+    const users = [
+        { name: "Mike", role: "Owner" },
+        { name: "Luca", role: "Soldato" },
+        { name: "Franco", role: "Vice Boss" }
+    ];
 
-    // esempio: simulazione di chiamate da utenti.html
-    // In futuro potrai collegarlo alle azioni reali
+    const ruoli = [
+        "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
+        "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
+        "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
+        "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
+    ];
+
+    const tbody = document.getElementById('usersTableBody');
+
+    users.forEach(user => {
+        const tr = document.createElement('tr');
+
+        // Nome
+        const tdName = document.createElement('td');
+        tdName.textContent = user.name;
+        tr.appendChild(tdName);
+
+        // Ruolo
+        const tdRole = document.createElement('td');
+        const select = document.createElement('select');
+        ruoli.forEach(r => {
+            const option = document.createElement('option');
+            option.value = r;
+            option.textContent = r;
+            if(r === user.role) option.selected = true;
+            select.appendChild(option);
+        });
+        tdRole.appendChild(select);
+        tr.appendChild(tdRole);
+
+        // Azioni
+        const tdActions = document.createElement('td');
+        const divWrapper = document.createElement('div');
+        divWrapper.style.position = 'relative';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'btn-edit';
+        btnEdit.textContent = '✎';
+        divWrapper.appendChild(btnEdit);
+
+        const menu = document.createElement('div');
+        menu.className = 'action-menu';
+
+        const btnBlocca = document.createElement('button');
+        btnBlocca.textContent = 'Blocca';
+        btnBlocca.onclick = () => azioneUtente(user.name,'Blocca');
+
+        const btnSblocca = document.createElement('button');
+        btnSblocca.textContent = 'Sblocca';
+        btnSblocca.onclick = () => azioneUtente(user.name,'Sblocca');
+
+        const btnEspelli = document.createElement('button');
+        btnEspelli.textContent = 'Espelli';
+        btnEspelli.onclick = () => azioneUtente(user.name,'Espelli');
+
+        menu.appendChild(btnBlocca);
+        menu.appendChild(btnSblocca);
+        menu.appendChild(btnEspelli);
+        divWrapper.appendChild(menu);
+
+        // Mostra/nascondi azioni in base al ruolo
+        if(!["Owner","Boss","Vice Boss"].includes(myRole)) {
+            btnEdit.style.display = 'none';
+        } else if(myRole === "Vice Boss") {
+            btnBlocca.style.display = 'none';
+            btnSblocca.style.display = 'none';
+        }
+
+        btnEdit.onclick = () => {
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        };
+
+        tdActions.appendChild(divWrapper);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+    });
+
     function azioneUtente(user, azione) {
-        // aggiunge il log
-        aggiungiLog(user, azione);
         alert(`Azione "${azione}" eseguita su ${user}`);
+        // qui potrai collegare il log o l'azione reale
     }
-
-    // test iniziale (puoi rimuoverlo)
-    // azioneUtente('Mike', 'Blocca');
-    // azioneUtente('Giulia', 'Espelli');
 </script>
 
 </body>
