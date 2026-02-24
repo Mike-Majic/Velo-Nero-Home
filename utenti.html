@@ -1,161 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Utenti - VELO NERO</title>
+    <title>Log - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
-        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; }
-        h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 10px; text-shadow: 0 0 12px #ff3b3b80; }
-        p.subtitle { color: #ff7b7b; font-size: 18px; margin-bottom: 40px; }
+        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+        h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 20px; text-shadow: 0 0 12px #ff3b3b80; }
         table { width: 90%; margin: 0 auto; border-collapse: collapse; }
         th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
         th { background-color: #1e1e1e; color: #ff3b3b; }
-        td { background-color: #1e1e1e; color: #fff; position: relative; }
+        td { background-color: #1e1e1e; }
         tr:hover td { background-color: #3a0000; }
-        select { padding: 4px 8px; border-radius: 6px; border: none; background-color: #2b2b2b; color: #fff; font-size: 12px; cursor: pointer; }
-        select:hover { background-color: #3a0000; }
-        .btn-edit { background: none; border: none; cursor: pointer; color: #ff3b3b; font-size: 18px; transition: transform 0.2s ease, text-shadow 0.2s ease; }
-        .btn-edit:hover { transform: scale(1.2); text-shadow: 0 0 6px #ff000080; }
-        .action-menu { display: none; position: absolute; top: 30px; left: 0; background-color: #1a1a1a; border: 1px solid #ff3b3b66; border-radius: 6px; padding: 10px; text-align: left; z-index: 100; }
-        .action-menu button { display: block; background: none; border: 1px solid #ff3b3b44; color: #fff; padding: 5px 10px; margin: 5px 0; border-radius: 4px; cursor: pointer; width: 100%; }
-        .action-menu button:hover { background-color: #3a0000; }
-        .blocked-icon { display: none; color: #ff3b3b; font-size: 18px; margin-left: 8px; }
         a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
         a.back:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
 
-<h1>Utenti</h1>
-<p class="subtitle">Gestione ruoli e azioni rapide</p>
+<h1>Log Attività</h1>
 
 <table>
     <thead>
         <tr>
-            <th>Nome</th>
-            <th>Ruolo</th>
-            <th>Azioni</th>
+            <th>Data/Ora</th>
+            <th>Utente</th>
+            <th>Azione</th>
         </tr>
     </thead>
-    <tbody id="usersTableBody"></tbody>
+    <tbody id="logBody">
+        <!-- log dinamici -->
+    </tbody>
 </table>
 
-<a href="index.html" class="back">Torna alla Dashboard</a>
+<a href="utenti.html" class="back">Torna agli Utenti</a>
 
 <script>
-const myRole = "Owner"; // Cambia a Boss o Vice Boss per test
-const users = [
-    { name: "Mike", role: "Owner", blocked: false },
-    { name: "Giulia", role: "Soldato", blocked: false } // utente di prova
-];
+const logBody = document.getElementById('logBody');
 
-const ruoli = [
-    "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
-    "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
-    "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
-    "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
-];
-
-const tbody = document.getElementById('usersTableBody');
-
-function sendToLog(user, action){
-    let logWindow = window.open("log.html", "logWindow");
-    if(!logWindow) return alert("Apri log.html in un'altra scheda prima di testare!");
-    if(!logWindow.addLog){
-        logWindow.onload = () => logWindow.addLog(user, action);
-    } else {
-        logWindow.addLog(user, action);
-    }
-}
-
-users.forEach(user => {
+// funzione che può essere richiamata da utenti.html
+function addLog(user, action) {
     const tr = document.createElement('tr');
-
-    const tdName = document.createElement('td');
-    tdName.textContent = user.name;
-    const blockedIcon = document.createElement('span');
-    blockedIcon.className = 'blocked-icon';
-    blockedIcon.textContent = '⛔';
-    if(user.blocked) blockedIcon.style.display='inline';
-    tdName.appendChild(blockedIcon);
-    tr.appendChild(tdName);
-
-    const tdRole = document.createElement('td');
-    const select = document.createElement('select');
-    ruoli.forEach(r => {
-        const option = document.createElement('option');
-        option.value = r;
-        option.textContent = r;
-        if(r === user.role) option.selected = true;
-        select.appendChild(option);
-    });
-    tdRole.appendChild(select);
-    tr.appendChild(tdRole);
-
-    const tdActions = document.createElement('td');
-    const divWrapper = document.createElement('div');
-    divWrapper.style.position = 'relative';
-
-    const btnEdit = document.createElement('button');
-    btnEdit.className = 'btn-edit';
-    btnEdit.textContent = '✎';
-    divWrapper.appendChild(btnEdit);
-
-    const menu = document.createElement('div');
-    menu.className = 'action-menu';
-
-    const btnBlocca = document.createElement('button');
-    btnBlocca.textContent = 'Blocca';
-    btnBlocca.onclick = () => {
-        if(["Owner","Boss"].includes(myRole)){
-            user.blocked = true;
-            blockedIcon.style.display='inline';
-            menu.style.display='none';
-            sendToLog(user.name, "Bloccato");
-        } else alert("Non hai permessi per bloccare");
-    };
-
-    const btnSblocca = document.createElement('button');
-    btnSblocca.textContent = 'Sblocca';
-    btnSblocca.onclick = () => {
-        if(["Owner","Boss"].includes(myRole)){
-            user.blocked = false;
-            blockedIcon.style.display='none';
-            menu.style.display='none';
-            sendToLog(user.name, "Sbloccato");
-        } else alert("Non hai permessi per sbloccare");
-    };
-
-    const btnEspelli = document.createElement('button');
-    btnEspelli.textContent = 'Espelli';
-    btnEspelli.onclick = () => {
-        menu.style.display='none';
-        alert(`${user.name} espulso`);
-        sendToLog(user.name, "Espulso");
-    };
-
-    menu.appendChild(btnBlocca);
-    menu.appendChild(btnSblocca);
-    menu.appendChild(btnEspelli);
-    divWrapper.appendChild(menu);
-
-    if(!["Owner","Boss","Vice Boss"].includes(myRole)) btnEdit.style.display='none';
-    else if(myRole==="Vice Boss"){ btnBlocca.style.display='none'; btnSblocca.style.display='none'; }
-
-    btnEdit.onclick = (e) => {
-        e.stopPropagation();
-        document.querySelectorAll('.action-menu').forEach(m => { if(m!==menu) m.style.display='none'; });
-        menu.style.display = menu.style.display==='block' ? 'none' : 'block';
-    };
-
-    tdActions.appendChild(divWrapper);
-    tr.appendChild(tdActions);
-    tbody.appendChild(tr);
-});
-
-document.addEventListener('click', () => {
-    document.querySelectorAll('.action-menu').forEach(menu => menu.style.display='none');
-});
+    const now = new Date();
+    tr.innerHTML = `<td>${now.toLocaleString()}</td><td>${user}</td><td>${action}</td>`;
+    logBody.prepend(tr); // mette la riga in cima
+}
 </script>
 
 </body>
