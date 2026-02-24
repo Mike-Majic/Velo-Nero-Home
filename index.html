@@ -160,6 +160,10 @@
           <input id="loginEmail" type="email" placeholder="nome@gmail.com" />
         </div>
         <div class="field" style="min-width:220px;">
+          <label>Password</label>
+          <input id="loginPassword" type="password" placeholder="Password" />
+        </div>
+        <div class="field" style="min-width:220px;">
           <button class="btn" onclick="loginWithEmail()">Entra / Registrati</button>
           <div class="hint">Funziona subito su Vercel</div>
         </div>
@@ -378,15 +382,29 @@
       return users.find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
     }
 
-    function upsertUser(email) {
+    function simpleHash(str) {
+      let hash = 0;
+      if (str.length === 0) return String(hash);
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash).toString(16);
+    }
+
+    function upsertUser(email, password = null) {
       const users = loadUsers();
       const e = (email || "").trim().toLowerCase();
       if (!e) return null;
 
       let u = users.find(x => (x.email || "").toLowerCase() === e);
       if (!u) {
-        u = { id: uid(), email: e, role: "Nessuno", blocked: false };
+        u = { id: uid(), email: e, role: "Nessuno", blocked: false, passwordHash: password ? simpleHash(password) : null };
         users.push(u);
+      } else if (password) {
+        // Se è un login successivo con password, aggiorna il hash
+        u.passwordHash = simpleHash(password);
       }
 
       // bootstrap owner
@@ -501,12 +519,33 @@
     // =========================
     function loginWithEmail() {
       const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
+      if (!password) return alert("Inserisci una password");
 
-      const u = upsertUser(email);
-      saveSession({ email: u.email });
+      const existingUser = findUserByEmail(email);
+      
+      // Se è un nuovo utente (primo login)
+      if (!existingUser) {
+        const u = upsertUser(email, password);
+        saveSession({ email: u.email });
+        setHeaderUser();
+        initAfterLogin();
+        document.getElementById("loginPassword").value = "";
+        return;
+      }
+
+      // Se l'utente esiste, verifica la password
+      const passwordHash = simpleHash(password);
+      if (existingUser.passwordHash !== passwordHash) {
+        return alert("Email o password errata");
+      }
+
+      saveSession({ email: existingUser.email });
       setHeaderUser();
       initAfterLogin();
+      document.getElementById("loginPassword").value = "";
     }
 
     function initAfterLogin() {
