@@ -8,8 +8,8 @@
             background-color: #121212;
             color: #fff;
             font-family: Arial, sans-serif;
-            text-align: center;
             padding: 50px 20px;
+            text-align: center;
         }
 
         h1 {
@@ -25,37 +25,38 @@
             margin-bottom: 40px;
         }
 
-        table {
-            width: 90%;
+        ul#logList {
+            list-style: none;
+            padding: 0;
+            max-width: 800px;
             margin: 0 auto 50px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 20px;
-            border: 1px solid #ff3b3b33;
             text-align: left;
         }
 
-        th {
+        ul#logList li {
             background-color: #1e1e1e;
-            color: #ff3b3b;
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-left: 6px solid #ff3b3b;
+            border-radius: 6px;
+            position: relative;
+            transition: background 0.2s ease;
         }
 
-        td {
-            background-color: #1e1e1e;
-            color: #fff;
-        }
-
-        tr:hover td {
+        ul#logList li:hover {
             background-color: #3a0000;
         }
 
-        .badge-alert {
+        span.badge {
             background-color: #ff3b3b;
-            padding: 4px 8px;
-            border-radius: 6px;
             color: #fff;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            box-shadow: 0 0 8px #ff000080;
         }
 
         a.back {
@@ -66,6 +67,7 @@
             background-color: #ff3b3b;
             border-radius: 6px;
             text-decoration: none;
+            transition: background 0.3s ease;
         }
 
         a.back:hover {
@@ -76,31 +78,42 @@
 <body>
 
 <h1>Logs</h1>
-<p class="subtitle">Attività interne recenti</p>
+<p class="subtitle">Azioni recenti sugli utenti</p>
 
-<table>
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Utente</th>
-            <th>Azione</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>24/02/2026</td>
-            <td>Mike</td>
-            <td><span class="badge-alert">Ruolo aggiornato</span></td>
-        </tr>
-        <tr>
-            <td>24/02/2026</td>
-            <td>Giulia</td>
-            <td><span class="badge-alert">Login effettuato</span></td>
-        </tr>
-    </tbody>
-</table>
+<ul id="logList">
+    <!-- i log verranno inseriti qui -->
+</ul>
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
+
+<script>
+    // funzione per aggiungere un log
+    function aggiungiLog(user, azione) {
+        const logList = document.getElementById('logList');
+        const li = document.createElement('li');
+        const timestamp = new Date().toLocaleTimeString();
+        li.textContent = `[${timestamp}] ${azione} eseguita su ${user}`;
+        
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = '!';
+        li.appendChild(badge);
+
+        logList.prepend(li); // mostra i log più recenti in cima
+    }
+
+    // esempio: simulazione di chiamate da utenti.html
+    // In futuro potrai collegarlo alle azioni reali
+    function azioneUtente(user, azione) {
+        // aggiunge il log
+        aggiungiLog(user, azione);
+        alert(`Azione "${azione}" eseguita su ${user}`);
+    }
+
+    // test iniziale (puoi rimuoverlo)
+    // azioneUtente('Mike', 'Blocca');
+    // azioneUtente('Giulia', 'Espelli');
+</script>
 
 </body>
 </html>
