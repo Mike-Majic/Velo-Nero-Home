@@ -4,9 +4,9 @@
     <title>Log - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
-        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; }
-        h1 { color: #ff3b3b; font-size: 50px; text-shadow: 0 0 12px #ff3b3b80; margin-bottom: 20px; }
-        table { width: 90%; border-collapse: collapse; margin: 0 auto; }
+        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+        h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 20px; text-shadow: 0 0 12px #ff3b3b80; }
+        table { width: 90%; margin: 0 auto; border-collapse: collapse; }
         th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
         th { background-color: #1e1e1e; color: #ff3b3b; }
         td { background-color: #1e1e1e; }
@@ -41,13 +41,9 @@
     function addLog(user, action) {
         const tr = document.createElement('tr');
         const now = new Date();
-        const dateStr = now.toLocaleString();
-        tr.innerHTML = `<td>${dateStr}</td><td>${user}</td><td>${action}</td>`;
+        tr.innerHTML = `<td>${now.toLocaleString()}</td><td>${user}</td><td>${action}</td>`;
         logBody.prepend(tr); // mette la riga in cima
     }
-
-    // per test rapido
-    addLog("Mike", "Accesso dashboard");
 </script>
 
 </body>
