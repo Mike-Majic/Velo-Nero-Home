@@ -98,7 +98,6 @@
     th { color:#ff3b3b; }
     tr:hover td { background-color:#3a0000; }
 
-    /* Users actions menu */
     .btn-edit { background:none; border:none; cursor:pointer; color:#ff3b3b; font-size:18px; transition:transform .2s ease, text-shadow .2s ease; }
     .btn-edit:hover { transform:scale(1.2); text-shadow:0 0 6px #ff000080; }
     .action-menu {
@@ -112,7 +111,6 @@
     .action-menu button:hover { background-color:#3a0000; }
     .blocked-icon { color:#ff3b3b; font-size:18px; margin-left:8px; vertical-align:middle; }
 
-    /* Edit modal */
     #editOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
     #editModal {
       max-width:900px; margin:0 auto; background:#121212;
@@ -128,6 +126,7 @@
     .right { margin-left:auto; display:flex; gap:10px; }
 
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; word-break:break-all; }
+    .qrwrap img { background:#fff; padding:8px; border-radius:10px; width:200px; height:200px; display:block; }
   </style>
 </head>
 
@@ -247,9 +246,30 @@
 
       <div class="row" id="twofaSetupBox" style="display:none;">
         <div class="field" style="min-width:320px; flex:1;">
-          <div class="hint">Configura 2FA (obbligatorio) su Google Authenticator (o simili) usando la chiave qui sotto.</div>
+          <div class="hint">Configura 2FA (obbligatorio) su Google Authenticator (o simili).</div>
+
           <label>Chiave segreta 2FA</label>
           <input id="twofaSecretInline" class="mono" disabled />
+
+          <div class="row" style="margin-top:10px; align-items:flex-start;">
+            <div class="field" style="min-width:220px;">
+              <button class="btn small" id="btnToggleQR" onclick="toggleQR()">Mostra QR</button>
+            </div>
+
+            <div class="field qrwrap" id="qrWrap" style="display:none; min-width:220px;">
+              <div class="hint">Scansiona il QR con l’app Authenticator</div>
+              <img id="twofaQR" alt="QR 2FA" />
+            </div>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+            <input id="confirmAdded" type="checkbox" />
+            Ho aggiunto questo account nell’app Authenticator
+          </label>
+
+          <div class="hint" style="margin-top:8px;">
+            Se il codice non viene accettato, controlla che l’orologio del PC sia corretto (data/ora automatiche).
+          </div>
         </div>
       </div>
 
@@ -265,7 +285,7 @@
             <input id="rememberDevice" type="checkbox" />
             Ricorda questo dispositivo per 30 giorni
           </label>
-          <button class="btn" onclick="loginStep2FA()">Verifica e entra</button>
+          <button class="btn" id="btnVerify2FA" onclick="loginStep2FA()">Verifica e entra</button>
           <button class="btn danger" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
@@ -496,7 +516,8 @@
           blocked: false,
           passwordHash: password ? simpleHash(password) : null,
           gameName: gameName || "",
-          totpSecret: null
+          totpSecret: null,
+          totpNeedsSetup: false
         };
         users.push(u);
       } else if (password) {
@@ -543,7 +564,7 @@
     function canBlockUnblock() { return ["Owner","Boss"].includes(myRole()); }
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canReset2FA() { return ["Owner","Boss"].includes(myRole()); }
-    function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); } // chi può modificare ruoli
+    function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
     // =========================
     // UI STATE
@@ -714,6 +735,47 @@
     }
 
     // =========================
+    // QR code (otpauth://) + show/hide
+    // =========================
+    function generate2FAQRCode(email, secret) {
+      const issuer = encodeURIComponent("VELO NERO");
+      const label = encodeURIComponent(`VELO NERO:${email}`);
+      const uri = `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}`;
+
+      const qrUrl =
+        "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" +
+        encodeURIComponent(uri);
+
+      const img = document.getElementById("twofaQR");
+      if (img) img.src = qrUrl;
+    }
+
+    function toggleQR() {
+      const wrap = document.getElementById("qrWrap");
+      const btn = document.getElementById("btnToggleQR");
+      if (!wrap || !btn) return;
+      const isOpen = wrap.style.display !== "none";
+      wrap.style.display = isOpen ? "none" : "block";
+      btn.textContent = isOpen ? "Mostra QR" : "Nascondi QR";
+    }
+
+    function show2FASetupUI(show) {
+      const box = document.getElementById("twofaSetupBox");
+      const wrap = document.getElementById("qrWrap");
+      const btn = document.getElementById("btnToggleQR");
+      const confirm = document.getElementById("confirmAdded");
+
+      if (!box) return;
+      box.style.display = show ? "block" : "none";
+
+      if (!show) {
+        if (wrap) wrap.style.display = "none";
+        if (btn) btn.textContent = "Mostra QR";
+        if (confirm) confirm.checked = false;
+      }
+    }
+
+    // =========================
     // TRUST DEVICE 30gg (salta 2FA)
     // =========================
     const TRUST_KEY = "vn_trusted_devices_v1";
@@ -777,6 +839,7 @@
       pendingEmail = null; pendingMode = null; pendingUser = null;
       document.getElementById("loginEmail").value = "";
       document.getElementById("pwResetBox").style.display = "none";
+      show2FASetupUI(false);
       showLoginStep("stepEmail");
     }
 
@@ -790,9 +853,9 @@
       saveSession({ email: user.email });
       setHeaderUser();
       initAfterLogin();
-      // cleanup form
       document.getElementById("loginPassword").value = "";
       document.getElementById("login2fa").value = "";
+      show2FASetupUI(false);
     }
 
     function loginStepEmail() {
@@ -833,17 +896,20 @@
 
       const u = upsertUser(pendingEmail, p1, gameName);
 
-      // crea secret 2FA
+      // crea secret 2FA + forza setup
       const users = loadUsers();
       const ref = users.find(x => x.email === u.email);
       ref.totpSecret = generateTotpSecret();
+      ref.totpNeedsSetup = true;
       saveUsers(users);
       pendingUser = ref;
 
       document.getElementById("twofaEmailInline").value = ref.email;
-      document.getElementById("twofaSetupBox").style.display = "block";
       document.getElementById("twofaSecretInline").value = ref.totpSecret;
-      document.getElementById("twofaHintInline").textContent = "Inserisci il codice dell’app per completare la registrazione.";
+      generate2FAQRCode(ref.email, ref.totpSecret);
+      show2FASetupUI(true);
+
+      document.getElementById("twofaHintInline").textContent = "Scansiona il QR (o inserisci la chiave), poi inserisci il codice 2FA per completare la registrazione.";
       document.getElementById("login2fa").value = "";
       document.getElementById("rememberDevice").checked = true;
       pendingMode = "register";
@@ -870,17 +936,36 @@
       pendingUser = existing;
       pendingMode = "login";
 
-      // se trusted -> salta 2FA
-      if (isTrustedForEmail(existing.email)) {
+      // se trusted -> salta 2FA SOLO se NON serve setup
+      if (!existing.totpNeedsSetup && isTrustedForEmail(existing.email)) {
         finishLogin(existing);
         return;
       }
 
-      // 2FA
+      // 2FA (se serve setup mostro QR/chiave)
       document.getElementById("twofaEmailInline").value = existing.email;
-      document.getElementById("twofaSetupBox").style.display = "none";
-      document.getElementById("twofaSecretInline").value = "";
-      document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA per completare l’accesso.";
+
+      if (!existing.totpSecret) {
+        // caso raro: manca il secret -> forzo setup
+        const users = loadUsers();
+        const u = users.find(x => x.email === existing.email);
+        u.totpSecret = generateTotpSecret();
+        u.totpNeedsSetup = true;
+        saveUsers(users);
+        pendingUser = u;
+      }
+
+      const fresh = findUserByEmail(existing.email);
+      if (fresh.totpNeedsSetup) {
+        document.getElementById("twofaSecretInline").value = fresh.totpSecret;
+        generate2FAQRCode(fresh.email, fresh.totpSecret);
+        show2FASetupUI(true);
+        document.getElementById("twofaHintInline").textContent = "Setup 2FA richiesto: scansiona il QR (o inserisci la chiave) e poi inserisci il codice.";
+      } else {
+        show2FASetupUI(false);
+        document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA per completare l’accesso.";
+      }
+
       document.getElementById("login2fa").value = "";
       document.getElementById("rememberDevice").checked = true;
       showLoginStep("step2FA");
@@ -907,15 +992,30 @@
       pendingUser = u;
       pendingMode = "login";
 
-      // se trusted -> salta 2FA
-      if (isTrustedForEmail(u.email)) {
+      // se trusted -> salta 2FA SOLO se NON serve setup
+      if (!u.totpNeedsSetup && isTrustedForEmail(u.email)) {
         finishLogin(u);
         return;
       }
 
       document.getElementById("twofaEmailInline").value = u.email;
-      document.getElementById("twofaSetupBox").style.display = "none";
-      document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA per completare l’accesso.";
+
+      if (!u.totpSecret) {
+        u.totpSecret = generateTotpSecret();
+        u.totpNeedsSetup = true;
+        saveUsers(users);
+      }
+
+      if (u.totpNeedsSetup) {
+        document.getElementById("twofaSecretInline").value = u.totpSecret;
+        generate2FAQRCode(u.email, u.totpSecret);
+        show2FASetupUI(true);
+        document.getElementById("twofaHintInline").textContent = "Setup 2FA richiesto: scansiona il QR (o inserisci la chiave) e poi inserisci il codice.";
+      } else {
+        show2FASetupUI(false);
+        document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA per completare l’accesso.";
+      }
+
       document.getElementById("login2fa").value = "";
       document.getElementById("rememberDevice").checked = true;
       showLoginStep("step2FA");
@@ -924,6 +1024,15 @@
     async function loginStep2FA() {
       if (!pendingUser?.email) return backToEmail();
 
+      // se è setup mode, obbligo conferma
+      const needsSetup = !!findUserByEmail(pendingUser.email)?.totpNeedsSetup;
+      if (needsSetup) {
+        const chk = document.getElementById("confirmAdded");
+        if (chk && !chk.checked) {
+          return alert("Prima aggiungi l’account nell’app Authenticator e spunta la conferma.");
+        }
+      }
+
       const code = (document.getElementById("login2fa").value || "").trim();
       if (!/^\d{6}$/.test(code)) return alert("Inserisci il codice 2FA a 6 cifre");
 
@@ -931,21 +1040,22 @@
       if (!fresh) return backToEmail();
       if (fresh.blocked) return alert("Account bloccato.");
 
-      if (!fresh.totpSecret) {
-        // se manca (caso raro) forziamo setup
-        const users = loadUsers();
-        const u = users.find(x => x.email === fresh.email);
-        u.totpSecret = generateTotpSecret();
-        saveUsers(users);
-        document.getElementById("twofaSetupBox").style.display = "block";
-        document.getElementById("twofaSecretInline").value = u.totpSecret;
-        document.getElementById("twofaHintInline").textContent = "Configura 2FA e inserisci il codice dell’app.";
-        pendingUser = u;
-        return;
-      }
+      if (!fresh.totpSecret) return alert("2FA non configurato (segnalalo all’admin).");
 
       const ok = await verifyTotp(fresh.totpSecret, code);
-      if (!ok) return alert("Codice 2FA non valido");
+      if (!ok) {
+        return alert("Codice 2FA non valido.\nControlla che data/ora del PC siano corrette (automatiche) e riprova.");
+      }
+
+      // completato setup? tolgo flag
+      if (fresh.totpNeedsSetup) {
+        const users = loadUsers();
+        const u = users.find(x => x.email === fresh.email);
+        if (u) {
+          u.totpNeedsSetup = false;
+          saveUsers(users);
+        }
+      }
 
       if (document.getElementById("rememberDevice").checked) {
         setTrustedForEmail(fresh.email, 30);
@@ -1043,12 +1153,15 @@
           if (!canReset2FA()) return alert("Solo Owner e Boss possono resettare il 2FA");
           const ok = confirm("Confermi RESET 2FA per " + u.email + "?\nL'utente dovrà riconfigurare Authenticator al prossimo login.");
           if (!ok) return;
+
           u.totpSecret = generateTotpSecret();
+          u.totpNeedsSetup = true;     // IMPORTANT: forzo setup
           clearTrustedForEmail(u.email);
+
           saveUsers(users);
           menu.style.display = "none";
           renderUsersTable();
-          alert("2FA resettato. Al prossimo login vedrà la chiave e dovrà riconfigurare.");
+          alert("2FA resettato. Al prossimo login vedrà chiave + QR e dovrà riconfigurare.");
         };
 
         const b5 = document.createElement("button");
@@ -1057,8 +1170,10 @@
           if (!canResetPassword()) return alert("Permesso negato");
           const ok = confirm("Confermi RESET PASSWORD per " + u.email + "?\nL'utente dovrà impostarne una nuova al prossimo accesso.");
           if (!ok) return;
+
           u.passwordHash = null;
           clearTrustedForEmail(u.email);
+
           saveUsers(users);
           menu.style.display = "none";
           renderUsersTable();
@@ -1101,11 +1216,11 @@
           if (s?.email === u.email) logout();
         };
 
-        // Vice Boss: no blocca/sblocca, ma può resettare password (come richiesto).
+        // Vice Boss: no blocca/sblocca, e reset 2FA solo Owner/Boss
         if (myRole() === "Vice Boss") {
           b1.style.display = "none";
           b2.style.display = "none";
-          b4.style.display = "none"; // reset 2FA solo Owner/Boss
+          b4.style.display = "none";
         }
 
         menu.appendChild(b4);
