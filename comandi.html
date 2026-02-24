@@ -11,20 +11,17 @@
             text-align: center;
             padding: 50px 20px;
         }
-
         h1 {
             color: #ff3b3b;
             font-size: 50px;
             margin-bottom: 10px;
             text-shadow: 0 0 12px #ff3b3b80;
         }
-
         p.subtitle {
             color: #ff7b7b;
             font-size: 18px;
             margin-bottom: 40px;
         }
-
         .command-box {
             display: inline-block;
             background: linear-gradient(145deg, #1a1a1a, #2b0000);
@@ -34,12 +31,10 @@
             box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .command-box:hover {
             transform: scale(1.05);
             box-shadow: 0 0 20px #ff1a1a99, 0 0 25px #ff0000cc inset;
         }
-
         a.back {
             display: inline-block;
             margin-top: 30px;
@@ -49,10 +44,7 @@
             border-radius: 6px;
             text-decoration: none;
         }
-
-        a.back:hover {
-            background-color: #cc0000;
-        }
+        a.back:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
@@ -66,6 +58,47 @@
 </div>
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
+
+<script>
+  // Protezione pagina (stesso storage di index.html)
+  const USERS_KEY = "vn_users_v2";
+  const SESSION_KEY = "vn_session_v1";
+
+  function loadSession() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
+  }
+  function loadUsers() {
+    try {
+      const raw = localStorage.getItem(USERS_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+  }
+  function findUserByEmail(email) {
+    const users = loadUsers();
+    return users.find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
+  }
+
+  (function guard(){
+    const s = loadSession();
+    if (!s?.email) {
+      window.location.href = "index.html";
+      return;
+    }
+    const u = findUserByEmail(s.email);
+    if (!u) {
+      localStorage.removeItem(SESSION_KEY);
+      window.location.href = "index.html";
+      return;
+    }
+    if (u.blocked) {
+      localStorage.removeItem(SESSION_KEY);
+      alert("Account bloccato.");
+      window.location.href = "index.html";
+      return;
+    }
+  })();
+</script>
 
 </body>
 </html>
