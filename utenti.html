@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Log - VELO NERO</title>
+    <title>Utenti - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
         body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; text-align: center; }
@@ -11,39 +11,115 @@
         th { background-color: #1e1e1e; color: #ff3b3b; }
         td { background-color: #1e1e1e; }
         tr:hover td { background-color: #3a0000; }
-        a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
+        a.back {
+            display: inline-block; margin-top: 20px; padding: 10px 20px;
+            color: #fff; background-color: #ff3b3b; border-radius: 6px;
+            text-decoration: none;
+        }
         a.back:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
 
-<h1>Log Attività</h1>
+<h1>Utenti</h1>
+<p style="color:#ff7b7b;">Accesso riservato ad Admin</p>
 
 <table>
     <thead>
         <tr>
-            <th>Data/Ora</th>
-            <th>Utente</th>
-            <th>Azione</th>
+            <th>Email</th>
+            <th>Nome in Game</th>
+            <th>Ruolo</th>
+            <th>Stato</th>
         </tr>
     </thead>
-    <tbody id="logBody">
-        <!-- log dinamici -->
-    </tbody>
+    <tbody id="usersBody"></tbody>
 </table>
 
-<a href="utenti.html" class="back">Torna agli Utenti</a>
+<a href="index.html" class="back">Torna alla Dashboard</a>
 
 <script>
-const logBody = document.getElementById('logBody');
+/* ===== COSTANTI CONDIVISE ===== */
+const SESSION_KEY = "vn_session_v1";
+const USERS_KEY = "vn_users_v2";
 
-// funzione che può essere richiamata da utenti.html
-function addLog(user, action) {
-    const tr = document.createElement('tr');
-    const now = new Date();
-    tr.innerHTML = `<td>${now.toLocaleString()}</td><td>${user}</td><td>${action}</td>`;
-    logBody.prepend(tr); // mette la riga in cima
+/* ===== UTILS ===== */
+function loadSession() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; }
 }
+function loadUsers() {
+    try {
+        const raw = localStorage.getItem(USERS_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+}
+function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+}
+
+/* ===== AUTH GUARD ===== */
+function bootGuard() {
+    const session = loadSession();
+    if (!session?.email) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    const users = loadUsers();
+    const me = users.find(u => u.email === session.email);
+    if (!me) {
+        localStorage.removeItem(SESSION_KEY);
+        window.location.href = "index.html";
+        return;
+    }
+
+    if (me.blocked) {
+        alert("Account bloccato.");
+        localStorage.removeItem(SESSION_KEY);
+        window.location.href = "index.html";
+        return;
+    }
+
+    if (!["Owner","Boss","Vice Boss"].includes(me.role)) {
+        alert("Accesso negato.");
+        window.location.href = "index.html";
+        return;
+    }
+}
+
+/* ===== RENDER ===== */
+function renderUsers() {
+    const users = loadUsers().slice().sort((a,b) =>
+        (a.email || "").localeCompare(b.email || "")
+    );
+
+    const tbody = document.getElementById("usersBody");
+    tbody.innerHTML = "";
+
+    if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="color:#ff7b7b;">Nessun utente</td></tr>`;
+        return;
+    }
+
+    users.forEach(u => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(u.email)}</td>
+          <td>${escapeHtml(u.gameName || "—")}</td>
+          <td>${escapeHtml(u.role || "Nessuno")}</td>
+          <td>${u.blocked ? "BLOCCATO" : "ATTIVO"}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+/* ===== START ===== */
+bootGuard();
+renderUsers();
 </script>
 
 </body>
