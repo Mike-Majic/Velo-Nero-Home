@@ -4,16 +4,125 @@
     <title>Logs - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
-        body { background-color: #0b0b0b; color: #fff; font-family: 'Arial', sans-serif; text-align: center; padding: 50px 20px; }
-        h1 { color: #ff1a1a; margin-bottom: 10px; }
-        p { color: #ff6666; margin-bottom: 30px; }
-        .btn { display: inline-block; padding: 10px 20px; color: #fff; background-color: #ff1a1a; border-radius: 6px; text-decoration: none; }
-        .btn:hover { background-color: #cc0000; }
+        body {
+            background-color: #0b0b0b;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        h1 {
+            color: #ff1a1a;
+            font-size: 50px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #ff000080;
+        }
+
+        p.subtitle {
+            color: #ff6666;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 95%;
+            margin: 0 auto 50px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 20px;
+            border: 1px solid #ff1a1a33;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1a1a1a;
+            color: #ff1a1a;
+        }
+
+        td {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        tr:hover td {
+            background-color: #2b0000;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            color: #fff;
+        }
+
+        .badge-alert {
+            background-color: #ff1a1a;
+            animation: glow 1.5s infinite;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #ff1a1a50; }
+            50% { box-shadow: 0 0 15px #ff0000aa; }
+            100% { box-shadow: 0 0 5px #ff1a1a50; }
+        }
+
+        a.back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #ff1a1a;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        a.back:hover {
+            background-color: #cc0000;
+        }
     </style>
 </head>
 <body>
+
     <h1>Logs</h1>
-    <p>Controllo attività interne</p>
-    <a href="index.html" class="btn">Torna alla Dashboard</a>
+    <p class="subtitle">Attività interne recenti</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Utente</th>
+                <th>Azione</th>
+                <th>Stato</th>
+            </tr>
+        </thead>
+        <tbody id="logs-table">
+            <tr>
+                <td>24/02/2026 14:30</td>
+                <td>Mike</td>
+                <td>Accesso Dashboard</td>
+                <td><span class="badge badge-alert">Nuovo</span></td>
+            </tr>
+            <tr>
+                <td>24/02/2026 14:35</td>
+                <td>Giulia</td>
+                <td>Modifica ruolo</td>
+                <td><span class="badge">OK</span></td>
+            </tr>
+            <tr>
+                <td>24/02/2026 14:40</td>
+                <td>Alessio</td>
+                <td>Login fallito</td>
+                <td><span class="badge badge-alert">!</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="index.html" class="back">Torna alla Dashboard</a>
+
 </body>
 </html>
