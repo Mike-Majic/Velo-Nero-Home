@@ -5,22 +5,22 @@
     <meta charset="UTF-8">
     <style>
         body {
-            background-color: #0b0b0b;
+            background-color: #121212;
             color: #fff;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px 20px;
         }
 
         h1 {
-            color: #ff1a1a;
+            color: #ff3b3b;
             font-size: 50px;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px #ff000080;
+            text-shadow: 0 0 12px #ff3b3b80;
         }
 
         p.subtitle {
-            color: #ff6666;
+            color: #ff7b7b;
             font-size: 18px;
             margin-bottom: 40px;
         }
@@ -31,37 +31,13 @@
             padding: 30px 40px;
             margin: 20px;
             border-radius: 12px;
-            box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset;
+            box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .command-box:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 30px #ff1a1a80, 0 0 50px #ff0000 inset;
-        }
-
-        .btn {
-            display: block;
-            padding: 12px 25px;
-            margin: 10px auto 0 auto;
-            color: #fff;
-            background-color: #ff1a1a;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-
-        .btn:hover {
-            background-color: #cc0000;
-            transform: scale(1.05);
-        }
-
-        .status {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #ff6666;
+            box-shadow: 0 0 20px #ff1a1a99, 0 0 25px #ff0000cc inset;
         }
 
         a.back {
@@ -69,10 +45,9 @@
             margin-top: 30px;
             padding: 10px 20px;
             color: #fff;
-            background-color: #ff1a1a;
+            background-color: #ff3b3b;
             border-radius: 6px;
             text-decoration: none;
-            transition: background 0.3s ease;
         }
 
         a.back:hover {
@@ -82,43 +57,15 @@
 </head>
 <body>
 
-    <h1>Comandi</h1>
-    <p class="subtitle">Esegui azioni interne simulate</p>
+<h1>Comandi</h1>
+<p class="subtitle">Sezione pronta per collegamenti futuri</p>
 
-    <div class="command-box">
-        <h2>Gestione Allarmi</h2>
-        <button class="btn" onclick="eseguiComando('Allarme attivato')">Attiva Allarme</button>
-        <button class="btn" onclick="eseguiComando('Allarme disattivato')">Disattiva Allarme</button>
-        <div class="status" id="status-allarme"></div>
-    </div>
+<div class="command-box">
+    <h2>Funzioni disponibili</h2>
+    <p>Nessuna simulazione attiva</p>
+</div>
 
-    <div class="command-box">
-        <h2>Utenti</h2>
-        <button class="btn" onclick="eseguiComando('Blocco utente simulato')">Blocca Utente</button>
-        <button class="btn" onclick="eseguiComando('Sblocco utente simulato')">Sblocca Utente</button>
-        <div class="status" id="status-utenti"></div>
-    </div>
-
-    <div class="command-box">
-        <h2>Braccio Armato</h2>
-        <button class="btn" onclick="eseguiComando('Protocollo d\'assalto simulato')">Esegui Protocollo</button>
-        <div class="status" id="status-braccio"></div>
-    </div>
-
-    <a href="index.html" class="back">Torna alla Dashboard</a>
-
-    <script>
-        function eseguiComando(messaggio) {
-            // Mostra messaggio nello status corrispondente
-            if(messaggio.includes('Allarme')) {
-                document.getElementById('status-allarme').textContent = messaggio;
-            } else if(messaggio.includes('utente')) {
-                document.getElementById('status-utenti').textContent = messaggio;
-            } else if(messaggio.includes('Protocollo')) {
-                document.getElementById('status-braccio').textContent = messaggio;
-            }
-        }
-    </script>
+<a href="index.html" class="back">Torna alla Dashboard</a>
 
 </body>
 </html>
