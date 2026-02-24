@@ -1,151 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VELO NERO</title>
+    <title>VELO NERO - Dashboard</title>
     <meta charset="UTF-8">
     <style>
-        @keyframes glow {
-            0% { box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset; }
-            50% { box-shadow: 0 0 30px #ff0000aa, 0 0 50px #ff0000 inset; }
-            100% { box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset; }
-        }
-
         body {
             background-color: #0b0b0b;
             color: #fff;
             font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1a1a1a;
+            padding: 20px;
             text-align: center;
-            padding: 50px 20px;
-        }
-
-        h1 {
-            font-size: 70px;
-            letter-spacing: 6px;
-            color: #ff1a1a;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px #ff1a1a50;
-        }
-
-        p.subtitle {
-            font-size: 22px;
-            color: #ff4d4d;
-            margin-bottom: 50px;
-        }
-
-        .dashboard {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-        }
-
-        .box {
-            background: linear-gradient(145deg, #1a1a1a, #2b0000);
-            padding: 40px 30px;
-            border-radius: 12px;
-            width: 280px;
-            box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            position: relative;
-        }
-
-        .box:hover {
-            transform: scale(1.07);
-            box-shadow: 0 0 30px #ff1a1a80, 0 0 50px #ff0000 inset;
-        }
-
-        h2 {
-            color: #ff1a1a;
-            margin-bottom: 15px;
-            text-shadow: 0 0 10px #ff000080;
-        }
-
-        p {
-            font-size: 16px;
-            color: #ff6666;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            color: #fff;
-            background-color: #ff1a1a;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
             box-shadow: 0 0 10px #ff1a1a50;
         }
 
-        .btn:hover {
-            background-color: #cc0000;
-            box-shadow: 0 0 20px #ff0000aa;
-            transform: scale(1.05);
+        header h1 {
+            color: #ff1a1a;
+            font-size: 48px;
+            margin: 0;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff000080;
         }
 
-        /* Badge notifiche inizialmente invisibile */
-        .badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background-color: #ff1a1a;
+        nav {
+            background-color: #2b0000;
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
+        }
+
+        nav a {
             color: #fff;
-            padding: 5px 10px;
-            border-radius: 50px;
-            font-size: 12px;
-            animation: glow 1.5s infinite;
-            display: none; /* invisibile finché non c’è notifica */
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 16px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
         }
 
-        @media(max-width: 900px) {
-            .dashboard {
-                flex-direction: column;
-                align-items: center;
-            }
+        nav a:hover {
+            background-color: #ff1a1a;
         }
+
+        main {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .box {
+            display: inline-block;
+            background-color: #1a1a1a;
+            padding: 40px 60px;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px #ff1a1a50 inset, 0 0 20px #ff000080;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #ff1a1a80 inset, 0 0 30px #ff000080;
+        }
+
+        .box h2 {
+            color: #ff1a1a;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .box p {
+            color: #ff6666;
+            font-size: 16px;
+        }
+
     </style>
 </head>
-
 <body>
 
+<header>
     <h1>VELO NERO</h1>
-    <p class="subtitle">Sistema Privato Interno</p>
+</header>
 
-    <div class="dashboard">
-        <div class="box">
-            <span class="badge" id="badge-utenti"></span>
-            <h2>Utenti</h2>
-            <p>Gestione accessi e permessi</p>
-            <a href="utenti.html" class="btn">Apri</a>
-        </div>
-        <div class="box">
-            <span class="badge" id="badge-logs"></span>
-            <h2>Logs</h2>
-            <p>Controllo attività interne</p>
-            <a href="logs.html" class="btn">Apri</a>
-        </div>
-        <div class="box">
-            <span class="badge" id="badge-comandi"></span>
-            <h2>Comandi</h2>
-            <p>Esegui operazioni interne</p>
-            <a href="comandi.html" class="btn">Apri</a>
-        </div>
+<nav>
+    <a href="index.html">Dashboard</a>
+    <a href="utenti.html">Utenti</a>
+    <a href="logs.html">Logs</a>
+    <a href="comandi.html">Comandi</a>
+</nav>
+
+<main>
+    <div class="box">
+        <h2>Utenti</h2>
+        <p>Gestione ruoli e accessi</p>
     </div>
-
-    <script>
-        // Esempio: funzione per attivare una notifica su una badge
-        function mostraNotifica(sezione, testo) {
-            const badge = document.getElementById('badge-' + sezione);
-            badge.textContent = testo;
-            badge.style.display = 'inline-block';
-        }
-
-        // Esempio: attiva badge su utenti con numero reale
-        // mostraNotifica('utenti', '3'); // Sostituire con numero reale quando arriva notifica
-    </script>
+    <div class="box">
+        <h2>Logs</h2>
+        <p>Attività interne recenti</p>
+    </div>
+    <div class="box">
+        <h2>Comandi</h2>
+        <p>Esegui azioni interne</p>
+    </div>
+</main>
 
 </body>
 </html>
