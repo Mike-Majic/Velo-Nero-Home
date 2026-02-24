@@ -32,6 +32,7 @@
     .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; }
 
     .hint { color:#ff7b7b; font-size:14px; margin-top:6px; }
+    .muted { color:#ffaaaa; font-size:13px; }
 
     /* Tabs / panels */
     .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
@@ -69,26 +70,39 @@
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
     }
     .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
+    .danger { background:#2b0000; border-color:#ff1a1aaa; }
 
     table { width:100%; border-collapse:collapse; margin-top:12px; }
     th, td { padding:10px 12px; border:1px solid #ff1a1a33; text-align:left; background-color:#1e1e1e; vertical-align:top; }
     th { color:#ff3b3b; }
     tr:hover td { background-color:#3a0000; }
 
-    .pill {
-      display:inline-block; padding:4px 8px; border-radius:999px;
-      border:1px solid #ff1a1a55; color:#fff; font-size:12px;
-    }
+    .pill { display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid #ff1a1a55; color:#fff; font-size:12px; }
 
     .split { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
     @media (max-width: 900px) { .split { grid-template-columns:1fr; } }
 
-    .danger {
-      border-color:#ff1a1aaa;
-      background:#2b0000;
-    }
+    /* Users actions menu */
+    .btn-edit { background:none; border:none; cursor:pointer; color:#ff3b3b; font-size:18px; transition:transform .2s ease, text-shadow .2s ease; }
+    .btn-edit:hover { transform:scale(1.2); text-shadow:0 0 6px #ff000080; }
 
-    .muted { color:#ffaaaa; font-size:13px; }
+    .action-menu {
+      display:none; position:absolute; top:32px; left:0; background-color:#1a1a1a;
+      border:1px solid #ff3b3b66; border-radius:8px; padding:10px; text-align:left; z-index:100; min-width:160px;
+    }
+    .action-menu button {
+      display:block; background:none; border:1px solid #ff3b3b44; color:#fff; padding:7px 10px;
+      margin:6px 0; border-radius:6px; cursor:pointer; width:100%; text-align:left;
+    }
+    .action-menu button:hover { background-color:#3a0000; }
+
+    .blocked-icon { display:none; color:#ff3b3b; font-size:18px; margin-left:8px; vertical-align:middle; }
+
+    /* Admin log */
+    #adminLogContainer { margin-top:18px; display:none; }
+    #adminLogContainer h3 { color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; }
+    #adminLogList { list-style:none; padding:0; margin:0; max-height:220px; overflow-y:auto; border:1px solid #ff3b3b33; border-radius:10px; background-color:#1e1e1e; }
+    #adminLogList li { padding:10px 12px; border-bottom:1px solid #ff3b3b22; font-size:14px; }
   </style>
 </head>
 
@@ -112,7 +126,7 @@
 
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
         <h2>Utenti</h2>
-        <p>Gestione ruoli e log</p>
+        <p>Ruoli + blocchi + log</p>
       </div>
     </div>
   </div>
@@ -120,33 +134,38 @@
   <!-- UTENTI (solo admin) -->
   <div id="utenti" class="section">
     <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Utenti</h2>
-    <div class="hint">Sezione riservata a Owner, Boss, Vice Boss.</div>
+    <div class="hint">Modifica ruoli + azioni. ⛔ = bloccato.</div>
 
     <table>
       <thead>
         <tr>
           <th>Nome</th>
           <th>Ruolo</th>
-          <th>Note</th>
+          <th>Stato</th>
+          <th>Azioni</th>
         </tr>
       </thead>
       <tbody id="usersTableBody"></tbody>
     </table>
+
+    <div id="adminLogContainer">
+      <h3>Log Attività (Admin)</h3>
+      <ul id="adminLogList"></ul>
+      <div class="hint">Visibile solo a Owner, Boss, Vice Boss.</div>
+    </div>
   </div>
 
   <!-- OPERAZIONI -->
   <div id="operazioni" class="section">
     <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Operazioni</h2>
-    <div class="hint">Qui gli utenti inseriscono gli esiti (ottenuto/perso). Totali calcolati in automatico.</div>
+    <div class="hint">Inserisci esiti (ottenuto/perso). Totali calcolati in automatico.</div>
 
     <div class="tabs" id="opsTabs"></div>
-
     <div id="panelWrapper"></div>
 
-    <!-- GESTIONE (solo Boss + Vice Boss) -->
     <div id="managePanel" class="panel" style="display:none;">
       <h3 style="margin:0 0 8px 0; color:#ff3b3b;">Gestione (Boss/Vice Boss)</h3>
-      <div class="muted">Qui vedrai lo specchio totale e puoi azzerare i dati. (In futuro qui mettiamo anche “cassa”, inventario, ecc.)</div>
+      <div class="muted">Specchio totale + reset dati. (Prossimo step: modifica righe.)</div>
 
       <div class="split">
         <div>
@@ -154,7 +173,7 @@
           <table>
             <thead>
               <tr>
-                <th>Tipo</th>
+                <th>Categoria</th>
                 <th>Ottenuto</th>
                 <th>Perso</th>
                 <th>Netto</th>
@@ -181,30 +200,27 @@
       </div>
 
       <div class="row" style="margin-top:14px;">
-        <button class="btn danger" onclick="resetAllData()">AZZERA TUTTO</button>
-        <div class="muted">Attenzione: cancella tutte le registrazioni salvate sul browser.</div>
+        <button class="btn danger" onclick="resetAllData()">AZZERA OPERAZIONI</button>
+        <div class="muted">Cancella tutte le registrazioni delle operazioni.</div>
       </div>
     </div>
-
   </div>
 
   <script>
     // =========================
-    // CONFIG (per ora test)
+    // CONFIG TEST (poi lo colleghiamo al login vero)
     // =========================
-    const myRole = "Owner"; // TEST: "Soldato" per vedere l'accesso bloccato a Utenti e gestione
-    const currentUserName = "Mike"; // chi sta inserendo i dati (per ora fisso)
+    const myRole = "Owner";       // prova: "Soldato"
+    const currentUserName = "Mike";
 
-    // Utenti di esempio (poi li renderemo dinamici)
-    const users = [
-      { name: "Mike", role: "Owner" },
-      { name: "Giulia", role: "Soldato" },
-      { name: "Luca", role: "Vice Boss" },
-      { name: "Franco", role: "Boss" }
+    const RUOLI = [
+      "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
+      "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
+      "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
+      "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
     ];
 
-    // Operazioni richieste
-    const categories = [
+    const CATEGORIES = [
       "Esiti Campi",
       "Esiti Rapine",
       "Esiti Freeroom",
@@ -216,35 +232,93 @@
     // PERMESSI
     // =========================
     const canSeeUsersSection = () => ["Owner","Boss","Vice Boss"].includes(myRole);
+    const canSeeAdminLog = () => ["Owner","Boss","Vice Boss"].includes(myRole);
+    const canBlockUnblock = () => ["Owner","Boss"].includes(myRole);
+    const canExpel = () => ["Owner","Boss","Vice Boss"].includes(myRole);
     const canSeeManage = () => ["Boss","Vice Boss"].includes(myRole);
 
     // =========================
-    // STORAGE
+    // STORAGE KEYS
     // =========================
-    const STORAGE_KEY = "veloNero_ops_v1";
+    const USERS_KEY = "veloNero_users_v1";
+    const OPS_KEY = "veloNero_ops_v1";
+    const ADMINLOG_KEY = "veloNero_adminlog_v1";
 
-    function loadData() {
+    // =========================
+    // UTILS
+    // =========================
+    function uid() { return Math.random().toString(16).slice(2) + Date.now().toString(16); }
+    function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString(); }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // =========================
+    // ADMIN LOG
+    // =========================
+    const adminLogContainer = document.getElementById("adminLogContainer");
+    const adminLogList = document.getElementById("adminLogList");
+
+    function loadAdminLog() {
+      try { return JSON.parse(localStorage.getItem(ADMINLOG_KEY)) || []; } catch { return []; }
+    }
+    function saveAdminLog(arr) {
+      localStorage.setItem(ADMINLOG_KEY, JSON.stringify(arr));
+    }
+    function addAdminLog(text) {
+      if (!canSeeAdminLog()) return;
+      const arr = loadAdminLog();
+      arr.unshift({ ts: Date.now(), text });
+      saveAdminLog(arr);
+      renderAdminLog();
+    }
+    function renderAdminLog() {
+      if (!canSeeAdminLog()) return;
+      const arr = loadAdminLog();
+      adminLogList.innerHTML = "";
+      if (arr.length === 0) {
+        adminLogList.innerHTML = `<li class="muted">Nessun log</li>`;
+        return;
+      }
+      arr.slice(0, 80).forEach(e => {
+        const li = document.createElement("li");
+        li.textContent = `[${new Date(e.ts).toLocaleString()}] ${e.text}`;
+        adminLogList.appendChild(li);
+      });
+    }
+
+    // =========================
+    // USERS DATA
+    // =========================
+    function defaultUsers() {
+      return [
+        { id: uid(), name: "Mike", role: "Owner", blocked: false },
+        { id: uid(), name: "Giulia", role: "Soldato", blocked: false },
+        { id: uid(), name: "Luca", role: "Vice Boss", blocked: false },
+        { id: uid(), name: "Franco", role: "Boss", blocked: false }
+      ];
+    }
+
+    function loadUsers() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return [];
+        const raw = localStorage.getItem(USERS_KEY);
+        if (!raw) return defaultUsers();
         const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
+        if (!Array.isArray(parsed)) return defaultUsers();
         return parsed;
       } catch {
-        return [];
+        return defaultUsers();
       }
     }
 
-    function saveData(records) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-    }
-
-    // record schema:
-    // { id, ts, user, category, type: "ottenuto"|"perso", money, itemsText }
-    // itemsText: multiline "AK-47 x1", "Pistola x2", "Giubbotti x3"
-
-    function uid() {
-      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    function saveUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
     }
 
     // =========================
@@ -265,46 +339,182 @@
     }
 
     // =========================
-    // RENDER UTENTI
+    // RENDER USERS TABLE (con azioni)
     // =========================
-    function renderUsers() {
-      const tbody = document.getElementById("usersTableBody");
-      tbody.innerHTML = "";
+    const usersTableBody = document.getElementById("usersTableBody");
+
+    function renderUsersTable() {
+      const users = loadUsers();
+      usersTableBody.innerHTML = "";
+
       users.forEach(u => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.name}</td><td><span class="pill">${u.role}</span></td><td class="muted">—</td>`;
-        tbody.appendChild(tr);
+
+        // Nome + icon
+        const tdName = document.createElement("td");
+        tdName.textContent = u.name;
+        const blockedIcon = document.createElement("span");
+        blockedIcon.className = "blocked-icon";
+        blockedIcon.textContent = "⛔";
+        blockedIcon.style.display = u.blocked ? "inline" : "none";
+        tdName.appendChild(blockedIcon);
+
+        // Ruolo select (salvato)
+        const tdRole = document.createElement("td");
+        const sel = document.createElement("select");
+        RUOLI.forEach(r => {
+          const opt = document.createElement("option");
+          opt.value = r;
+          opt.textContent = r;
+          if (r === u.role) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.onchange = () => {
+          u.role = sel.value;
+          saveUsers(users);
+          addAdminLog(`Ruolo cambiato: ${u.name} → ${u.role}`);
+        };
+        tdRole.appendChild(sel);
+
+        // Stato
+        const tdState = document.createElement("td");
+        tdState.innerHTML = u.blocked ? `<span class="pill">BLOCCATO</span>` : `<span class="pill">ATTIVO</span>`;
+
+        // Azioni (matita)
+        const tdActions = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.style.position = "relative";
+
+        const btnEdit = document.createElement("button");
+        btnEdit.className = "btn-edit";
+        btnEdit.textContent = "✎";
+        wrap.appendChild(btnEdit);
+
+        const menu = document.createElement("div");
+        menu.className = "action-menu";
+
+        const btnBlocca = document.createElement("button");
+        btnBlocca.textContent = "Blocca";
+        btnBlocca.onclick = () => {
+          if (!canBlockUnblock()) return alert("Non hai permessi per bloccare");
+          u.blocked = true;
+          saveUsers(users);
+          menu.style.display = "none";
+          addAdminLog(`Utente bloccato: ${u.name}`);
+          renderUsersTable();
+        };
+
+        const btnSblocca = document.createElement("button");
+        btnSblocca.textContent = "Sblocca";
+        btnSblocca.onclick = () => {
+          if (!canBlockUnblock()) return alert("Non hai permessi per sbloccare");
+          u.blocked = false;
+          saveUsers(users);
+          menu.style.display = "none";
+          addAdminLog(`Utente sbloccato: ${u.name}`);
+          renderUsersTable();
+        };
+
+        const btnEspelli = document.createElement("button");
+        btnEspelli.textContent = "Espelli";
+        btnEspelli.onclick = () => {
+          if (!canExpel()) return alert("Non hai permessi per espellere");
+          const ok = confirm(`Confermi espulsione di ${u.name}?`);
+          if (!ok) return;
+          const filtered = users.filter(x => x.id !== u.id);
+          saveUsers(filtered);
+          menu.style.display = "none";
+          addAdminLog(`Utente espulso: ${u.name}`);
+          renderUsersTable();
+        };
+
+        // Vice Boss: solo Espelli (come richiesto)
+        if (myRole === "Vice Boss") {
+          btnBlocca.style.display = "none";
+          btnSblocca.style.display = "none";
+        }
+
+        menu.appendChild(btnBlocca);
+        menu.appendChild(btnSblocca);
+        menu.appendChild(btnEspelli);
+
+        wrap.appendChild(menu);
+
+        // se non autorizzato alle azioni, nascondi matita
+        if (!canSeeUsersSection()) btnEdit.style.display = "none";
+
+        btnEdit.onclick = (e) => {
+          e.stopPropagation();
+          document.querySelectorAll(".action-menu").forEach(m => { if (m !== menu) m.style.display = "none"; });
+          menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        };
+
+        tdActions.appendChild(wrap);
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdRole);
+        tr.appendChild(tdState);
+        tr.appendChild(tdActions);
+
+        usersTableBody.appendChild(tr);
       });
     }
 
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
+    });
+
     // =========================
-    // OPERAZIONI UI
+    // OPERAZIONI DATA
     // =========================
-    const opsTabs = document.getElementById("opsTabs");
-    const panelWrapper = document.getElementById("panelWrapper");
+    function loadOps() {
+      try { return JSON.parse(localStorage.getItem(OPS_KEY)) || []; } catch { return []; }
+    }
+    function saveOps(arr) { localStorage.setItem(OPS_KEY, JSON.stringify(arr)); }
 
     function tabIdFromName(name) {
       return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
     }
 
-    function showCat(catName) {
-      // activate tab
-      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
-      document.getElementById("tab_" + tabIdFromName(catName)).classList.add("active");
+    function parseItems(text) {
+      const map = {};
+      const lines = (text || "").split("\n").map(l => l.trim()).filter(Boolean);
 
-      // activate panel
-      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
-      document.getElementById("panel_" + tabIdFromName(catName)).classList.add("active");
+      lines.forEach(line => {
+        let name = line;
+        let qty = 1;
 
-      // refresh table for that category
-      renderCategoryTable(catName);
+        const matchX = line.match(/^(.*?)(?:\s*[xX]\s*|\s*:\s*)(\d+)\s*$/);
+        if (matchX) {
+          name = matchX[1].trim();
+          qty = parseInt(matchX[2], 10);
+        } else {
+          const matchSpace = line.match(/^(.*)\s+(\d+)\s*$/);
+          if (matchSpace) {
+            name = matchSpace[1].trim();
+            qty = parseInt(matchSpace[2], 10);
+          }
+        }
+
+        if (!name) return;
+        if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+        const key = name.toLowerCase();
+        if (!map[key]) map[key] = { label: name, qty: 0 };
+        map[key].qty += qty;
+      });
+
+      return map;
     }
 
     function renderTabsAndPanels() {
+      const opsTabs = document.getElementById("opsTabs");
+      const panelWrapper = document.getElementById("panelWrapper");
+
       opsTabs.innerHTML = "";
       panelWrapper.innerHTML = "";
 
-      categories.forEach((cat, idx) => {
+      CATEGORIES.forEach((cat, idx) => {
         const tid = tabIdFromName(cat);
 
         const btn = document.createElement("button");
@@ -319,7 +529,7 @@
 
         panel.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:#ff3b3b;">${cat}</h3>
-          <div class="muted">Inserisci esito: soldi sporchi + armi/oggetti. Scegli se è OTTENUTO o PERSO.</div>
+          <div class="muted">Inserisci esito: soldi sporchi + armi/oggetti. Scegli OTTENUTO o PERSO.</div>
 
           <div class="row">
             <div class="field" style="min-width:180px;">
@@ -336,7 +546,7 @@
             </div>
 
             <div class="field" style="flex:1; min-width:280px;">
-              <label>Armi/Oggetti (uno per riga, formato: Nome xQuantità)</label>
+              <label>Armi/Oggetti (uno per riga: Nome xQuantità)</label>
               <textarea id="items_${tid}" placeholder="Esempio:
 AK-47 x1
 Pistola x2
@@ -344,7 +554,7 @@ Giubbotto x3"></textarea>
             </div>
 
             <div class="field" style="min-width:180px;">
-              <button class="btn" onclick="addRecord('${cat}')">Aggiungi</button>
+              <button class="btn" onclick="addRecord('${escapeHtml(cat)}')">Aggiungi</button>
               <div class="hint">Salva sul browser</div>
             </div>
           </div>
@@ -353,34 +563,19 @@ Giubbotto x3"></textarea>
             <div>
               <h4 style="margin:12px 0 6px 0;">Totali ${cat} (Soldi)</h4>
               <table>
-                <thead>
-                  <tr>
-                    <th>Ottenuto</th>
-                    <th>Perso</th>
-                    <th>Netto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td id="m_get_${tid}">$0</td>
-                    <td id="m_lost_${tid}">$0</td>
-                    <td id="m_net_${tid}">$0</td>
-                  </tr>
-                </tbody>
+                <thead><tr><th>Ottenuto</th><th>Perso</th><th>Netto</th></tr></thead>
+                <tbody><tr>
+                  <td id="m_get_${tid}">$0</td>
+                  <td id="m_lost_${tid}">$0</td>
+                  <td id="m_net_${tid}">$0</td>
+                </tr></tbody>
               </table>
             </div>
 
             <div>
               <h4 style="margin:12px 0 6px 0;">Totali ${cat} (Oggetti/Armi)</h4>
               <table>
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Ottenuto</th>
-                    <th>Perso</th>
-                    <th>Netto</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Item</th><th>Ottenuto</th><th>Perso</th><th>Netto</th></tr></thead>
                 <tbody id="itemsTotals_${tid}">
                   <tr><td class="muted" colspan="4">Nessun dato</td></tr>
                 </tbody>
@@ -415,49 +610,17 @@ Giubbotto x3"></textarea>
       });
     }
 
-    // =========================
-    // PARSE ITEMS
-    // =========================
-    function parseItems(text) {
-      // returns map { itemName: qty }
-      const map = {};
-      const lines = (text || "").split("\n").map(l => l.trim()).filter(Boolean);
-      lines.forEach(line => {
-        // Accept formats:
-        // "AK-47 x1" | "AK-47 1" | "AK-47:1"
-        let name = line;
-        let qty = 1;
+    function showCat(catName) {
+      const tid = tabIdFromName(catName);
+      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
+      document.getElementById("tab_" + tid).classList.add("active");
 
-        const matchX = line.match(/^(.*?)(?:\s*[xX]\s*|\s*:\s*)(\d+)\s*$/);
-        if (matchX) {
-          name = matchX[1].trim();
-          qty = parseInt(matchX[2], 10);
-        } else {
-          const matchSpace = line.match(/^(.*)\s+(\d+)\s*$/);
-          if (matchSpace) {
-            name = matchSpace[1].trim();
-            qty = parseInt(matchSpace[2], 10);
-          }
-        }
+      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
+      document.getElementById("panel_" + tid).classList.add("active");
 
-        if (!name) return;
-        if (!Number.isFinite(qty) || qty < 1) qty = 1;
-
-        const key = name.toLowerCase();
-        if (!map[key]) map[key] = { label: name, qty: 0 };
-        map[key].qty += qty;
-      });
-      return map; // {key:{label,qty}}
+      renderCategoryTable(catName);
     }
 
-    function formatMoney(n) {
-      const v = Math.round(Number(n || 0));
-      return "$" + v.toLocaleString();
-    }
-
-    // =========================
-    // RECORDS CRUD
-    // =========================
     function addRecord(category) {
       const tid = tabIdFromName(category);
       const type = document.getElementById("type_" + tid).value;
@@ -469,55 +632,46 @@ Giubbotto x3"></textarea>
         return alert("Inserisci almeno soldi o un oggetto/arma.");
       }
 
-      const records = loadData();
-      records.push({
-        id: uid(),
-        ts: Date.now(),
-        user: currentUserName,
-        category,
-        type, // ottenuto | perso
-        money,
-        itemsText
-      });
-      saveData(records);
+      const ops = loadOps();
+      ops.push({ id: uid(), ts: Date.now(), user: currentUserName, category, type, money, itemsText });
+      saveOps(ops);
 
       document.getElementById("money_" + tid).value = "";
       document.getElementById("items_" + tid).value = "";
 
+      addAdminLog(`Operazione registrata: ${category} (${type}) da ${currentUserName}`);
       renderCategoryTable(category);
       renderManageSummaries();
     }
 
     function deleteRecord(id, category) {
-      const records = loadData().filter(r => r.id !== id);
-      saveData(records);
+      const ops = loadOps().filter(r => r.id !== id);
+      saveOps(ops);
+      addAdminLog(`Operazione eliminata: ${category} (ID ${id})`);
       renderCategoryTable(category);
       renderManageSummaries();
     }
 
     function resetAllData() {
-      const ok = confirm("Confermi AZZERA TUTTO? Questa azione cancella tutte le registrazioni.");
+      const ok = confirm("Confermi AZZERA OPERAZIONI? Cancella tutte le registrazioni.");
       if (!ok) return;
-      localStorage.removeItem(STORAGE_KEY);
-      // refresh UI
-      categories.forEach(c => renderCategoryTable(c));
+      localStorage.removeItem(OPS_KEY);
+      addAdminLog("Operazioni azzerate");
+      CATEGORIES.forEach(c => renderCategoryTable(c));
       renderManageSummaries();
-      alert("Dati azzerati.");
+      alert("Operazioni azzerate.");
     }
 
-    // =========================
-    // CALCOLI & RENDER CATEGORY
-    // =========================
     function computeCategory(category) {
-      const records = loadData().filter(r => r.category === category);
+      const records = loadOps().filter(r => r.category === category);
 
       let moneyGet = 0, moneyLost = 0;
-      const itemsGet = {};  // key -> {label, qty}
+      const itemsGet = {};
       const itemsLost = {};
 
       records.forEach(r => {
         if (r.type === "ottenuto") moneyGet += (r.money || 0);
-        if (r.type === "perso") moneyLost += (r.money || 0);
+        else moneyLost += (r.money || 0);
 
         const parsed = parseItems(r.itemsText);
         Object.keys(parsed).forEach(k => {
@@ -542,12 +696,10 @@ Giubbotto x3"></textarea>
       const { records, moneyGet, moneyLost, itemsGet, itemsLost } = computeCategory(category);
       const moneyNet = moneyGet - moneyLost;
 
-      // money totals
       document.getElementById("m_get_" + tid).textContent = formatMoney(moneyGet);
       document.getElementById("m_lost_" + tid).textContent = formatMoney(moneyLost);
       document.getElementById("m_net_" + tid).textContent = formatMoney(moneyNet);
 
-      // items totals per category
       const itemsTotalsBody = document.getElementById("itemsTotals_" + tid);
       const keys = Array.from(new Set([...Object.keys(itemsGet), ...Object.keys(itemsLost)]));
 
@@ -562,12 +714,11 @@ Giubbotto x3"></textarea>
           const l = itemsLost[k]?.qty || 0;
           const n = g - l;
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${label}</td><td>${g}</td><td>${l}</td><td>${n}</td>`;
+          tr.innerHTML = `<td>${escapeHtml(label)}</td><td>${g}</td><td>${l}</td><td>${n}</td>`;
           itemsTotalsBody.appendChild(tr);
         });
       }
 
-      // records table
       if (records.length === 0) {
         tableBody.innerHTML = `<tr><td class="muted" colspan="6">Nessuna registrazione</td></tr>`;
         return;
@@ -589,35 +740,18 @@ Giubbotto x3"></textarea>
           <td>${tipoPill}</td>
           <td>${formatMoney(r.money || 0)}</td>
           <td>${itemsHtml}</td>
-          <td><button class="btn danger" onclick="deleteRecord('${r.id}','${escapeJs(category)}')">Elimina</button></td>
+          <td><button class="btn danger" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button></td>
         `;
         tableBody.appendChild(tr);
       });
     }
 
-    function escapeHtml(s) {
-      return String(s)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    function escapeJs(s) {
-      return String(s).replaceAll("\\","\\\\").replaceAll("'","\\'");
-    }
-
-    // =========================
-    // MANAGE SUMMARIES (Boss/Vice)
-    // =========================
     function computeAll() {
-      const records = loadData();
+      const ops = loadOps();
+      const moneyByCategory = {};
+      const itemsByKey = {};
 
-      const moneyByCategory = {}; // cat -> {get,lost}
-      const itemsByKey = {}; // key -> {label,get,lost}
-
-      records.forEach(r => {
+      ops.forEach(r => {
         if (!moneyByCategory[r.category]) moneyByCategory[r.category] = { get:0, lost:0 };
         if (r.type === "ottenuto") moneyByCategory[r.category].get += (r.money || 0);
         else moneyByCategory[r.category].lost += (r.money || 0);
@@ -644,18 +778,16 @@ Giubbotto x3"></textarea>
 
       const { moneyByCategory, itemsByKey } = computeAll();
 
-      // money summary per category
       const moneyBody = document.getElementById("moneySummaryBody");
       moneyBody.innerHTML = "";
-      categories.forEach(cat => {
+      CATEGORIES.forEach(cat => {
         const m = moneyByCategory[cat] || { get:0, lost:0 };
         const net = m.get - m.lost;
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${cat}</td><td>${formatMoney(m.get)}</td><td>${formatMoney(m.lost)}</td><td>${formatMoney(net)}</td>`;
+        tr.innerHTML = `<td>${escapeHtml(cat)}</td><td>${formatMoney(m.get)}</td><td>${formatMoney(m.lost)}</td><td>${formatMoney(net)}</td>`;
         moneyBody.appendChild(tr);
       });
 
-      // items summary global
       const itemsBody = document.getElementById("itemsSummaryBody");
       const keys = Object.keys(itemsByKey);
       if (keys.length === 0) {
@@ -667,7 +799,7 @@ Giubbotto x3"></textarea>
           const it = itemsByKey[k];
           const net = it.get - it.lost;
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${it.label}</td><td>${it.get}</td><td>${it.lost}</td><td>${net}</td>`;
+          tr.innerHTML = `<td>${escapeHtml(it.label)}</td><td>${it.get}</td><td>${it.lost}</td><td>${net}</td>`;
           itemsBody.appendChild(tr);
         });
       }
@@ -677,7 +809,6 @@ Giubbotto x3"></textarea>
     // INIT
     // =========================
     function init() {
-      // menu visibility
       const btnUtenti = document.getElementById("btnUtenti");
       const btnDashboard = document.getElementById("btnDashboard");
       const cardUtenti = document.getElementById("cardUtenti");
@@ -691,11 +822,20 @@ Giubbotto x3"></textarea>
         showSection("dashboard");
       }
 
-      renderUsers();
+      // users
+      if (canSeeUsersSection()) {
+        renderUsersTable();
+      }
 
+      // admin log visibility
+      if (canSeeAdminLog()) {
+        adminLogContainer.style.display = "block";
+        renderAdminLog();
+      }
+
+      // ops
       renderTabsAndPanels();
-      categories.forEach(c => renderCategoryTable(c));
-
+      CATEGORIES.forEach(c => renderCategoryTable(c));
       renderManageSummaries();
     }
 
