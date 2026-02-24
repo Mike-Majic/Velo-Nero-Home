@@ -1,1294 +1,236 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>VELO NERO</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { background-color:#0d0d0d; color:#fff; font-family:Arial,sans-serif; text-align:center; padding:60px 20px; margin:0; }
-    h1 { font-size:60px; letter-spacing:5px; color:#ff1a1a; text-shadow:0 0 12px #ff000080; margin:0 0 10px 0; }
-    p.subtitle { font-size:20px; color:#ff6666; margin:0 0 28px 0; }
-
-    .topbar {
-      max-width:1200px; margin:0 auto 18px auto;
-      display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
-      text-align:left;
-    }
-    .userpill {
-      display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap;
-    }
-    .pill {
-      display:inline-block; padding:6px 10px; border-radius:999px;
-      border:1px solid #ff1a1a55; background:#1a1a1a; color:#fff; font-size:13px;
-      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-    }
-    .linkbtn {
-      background:none; border:1px solid #ff1a1a55; color:#fff; cursor:pointer;
-      padding:8px 12px; border-radius:10px;
-      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-    }
-    .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
-
-    .nav { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:28px; }
-    .nav button {
-      background-color:#1a1a1a; color:#fff; border:1px solid #ff1a1a55;
-      padding:10px 16px; border-radius:10px; cursor:pointer;
-      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
-      box-shadow:0 0 10px #ff1a1a44 inset, 0 0 12px #ff000066; font-size:14px;
-    }
-    .nav button:hover { transform:scale(1.03); box-shadow:0 0 16px #ff1a1a77 inset, 0 0 16px #ff000088; }
-    .nav button.active { background-color:#2b0000; border-color:#ff1a1aaa; box-shadow:0 0 18px #ff1a1a88 inset, 0 0 18px #ff0000aa; }
-
-    .section { display:none; max-width:1200px; margin:0 auto; text-align:left; }
-    .section.active { display:block; }
-
-    .cards { text-align:center; }
-    .box {
-      display:inline-block; background-color:#1a1a1a; padding:40px 60px; margin:12px;
-      border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
-      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
-    }
-    .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
-    .box h2 { font-size:28px; margin:0 0 10px 0; color:#ff1a1a; text-align:center; }
-    .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; }
-
-    .hint { color:#ff7b7b; font-size:14px; margin-top:6px; }
-    .muted { color:#ffaaaa; font-size:13px; }
-
-    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-    .tabs button {
-      background-color:#1a1a1a; color:#fff; border:1px solid #ff1a1a55;
-      padding:8px 12px; border-radius:10px; cursor:pointer;
-      box-shadow:0 0 8px #ff1a1a33 inset, 0 0 10px #ff000055;
-      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
-      font-size:13px;
-    }
-    .tabs button:hover { transform:scale(1.02); box-shadow:0 0 12px #ff1a1a55 inset, 0 0 12px #ff000077; }
-    .tabs button.active { background-color:#2b0000; border-color:#ff1a1aaa; }
-
-    .panel {
-      display:none; margin-top:14px; padding:18px 18px;
-      background:linear-gradient(145deg,#1a1a1a,#2b0000);
-      border-radius:12px; box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
-    }
-    .panel.active { display:block; }
-
-    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
-    .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
-    label { color:#ff7b7b; font-size:13px; }
-    input, select, textarea {
-      background:#121212; border:1px solid #ff1a1a55; color:#fff; border-radius:10px;
-      padding:10px 12px; outline:none;
-    }
-    textarea { min-height:70px; resize:vertical; }
-
-    .btn {
-      background:#1a1a1a; border:1px solid #ff1a1a99; color:#fff; border-radius:10px;
-      padding:10px 14px; cursor:pointer;
-      box-shadow:0 0 12px #ff1a1a44 inset, 0 0 12px #ff000066;
-      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
-    .danger { background:#2b0000; border-color:#ff1a1aaa; }
-    .small { padding:7px 10px; font-size:13px; border-radius:9px; }
-    .disabled { opacity:.5; cursor:not-allowed; }
-
-    table { width:100%; border-collapse:collapse; margin-top:12px; }
-    th, td { padding:10px 12px; border:1px solid #ff1a1a33; text-align:left; background-color:#1e1e1e; vertical-align:top; }
-    th { color:#ff3b3b; }
-    tr:hover td { background-color:#3a0000; }
-
-    /* Users actions menu */
-    .btn-edit { background:none; border:none; cursor:pointer; color:#ff3b3b; font-size:18px; transition:transform .2s ease, text-shadow .2s ease; }
-    .btn-edit:hover { transform:scale(1.2); text-shadow:0 0 6px #ff000080; }
-    .action-menu {
-      display:none; position:absolute; top:32px; left:0; background-color:#1a1a1a;
-      border:1px solid #ff3b3b66; border-radius:8px; padding:10px; text-align:left; z-index:100; min-width:160px;
-    }
-    .action-menu button {
-      display:block; background:none; border:1px solid #ff3b3b44; color:#fff; padding:7px 10px;
-      margin:6px 0; border-radius:6px; cursor:pointer; width:100%; text-align:left;
-    }
-    .action-menu button:hover { background-color:#3a0000; }
-    .blocked-icon { color:#ff3b3b; font-size:18px; margin-left:8px; vertical-align:middle; }
-
-    /* Edit modal */
-    #editOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
-    #editModal {
-      max-width:900px; margin:0 auto; background:#121212;
-      border:1px solid #ff1a1a77; border-radius:14px;
-      box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset;
-      padding:18px; text-align:left;
-    }
-    #editModal h3 { margin:0 0 10px 0; color:#ff3b3b; text-shadow:0 0 10px #ff3b3b80; }
-    .itemRow {
-      display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
-      padding:10px; border:1px solid #ff1a1a33; border-radius:12px; margin-bottom:10px; background:#1a1a1a;
-    }
-    .right { margin-left:auto; display:flex; gap:10px; }
-  </style>
+    <title>Log - VELO NERO</title>
+    <meta charset="UTF-8">
+    <style>
+        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+        h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 20px; text-shadow: 0 0 12px #ff3b3b80; }
+        table { width: 90%; margin: 0 auto; border-collapse: collapse; }
+        th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
+        th { background-color: #1e1e1e; color: #ff3b3b; }
+        td { background-color: #1e1e1e; }
+        tr:hover td { background-color: #3a0000; }
+        a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
+        a.back:hover { background-color: #cc0000; }
+    </style>
 </head>
-
 <body>
-  <div class="topbar">
-    <div></div>
-    <div class="userpill">
-      <span class="pill" id="pillEmail">Non autenticato</span>
-      <span class="pill" id="pillRole">Ruolo: —</span>
-      <button class="linkbtn" id="btnLogout" onclick="logout()" style="display:none;">Esci</button>
+
+<h1>Log Attività</h1>
+
+<!-- Sezione Login History -->
+<div class="section">
+    <h2>📋 Cronologia Login</h2>
+    <div class="buttons">
+        <button class="btn" onclick="refreshLoginLogs()">🔄 Aggiorna</button>
+        <button class="btn danger" onclick="clearLoginLogs()">🗑️ Cancella Cronologia</button>
     </div>
-  </div>
-
-  <h1>VELO NERO</h1>
-  <p class="subtitle">Sistema Privato Interno</p>
-
-  <div class="nav">
-    <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
-    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
-    <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
-    <button id="btnLog" onclick="goToLogs()" style="display:none;">📋 Log</button>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="login" class="section">
-    <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Accesso</h2>
-    <div class="hint">Per entrare devi registrarti / accedere. Al primo accesso il ruolo è “Nessuno” finché un admin non lo assegna.</div>
-
-    <div class="panel active" style="display:block;">
-      <div class="row">
-        <div class="field" style="min-width:320px; flex:1;">
-          <label>Email</label>
-          <input id="loginEmail" type="email" placeholder="nome@gmail.com" />
-        </div>
-        <div class="field" style="min-width:220px;">
-          <label>Password</label>
-          <input id="loginPassword" type="password" placeholder="Password" />
-        </div>
-      </div>
-      <div class="row">
-        <div class="field" style="min-width:320px; flex:1;">
-          <label>Nome utente in game</label>
-          <input id="loginGameName" type="text" placeholder="Il tuo nick in game" />
-        </div>
-        <div class="field" style="min-width:220px;">
-          <button class="btn" onclick="loginWithEmail()">Entra / Registrati</button>
-          <div class="hint">Funziona subito su Vercel</div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:10px;">
-        <div class="field" style="flex:1; min-width:320px;">
-          <div class="muted">
-            Vuoi “Login con Google” vero?
-            <br>Nel codice trovi <b>GOOGLE_CLIENT_ID</b>: va impostato con il tuo Client ID di Google.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="section">
-    <div class="cards">
-      <div class="box" onclick="showSection('azioni')">
-        <h2>Azioni</h2>
-        <p>Azioni</p>
-      </div>
-
-      <div class="box" id="cardUtenti" onclick="showSection('utenti')">
-        <h2>Utenti</h2>
-        <p>Gestione</p>
-      </div>
-    </div>
-
-    <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
-  </div>
-
-  <!-- UTENTI (solo admin) -->
-  <div id="utenti" class="section">
-    <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Utenti</h2>
-    <div class="hint">Qui assegni i ruoli. Solo Owner / Boss / Vice Boss.</div>
-
     <table>
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Nome in Game</th>
-          <th>Ruolo</th>
-          <th>Stato</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody id="usersTableBody"></tbody>
+        <thead>
+            <tr>
+                <th>Data/Ora</th>
+                <th>Email</th>
+                <th>Nome in Game</th>
+                <th>Azione</th>
+            </tr>
+        </thead>
+        <tbody id="loginLogBody">
+            <tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>
+        </tbody>
     </table>
-  </div>
+</div>
 
-  <!-- AZIONI -->
-  <div id="azioni" class="section">
-    <h2 style="color:#ff3b3b; margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;">Azioni</h2>
-    <div class="hint" id="actionsHint"></div>
+<!-- Sezione Utenti Registrati -->
+<div class="section">
+    <h2>👥 Utenti Registrati</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Nome in Game</th>
+                <th>Ruolo</th>
+                <th>Ultimo Accesso</th>
+            </tr>
+        </thead>
+        <tbody id="usersBody">
+            <tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun utente registrato</td></tr>
+        </tbody>
+    </table>
+</div>
 
-    <div class="tabs" id="opsTabs"></div>
-    <div id="panelWrapper"></div>
+<!-- Sezione Log Attività Generale -->
+<div class="section">
+    <h2>⚙️ Log Attività</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Data/Ora</th>
+                <th>Utente</th>
+                <th>Azione</th>
+            </tr>
+        </thead>
+        <tbody id="logBody">
+            <!-- log dinamici -->
+        </tbody>
+    </table>
+</div>
 
-    <div id="managePanel" class="panel" style="display:none;">
-      <h3 style="margin:0 0 8px 0; color:#ff3b3b;">Gestione (Boss/Vice Boss)</h3>
-      <div class="muted">Specchio totale + reset dati.</div>
+<a href="index.html" class="back">Torna al Dashboard</a>
 
-      <div class="split">
-        <div>
-          <h4 style="margin:12px 0 6px 0;">Specchio Totale Soldi</h4>
-          <table>
-            <thead><tr><th>Categoria</th><th>Ottenuto</th><th>Perso</th><th>Netto</th></tr></thead>
-            <tbody id="moneySummaryBody"></tbody>
-          </table>
-        </div>
+<script>
+const LOGS_KEY = "vn_login_logs";
+const ACTIVITY_LOGS_KEY = "vn_activity_logs";
+const USERS_KEY = "vn_users_v2";
 
-        <div>
-          <h4 style="margin:12px 0 6px 0;">Specchio Totale Items</h4>
-          <table>
-            <thead><tr><th>Item</th><th>Ottenuto</th><th>Perso</th><th>Netto</th></tr></thead>
-            <tbody id="itemsSummaryBody"></tbody>
-          </table>
-        </div>
-      </div>
+const logBody = document.getElementById('logBody');
+const loginLogBody = document.getElementById('loginLogBody');
+const usersBody = document.getElementById('usersBody');
 
-      <div class="row" style="margin-top:14px;">
-        <button class="btn danger" onclick="resetAllOps()">AZZERA AZIONI</button>
-        <div class="muted">Cancella tutte le registrazioni.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EDIT MODAL -->
-  <div id="editOverlay">
-    <div id="editModal">
-      <h3>Modifica registrazione</h3>
-      <div class="muted" id="editInfo"></div>
-
-      <div class="row">
-        <div class="field" style="min-width:180px;">
-          <label>Tipo</label>
-          <select id="editType">
-            <option value="ottenuto">OTTENUTO</option>
-            <option value="perso">PERSO</option>
-          </select>
-        </div>
-
-        <div class="field" style="min-width:220px;">
-          <label>Soldi ($)</label>
-          <input id="editMoney" type="number" min="0" step="1" />
-        </div>
-
-        <div class="field" style="flex:1; min-width:260px;">
-          <label>Note (visibili a tutti)</label>
-          <input id="editNote" type="text" placeholder="Motivo / dettaglio..." />
-        </div>
-
-        <div class="right">
-          <button class="btn small" onclick="closeEdit()">Chiudi</button>
-          <button class="btn small" onclick="saveEdit()">Salva</button>
-        </div>
-      </div>
-
-      <div style="margin-top:14px;">
-        <h4 style="margin:10px 0 8px 0; color:#ff3b3b;">Items (lista fissa + quantità)</h4>
-
-        <div class="row">
-          <div class="field" style="min-width:320px;">
-            <label>Item</label>
-            <select id="editItemSelect"></select>
-          </div>
-          <div class="field" style="min-width:160px;">
-            <label>Quantità</label>
-            <input id="editItemQty" type="number" min="1" step="1" value="1" />
-          </div>
-          <div class="field" style="min-width:180px;">
-            <button class="btn" onclick="editAddItem()">Aggiungi item</button>
-          </div>
-        </div>
-
-        <div id="editItemsList"></div>
-        <div class="hint">Se aggiungi lo stesso item, somma le quantità.</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // =========================
-    // CONFIG (IMPORTANTI)
-    // =========================
-    // 1) Metti qui la TUA email (quella che deve diventare Owner automaticamente al primo accesso)
-    const OWNER_EMAIL = "M.COLURCI@GMAIL.COM";
-
-    // 2) (Opzionale) Google Login: per farlo funzionare davvero serve configurare Google Cloud OAuth
-    //    e inserire qui il Client ID. Altrimenti usa l’accesso via email (già funzionante).
-    const GOOGLE_CLIENT_ID = ""; // es: "1234567890-xxxxx.apps.googleusercontent.com"
-
-    // =========================
-    // RUOLI E SEZIONI
-    // =========================
-    const RUOLI = [
-      "Nessuno",
-      "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
-      "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
-      "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
-      "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
-    ];
-
-    const CATEGORIES = [
-      "Esiti Campi",
-      "Esiti Rapine",
-      "Esiti Freeroom",
-      "Furti in casa",
-      "Auto Rubata"
-    ];
-
-    const FIXED_ITEMS = [
-      "Pistola","Pistola Pesante","SMG","Micro SMG","Carabina","AK-47","Fucile a pompa","Munizioni",
-      "Giubbotto antiproiettile","Radio",
-      "Grimaldello","Altri oggetti","Droga","Cibo","Bevande","Telecamera","Bende","Medikit"
-    ];
-
-    // =========================
-    // STORAGE
-    // =========================
-    const USERS_KEY = "vn_users_v2";
-    const OPS_KEY = "vn_ops_v4";
-    const SESSION_KEY = "vn_session_v1";
-
-    // =========================
-    // SESSION (chi è loggato)
-    // =========================
-    function loadSession() {
-      try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
+// ===== GESTIONE LOGIN LOGS =====
+function loadLoginLogs() {
+    try {
+        const raw = localStorage.getItem(LOGS_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+    } catch {
+        return [];
     }
-    function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
-    function clearSession() { localStorage.removeItem(SESSION_KEY); }
+}
 
-    // =========================
-    // USERS
-    // =========================
-    function uid() { return Math.random().toString(16).slice(2) + Date.now().toString(16); }
-    function escapeHtml(s) {
-      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+function saveLoginLogs(arr) {
+    localStorage.setItem(LOGS_KEY, JSON.stringify(arr));
+}
+
+function recordLogin(email, gameName) {
+    const logs = loadLoginLogs();
+    logs.push({
+        ts: Date.now(),
+        email: email,
+        gameName: gameName,
+        action: "LOGIN"
+    });
+    saveLoginLogs(logs);
+}
+
+function refreshLoginLogs() {
+    const logs = loadLoginLogs().slice().sort((a, b) => b.ts - a.ts);
+    loginLogBody.innerHTML = "";
+    
+    if (logs.length === 0) {
+        loginLogBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
+        return;
     }
-    function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString(); }
 
-    function loadUsers() {
-      try {
+    logs.forEach(log => {
+        const when = new Date(log.ts).toLocaleString();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${when}</td>
+            <td>${log.email}</td>
+            <td>${log.gameName || '—'}</td>
+            <td>${log.action}</td>
+        `;
+        loginLogBody.appendChild(tr);
+    });
+}
+
+function clearLoginLogs() {
+    const ok = confirm("Confermi cancellazione di TUTTI i log di login?");
+    if (!ok) return;
+    localStorage.removeItem(LOGS_KEY);
+    refreshLoginLogs();
+}
+
+// ===== VISUALIZZA UTENTI =====
+function loadUsers() {
+    try {
         const raw = localStorage.getItem(USERS_KEY);
         const arr = raw ? JSON.parse(raw) : [];
         return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
+    } catch {
+        return [];
     }
-    function saveUsers(arr) { localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
+}
 
-    function findUserByEmail(email) {
-      const users = loadUsers();
-      return users.find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
-    }
+function refreshUsers() {
+    const users = loadUsers().slice().sort((a, b) => (a.email || "").localeCompare(b.email || ""));
+    usersBody.innerHTML = "";
 
-    function simpleHash(str) {
-      let hash = 0;
-      if (str.length === 0) return String(hash);
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-      }
-      return Math.abs(hash).toString(16);
+    if (users.length === 0) {
+        usersBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun utente registrato</td></tr>`;
+        return;
     }
 
-    function upsertUser(email, password = null, gameName = null) {
-      const users = loadUsers();
-      const e = (email || "").trim().toLowerCase();
-      if (!e) return null;
+    users.forEach(u => {
+        const logs = loadLoginLogs().filter(l => l.email === u.email);
+        const lastLogin = logs.length > 0 
+            ? new Date(logs[0].ts).toLocaleString() 
+            : "Mai";
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${u.email}</td>
+            <td>${u.gameName || '—'}</td>
+            <td>${u.role || 'Nessuno'}</td>
+            <td>${lastLogin}</td>
+        `;
+        usersBody.appendChild(tr);
+    });
+}
 
-      let u = users.find(x => (x.email || "").toLowerCase() === e);
-      if (!u) {
-        u = { id: uid(), email: e, role: "Nessuno", blocked: false, passwordHash: password ? simpleHash(password) : null, gameName: gameName || "" };
-        users.push(u);
-      } else if (password) {
-        // Se è un login successivo con password, aggiorna il hash
-        u.passwordHash = simpleHash(password);
-      }
-      
-      // Aggiorna il nome utente in game se fornito
-      if (gameName) {
-        u.gameName = gameName;
-      }
-
-      // bootstrap owner
-      if (e === (OWNER_EMAIL || "").trim().toLowerCase()) {
-        u.role = "Owner";
-      }
-
-      saveUsers(users);
-      return u;
-    }
-
-    // =========================
-    // OPS
-    // record: {id, ts, userEmail, category, type, money, note, items:[{name,qty}]}
-    // =========================
-    function loadOps() {
-      try {
-        const raw = localStorage.getItem(OPS_KEY);
+// ===== GESTIONE LOG ATTIVITÀ =====
+function loadActivityLogs() {
+    try {
+        const raw = localStorage.getItem(ACTIVITY_LOGS_KEY);
         const arr = raw ? JSON.parse(raw) : [];
         return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
+    } catch {
+        return [];
     }
-    function saveOps(arr) { localStorage.setItem(OPS_KEY, JSON.stringify(arr)); }
+}
 
-    // =========================
-    // PERMESSI
-    // =========================
-    function getMyUser() {
-      const s = loadSession();
-      if (!s?.email) return null;
-      return findUserByEmail(s.email);
-    }
-    function myRole() {
-      const u = getMyUser();
-      return u?.role || "Nessuno";
-    }
-    function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
-    function canEditOps() { return myRole() !== "Nessuno"; } // come richiesto: solo dopo ruolo assegnato
-    function canManageTotals() { return ["Boss","Vice Boss"].includes(myRole()); }
-    function canBlockUnblock() { return ["Owner","Boss"].includes(myRole()); }
-    function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+function saveActivityLogs(arr) {
+    localStorage.setItem(ACTIVITY_LOGS_KEY, JSON.stringify(arr));
+}
 
-    // =========================
-    // UI STATE
-    // =========================
-    const pillEmail = document.getElementById("pillEmail");
-    const pillRole = document.getElementById("pillRole");
-    const btnLogout = document.getElementById("btnLogout");
-
-    function setHeaderUser() {
-      const s = loadSession();
-      const u = getMyUser();
-
-      if (!s?.email) {
-        pillEmail.textContent = "Non autenticato";
-        pillRole.textContent = "Ruolo: —";
-        btnLogout.style.display = "none";
-        return;
-      }
-
-      pillEmail.textContent = s.email;
-      pillRole.textContent = "Ruolo: " + (u?.role || "Nessuno");
-      btnLogout.style.display = "inline-block";
-    }
-
-    function requireAuthOrShowLogin() {
-      const s = loadSession();
-      if (!s?.email) {
-        showOnly("login");
-        return false;
-      }
-      return true;
-    }
-
-    function showOnly(id) {
-      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-
-      // nav active reset
-      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
-      if (id === "dashboard") document.getElementById("btnDashboard").classList.add("active");
-      if (id === "utenti") document.getElementById("btnUtenti").classList.add("active");
-      if (id === "azioni") document.getElementById("btnAzioni").classList.add("active");
-    }
-
-    function showSection(id) {
-      if (!requireAuthOrShowLogin()) return;
-
-      if (id === "utenti" && !isAdmin()) {
-        return showOnly("dashboard");
-      }
-
-      showOnly(id);
-
-      if (id === "utenti") renderUsersTable();
-      if (id === "azioni") {
-        renderTabsAndPanels();
-        // render current category
-        showCat(CATEGORIES[0]);
-        renderManageSummaries();
-      }
-    }
-
-    function logout() {
-      clearSession();
-      setHeaderUser();
-      showOnly("login");
-    }
-
-    // =========================
-    // =========================
-    // LOGIN LOGS
-    // =========================
-    const LOGS_KEY = "vn_login_logs";
-
-    function recordLoginToLogs(email, gameName) {
-      try {
-        const raw = localStorage.getItem(LOGS_KEY) || "[]";
-        const logs = JSON.parse(raw);
-        logs.push({
-          ts: Date.now(),
-          email: email,
-          gameName: gameName,
-          action: "LOGIN"
-        });
-        localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
-      } catch (e) {
-        console.error("Errore nel registrare il login", e);
-      }
-    }
-
-    function goToLogs() {
-      if (!isAdmin()) {
-        alert("Permesso negato: solo gli admin possono visualizzare i log");
-        return;
-      }
-      window.location.href = "logs.html";
-    }
-
-    // =========================
-    // LOGIN (email)
-    // =========================
-    function loginWithEmail() {
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
-      const gameName = document.getElementById("loginGameName").value.trim();
-      
-      if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
-      if (!password) return alert("Inserisci una password");
-      if (!gameName) return alert("Inserisci il tuo nome utente in game");
-
-      const existingUser = findUserByEmail(email);
-      
-      // Se è un nuovo utente (primo login)
-      if (!existingUser) {
-        const u = upsertUser(email, password, gameName);
-        recordLoginToLogs(email, gameName);
-        saveSession({ email: u.email });
-        setHeaderUser();
-        initAfterLogin();
-        document.getElementById("loginPassword").value = "";
-        document.getElementById("loginGameName").value = "";
-        return;
-      }
-
-      // Se l'utente esiste, verifica la password
-      const passwordHash = simpleHash(password);
-      if (existingUser.passwordHash !== passwordHash) {
-        return alert("Email o password errata");
-      }
-
-      // Aggiorna il gameName se fornito
-      if (gameName && existingUser.gameName !== gameName) {
-        existingUser.gameName = gameName;
-        saveUsers(loadUsers());
-      }
-
-      recordLoginToLogs(existingUser.email, existingUser.gameName);
-      saveSession({ email: existingUser.email });
-      setHeaderUser();
-      initAfterLogin();
-      document.getElementById("loginPassword").value = "";
-      document.getElementById("loginGameName").value = "";
-    }
-
-    function initAfterLogin() {
-      // UI permessi nav
-      const btnUtenti = document.getElementById("btnUtenti");
-      const cardUtenti = document.getElementById("cardUtenti");
-      const btnLog = document.getElementById("btnLog");
-      const dashHint = document.getElementById("dashHint");
-      const actionsHint = document.getElementById("actionsHint");
-
-      if (!isAdmin()) {
-        btnUtenti.style.display = "none";
-        cardUtenti.style.display = "none";
-        btnLog.style.display = "none";
-      } else {
-        btnUtenti.style.display = "inline-block";
-        cardUtenti.style.display = "inline-block";
-        btnLog.style.display = "inline-block";
-      }
-
-      if (!canEditOps()) {
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni.";
-        actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
-      } else {
-        dashHint.textContent = "";
-        actionsHint.textContent = "Note visibili a tutti. Inserimento e modifiche abilitate perché hai un ruolo.";
-      }
-
-      showOnly("dashboard");
-    }
-
-    // =========================
-    // USERS TABLE
-    // =========================
-    const usersTableBody = document.getElementById("usersTableBody");
-
-    function renderUsersTable() {
-      if (!isAdmin()) return;
-
-      const users = loadUsers().slice().sort((a,b) => (a.email||"").localeCompare(b.email||""));
-      usersTableBody.innerHTML = "";
-
-      users.forEach(u => {
-        const tr = document.createElement("tr");
-
-        const tdEmail = document.createElement("td");
-        tdEmail.innerHTML = escapeHtml(u.email) + (u.blocked ? ` <span class="blocked-icon">⛔</span>` : "");
-        
-        const tdGameName = document.createElement("td");
-        tdGameName.textContent = u.gameName || "—";
-
-        const tdRole = document.createElement("td");
-        const sel = document.createElement("select");
-        RUOLI.forEach(r => {
-          const opt = document.createElement("option");
-          opt.value = r;
-          opt.textContent = r;
-          if (r === (u.role || "Nessuno")) opt.selected = true;
-          sel.appendChild(opt);
-        });
-        sel.onchange = () => {
-          u.role = sel.value;
-          saveUsers(users);
-          // se l’utente modificato è quello loggato, aggiorna UI
-          setHeaderUser();
-          initAfterLogin();
-        };
-        tdRole.appendChild(sel);
-
-        const tdState = document.createElement("td");
-        tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
-
-        const tdActions = document.createElement("td");
-        const wrap = document.createElement("div");
-        wrap.style.position = "relative";
-
-        const btnEdit = document.createElement("button");
-        btnEdit.className = "btn-edit";
-        btnEdit.textContent = "✎";
-        wrap.appendChild(btnEdit);
-
-        const menu = document.createElement("div");
-        menu.className = "action-menu";
-
-        const b1 = document.createElement("button");
-        b1.textContent = "Blocca";
-        b1.onclick = () => {
-          if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
-          u.blocked = true;
-          saveUsers(users);
-          menu.style.display = "none";
-          renderUsersTable();
-          // se blocca se stesso (non consigliato) lo butta fuori
-          const me = getMyUser();
-          if (me?.email === u.email && u.blocked) logout();
-        };
-
-        const b2 = document.createElement("button");
-        b2.textContent = "Sblocca";
-        b2.onclick = () => {
-          if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
-          u.blocked = false;
-          saveUsers(users);
-          menu.style.display = "none";
-          renderUsersTable();
-        };
-
-        const b3 = document.createElement("button");
-        b3.textContent = "Espelli";
-        b3.onclick = () => {
-          if (!canExpel()) return alert("Permesso negato");
-          const ok = confirm("Confermi espulsione di " + u.email + "?");
-          if (!ok) return;
-          const filtered = users.filter(x => x.id !== u.id);
-          saveUsers(filtered);
-          menu.style.display = "none";
-          renderUsersTable();
-          // se espelle se stesso, logout
-          const s = loadSession();
-          if (s?.email === u.email) logout();
-        };
-
-        // Vice Boss: no blocca/sblocca
-        if (myRole() === "Vice Boss") {
-          b1.style.display = "none";
-          b2.style.display = "none";
-        }
-
-        menu.appendChild(b1);
-        menu.appendChild(b2);
-        menu.appendChild(b3);
-        wrap.appendChild(menu);
-
-        btnEdit.onclick = (e) => {
-          e.stopPropagation();
-          document.querySelectorAll(".action-menu").forEach(m => { if (m !== menu) m.style.display = "none"; });
-          menu.style.display = (menu.style.display === "block") ? "none" : "block";
-        };
-
-        tdActions.appendChild(wrap);
-
-        tr.appendChild(tdEmail);
-        tr.appendChild(tdGameName);
-        tr.appendChild(tdRole);
-        tr.appendChild(tdState);
-        tr.appendChild(tdActions);
-
-        usersTableBody.appendChild(tr);
-      });
-    }
-
-    document.addEventListener("click", () => {
-      document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
-    });
-
-    // =========================
-    // AZIONI UI + LOGICA
-    // =========================
-    const opsTabs = document.getElementById("opsTabs");
-    const panelWrapper = document.getElementById("panelWrapper");
-
-    function tabIdFromName(name) {
-      return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-    }
-
-    function fillItemSelect(selectEl) {
-      selectEl.innerHTML = "";
-      FIXED_ITEMS.forEach(it => {
-        const opt = document.createElement("option");
-        opt.value = it;
-        opt.textContent = it;
-        selectEl.appendChild(opt);
-      });
-    }
-
-    const drafts = {}; // category -> [{name,qty}]
-    function getDraft(category) { if (!drafts[category]) drafts[category] = []; return drafts[category]; }
-
-    function renderDraft(category) {
-      const tid = tabIdFromName(category);
-      const wrap = document.getElementById("draft_" + tid);
-      if (!wrap) return;
-
-      const draft = getDraft(category);
-      if (draft.length === 0) {
-        wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
-        return;
-      }
-
-      wrap.innerHTML = "";
-      draft.forEach(it => {
-        const div = document.createElement("div");
-        div.className = "itemRow";
-        div.innerHTML = `
-          <div class="field" style="min-width:320px;">
-            <label>Item</label>
-            <input value="${escapeHtml(it.name)}" disabled />
-          </div>
-          <div class="field" style="min-width:160px;">
-            <label>Quantità</label>
-            <input value="${it.qty}" disabled />
-          </div>
-          <div class="right">
-            <button class="btn danger small ${canEditOps() ? "" : "disabled"}" ${canEditOps() ? "" : "disabled"} onclick="removeDraftItem('${escapeHtml(category)}','${escapeHtml(it.name)}')">Rimuovi</button>
-          </div>
-        `;
-        wrap.appendChild(div);
-      });
-    }
-
-    function addItemToDraft(category) {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-      const tid = tabIdFromName(category);
-      const name = document.getElementById("item_" + tid).value;
-      let qty = parseInt(document.getElementById("qty_" + tid).value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
-
-      const draft = getDraft(category);
-      const existing = draft.find(x => x.name === name);
-      if (existing) existing.qty += qty;
-      else draft.push({ name, qty });
-
-      document.getElementById("qty_" + tid).value = "1";
-      renderDraft(category);
-    }
-
-    function removeDraftItem(category, name) {
-      if (!canEditOps()) return;
-      drafts[category] = getDraft(category).filter(x => x.name !== name);
-      renderDraft(category);
-    }
-
-    function saveDraftRecord(category) {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-
-      const tid = tabIdFromName(category);
-      const type = document.getElementById("type_" + tid).value;
-      const moneyRaw = document.getElementById("money_" + tid).value;
-      const note = document.getElementById("note_" + tid).value || "";
-      const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
-      const items = getDraft(category);
-
-      if (money === 0 && items.length === 0 && note.trim() === "") {
-        return alert("Inserisci almeno soldi, o un item, o una nota.");
-      }
-
-      const ops = loadOps();
-      ops.push({
-        id: uid(),
+function addLog(user, action) {
+    const logs = loadActivityLogs();
+    logs.push({
         ts: Date.now(),
-        userEmail: loadSession().email,
-        category,
-        type,
-        money,
-        note: note.trim(),
-        items: items.map(x => ({ name: x.name, qty: x.qty }))
-      });
-      saveOps(ops);
+        user: user,
+        action: action
+    });
+    saveActivityLogs(logs);
+    refreshActivityLogs();
+}
 
-      document.getElementById("money_" + tid).value = "";
-      document.getElementById("note_" + tid).value = "";
-      drafts[category] = [];
-      renderDraft(category);
+function refreshActivityLogs() {
+    const logs = loadActivityLogs().slice().sort((a, b) => b.ts - a.ts);
+    logBody.innerHTML = "";
 
-      renderCategory(category);
-      renderManageSummaries();
-    }
-
-    function deleteRecord(id, category) {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-      saveOps(loadOps().filter(r => r.id !== id));
-      renderCategory(category);
-      renderManageSummaries();
-    }
-
-    // Edit modal
-    const editOverlay = document.getElementById("editOverlay");
-    const editInfo = document.getElementById("editInfo");
-    const editType = document.getElementById("editType");
-    const editMoney = document.getElementById("editMoney");
-    const editNote = document.getElementById("editNote");
-    const editItemSelect = document.getElementById("editItemSelect");
-    const editItemQty = document.getElementById("editItemQty");
-    const editItemsList = document.getElementById("editItemsList");
-    fillItemSelect(editItemSelect);
-
-    let editingId = null;
-    let editingItems = [];
-    let editingCategory = null;
-
-    function openEdit(id) {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-      const ops = loadOps();
-      const rec = ops.find(r => r.id === id);
-      if (!rec) return;
-
-      editingId = id;
-      editingCategory = rec.category;
-      editingItems = (rec.items || []).map(x => ({ name: x.name, qty: x.qty }));
-
-      editInfo.textContent = `${rec.category} — ${rec.userEmail} — ${new Date(rec.ts).toLocaleString()}`;
-      editType.value = rec.type;
-      editMoney.value = String(rec.money || 0);
-      editNote.value = rec.note || "";
-
-      renderEditItems();
-      editOverlay.style.display = "block";
-    }
-
-    function closeEdit() {
-      editOverlay.style.display = "none";
-      editingId = null;
-      editingCategory = null;
-      editingItems = [];
-    }
-
-    function renderEditItems() {
-      if (editingItems.length === 0) {
-        editItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+    if (logs.length === 0) {
+        logBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
         return;
-      }
-      editItemsList.innerHTML = "";
-      editingItems.forEach(it => {
-        const div = document.createElement("div");
-        div.className = "itemRow";
-        div.innerHTML = `
-          <div class="field" style="min-width:320px;">
-            <label>Item</label>
-            <input value="${escapeHtml(it.name)}" disabled />
-          </div>
-          <div class="field" style="min-width:160px;">
-            <label>Quantità</label>
-            <input value="${it.qty}" disabled />
-          </div>
-          <div class="right">
-            <button class="btn danger small" onclick="editRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
-          </div>
-        `;
-        editItemsList.appendChild(div);
-      });
     }
 
-    function editAddItem() {
-      const name = editItemSelect.value;
-      let qty = parseInt(editItemQty.value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+    logs.forEach(log => {
+        const when = new Date(log.ts).toLocaleString();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${when}</td><td>${log.user}</td><td>${log.action}</td>`;
+        logBody.appendChild(tr);
+    });
+}
 
-      const existing = editingItems.find(x => x.name === name);
-      if (existing) existing.qty += qty;
-      else editingItems.push({ name, qty });
+// ===== INIZIALIZZAZIONE =====
+function init() {
+    refreshLoginLogs();
+    refreshUsers();
+    refreshActivityLogs();
+}
 
-      editItemQty.value = "1";
-      renderEditItems();
-    }
+init();
+</script>
 
-    function editRemoveItem(name) {
-      editingItems = editingItems.filter(x => x.name !== name);
-      renderEditItems();
-    }
-
-    function saveEdit() {
-      if (!editingId) return;
-      const ops = loadOps();
-      const rec = ops.find(r => r.id === editingId);
-      if (!rec) return;
-
-      rec.type = editType.value;
-      rec.money = Math.max(0, parseInt(editMoney.value || "0", 10) || 0);
-      rec.note = (editNote.value || "").trim();
-      rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
-
-      saveOps(ops);
-      closeEdit();
-      renderCategory(rec.category);
-      renderManageSummaries();
-    }
-
-    function computeCategory(category) {
-      const records = loadOps().filter(r => r.category === category);
-      let moneyGet = 0, moneyLost = 0;
-      const itemsGet = {}, itemsLost = {};
-
-      records.forEach(r => {
-        if (r.type === "ottenuto") moneyGet += (r.money || 0);
-        else moneyLost += (r.money || 0);
-
-        (r.items || []).forEach(it => {
-          const key = it.name.toLowerCase();
-          const qty = Number(it.qty || 0);
-          if (r.type === "ottenuto") {
-            if (!itemsGet[key]) itemsGet[key] = { label: it.name, qty: 0 };
-            itemsGet[key].qty += qty;
-          } else {
-            if (!itemsLost[key]) itemsLost[key] = { label: it.name, qty: 0 };
-            itemsLost[key].qty += qty;
-          }
-        });
-      });
-
-      return { records, moneyGet, moneyLost, itemsGet, itemsLost };
-    }
-
-    function renderCategory(category) {
-      const tid = tabIdFromName(category);
-      renderDraft(category);
-
-      const { records, moneyGet, moneyLost, itemsGet, itemsLost } = computeCategory(category);
-      const moneyNet = moneyGet - moneyLost;
-
-      document.getElementById("m_get_" + tid).textContent = formatMoney(moneyGet);
-      document.getElementById("m_lost_" + tid).textContent = formatMoney(moneyLost);
-      document.getElementById("m_net_" + tid).textContent = formatMoney(moneyNet);
-
-      const itemsTotalsBody = document.getElementById("itemsTotals_" + tid);
-      const keys = Array.from(new Set([...Object.keys(itemsGet), ...Object.keys(itemsLost)]));
-
-      if (keys.length === 0) {
-        itemsTotalsBody.innerHTML = `<tr><td class="muted" colspan="4">Nessun dato</td></tr>`;
-      } else {
-        itemsTotalsBody.innerHTML = "";
-        keys.sort((a,b) => (itemsGet[a]?.label || itemsLost[a]?.label || a).localeCompare(itemsGet[b]?.label || itemsLost[b]?.label || b));
-        keys.forEach(k => {
-          const label = itemsGet[k]?.label || itemsLost[k]?.label || k;
-          const g = itemsGet[k]?.qty || 0;
-          const l = itemsLost[k]?.qty || 0;
-          const n = g - l;
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${escapeHtml(label)}</td><td>${g}</td><td>${l}</td><td>${n}</td>`;
-          itemsTotalsBody.appendChild(tr);
-        });
-      }
-
-      const tableBody = document.getElementById("table_" + tid);
-      if (!records || records.length === 0) {
-        tableBody.innerHTML = `<tr><td class="muted" colspan="7">Nessuna registrazione</td></tr>`;
-        return;
-      }
-
-      const sorted = records.slice().sort((a,b) => b.ts - a.ts);
-      tableBody.innerHTML = "";
-
-      sorted.forEach(r => {
-        const when = new Date(r.ts).toLocaleString();
-        const tipo = r.type === "ottenuto" ? "OTTENUTO" : "PERSO";
-        const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
-        const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
-        const noteHtml = (r.note && r.note.trim()) ? `<div style="white-space:pre-wrap; font-size:13px;">${escapeHtml(r.note.trim())}</div>` : `<span class="muted">—</span>`;
-
-        const actionsHtml = canEditOps()
-          ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
-             <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
-          : `<span class="muted">—</span>`;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${when}</td>
-          <td>${escapeHtml(r.userEmail)}</td>
-          <td>${tipo}</td>
-          <td>${formatMoney(r.money || 0)}</td>
-          <td>${noteHtml}</td>
-          <td>${itemsHtml}</td>
-          <td>${actionsHtml}</td>
-        `;
-        tableBody.appendChild(tr);
-      });
-    }
-
-    function computeAll() {
-      const ops = loadOps();
-      const moneyByCategory = {};
-      const itemsByKey = {};
-
-      ops.forEach(r => {
-        if (!moneyByCategory[r.category]) moneyByCategory[r.category] = { get:0, lost:0 };
-        if (r.type === "ottenuto") moneyByCategory[r.category].get += (r.money || 0);
-        else moneyByCategory[r.category].lost += (r.money || 0);
-
-        (r.items || []).forEach(it => {
-          const key = it.name.toLowerCase();
-          if (!itemsByKey[key]) itemsByKey[key] = { label: it.name, get:0, lost:0 };
-          if (r.type === "ottenuto") itemsByKey[key].get += Number(it.qty || 0);
-          else itemsByKey[key].lost += Number(it.qty || 0);
-        });
-      });
-
-      return { moneyByCategory, itemsByKey };
-    }
-
-    function renderManageSummaries() {
-      const managePanel = document.getElementById("managePanel");
-      if (!canManageTotals()) {
-        managePanel.style.display = "none";
-        return;
-      }
-      managePanel.style.display = "block";
-
-      const { moneyByCategory, itemsByKey } = computeAll();
-
-      const moneyBody = document.getElementById("moneySummaryBody");
-      moneyBody.innerHTML = "";
-      CATEGORIES.forEach(cat => {
-        const m = moneyByCategory[cat] || { get:0, lost:0 };
-        const net = m.get - m.lost;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${escapeHtml(cat)}</td><td>${formatMoney(m.get)}</td><td>${formatMoney(m.lost)}</td><td>${formatMoney(net)}</td>`;
-        moneyBody.appendChild(tr);
-      });
-
-      const itemsBody = document.getElementById("itemsSummaryBody");
-      const keys = Object.keys(itemsByKey);
-      if (keys.length === 0) {
-        itemsBody.innerHTML = `<tr><td class="muted" colspan="4">Nessun dato</td></tr>`;
-      } else {
-        itemsBody.innerHTML = "";
-        keys.sort((a,b) => itemsByKey[a].label.localeCompare(itemsByKey[b].label));
-        keys.forEach(k => {
-          const it = itemsByKey[k];
-          const net = it.get - it.lost;
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${escapeHtml(it.label)}</td><td>${it.get}</td><td>${it.lost}</td><td>${net}</td>`;
-          itemsBody.appendChild(tr);
-        });
-      }
-    }
-
-    function resetAllOps() {
-      if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
-      const ok = confirm("Confermi AZZERA AZIONI?");
-      if (!ok) return;
-      localStorage.removeItem(OPS_KEY);
-      CATEGORIES.forEach(c => renderCategory(c));
-      renderManageSummaries();
-    }
-
-    function renderTabsAndPanels() {
-      opsTabs.innerHTML = "";
-      panelWrapper.innerHTML = "";
-
-      CATEGORIES.forEach((cat, idx) => {
-        const tid = tabIdFromName(cat);
-
-        const tab = document.createElement("button");
-        tab.id = "tab_" + tid;
-        tab.textContent = cat;
-        tab.onclick = () => showCat(cat);
-        opsTabs.appendChild(tab);
-
-        const panel = document.createElement("div");
-        panel.className = "panel opPanel";
-        panel.id = "panel_" + tid;
-
-        const disabledAttr = canEditOps() ? "" : "disabled";
-        const disabledCls = canEditOps() ? "" : "disabled";
-
-        panel.innerHTML = `
-          <h3 style="margin:0 0 6px 0; color:#ff3b3b;">${cat}</h3>
-          <div class="muted">Note sempre visibili a tutti.</div>
-
-          <div class="row">
-            <div class="field" style="min-width:180px;">
-              <label>Tipo</label>
-              <select id="type_${tid}" ${disabledAttr}>
-                <option value="ottenuto">OTTENUTO</option>
-                <option value="perso">PERSO</option>
-              </select>
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <label>Soldi ($)</label>
-              <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="flex:1; min-width:260px;">
-              <label>Note</label>
-              <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field" style="min-width:320px;">
-              <label>Item</label>
-              <select id="item_${tid}" ${disabledAttr}></select>
-            </div>
-
-            <div class="field" style="min-width:160px;">
-              <label>Quantità</label>
-              <input id="qty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:180px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="addItemToDraft('${cat}')">Aggiungi item</button>
-            </div>
-
-            <div class="field" style="min-width:180px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
-            </div>
-          </div>
-
-          <div class="panel active" style="display:block; margin-top:12px;">
-            <h4 style="margin:0 0 8px 0; color:#ff3b3b;">Bozza items</h4>
-            <div id="draft_${tid}" style="margin-top:10px;"></div>
-          </div>
-
-          <div class="split">
-            <div>
-              <h4 style="margin:12px 0 6px 0;">Totali ${cat} (Soldi)</h4>
-              <table>
-                <thead><tr><th>Ottenuto</th><th>Perso</th><th>Netto</th></tr></thead>
-                <tbody><tr>
-                  <td id="m_get_${tid}">$0</td>
-                  <td id="m_lost_${tid}">$0</td>
-                  <td id="m_net_${tid}">$0</td>
-                </tr></tbody>
-              </table>
-            </div>
-
-            <div>
-              <h4 style="margin:12px 0 6px 0;">Totali ${cat} (Items)</h4>
-              <table>
-                <thead><tr><th>Item</th><th>Ottenuto</th><th>Perso</th><th>Netto</th></tr></thead>
-                <tbody id="itemsTotals_${tid}">
-                  <tr><td class="muted" colspan="4">Nessun dato</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <h4 style="margin:16px 0 6px 0;">Registrazioni ${cat}</h4>
-          <table>
-            <thead>
-              <tr><th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi</th><th>Note</th><th>Items</th><th>Azioni</th></tr>
-            </thead>
-            <tbody id="table_${tid}">
-              <tr><td class="muted" colspan="7">Nessuna registrazione</td></tr>
-            </tbody>
-          </table>
-        `;
-
-        panelWrapper.appendChild(panel);
-
-        // fill select
-        setTimeout(() => {
-          const itemSel = document.getElementById("item_" + tid);
-          if (itemSel) fillItemSelect(itemSel);
-          renderDraft(cat);
-          renderCategory(cat);
-        }, 0);
-
-        if (idx === 0) { tab.classList.add("active"); panel.classList.add("active"); }
-      });
-    }
-
-    function showCat(catName) {
-      const tid = tabIdFromName(catName);
-      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
-      const tb = document.getElementById("tab_" + tid);
-      if (tb) tb.classList.add("active");
-      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
-      const pn = document.getElementById("panel_" + tid);
-      if (pn) pn.classList.add("active");
-      renderCategory(catName);
-    }
-
-    // =========================
-    // STARTUP
-    // =========================
-    function boot() {
-      setHeaderUser();
-
-      const s = loadSession();
-      if (!s?.email) {
-        showOnly("login");
-        // nav buttons disabled-ish: keep but will redirect to login
-        return;
-      }
-
-      // blocked check
-      const u = getMyUser();
-      if (u?.blocked) {
-        alert("Account bloccato.");
-        logout();
-        return;
-      }
-
-      initAfterLogin();
-    }
-
-    boot();
-  </script>
 </body>
 </html>
