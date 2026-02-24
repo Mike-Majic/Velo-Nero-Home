@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Utenti - VELO NERO</title>
+    <title>Logs - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
         body {
             background-color: #121212;
             color: #fff;
             font-family: Arial, sans-serif;
-            text-align: center;
             padding: 50px 20px;
+            text-align: center;
         }
 
         h1 {
@@ -25,88 +25,38 @@
             margin-bottom: 40px;
         }
 
-        table {
-            width: 90%;
+        ul#logList {
+            list-style: none;
+            padding: 0;
+            max-width: 800px;
             margin: 0 auto 50px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 20px;
-            border: 1px solid #ff3b3b33;
             text-align: left;
         }
 
-        th {
+        ul#logList li {
             background-color: #1e1e1e;
-            color: #ff3b3b;
-        }
-
-        td {
-            background-color: #1e1e1e;
-            color: #fff;
-        }
-
-        tr:hover td {
-            background-color: #3a0000;
-        }
-
-        select {
-            padding: 4px 8px;
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-left: 6px solid #ff3b3b;
             border-radius: 6px;
-            border: none;
-            background-color: #2b2b2b;
-            color: #fff;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        select:hover {
-            background-color: #3a0000;
-        }
-
-        .btn-edit {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #ff3b3b;
-            font-size: 18px;
-            transition: transform 0.2s ease, text-shadow 0.2s ease;
             position: relative;
+            transition: background 0.2s ease;
         }
 
-        .btn-edit:hover {
-            transform: scale(1.2);
-            text-shadow: 0 0 6px #ff000080;
-        }
-
-        .action-menu {
-            display: none;
-            position: absolute;
-            top: 25px;
-            left: -10px;
-            background-color: #1a1a1a;
-            border: 1px solid #ff3b3b66;
-            border-radius: 6px;
-            padding: 10px;
-            text-align: left;
-            z-index: 100;
-        }
-
-        .action-menu button {
-            display: block;
-            background: none;
-            border: 1px solid #ff3b3b44;
-            color: #fff;
-            padding: 5px 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .action-menu button:hover {
+        ul#logList li:hover {
             background-color: #3a0000;
+        }
+
+        span.badge {
+            background-color: #ff3b3b;
+            color: #fff;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            box-shadow: 0 0 8px #ff000080;
         }
 
         a.back {
@@ -127,114 +77,42 @@
 </head>
 <body>
 
-<h1>Utenti</h1>
-<p class="subtitle">Gestione ruoli e azioni rapide</p>
+<h1>Logs</h1>
+<p class="subtitle">Azioni recenti sugli utenti</p>
 
-<table>
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Ruolo</th>
-            <th>Azioni</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Mike</td>
-            <td>
-                <select id="role-Mike">
-                    <option>Owner</option>
-                    <option>Boss</option>
-                    <option>Vice Boss</option>
-                    <option>Consigliere</option>
-                    <option>Gestore incontri</option>
-                    <option>Gestore Gang</option>
-                    <option>Gestore droga</option>
-                    <option>Resp. reperimento droga</option>
-                    <option>Gestore armi</option>
-                    <option>Resp. Craft armi</option>
-                    <option>Capo Gestore braccio armato</option>
-                    <option>Gestore braccio a.</option>
-                    <option>Capo sq. d'assalto Est.</option>
-                    <option>Guardia del corpo</option>
-                    <option>Soldato</option>
-                    <option>Scagnozzo</option>
-                    <option>Scagnozzo in prova</option>
-                </select>
-            </td>
-            <td>
-                <div style="position: relative;">
-                    <button class="btn-edit" onclick="toggleMenu('menu-Mike')">✎</button>
-                    <div class="action-menu" id="menu-Mike">
-                        <button class="menu-blocca" onclick="azioneUtente('Mike','Blocca')">Blocca</button>
-                        <button class="menu-sblocca" onclick="azioneUtente('Mike','Sblocca')">Sblocca</button>
-                        <button onclick="azioneUtente('Mike','Espelli')">Espelli</button>
-                    </div>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td>Giulia</td>
-            <td>
-                <select id="role-Giulia">
-                    <option>Owner</option>
-                    <option>Boss</option>
-                    <option>Vice Boss</option>
-                    <option>Consigliere</option>
-                    <option>Gestore incontri</option>
-                    <option>Gestore Gang</option>
-                    <option>Gestore droga</option>
-                    <option>Resp. reperimento droga</option>
-                    <option>Gestore armi</option>
-                    <option>Resp. Craft armi</option>
-                    <option>Capo Gestore braccio armato</option>
-                    <option>Gestore braccio a.</option>
-                    <option>Capo sq. d'assalto Est.</option>
-                    <option>Guardia del corpo</option>
-                    <option>Soldato</option>
-                    <option>Scagnozzo</option>
-                    <option>Scagnozzo in prova</option>
-                </select>
-            </td>
-            <td>
-                <div style="position: relative;">
-                    <button class="btn-edit" onclick="toggleMenu('menu-Giulia')">✎</button>
-                    <div class="action-menu" id="menu-Giulia">
-                        <button class="menu-blocca" onclick="azioneUtente('Giulia','Blocca')">Blocca</button>
-                        <button class="menu-sblocca" onclick="azioneUtente('Giulia','Sblocca')">Sblocca</button>
-                        <button onclick="azioneUtente('Giulia','Espelli')">Espelli</button>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </tbody>
-</table>
+<ul id="logList">
+    <!-- i log verranno inseriti qui -->
+</ul>
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
 
 <script>
-    const myRole = "Vice Boss"; // modifica qui il tuo ruolo per test
+    // funzione per aggiungere un log
+    function aggiungiLog(user, azione) {
+        const logList = document.getElementById('logList');
+        const li = document.createElement('li');
+        const timestamp = new Date().toLocaleTimeString();
+        li.textContent = `[${timestamp}] ${azione} eseguita su ${user}`;
+        
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = '!';
+        li.appendChild(badge);
 
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        const menu = btn.nextElementSibling;
-        if(!["Owner","Boss","Vice Boss"].includes(myRole)) {
-            btn.style.display = 'none';
-        } else if(myRole === "Vice Boss") {
-            // Vice Boss vede solo Espelli
-            menu.querySelectorAll('.menu-blocca, .menu-sblocca').forEach(b => b.style.display = 'none');
-        }
-        // Owner e Boss vedono tutte le azioni
-    });
-
-    function toggleMenu(id) {
-        const menu = document.getElementById(id);
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        logList.prepend(li); // mostra i log più recenti in cima
     }
 
+    // esempio: simulazione di chiamate da utenti.html
+    // In futuro potrai collegarlo alle azioni reali
     function azioneUtente(user, azione) {
+        // aggiunge il log
+        aggiungiLog(user, azione);
         alert(`Azione "${azione}" eseguita su ${user}`);
-        // qui potrai inserire codice reale per bloccare/sbloccare/espellere
     }
+
+    // test iniziale (puoi rimuoverlo)
+    // azioneUtente('Mike', 'Blocca');
+    // azioneUtente('Giulia', 'Espelli');
 </script>
 
 </body>
