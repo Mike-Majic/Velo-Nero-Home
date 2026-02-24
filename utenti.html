@@ -7,7 +7,7 @@
         body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; }
         h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 10px; text-shadow: 0 0 12px #ff3b3b80; }
         p.subtitle { color: #ff7b7b; font-size: 18px; margin-bottom: 40px; }
-        table { width: 90%; margin: 0 auto 50px; border-collapse: collapse; }
+        table { width: 90%; margin: 0 auto; border-collapse: collapse; }
         th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
         th { background-color: #1e1e1e; color: #ff3b3b; }
         td { background-color: #1e1e1e; color: #fff; position: relative; }
@@ -22,6 +22,10 @@
         .blocked-icon { display: none; color: #ff3b3b; font-size: 18px; margin-left: 8px; }
         a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
         a.back:hover { background-color: #cc0000; }
+        #logContainer { margin-top: 50px; text-align: left; width: 90%; margin-left: auto; margin-right: auto; }
+        #logContainer h2 { color: #ff3b3b; text-shadow: 0 0 10px #ff3b3b80; }
+        #logContainer ul { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ff3b3b33; border-radius: 6px; background-color: #1e1e1e; }
+        #logContainer ul li { padding: 8px 12px; border-bottom: 1px solid #ff3b3b22; }
     </style>
 </head>
 <body>
@@ -42,8 +46,13 @@
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
 
+<div id="logContainer">
+    <h2>Log Attività</h2>
+    <ul id="logList"></ul>
+</div>
+
 <script>
-const myRole = "Owner"; // cambia a Boss o Vice Boss per test
+const myRole = "Owner"; // Cambia a Boss o Vice Boss per test
 const users = [
     { name: "Mike", role: "Owner", blocked: false },
     { name: "Giulia", role: "Soldato", blocked: false } // utente di prova
@@ -57,23 +66,21 @@ const ruoli = [
 ];
 
 const tbody = document.getElementById('usersTableBody');
+const logList = document.getElementById('logList');
 
 function addLog(user, action) {
-    // apre log.html in un'altra scheda o tab e aggiunge la riga
-    const logWindow = window.open("log.html","_blank");
-    if(!logWindow.addLog){
-        logWindow.onload = () => logWindow.addLog(user, action);
-    } else {
-        logWindow.addLog(user, action);
-    }
+    const li = document.createElement('li');
+    const now = new Date();
+    li.textContent = `[${now.toLocaleString()}] ${user}: ${action}`;
+    logList.prepend(li); // voce in cima
 }
 
+// Genera tabella utenti
 users.forEach(user => {
     const tr = document.createElement('tr');
 
     const tdName = document.createElement('td');
     tdName.textContent = user.name;
-
     const blockedIcon = document.createElement('span');
     blockedIcon.className = 'blocked-icon';
     blockedIcon.textContent = '⛔';
@@ -140,7 +147,6 @@ users.forEach(user => {
     menu.appendChild(btnEspelli);
     divWrapper.appendChild(menu);
 
-    // Ruolo matita
     if(!["Owner","Boss","Vice Boss"].includes(myRole)) btnEdit.style.display='none';
     else if(myRole==="Vice Boss"){ btnBlocca.style.display='none'; btnSblocca.style.display='none'; }
 
@@ -155,7 +161,6 @@ users.forEach(user => {
     tbody.appendChild(tr);
 });
 
-// chiude menu cliccando fuori
 document.addEventListener('click', () => {
     document.querySelectorAll('.action-menu').forEach(menu => menu.style.display='none');
 });
