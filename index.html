@@ -163,6 +163,12 @@
           <label>Password</label>
           <input id="loginPassword" type="password" placeholder="Password" />
         </div>
+      </div>
+      <div class="row">
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Nome utente in game</label>
+          <input id="loginGameName" type="text" placeholder="Il tuo nick in game" />
+        </div>
         <div class="field" style="min-width:220px;">
           <button class="btn" onclick="loginWithEmail()">Entra / Registrati</button>
           <div class="hint">Funziona subito su Vercel</div>
@@ -205,7 +211,8 @@
     <table>
       <thead>
         <tr>
-          <th>Nome/Email</th>
+          <th>Email</th>
+          <th>Nome in Game</th>
           <th>Ruolo</th>
           <th>Stato</th>
           <th>Azioni</th>
@@ -393,18 +400,23 @@
       return Math.abs(hash).toString(16);
     }
 
-    function upsertUser(email, password = null) {
+    function upsertUser(email, password = null, gameName = null) {
       const users = loadUsers();
       const e = (email || "").trim().toLowerCase();
       if (!e) return null;
 
       let u = users.find(x => (x.email || "").toLowerCase() === e);
       if (!u) {
-        u = { id: uid(), email: e, role: "Nessuno", blocked: false, passwordHash: password ? simpleHash(password) : null };
+        u = { id: uid(), email: e, role: "Nessuno", blocked: false, passwordHash: password ? simpleHash(password) : null, gameName: gameName || "" };
         users.push(u);
       } else if (password) {
         // Se è un login successivo con password, aggiorna il hash
         u.passwordHash = simpleHash(password);
+      }
+      
+      // Aggiorna il nome utente in game se fornito
+      if (gameName) {
+        u.gameName = gameName;
       }
 
       // bootstrap owner
@@ -520,19 +532,22 @@
     function loginWithEmail() {
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
+      const gameName = document.getElementById("loginGameName").value.trim();
       
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
       if (!password) return alert("Inserisci una password");
+      if (!gameName) return alert("Inserisci il tuo nome utente in game");
 
       const existingUser = findUserByEmail(email);
       
       // Se è un nuovo utente (primo login)
       if (!existingUser) {
-        const u = upsertUser(email, password);
+        const u = upsertUser(email, password, gameName);
         saveSession({ email: u.email });
         setHeaderUser();
         initAfterLogin();
         document.getElementById("loginPassword").value = "";
+        document.getElementById("loginGameName").value = "";
         return;
       }
 
@@ -542,10 +557,17 @@
         return alert("Email o password errata");
       }
 
+      // Aggiorna il gameName se fornito
+      if (gameName && existingUser.gameName !== gameName) {
+        existingUser.gameName = gameName;
+        saveUsers(loadUsers());
+      }
+
       saveSession({ email: existingUser.email });
       setHeaderUser();
       initAfterLogin();
       document.getElementById("loginPassword").value = "";
+      document.getElementById("loginGameName").value = "";
     }
 
     function initAfterLogin() {
@@ -590,6 +612,9 @@
 
         const tdEmail = document.createElement("td");
         tdEmail.innerHTML = escapeHtml(u.email) + (u.blocked ? ` <span class="blocked-icon">⛔</span>` : "");
+        
+        const tdGameName = document.createElement("td");
+        tdGameName.textContent = u.gameName || "—";
 
         const tdRole = document.createElement("td");
         const sel = document.createElement("select");
@@ -682,6 +707,7 @@
         tdActions.appendChild(wrap);
 
         tr.appendChild(tdEmail);
+        tr.appendChild(tdGameName);
         tr.appendChild(tdRole);
         tr.appendChild(tdState);
         tr.appendChild(tdActions);
