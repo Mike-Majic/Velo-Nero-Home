@@ -7,12 +7,22 @@
         body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; text-align: center; }
         h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 20px; text-shadow: 0 0 12px #ff3b3b80; }
         table { width: 90%; margin: 0 auto; border-collapse: collapse; }
-        th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
+        th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; vertical-align: top; }
         th { background-color: #1e1e1e; color: #ff3b3b; }
         td { background-color: #1e1e1e; }
         tr:hover td { background-color: #3a0000; }
+
+        .buttons { margin: 10px 0 14px 0; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+        .btn { padding: 10px 14px; border-radius: 8px; border: 1px solid #ff3b3b66; background:#1a1a1a; color:#fff; cursor:pointer; }
+        .btn:hover { background:#2b0000; }
+        .danger { background:#2b0000; border-color:#ff3b3baa; }
+
         a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
         a.back:hover { background-color: #cc0000; }
+
+        .section { margin-top: 26px; }
+        h2 { color:#ff7b7b; text-shadow:0 0 10px #ff000040; }
+        .muted { color:#ff7b7b; }
     </style>
 </head>
 <body>
@@ -62,6 +72,10 @@
 <!-- Sezione Log Attività Generale -->
 <div class="section">
     <h2>⚙️ Log Attività</h2>
+    <div class="buttons">
+        <button class="btn" onclick="refreshActivityLogs()">🔄 Aggiorna</button>
+        <button class="btn danger" onclick="clearActivityLogs()">🗑️ Cancella Log</button>
+    </div>
     <table>
         <thead>
             <tr>
@@ -70,9 +84,7 @@
                 <th>Azione</th>
             </tr>
         </thead>
-        <tbody id="logBody">
-            <!-- log dinamici -->
-        </tbody>
+        <tbody id="logBody"></tbody>
     </table>
 </div>
 
@@ -82,153 +94,153 @@
 const LOGS_KEY = "vn_login_logs";
 const ACTIVITY_LOGS_KEY = "vn_activity_logs";
 const USERS_KEY = "vn_users_v2";
+const SESSION_KEY = "vn_session_v1";
 
 const logBody = document.getElementById('logBody');
 const loginLogBody = document.getElementById('loginLogBody');
 const usersBody = document.getElementById('usersBody');
 
-// ===== GESTIONE LOGIN LOGS =====
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+// ===== AUTH GUARD (solo admin) =====
+function loadSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
+}
+function loadUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function findUserByEmail(email) {
+  return loadUsers().find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
+}
+function isAdminRole(role) {
+  return ["Owner","Boss","Vice Boss"].includes(role);
+}
+(function guard(){
+  const s = loadSession();
+  if (!s?.email) { window.location.href = "index.html"; return; }
+  const u = findUserByEmail(s.email);
+  if (!u) { localStorage.removeItem(SESSION_KEY); window.location.href = "index.html"; return; }
+  if (u.blocked) { localStorage.removeItem(SESSION_KEY); alert("Account bloccato."); window.location.href = "index.html"; return; }
+  if (!isAdminRole(u.role || "Nessuno")) { alert("Permesso negato."); window.location.href = "index.html"; return; }
+})();
+
+// ===== LOGIN LOGS =====
 function loadLoginLogs() {
-    try {
-        const raw = localStorage.getItem(LOGS_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-    } catch {
-        return [];
-    }
-}
-
-function saveLoginLogs(arr) {
-    localStorage.setItem(LOGS_KEY, JSON.stringify(arr));
-}
-
-function recordLogin(email, gameName) {
-    const logs = loadLoginLogs();
-    logs.push({
-        ts: Date.now(),
-        email: email,
-        gameName: gameName,
-        action: "LOGIN"
-    });
-    saveLoginLogs(logs);
+  try {
+    const raw = localStorage.getItem(LOGS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
 }
 
 function refreshLoginLogs() {
-    const logs = loadLoginLogs().slice().sort((a, b) => b.ts - a.ts);
-    loginLogBody.innerHTML = "";
-    
-    if (logs.length === 0) {
-        loginLogBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
-        return;
-    }
+  const logs = loadLoginLogs().slice().sort((a, b) => (b.ts||0) - (a.ts||0));
+  loginLogBody.innerHTML = "";
 
-    logs.forEach(log => {
-        const when = new Date(log.ts).toLocaleString();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${when}</td>
-            <td>${log.email}</td>
-            <td>${log.gameName || '—'}</td>
-            <td>${log.action}</td>
-        `;
-        loginLogBody.appendChild(tr);
-    });
+  if (logs.length === 0) {
+    loginLogBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
+    return;
+  }
+
+  logs.forEach(log => {
+    const when = new Date(log.ts).toLocaleString();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(when)}</td>
+      <td>${escapeHtml(log.email)}</td>
+      <td>${escapeHtml(log.gameName || '—')}</td>
+      <td>${escapeHtml(log.action || 'LOGIN')}</td>
+    `;
+    loginLogBody.appendChild(tr);
+  });
 }
 
 function clearLoginLogs() {
-    const ok = confirm("Confermi cancellazione di TUTTI i log di login?");
-    if (!ok) return;
-    localStorage.removeItem(LOGS_KEY);
-    refreshLoginLogs();
+  const ok = confirm("Confermi cancellazione di TUTTI i log di login?");
+  if (!ok) return;
+  localStorage.removeItem(LOGS_KEY);
+  refreshLoginLogs();
+  refreshUsers();
 }
 
-// ===== VISUALIZZA UTENTI =====
-function loadUsers() {
-    try {
-        const raw = localStorage.getItem(USERS_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-    } catch {
-        return [];
-    }
-}
-
+// ===== UTENTI + ULTIMO ACCESSO (fix: vero max ts) =====
 function refreshUsers() {
-    const users = loadUsers().slice().sort((a, b) => (a.email || "").localeCompare(b.email || ""));
-    usersBody.innerHTML = "";
+  const users = loadUsers().slice().sort((a, b) => (a.email || "").localeCompare(b.email || ""));
+  const allLogs = loadLoginLogs();
+  usersBody.innerHTML = "";
 
-    if (users.length === 0) {
-        usersBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun utente registrato</td></tr>`;
-        return;
-    }
+  if (users.length === 0) {
+    usersBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun utente registrato</td></tr>`;
+    return;
+  }
 
-    users.forEach(u => {
-        const logs = loadLoginLogs().filter(l => l.email === u.email);
-        const lastLogin = logs.length > 0 
-            ? new Date(logs[0].ts).toLocaleString() 
-            : "Mai";
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${u.email}</td>
-            <td>${u.gameName || '—'}</td>
-            <td>${u.role || 'Nessuno'}</td>
-            <td>${lastLogin}</td>
-        `;
-        usersBody.appendChild(tr);
-    });
+  users.forEach(u => {
+    const userLogs = allLogs.filter(l => (l.email || "").toLowerCase() === (u.email || "").toLowerCase());
+    const lastTs = userLogs.reduce((m, x) => Math.max(m, Number(x.ts || 0)), 0);
+    const lastLogin = lastTs ? new Date(lastTs).toLocaleString() : "Mai";
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(u.email)}</td>
+      <td>${escapeHtml(u.gameName || '—')}</td>
+      <td>${escapeHtml(u.role || 'Nessuno')}</td>
+      <td>${escapeHtml(lastLogin)}</td>
+    `;
+    usersBody.appendChild(tr);
+  });
 }
 
-// ===== GESTIONE LOG ATTIVITÀ =====
+// ===== ACTIVITY LOGS (persistenti) =====
 function loadActivityLogs() {
-    try {
-        const raw = localStorage.getItem(ACTIVITY_LOGS_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-    } catch {
-        return [];
-    }
-}
-
-function saveActivityLogs(arr) {
-    localStorage.setItem(ACTIVITY_LOGS_KEY, JSON.stringify(arr));
-}
-
-function addLog(user, action) {
-    const logs = loadActivityLogs();
-    logs.push({
-        ts: Date.now(),
-        user: user,
-        action: action
-    });
-    saveActivityLogs(logs);
-    refreshActivityLogs();
+  try {
+    const raw = localStorage.getItem(ACTIVITY_LOGS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
 }
 
 function refreshActivityLogs() {
-    const logs = loadActivityLogs().slice().sort((a, b) => b.ts - a.ts);
-    logBody.innerHTML = "";
+  const logs = loadActivityLogs().slice().sort((a, b) => (b.ts||0) - (a.ts||0));
+  logBody.innerHTML = "";
 
-    if (logs.length === 0) {
-        logBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
-        return;
-    }
+  if (logs.length === 0) {
+    logBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
+    return;
+  }
 
-    logs.forEach(log => {
-        const when = new Date(log.ts).toLocaleString();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${when}</td><td>${log.user}</td><td>${log.action}</td>`;
-        logBody.appendChild(tr);
-    });
+  logs.forEach(log => {
+    const when = new Date(log.ts).toLocaleString();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(when)}</td>
+      <td>${escapeHtml(log.user || '—')}</td>
+      <td>${escapeHtml(log.action || '—')}</td>
+    `;
+    logBody.appendChild(tr);
+  });
 }
 
-// ===== INIZIALIZZAZIONE =====
+function clearActivityLogs() {
+  const ok = confirm("Confermi cancellazione di TUTTI i log attività?");
+  if (!ok) return;
+  localStorage.removeItem(ACTIVITY_LOGS_KEY);
+  refreshActivityLogs();
+}
+
+// ===== INIT =====
 function init() {
-    refreshLoginLogs();
-    refreshUsers();
-    refreshActivityLogs();
+  refreshLoginLogs();
+  refreshUsers();
+  refreshActivityLogs();
 }
-
 init();
 </script>
 
