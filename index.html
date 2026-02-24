@@ -86,7 +86,7 @@
             transform: scale(1.05);
         }
 
-        /* Badge notifiche */
+        /* Badge notifiche inizialmente invisibile */
         .badge {
             position: absolute;
             top: 15px;
@@ -97,6 +97,7 @@
             border-radius: 50px;
             font-size: 12px;
             animation: glow 1.5s infinite;
+            display: none; /* invisibile finché non c’è notifica */
         }
 
         @media(max-width: 900px) {
@@ -115,24 +116,36 @@
 
     <div class="dashboard">
         <div class="box">
-            <span class="badge">3</span>
+            <span class="badge" id="badge-utenti"></span>
             <h2>Utenti</h2>
             <p>Gestione accessi e permessi</p>
             <a href="utenti.html" class="btn">Apri</a>
         </div>
         <div class="box">
-            <span class="badge">7</span>
+            <span class="badge" id="badge-logs"></span>
             <h2>Logs</h2>
             <p>Controllo attività interne</p>
             <a href="logs.html" class="btn">Apri</a>
         </div>
         <div class="box">
-            <span class="badge">!</span>
+            <span class="badge" id="badge-comandi"></span>
             <h2>Comandi</h2>
             <p>Esegui operazioni interne</p>
             <a href="comandi.html" class="btn">Apri</a>
         </div>
     </div>
+
+    <script>
+        // Esempio: funzione per attivare una notifica su una badge
+        function mostraNotifica(sezione, testo) {
+            const badge = document.getElementById('badge-' + sezione);
+            badge.textContent = testo;
+            badge.style.display = 'inline-block';
+        }
+
+        // Esempio: attiva badge su utenti con numero reale
+        // mostraNotifica('utenti', '3'); // Sostituire con numero reale quando arriva notifica
+    </script>
 
 </body>
 </html>
