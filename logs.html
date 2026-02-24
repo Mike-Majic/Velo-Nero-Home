@@ -5,69 +5,57 @@
     <meta charset="UTF-8">
     <style>
         body {
-            background-color: #0b0b0b;
+            background-color: #121212;
             color: #fff;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px 20px;
         }
 
         h1 {
-            color: #ff1a1a;
+            color: #ff3b3b;
             font-size: 50px;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px #ff000080;
+            text-shadow: 0 0 12px #ff3b3b80;
         }
 
         p.subtitle {
-            color: #ff6666;
+            color: #ff7b7b;
             font-size: 18px;
             margin-bottom: 40px;
         }
 
         table {
-            width: 95%;
+            width: 90%;
             margin: 0 auto 50px;
             border-collapse: collapse;
         }
 
         th, td {
             padding: 12px 20px;
-            border: 1px solid #ff1a1a33;
+            border: 1px solid #ff3b3b33;
             text-align: left;
         }
 
         th {
-            background-color: #1a1a1a;
-            color: #ff1a1a;
+            background-color: #1e1e1e;
+            color: #ff3b3b;
         }
 
         td {
-            background-color: #1a1a1a;
+            background-color: #1e1e1e;
             color: #fff;
         }
 
         tr:hover td {
-            background-color: #2b0000;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            color: #fff;
+            background-color: #3a0000;
         }
 
         .badge-alert {
-            background-color: #ff1a1a;
-            animation: glow 1.5s infinite;
-        }
-
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px #ff1a1a50; }
-            50% { box-shadow: 0 0 15px #ff0000aa; }
-            100% { box-shadow: 0 0 5px #ff1a1a50; }
+            background-color: #ff3b3b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #fff;
         }
 
         a.back {
@@ -75,10 +63,9 @@
             margin-top: 20px;
             padding: 10px 20px;
             color: #fff;
-            background-color: #ff1a1a;
+            background-color: #ff3b3b;
             border-radius: 6px;
             text-decoration: none;
-            transition: background 0.3s ease;
         }
 
         a.back:hover {
@@ -88,41 +75,32 @@
 </head>
 <body>
 
-    <h1>Logs</h1>
-    <p class="subtitle">Attività interne recenti</p>
+<h1>Logs</h1>
+<p class="subtitle">Attività interne recenti</p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Timestamp</th>
-                <th>Utente</th>
-                <th>Azione</th>
-                <th>Stato</th>
-            </tr>
-        </thead>
-        <tbody id="logs-table">
-            <tr>
-                <td>24/02/2026 14:30</td>
-                <td>Mike</td>
-                <td>Accesso Dashboard</td>
-                <td><span class="badge badge-alert">Nuovo</span></td>
-            </tr>
-            <tr>
-                <td>24/02/2026 14:35</td>
-                <td>Giulia</td>
-                <td>Modifica ruolo</td>
-                <td><span class="badge">OK</span></td>
-            </tr>
-            <tr>
-                <td>24/02/2026 14:40</td>
-                <td>Alessio</td>
-                <td>Login fallito</td>
-                <td><span class="badge badge-alert">!</span></td>
-            </tr>
-        </tbody>
-    </table>
+<table>
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Utente</th>
+            <th>Azione</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>24/02/2026</td>
+            <td>Mike</td>
+            <td><span class="badge-alert">Ruolo aggiornato</span></td>
+        </tr>
+        <tr>
+            <td>24/02/2026</td>
+            <td>Giulia</td>
+            <td><span class="badge-alert">Login effettuato</span></td>
+        </tr>
+    </tbody>
+</table>
 
-    <a href="index.html" class="back">Torna alla Dashboard</a>
+<a href="index.html" class="back">Torna alla Dashboard</a>
 
 </body>
 </html>
