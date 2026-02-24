@@ -1,118 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Logs - VELO NERO</title>
+    <title>Log - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
-        body {
-            background-color: #121212;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            padding: 50px 20px;
-            text-align: center;
-        }
-
-        h1 {
-            color: #ff3b3b;
-            font-size: 50px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 12px #ff3b3b80;
-        }
-
-        p.subtitle {
-            color: #ff7b7b;
-            font-size: 18px;
-            margin-bottom: 40px;
-        }
-
-        ul#logList {
-            list-style: none;
-            padding: 0;
-            max-width: 800px;
-            margin: 0 auto 50px;
-            text-align: left;
-        }
-
-        ul#logList li {
-            background-color: #1e1e1e;
-            margin: 10px 0;
-            padding: 15px 20px;
-            border-left: 6px solid #ff3b3b;
-            border-radius: 6px;
-            position: relative;
-            transition: background 0.2s ease;
-        }
-
-        ul#logList li:hover {
-            background-color: #3a0000;
-        }
-
-        span.badge {
-            background-color: #ff3b3b;
-            color: #fff;
-            border-radius: 12px;
-            padding: 2px 8px;
-            font-size: 12px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            box-shadow: 0 0 8px #ff000080;
-        }
-
-        a.back {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #ff3b3b;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: background 0.3s ease;
-        }
-
-        a.back:hover {
-            background-color: #cc0000;
-        }
+        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px; }
+        h1 { color: #ff3b3b; font-size: 50px; text-shadow: 0 0 12px #ff3b3b80; margin-bottom: 20px; }
+        table { width: 90%; border-collapse: collapse; margin: 0 auto; }
+        th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
+        th { background-color: #1e1e1e; color: #ff3b3b; }
+        td { background-color: #1e1e1e; }
+        tr:hover td { background-color: #3a0000; }
+        .back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
+        .back:hover { background-color: #cc0000; }
     </style>
 </head>
 <body>
 
-<h1>Logs</h1>
-<p class="subtitle">Azioni recenti sugli utenti</p>
+<h1>Log Attività</h1>
 
-<ul id="logList">
-    <!-- i log verranno inseriti qui -->
-</ul>
+<table>
+    <thead>
+        <tr>
+            <th>Data/Ora</th>
+            <th>Utente</th>
+            <th>Azione</th>
+        </tr>
+    </thead>
+    <tbody id="logBody">
+        <!-- log dinamici -->
+    </tbody>
+</table>
 
-<a href="index.html" class="back">Torna alla Dashboard</a>
+<a href="utenti.html" class="back">Torna agli Utenti</a>
 
 <script>
-    // funzione per aggiungere un log
-    function aggiungiLog(user, azione) {
-        const logList = document.getElementById('logList');
-        const li = document.createElement('li');
-        const timestamp = new Date().toLocaleTimeString();
-        li.textContent = `[${timestamp}] ${azione} eseguita su ${user}`;
-        
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = '!';
-        li.appendChild(badge);
+    const logBody = document.getElementById('logBody');
 
-        logList.prepend(li); // mostra i log più recenti in cima
+    // funzione per aggiungere una riga al log
+    function addLog(user, action) {
+        const tr = document.createElement('tr');
+        const now = new Date();
+        const dateStr = now.toLocaleString();
+        tr.innerHTML = `<td>${dateStr}</td><td>${user}</td><td>${action}</td>`;
+        logBody.prepend(tr); // mette la riga in cima
     }
 
-    // esempio: simulazione di chiamate da utenti.html
-    // In futuro potrai collegarlo alle azioni reali
-    function azioneUtente(user, azione) {
-        // aggiunge il log
-        aggiungiLog(user, azione);
-        alert(`Azione "${azione}" eseguita su ${user}`);
-    }
-
-    // test iniziale (puoi rimuoverlo)
-    // azioneUtente('Mike', 'Blocca');
-    // azioneUtente('Giulia', 'Espelli');
+    // per test rapido
+    addLog("Mike", "Accesso dashboard");
 </script>
 
 </body>
