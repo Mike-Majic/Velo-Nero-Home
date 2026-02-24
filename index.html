@@ -146,6 +146,7 @@
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
     <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
+    <button id="btnLog" onclick="goToLogs()" style="display:none;">📋 Log</button>
   </div>
 
   <!-- LOGIN -->
@@ -527,6 +528,36 @@
     }
 
     // =========================
+    // =========================
+    // LOGIN LOGS
+    // =========================
+    const LOGS_KEY = "vn_login_logs";
+
+    function recordLoginToLogs(email, gameName) {
+      try {
+        const raw = localStorage.getItem(LOGS_KEY) || "[]";
+        const logs = JSON.parse(raw);
+        logs.push({
+          ts: Date.now(),
+          email: email,
+          gameName: gameName,
+          action: "LOGIN"
+        });
+        localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+      } catch (e) {
+        console.error("Errore nel registrare il login", e);
+      }
+    }
+
+    function goToLogs() {
+      if (!isAdmin()) {
+        alert("Permesso negato: solo gli admin possono visualizzare i log");
+        return;
+      }
+      window.location.href = "logs.html";
+    }
+
+    // =========================
     // LOGIN (email)
     // =========================
     function loginWithEmail() {
@@ -543,6 +574,7 @@
       // Se è un nuovo utente (primo login)
       if (!existingUser) {
         const u = upsertUser(email, password, gameName);
+        recordLoginToLogs(email, gameName);
         saveSession({ email: u.email });
         setHeaderUser();
         initAfterLogin();
@@ -563,6 +595,7 @@
         saveUsers(loadUsers());
       }
 
+      recordLoginToLogs(existingUser.email, existingUser.gameName);
       saveSession({ email: existingUser.email });
       setHeaderUser();
       initAfterLogin();
@@ -574,15 +607,18 @@
       // UI permessi nav
       const btnUtenti = document.getElementById("btnUtenti");
       const cardUtenti = document.getElementById("cardUtenti");
+      const btnLog = document.getElementById("btnLog");
       const dashHint = document.getElementById("dashHint");
       const actionsHint = document.getElementById("actionsHint");
 
       if (!isAdmin()) {
         btnUtenti.style.display = "none";
         cardUtenti.style.display = "none";
+        btnLog.style.display = "none";
       } else {
         btnUtenti.style.display = "inline-block";
         cardUtenti.style.display = "inline-block";
+        btnLog.style.display = "inline-block";
       }
 
       if (!canEditOps()) {
