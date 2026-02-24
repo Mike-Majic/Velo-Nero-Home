@@ -17,32 +17,12 @@
             margin-bottom: 10px;
             text-shadow: 0 0 12px #ff3b3b80;
         }
-        p.subtitle {
-            color: #ff7b7b;
-            font-size: 18px;
-            margin-bottom: 40px;
-        }
-        table {
-            width: 90%;
-            margin: 0 auto 50px;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px 20px;
-            border: 1px solid #ff3b3b33;
-            text-align: left;
-        }
-        th {
-            background-color: #1e1e1e;
-            color: #ff3b3b;
-        }
-        td {
-            background-color: #1e1e1e;
-            color: #fff;
-        }
-        tr:hover td {
-            background-color: #3a0000;
-        }
+        p.subtitle { color: #ff7b7b; font-size: 18px; margin-bottom: 40px; }
+        table { width: 90%; margin: 0 auto 50px; border-collapse: collapse; }
+        th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
+        th { background-color: #1e1e1e; color: #ff3b3b; }
+        td { background-color: #1e1e1e; color: #fff; position: relative; }
+        tr:hover td { background-color: #3a0000; }
         select {
             padding: 4px 8px;
             border-radius: 6px;
@@ -60,17 +40,13 @@
             color: #ff3b3b;
             font-size: 18px;
             transition: transform 0.2s ease, text-shadow 0.2s ease;
-            position: relative;
         }
-        .btn-edit:hover {
-            transform: scale(1.2);
-            text-shadow: 0 0 6px #ff000080;
-        }
+        .btn-edit:hover { transform: scale(1.2); text-shadow: 0 0 6px #ff000080; }
         .action-menu {
             display: none;
             position: absolute;
-            top: 25px;
-            left: -10px;
+            top: 30px;
+            left: 0;
             background-color: #1a1a1a;
             border: 1px solid #ff3b3b66;
             border-radius: 6px;
@@ -90,6 +66,12 @@
             width: 100%;
         }
         .action-menu button:hover { background-color: #3a0000; }
+        .blocked-icon {
+            display: none;
+            color: #ff3b3b;
+            font-size: 18px;
+            margin-left: 8px;
+        }
         a.back {
             display: inline-block;
             margin-top: 20px;
@@ -124,16 +106,10 @@
 <a href="index.html" class="back">Torna alla Dashboard</a>
 
 <script>
-    // Ruolo dell'utente che sta usando la dashboard
-    const myRole = "Owner"; // cambia qui a Boss o Vice Boss per test
-
-    // Lista utenti reali, puoi aggiungere altri
+    const myRole = "Owner"; // cambia in Boss o Vice Boss per test
     const users = [
-        { name: "Mike", role: "Owner" },
-        { name: "Luca", role: "Soldato" },
-        { name: "Franco", role: "Vice Boss" }
+        { name: "Mike", role: "Owner", blocked: false }
     ];
-
     const ruoli = [
         "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
         "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
@@ -146,9 +122,15 @@
     users.forEach(user => {
         const tr = document.createElement('tr');
 
-        // Nome
+        // Nome + icona blocco
         const tdName = document.createElement('td');
         tdName.textContent = user.name;
+
+        const blockedIcon = document.createElement('span');
+        blockedIcon.className = 'blocked-icon';
+        blockedIcon.textContent = '⛔';
+        tdName.appendChild(blockedIcon);
+
         tr.appendChild(tdName);
 
         // Ruolo
@@ -179,22 +161,22 @@
 
         const btnBlocca = document.createElement('button');
         btnBlocca.textContent = 'Blocca';
-        btnBlocca.onclick = () => azioneUtente(user.name,'Blocca');
+        btnBlocca.onclick = () => { user.blocked = true; blockedIcon.style.display = 'inline'; menu.style.display='none'; };
 
         const btnSblocca = document.createElement('button');
         btnSblocca.textContent = 'Sblocca';
-        btnSblocca.onclick = () => azioneUtente(user.name,'Sblocca');
+        btnSblocca.onclick = () => { user.blocked = false; blockedIcon.style.display = 'none'; menu.style.display='none'; };
 
         const btnEspelli = document.createElement('button');
         btnEspelli.textContent = 'Espelli';
-        btnEspelli.onclick = () => azioneUtente(user.name,'Espelli');
+        btnEspelli.onclick = () => { menu.style.display='none'; alert(`${user.name} espulso`); };
 
         menu.appendChild(btnBlocca);
         menu.appendChild(btnSblocca);
         menu.appendChild(btnEspelli);
         divWrapper.appendChild(menu);
 
-        // Mostra/nascondi azioni in base al ruolo
+        // Mostra/nascondi pulsante matita in base al ruolo
         if(!["Owner","Boss","Vice Boss"].includes(myRole)) {
             btnEdit.style.display = 'none';
         } else if(myRole === "Vice Boss") {
@@ -211,11 +193,6 @@
 
         tbody.appendChild(tr);
     });
-
-    function azioneUtente(user, azione) {
-        alert(`Azione "${azione}" eseguita su ${user}`);
-        // qui potrai collegare il log o l'azione reale
-    }
 </script>
 
 </body>
