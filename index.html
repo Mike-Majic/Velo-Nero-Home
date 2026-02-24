@@ -17,6 +17,7 @@
             letter-spacing: 6px;
             color: #ff1a1a;
             margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff1a1a50;
         }
 
         p.subtitle {
@@ -37,17 +38,19 @@
             padding: 40px 30px;
             border-radius: 12px;
             width: 280px;
-            box-shadow: 0 0 20px #ff1a1a50;
-            transition: transform 0.3s ease;
+            box-shadow: 0 0 20px #ff1a1a50, 0 0 40px #ff000080 inset;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
         }
 
         .box:hover {
-            transform: scale(1.05);
+            transform: scale(1.07);
+            box-shadow: 0 0 30px #ff1a1a80, 0 0 50px #ff0000 inset;
         }
 
         h2 {
             color: #ff1a1a;
             margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff000080;
         }
 
         p {
@@ -58,7 +61,7 @@
 
         .btn {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 12px 25px;
             color: #fff;
             background-color: #ff1a1a;
             border: none;
@@ -66,11 +69,14 @@
             cursor: pointer;
             font-size: 14px;
             text-decoration: none;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 0 10px #ff1a1a50;
         }
 
         .btn:hover {
             background-color: #cc0000;
+            box-shadow: 0 0 20px #ff0000aa;
+            transform: scale(1.05);
         }
 
         @media(max-width: 900px) {
