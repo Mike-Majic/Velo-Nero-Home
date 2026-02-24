@@ -4,84 +4,23 @@
     <title>Utenti - VELO NERO</title>
     <meta charset="UTF-8">
     <style>
-        body {
-            background-color: #121212;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px 20px;
-        }
-        h1 {
-            color: #ff3b3b;
-            font-size: 50px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 12px #ff3b3b80;
-        }
+        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; }
+        h1 { color: #ff3b3b; font-size: 50px; margin-bottom: 10px; text-shadow: 0 0 12px #ff3b3b80; }
         p.subtitle { color: #ff7b7b; font-size: 18px; margin-bottom: 40px; }
         table { width: 90%; margin: 0 auto 50px; border-collapse: collapse; }
         th, td { padding: 12px 20px; border: 1px solid #ff3b3b33; text-align: left; }
         th { background-color: #1e1e1e; color: #ff3b3b; }
         td { background-color: #1e1e1e; color: #fff; position: relative; }
         tr:hover td { background-color: #3a0000; }
-        select {
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: none;
-            background-color: #2b2b2b;
-            color: #fff;
-            font-size: 12px;
-            cursor: pointer;
-        }
+        select { padding: 4px 8px; border-radius: 6px; border: none; background-color: #2b2b2b; color: #fff; font-size: 12px; cursor: pointer; }
         select:hover { background-color: #3a0000; }
-        .btn-edit {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #ff3b3b;
-            font-size: 18px;
-            transition: transform 0.2s ease, text-shadow 0.2s ease;
-        }
+        .btn-edit { background: none; border: none; cursor: pointer; color: #ff3b3b; font-size: 18px; transition: transform 0.2s ease, text-shadow 0.2s ease; }
         .btn-edit:hover { transform: scale(1.2); text-shadow: 0 0 6px #ff000080; }
-        .action-menu {
-            display: none;
-            position: absolute;
-            top: 30px;
-            left: 0;
-            background-color: #1a1a1a;
-            border: 1px solid #ff3b3b66;
-            border-radius: 6px;
-            padding: 10px;
-            text-align: left;
-            z-index: 100;
-        }
-        .action-menu button {
-            display: block;
-            background: none;
-            border: 1px solid #ff3b3b44;
-            color: #fff;
-            padding: 5px 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
+        .action-menu { display: none; position: absolute; top: 30px; left: 0; background-color: #1a1a1a; border: 1px solid #ff3b3b66; border-radius: 6px; padding: 10px; text-align: left; z-index: 100; }
+        .action-menu button { display: block; background: none; border: 1px solid #ff3b3b44; color: #fff; padding: 5px 10px; margin: 5px 0; border-radius: 4px; cursor: pointer; width: 100%; }
         .action-menu button:hover { background-color: #3a0000; }
-        .blocked-icon {
-            display: none;
-            color: #ff3b3b;
-            font-size: 18px;
-            margin-left: 8px;
-        }
-        a.back {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #ff3b3b;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: background 0.3s ease;
-        }
+        .blocked-icon { display: none; color: #ff3b3b; font-size: 18px; margin-left: 8px; }
+        a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: background 0.3s ease; }
         a.back:hover { background-color: #cc0000; }
     </style>
 </head>
@@ -106,93 +45,94 @@
 <a href="index.html" class="back">Torna alla Dashboard</a>
 
 <script>
-    const myRole = "Owner"; // cambia in Boss o Vice Boss per test
-    const users = [
-        { name: "Mike", role: "Owner", blocked: false }
-    ];
-    const ruoli = [
-        "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
-        "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
-        "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
-        "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
-    ];
+const myRole = "Owner"; // cambia a Boss o Vice Boss per test
+const users = [
+    { name: "Mike", role: "Owner", blocked: false },
+    { name: "Giulia", role: "Soldato", blocked: false } // utente di prova
+];
 
-    const tbody = document.getElementById('usersTableBody');
+const ruoli = [
+    "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
+    "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
+    "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
+    "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
+];
 
-    users.forEach(user => {
-        const tr = document.createElement('tr');
+const tbody = document.getElementById('usersTableBody');
 
-        // Nome + icona blocco
-        const tdName = document.createElement('td');
-        tdName.textContent = user.name;
+users.forEach(user => {
+    const tr = document.createElement('tr');
 
-        const blockedIcon = document.createElement('span');
-        blockedIcon.className = 'blocked-icon';
-        blockedIcon.textContent = '⛔';
-        tdName.appendChild(blockedIcon);
+    // Nome + icona blocco
+    const tdName = document.createElement('td');
+    tdName.textContent = user.name;
+    const blockedIcon = document.createElement('span');
+    blockedIcon.className = 'blocked-icon';
+    blockedIcon.textContent = '⛔';
+    tdName.appendChild(blockedIcon);
+    tr.appendChild(tdName);
 
-        tr.appendChild(tdName);
-
-        // Ruolo
-        const tdRole = document.createElement('td');
-        const select = document.createElement('select');
-        ruoli.forEach(r => {
-            const option = document.createElement('option');
-            option.value = r;
-            option.textContent = r;
-            if(r === user.role) option.selected = true;
-            select.appendChild(option);
-        });
-        tdRole.appendChild(select);
-        tr.appendChild(tdRole);
-
-        // Azioni
-        const tdActions = document.createElement('td');
-        const divWrapper = document.createElement('div');
-        divWrapper.style.position = 'relative';
-
-        const btnEdit = document.createElement('button');
-        btnEdit.className = 'btn-edit';
-        btnEdit.textContent = '✎';
-        divWrapper.appendChild(btnEdit);
-
-        const menu = document.createElement('div');
-        menu.className = 'action-menu';
-
-        const btnBlocca = document.createElement('button');
-        btnBlocca.textContent = 'Blocca';
-        btnBlocca.onclick = () => { user.blocked = true; blockedIcon.style.display = 'inline'; menu.style.display='none'; };
-
-        const btnSblocca = document.createElement('button');
-        btnSblocca.textContent = 'Sblocca';
-        btnSblocca.onclick = () => { user.blocked = false; blockedIcon.style.display = 'none'; menu.style.display='none'; };
-
-        const btnEspelli = document.createElement('button');
-        btnEspelli.textContent = 'Espelli';
-        btnEspelli.onclick = () => { menu.style.display='none'; alert(`${user.name} espulso`); };
-
-        menu.appendChild(btnBlocca);
-        menu.appendChild(btnSblocca);
-        menu.appendChild(btnEspelli);
-        divWrapper.appendChild(menu);
-
-        // Mostra/nascondi pulsante matita in base al ruolo
-        if(!["Owner","Boss","Vice Boss"].includes(myRole)) {
-            btnEdit.style.display = 'none';
-        } else if(myRole === "Vice Boss") {
-            btnBlocca.style.display = 'none';
-            btnSblocca.style.display = 'none';
-        }
-
-        btnEdit.onclick = () => {
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        };
-
-        tdActions.appendChild(divWrapper);
-        tr.appendChild(tdActions);
-
-        tbody.appendChild(tr);
+    // Ruolo
+    const tdRole = document.createElement('td');
+    const select = document.createElement('select');
+    ruoli.forEach(r => {
+        const option = document.createElement('option');
+        option.value = r;
+        option.textContent = r;
+        if(r === user.role) option.selected = true;
+        select.appendChild(option);
     });
+    tdRole.appendChild(select);
+    tr.appendChild(tdRole);
+
+    // Azioni
+    const tdActions = document.createElement('td');
+    const divWrapper = document.createElement('div');
+    divWrapper.style.position = 'relative';
+
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'btn-edit';
+    btnEdit.textContent = '✎';
+    divWrapper.appendChild(btnEdit);
+
+    const menu = document.createElement('div');
+    menu.className = 'action-menu';
+
+    const btnBlocca = document.createElement('button');
+    btnBlocca.textContent = 'Blocca';
+    btnBlocca.onclick = () => { user.blocked = true; blockedIcon.style.display='inline'; menu.style.display='none'; };
+
+    const btnSblocca = document.createElement('button');
+    btnSblocca.textContent = 'Sblocca';
+    btnSblocca.onclick = () => { user.blocked = false; blockedIcon.style.display='none'; menu.style.display='none'; };
+
+    const btnEspelli = document.createElement('button');
+    btnEspelli.textContent = 'Espelli';
+    btnEspelli.onclick = () => { menu.style.display='none'; alert(`${user.name} espulso`); };
+
+    menu.appendChild(btnBlocca);
+    menu.appendChild(btnSblocca);
+    menu.appendChild(btnEspelli);
+    divWrapper.appendChild(menu);
+
+    // Mostra/nascondi pulsante matita
+    if(!["Owner","Boss","Vice Boss"].includes(myRole)) btnEdit.style.display='none';
+    else if(myRole==="Vice Boss"){ btnBlocca.style.display='none'; btnSblocca.style.display='none'; }
+
+    btnEdit.onclick = (e) => {
+        e.stopPropagation(); // evita che il click sul documento chiuda subito
+        menu.style.display = menu.style.display==='block' ? 'none' : 'block';
+    };
+
+    tdActions.appendChild(divWrapper);
+    tr.appendChild(tdActions);
+    tbody.appendChild(tr);
+});
+
+// Click ovunque chiude tutti i menu
+document.addEventListener('click', () => {
+    document.querySelectorAll('.action-menu').forEach(menu => menu.style.display='none');
+});
 </script>
 
 </body>
