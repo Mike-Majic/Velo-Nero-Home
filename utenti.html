@@ -20,7 +20,7 @@
         .action-menu button { display: block; background: none; border: 1px solid #ff3b3b44; color: #fff; padding: 5px 10px; margin: 5px 0; border-radius: 4px; cursor: pointer; width: 100%; }
         .action-menu button:hover { background-color: #3a0000; }
         .blocked-icon { display: none; color: #ff3b3b; font-size: 18px; margin-left: 8px; }
-        a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: background 0.3s ease; }
+        a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
         a.back:hover { background-color: #cc0000; }
     </style>
 </head>
@@ -37,9 +37,7 @@
             <th>Azioni</th>
         </tr>
     </thead>
-    <tbody id="usersTableBody">
-        <!-- righe generate dinamicamente -->
-    </tbody>
+    <tbody id="usersTableBody"></tbody>
 </table>
 
 <a href="index.html" class="back">Torna alla Dashboard</a>
@@ -60,19 +58,29 @@ const ruoli = [
 
 const tbody = document.getElementById('usersTableBody');
 
+function addLog(user, action) {
+    // apre log.html in un'altra scheda o tab e aggiunge la riga
+    const logWindow = window.open("log.html","_blank");
+    if(!logWindow.addLog){
+        logWindow.onload = () => logWindow.addLog(user, action);
+    } else {
+        logWindow.addLog(user, action);
+    }
+}
+
 users.forEach(user => {
     const tr = document.createElement('tr');
 
-    // Nome + icona blocco
     const tdName = document.createElement('td');
     tdName.textContent = user.name;
+
     const blockedIcon = document.createElement('span');
     blockedIcon.className = 'blocked-icon';
     blockedIcon.textContent = '⛔';
+    if(user.blocked) blockedIcon.style.display='inline';
     tdName.appendChild(blockedIcon);
     tr.appendChild(tdName);
 
-    // Ruolo
     const tdRole = document.createElement('td');
     const select = document.createElement('select');
     ruoli.forEach(r => {
@@ -85,7 +93,6 @@ users.forEach(user => {
     tdRole.appendChild(select);
     tr.appendChild(tdRole);
 
-    // Azioni
     const tdActions = document.createElement('td');
     const divWrapper = document.createElement('div');
     divWrapper.style.position = 'relative';
@@ -100,27 +107,46 @@ users.forEach(user => {
 
     const btnBlocca = document.createElement('button');
     btnBlocca.textContent = 'Blocca';
-    btnBlocca.onclick = () => { user.blocked = true; blockedIcon.style.display='inline'; menu.style.display='none'; };
+    btnBlocca.onclick = () => {
+        if(["Owner","Boss"].includes(myRole)){
+            user.blocked = true;
+            blockedIcon.style.display='inline';
+            menu.style.display='none';
+            addLog(user.name, "Bloccato");
+        } else alert("Non hai permessi per bloccare");
+    };
 
     const btnSblocca = document.createElement('button');
     btnSblocca.textContent = 'Sblocca';
-    btnSblocca.onclick = () => { user.blocked = false; blockedIcon.style.display='none'; menu.style.display='none'; };
+    btnSblocca.onclick = () => {
+        if(["Owner","Boss"].includes(myRole)){
+            user.blocked = false;
+            blockedIcon.style.display='none';
+            menu.style.display='none';
+            addLog(user.name, "Sbloccato");
+        } else alert("Non hai permessi per sbloccare");
+    };
 
     const btnEspelli = document.createElement('button');
     btnEspelli.textContent = 'Espelli';
-    btnEspelli.onclick = () => { menu.style.display='none'; alert(`${user.name} espulso`); };
+    btnEspelli.onclick = () => {
+        menu.style.display='none';
+        alert(`${user.name} espulso`);
+        addLog(user.name, "Espulso");
+    };
 
     menu.appendChild(btnBlocca);
     menu.appendChild(btnSblocca);
     menu.appendChild(btnEspelli);
     divWrapper.appendChild(menu);
 
-    // Mostra/nascondi pulsante matita
+    // Ruolo matita
     if(!["Owner","Boss","Vice Boss"].includes(myRole)) btnEdit.style.display='none';
     else if(myRole==="Vice Boss"){ btnBlocca.style.display='none'; btnSblocca.style.display='none'; }
 
     btnEdit.onclick = (e) => {
-        e.stopPropagation(); // evita che il click sul documento chiuda subito
+        e.stopPropagation();
+        document.querySelectorAll('.action-menu').forEach(m => { if(m!==menu) m.style.display='none'; });
         menu.style.display = menu.style.display==='block' ? 'none' : 'block';
     };
 
@@ -129,7 +155,7 @@ users.forEach(user => {
     tbody.appendChild(tr);
 });
 
-// Click ovunque chiude tutti i menu
+// chiude menu cliccando fuori
 document.addEventListener('click', () => {
     document.querySelectorAll('.action-menu').forEach(menu => menu.style.display='none');
 });
