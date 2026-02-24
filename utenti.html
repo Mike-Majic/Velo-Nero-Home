@@ -1,71 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Comandi - VELO NERO</title>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            background-color: #121212;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px 20px;
+<script>
+    const myRole = "Boss"; // ruolo di chi sta usando la dashboard
+
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        const parentRow = btn.closest('tr');
+
+        // Mostra il pulsante solo se Owner, Boss o Vice Boss
+        if(!["Owner","Boss","Vice Boss"].includes(myRole)) {
+            btn.style.display = 'none';
+        } else {
+            // Personalizza le azioni visibili
+            const menu = btn.nextElementSibling;
+            if(myRole === "Vice Boss") {
+                // Vice Boss può solo Espellere
+                menu.querySelectorAll('button').forEach(b => {
+                    if(b.innerText !== "Espelli") b.style.display = 'none';
+                });
+            }
+            // Owner e Boss vedono tutto
         }
+    });
 
-        h1 {
-            color: #ff3b3b;
-            font-size: 50px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 12px #ff3b3b80;
-        }
+    function toggleMenu(id) {
+        const menu = document.getElementById(id);
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
 
-        p.subtitle {
-            color: #ff7b7b;
-            font-size: 18px;
-            margin-bottom: 40px;
-        }
-
-        .command-box {
-            display: inline-block;
-            background: linear-gradient(145deg, #1a1a1a, #2b0000);
-            padding: 30px 40px;
-            margin: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .command-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #ff1a1a99, 0 0 25px #ff0000cc inset;
-        }
-
-        a.back {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #ff3b3b;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-
-        a.back:hover {
-            background-color: #cc0000;
-        }
-    </style>
-</head>
-<body>
-
-<h1>Comandi</h1>
-<p class="subtitle">Sezione pronta per collegamenti futuri</p>
-
-<div class="command-box">
-    <h2>Funzioni disponibili</h2>
-    <p>Nessuna simulazione attiva</p>
-</div>
-
-<a href="index.html" class="back">Torna alla Dashboard</a>
-
-</body>
-</html>
+    function azioneUtente(user, azione) {
+        alert(`Azione "${azione}" eseguita su ${user}`);
+        // qui potrai inserire codice per bloccare/sbloccare/espellere realmente
+    }
+</script>
