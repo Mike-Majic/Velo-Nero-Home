@@ -1,239 +1,376 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VELO NERO - Diario</title>
+  <meta charset="UTF-8" />
+  <title>VELO NERO – Diario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    :root{
-      --bg:#060606;
-      --panel: rgba(25,25,25,.82);
-      --text:#f2f2f2;
-      --red:#ff1e1e;
-      --glow: 0 0 18px rgba(255,0,0,.35), 0 0 40px rgba(255,0,0,.18);
-      --glow-soft: 0 0 12px rgba(255,0,0,.25), 0 0 26px rgba(255,0,0,.12);
-      --radius: 18px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
     body{
+      background:#0d0d0d;
+      color:#fff;
+      font-family:Arial,sans-serif;
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 50% 10%, rgba(255,0,0,.14), transparent 55%),
-                  radial-gradient(1000px 600px at 50% 80%, rgba(255,0,0,.08), transparent 60%),
-                  var(--bg);
-      color:var(--text);
+      padding:60px 20px;
+      text-align:center;
     }
 
-    .wrap{max-width:1180px;margin:0 auto;padding:34px 18px 44px}
+    h1{
+      font-size:60px;
+      letter-spacing:5px;
+      color:#ff1a1a;
+      text-shadow:0 0 12px #ff000080;
+      margin:0 0 10px 0;
+    }
+
+    .subtitle{
+      font-size:20px;
+      color:#ff6666;
+      margin-bottom:28px;
+    }
 
     .topbar{
-      display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-bottom:10px
-    }
-    .pill{
-      background: rgba(10,10,10,.65);
-      border: 1px solid rgba(255,0,0,.35);
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: 999px;
-      box-shadow: var(--glow-soft);
-      font-size: 13px;
+      max-width:1200px;
+      margin:0 auto 18px auto;
       display:flex;
-      gap:8px;
-      align-items:center;
-      white-space:nowrap;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
     }
-    .pill strong{color:#fff;font-weight:700}
-    .pill-btn{
+
+    .pill{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #ff1a1a55;
+      background:#1a1a1a;
+      font-size:13px;
+      box-shadow:0 0 10px #ff1a1a22 inset,0 0 10px #ff000033;
+    }
+
+    .linkbtn{
+      background:none;
+      border:1px solid #ff1a1a55;
+      color:#fff;
+      padding:8px 12px;
+      border-radius:10px;
       cursor:pointer;
-      background: rgba(12,12,12,.75);
-      border: 1px solid rgba(255,0,0,.45);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 999px;
-      box-shadow: var(--glow-soft);
-      font-weight:700;
+      box-shadow:0 0 10px #ff1a1a22 inset,0 0 10px #ff000033;
     }
-    .pill-btn:hover{filter:brightness(1.05)}
-    .pill-btn:active{transform:translateY(1px)}
 
-    .hero{text-align:center;margin-top:10px;margin-bottom:18px}
-    .title{
-      font-size: 56px;
-      letter-spacing: 8px;
-      margin: 12px 0 6px;
-      color: var(--red);
-      text-shadow: 0 0 16px rgba(255,0,0,.45), 0 0 42px rgba(255,0,0,.20);
-      font-weight: 900;
+    .linkbtn:hover{
+      background:#2b0000;
+      border-color:#ff1a1aaa;
     }
-    .subtitle{margin:0 0 22px;color:#ff8a8a;opacity:.9;font-size:18px;letter-spacing:.8px}
 
-    .nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
+    .nav{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:28px;
+    }
+
     .nav button{
-      cursor:pointer;padding:10px 18px;border-radius:14px;border:1px solid rgba(255,0,0,.45);
-      background: rgba(15,15,15,.7);color:#fff;box-shadow: var(--glow-soft);
-      font-weight:800;letter-spacing:.3px;min-width:110px
+      background:#1a1a1a;
+      color:#fff;
+      border:1px solid #ff1a1a55;
+      padding:10px 16px;
+      border-radius:10px;
+      cursor:pointer;
+      box-shadow:0 0 10px #ff1a1a44 inset,0 0 12px #ff000066;
     }
+
     .nav button.active{
-      background: rgba(90,0,0,.35);
-      border-color: rgba(255,0,0,.75);
-      box-shadow: var(--glow);
+      background:#2b0000;
+      border-color:#ff1a1aaa;
+      box-shadow:0 0 18px #ff1a1a88 inset,0 0 18px #ff0000aa;
     }
 
-    .panel{
-      background: var(--panel);
-      border: 1px solid rgba(255,0,0,.35);
-      border-radius: var(--radius);
-      box-shadow: var(--glow);
-      padding: 18px;
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      text-align:left;
     }
 
-    .search-row{
-      display:flex;gap:12px;align-items:stretch;flex-wrap:wrap
+    .searchbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
     }
-    .search-box{flex:1 1 520px;display:flex;align-items:stretch;position:relative}
-    .search-box input{
-      width:100%;height:44px;padding:0 14px 0 40px;border-radius:14px;
-      border:1px solid rgba(255,0,0,.35);outline:none;background: rgba(6,6,6,.55);
-      color:#fff;box-shadow: var(--glow-soft);font-size:14px
+
+    .searchbar input{
+      flex:1;
+      background:#121212;
+      border:1px solid #ff1a1a55;
+      color:#fff;
+      padding:12px 14px;
+      border-radius:12px;
     }
-    .search-ico{
-      position:absolute;left:12px;top:50%;transform:translateY(-50%);
-      opacity:.9;color:#ffb1b1;font-size:16px;pointer-events:none
-    }
+
     .btn{
-      height:44px;padding:0 18px;border-radius:14px;border:1px solid rgba(255,0,0,.45);
-      background: rgba(18,18,18,.75);color:#fff;box-shadow: var(--glow-soft);
-      font-weight:900;letter-spacing:.2px;cursor:pointer;min-width:140px;
-      display:inline-flex;align-items:center;justify-content:center
+      background:#1a1a1a;
+      border:1px solid #ff1a1a99;
+      color:#fff;
+      padding:10px 16px;
+      border-radius:10px;
+      cursor:pointer;
+      box-shadow:0 0 12px #ff1a1a44 inset,0 0 12px #ff000066;
     }
 
-    .hint{margin:10px 0 12px;color:#ffaaaa;font-size:12px;opacity:.95}
+    .btn:hover{
+      background:#2b0000;
+    }
 
     table{
-      width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;
-      border:1px solid rgba(255,0,0,.22);background: rgba(10,10,10,.40)
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
     }
-    thead th{
-      text-align:left;padding:12px 14px;color: var(--red);
-      border-bottom:1px solid rgba(255,0,0,.18);
-      font-weight:900;letter-spacing:.3px;background: rgba(14,14,14,.55)
-    }
-    tbody td{padding:11px 14px;border-bottom:1px solid rgba(255,0,0,.10);color:#f1f1f1}
-    tbody tr:last-child td{border-bottom:none}
-    tbody tr:hover td{background: rgba(255,0,0,.06);cursor:pointer}
-    .empty-row{color:#d8d8d8;opacity:.9;font-style:italic}
 
-    @media (max-width: 980px){
-      .title{font-size:42px;letter-spacing:6px}
-      .btn{min-width:120px;flex:1 1 auto}
-      .search-box{flex:1 1 100%}
+    th,td{
+      padding:12px;
+      border:1px solid #ff1a1a33;
+      background:#1e1e1e;
+      vertical-align:top;
+    }
+
+    th{
+      color:#ff3b3b;
+    }
+
+    tr:hover td{
+      background:#3a0000;
+      cursor:pointer;
+    }
+
+    .muted{
+      color:#ffaaaa;
+      font-size:13px;
+    }
+
+    /* MODAL */
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.7);
+      z-index:1000;
+      padding:24px;
+    }
+
+    .modal{
+      max-width:900px;
+      margin:0 auto;
+      background:#121212;
+      border:1px solid #ff1a1a77;
+      border-radius:14px;
+      padding:18px;
+      box-shadow:0 0 20px #ff1a1a33,0 0 22px #ff000055 inset;
+    }
+
+    .modal h3{
+      color:#ff3b3b;
+      margin-top:0;
+    }
+
+    textarea,input,select{
+      width:100%;
+      background:#121212;
+      border:1px solid #ff1a1a55;
+      color:#fff;
+      padding:10px;
+      border-radius:10px;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .right{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
 
-    <div class="topbar">
-      <div class="pill" id="pillEmail">m.colurci@gmail.com</div>
-      <div class="pill"><span>Ruolo:</span> <strong id="pillRole">Owner</strong></div>
-      <button class="pill-btn" id="btnLogout">Esci</button>
+  <div class="topbar">
+    <span class="pill" id="userEmail">—</span>
+    <span class="pill" id="userRole">Ruolo: —</span>
+    <button class="linkbtn" onclick="location.href='index.html'">Esci</button>
+  </div>
+
+  <h1>VELO NERO</h1>
+  <div class="subtitle">Diario</div>
+
+  <div class="nav">
+    <button onclick="location.href='index.html'">Dashboard</button>
+    <button onclick="location.href='index.html#azioni'">Azioni</button>
+    <button class="active">Diario</button>
+    <button onclick="location.href='logs.html'">Log</button>
+  </div>
+
+  <div class="container">
+
+    <div class="searchbar">
+      <input id="searchInput" placeholder="Cerca nel diario (titolo, testo, autore)" />
+      <button class="btn" onclick="loadDiary()">Cerca</button>
+      <button class="btn" onclick="clearSearch()">Pulisci</button>
+      <button class="btn" onclick="openNew()">Nuova nota</button>
     </div>
 
-    <div class="hero">
-      <div class="title">VELO NERO</div>
-      <div class="subtitle">Diario</div>
-
-      <div class="nav">
-        <button id="navDashboard">Dashboard</button>
-        <button id="navUtenti">Utenti</button>
-        <button id="navAzioni">Azioni</button>
-        <button class="active" id="navDiario">Diario</button>
-        <button id="navLog">Log</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="search-row">
-        <div class="search-box">
-          <div class="search-ico">🔎</div>
-          <input id="q" type="text" placeholder="Cerca nel diario.. (titolo, nomi, accordi, note)" />
-        </div>
-
-        <button class="btn" id="btnSearch">Cerca</button>
-        <button class="btn" id="btnClear">Pulisci</button>
-        <button class="btn" id="btnNew">Nuova nota</button>
-      </div>
-
-      <div class="hint">Invio per cercare .. click su una riga per aprire la nota</div>
-
-      <table>
-        <thead>
-          <tr>
-            <th style="width:24%">Quando</th>
-            <th style="width:22%">Tipo</th>
-            <th>Risultato</th>
-          </tr>
-        </thead>
-        <tbody id="tbody">
-          <tr><td class="empty-row" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Quando</th>
+          <th>Tipo</th>
+          <th>Risultato</th>
+        </tr>
+      </thead>
+      <tbody id="diaryTable">
+        <tr><td colspan="3" class="muted">Caricamento…</td></tr>
+      </tbody>
+    </table>
 
   </div>
 
-  <script>
-    const go = (path) => { window.location.href = path; };
+  <!-- MODAL -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="modalTitle">Nuova nota</h3>
 
-    document.getElementById("navDashboard").onclick = () => go("index.html");
-    document.getElementById("navUtenti").onclick    = () => go("utenti.html");
-    document.getElementById("navAzioni").onclick    = () => go("azioni.html");
-    document.getElementById("navDiario").onclick    = () => go("diario.html");
-    document.getElementById("navLog").onclick       = () => go("logs.html");
+      <div class="row">
+        <div style="flex:1;">
+          <label>Titolo</label>
+          <input id="noteTitle">
+        </div>
+        <div style="width:200px;">
+          <label>Tipo</label>
+          <select id="noteType">
+            <option>Informazione</option>
+            <option>Accordo</option>
+            <option>Avvertimento</option>
+            <option>Importante</option>
+          </select>
+        </div>
+      </div>
 
-    document.getElementById("btnLogout").onclick = () => go("index.html");
+      <div class="row">
+        <div style="flex:1;">
+          <label>Testo</label>
+          <textarea id="noteText"></textarea>
+        </div>
+      </div>
 
-    const q = document.getElementById("q");
-    const tbody = document.getElementById("tbody");
+      <div class="row">
+        <div class="right">
+          <button class="btn" onclick="closeModal()">Chiudi</button>
+          <button class="btn" onclick="saveNote()">Salva</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    function setEmpty(msg){
-      tbody.innerHTML = '<tr><td class="empty-row" colspan="3">' + msg + '</td></tr>';
-    }
+<script>
+const API = "/api/diario";
 
-    document.getElementById("btnClear").onclick = () => {
-      q.value = "";
-      setEmpty("Scrivi qualcosa per cercare nel diario");
-      q.focus();
-    };
+function getSession(){
+  try{
+    return JSON.parse(localStorage.getItem("vn_session_v1")) || null;
+  }catch{
+    return null;
+  }
+}
 
-    document.getElementById("btnNew").onclick = () => {
-      alert("Qui colleghiamo la creazione nuova nota (appena mi dici endpoint o logica).");
-    };
+function boot(){
+  const s = getSession();
+  if(!s?.email){
+    location.href = "index.html";
+    return;
+  }
+  document.getElementById("userEmail").textContent = s.email;
+  loadDiary();
+}
 
-    async function doSearch(){
-      const term = q.value.trim();
-      if(!term){
-        setEmpty("Scrivi qualcosa per cercare nel diario");
-        return;
-      }
+async function loadDiary(){
+  const q = document.getElementById("searchInput").value || "";
+  const res = await fetch(API + "?q=" + encodeURIComponent(q));
+  const data = await res.json();
 
-      // Qui va la fetch reale quando rimettiamo /api
-      // const r = await fetch("/api/diary/search?q=" + encodeURIComponent(term));
-      // const data = await r.json();
+  const tb = document.getElementById("diaryTable");
+  tb.innerHTML = "";
 
-      tbody.innerHTML = "";
-      const tr = document.createElement("tr");
-      tr.innerHTML = '<td>--</td><td>--</td><td>Ricerca: ' + term + '</td>';
-      tr.onclick = () => alert("Qui apriamo la nota selezionata.");
-      tbody.appendChild(tr);
-    }
+  if(!data.length){
+    tb.innerHTML = `<tr><td colspan="3" class="muted">Nessuna nota</td></tr>`;
+    return;
+  }
 
-    document.getElementById("btnSearch").onclick = doSearch;
-    q.addEventListener("keydown", (e) => { if(e.key === "Enter") doSearch(); });
-  </script>
+  data.forEach(n=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(n.ts).toLocaleString()}</td>
+      <td>${n.type}</td>
+      <td>${n.title}</td>
+    `;
+    tr.onclick = ()=>openView(n);
+    tb.appendChild(tr);
+  });
+}
+
+function clearSearch(){
+  document.getElementById("searchInput").value="";
+  loadDiary();
+}
+
+function openNew(){
+  document.getElementById("modalTitle").textContent="Nuova nota";
+  document.getElementById("noteTitle").value="";
+  document.getElementById("noteText").value="";
+  document.getElementById("overlay").style.display="block";
+}
+
+function openView(n){
+  document.getElementById("modalTitle").textContent=n.title;
+  document.getElementById("noteTitle").value=n.title;
+  document.getElementById("noteText").value=n.text;
+  document.getElementById("noteType").value=n.type;
+  document.getElementById("overlay").style.display="block";
+}
+
+function closeModal(){
+  document.getElementById("overlay").style.display="none";
+}
+
+async function saveNote(){
+  const payload={
+    title:noteTitle.value,
+    text:noteText.value,
+    type:noteType.value
+  };
+
+  await fetch(API,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(payload)
+  });
+
+  closeModal();
+  loadDiary();
+}
+
+boot();
+</script>
+
 </body>
 </html>
