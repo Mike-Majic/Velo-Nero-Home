@@ -721,13 +721,6 @@ function goToLogs() {
 const url = new URL("/logs/", window.location.origin).href;
 window.location.assign(url);
   
-  // navigazione forzata
-  window.location.assign(url);
-}
-    if (!isAdmin()) { alert("Permesso negato: solo gli admin possono visualizzare i log"); return; }
-      window.location.href = "logs.html";
-    }
-
     // =========================
     // LOGIN LOGS
     // =========================
