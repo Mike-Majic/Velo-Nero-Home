@@ -392,12 +392,33 @@
   </div>
 
   <!-- DASHBOARD -->
-  <div id="dashboard" class="section">
-    <div class="cards">
-      <div class="box" onclick="showSection('azioni')">
-        <h2>Azioni</h2>
-        <p>Azioni</p>
-      </div>
+  <!-- DASHBOARD -->
+<div id="dashboard" class="section">
+  <div class="cards">
+    <div class="box" onclick="showSection('azioni')">
+      <h2>Azioni</h2>
+      <p>Azioni</p>
+    </div>
+
+    <div class="box" id="cardUtenti" onclick="showSection('utenti')">
+      <h2>Utenti</h2>
+      <p>Gestione</p>
+    </div>
+
+    <div class="box" onclick="goToDiario()">
+      <h2>Diario</h2>
+      <p>Note</p>
+    </div>
+
+    <!-- BOX GRANDE: GESTIONE ARMI / DROGA -->
+    <div class="box wide" onclick="window.location.href='comandi.html'">
+      <h2>Gestione Armi-Droga</h2>
+      <p>Funzioni</p>
+    </div>
+  </div>
+
+  <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
+</div>
 
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
         <h2>Utenti</h2>
