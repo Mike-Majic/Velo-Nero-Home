@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VELO NERO - Diario</title>
+
+  <style>
+    :root{
+      --bg:#060606;
+      --panel: rgba(25,25,25,.82);
+      --text:#f2f2f2;
+      --red:#ff1e1e;
+      --glow: 0 0 18px rgba(255,0,0,.35), 0 0 40px rgba(255,0,0,.18);
+      --glow-soft: 0 0 12px rgba(255,0,0,.25), 0 0 26px rgba(255,0,0,.12);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 50% 10%, rgba(255,0,0,.14), transparent 55%),
+                  radial-gradient(1000px 600px at 50% 80%, rgba(255,0,0,.08), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{max-width:1180px;margin:0 auto;padding:34px 18px 44px}
+
+    .topbar{
+      display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-bottom:10px
+    }
+    .pill{
+      background: rgba(10,10,10,.65);
+      border: 1px solid rgba(255,0,0,.35);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 999px;
+      box-shadow: var(--glow-soft);
+      font-size: 13px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .pill strong{color:#fff;font-weight:700}
+    .pill-btn{
+      cursor:pointer;
+      background: rgba(12,12,12,.75);
+      border: 1px solid rgba(255,0,0,.45);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      box-shadow: var(--glow-soft);
+      font-weight:700;
+    }
+    .pill-btn:hover{filter:brightness(1.05)}
+    .pill-btn:active{transform:translateY(1px)}
+
+    .hero{text-align:center;margin-top:10px;margin-bottom:18px}
+    .title{
+      font-size: 56px;
+      letter-spacing: 8px;
+      margin: 12px 0 6px;
+      color: var(--red);
+      text-shadow: 0 0 16px rgba(255,0,0,.45), 0 0 42px rgba(255,0,0,.20);
+      font-weight: 900;
+    }
+    .subtitle{margin:0 0 22px;color:#ff8a8a;opacity:.9;font-size:18px;letter-spacing:.8px}
+
+    .nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
+    .nav button{
+      cursor:pointer;padding:10px 18px;border-radius:14px;border:1px solid rgba(255,0,0,.45);
+      background: rgba(15,15,15,.7);color:#fff;box-shadow: var(--glow-soft);
+      font-weight:800;letter-spacing:.3px;min-width:110px
+    }
+    .nav button.active{
+      background: rgba(90,0,0,.35);
+      border-color: rgba(255,0,0,.75);
+      box-shadow: var(--glow);
+    }
+
+    .panel{
+      background: var(--panel);
+      border: 1px solid rgba(255,0,0,.35);
+      border-radius: var(--radius);
+      box-shadow: var(--glow);
+      padding: 18px;
+    }
+
+    .search-row{
+      display:flex;gap:12px;align-items:stretch;flex-wrap:wrap
+    }
+    .search-box{flex:1 1 520px;display:flex;align-items:stretch;position:relative}
+    .search-box input{
+      width:100%;height:44px;padding:0 14px 0 40px;border-radius:14px;
+      border:1px solid rgba(255,0,0,.35);outline:none;background: rgba(6,6,6,.55);
+      color:#fff;box-shadow: var(--glow-soft);font-size:14px
+    }
+    .search-ico{
+      position:absolute;left:12px;top:50%;transform:translateY(-50%);
+      opacity:.9;color:#ffb1b1;font-size:16px;pointer-events:none
+    }
+    .btn{
+      height:44px;padding:0 18px;border-radius:14px;border:1px solid rgba(255,0,0,.45);
+      background: rgba(18,18,18,.75);color:#fff;box-shadow: var(--glow-soft);
+      font-weight:900;letter-spacing:.2px;cursor:pointer;min-width:140px;
+      display:inline-flex;align-items:center;justify-content:center
+    }
+
+    .hint{margin:10px 0 12px;color:#ffaaaa;font-size:12px;opacity:.95}
+
+    table{
+      width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;
+      border:1px solid rgba(255,0,0,.22);background: rgba(10,10,10,.40)
+    }
+    thead th{
+      text-align:left;padding:12px 14px;color: var(--red);
+      border-bottom:1px solid rgba(255,0,0,.18);
+      font-weight:900;letter-spacing:.3px;background: rgba(14,14,14,.55)
+    }
+    tbody td{padding:11px 14px;border-bottom:1px solid rgba(255,0,0,.10);color:#f1f1f1}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background: rgba(255,0,0,.06);cursor:pointer}
+    .empty-row{color:#d8d8d8;opacity:.9;font-style:italic}
+
+    @media (max-width: 980px){
+      .title{font-size:42px;letter-spacing:6px}
+      .btn{min-width:120px;flex:1 1 auto}
+      .search-box{flex:1 1 100%}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="pill" id="pillEmail">m.colurci@gmail.com</div>
+      <div class="pill"><span>Ruolo:</span> <strong id="pillRole">Owner</strong></div>
+      <button class="pill-btn" id="btnLogout">Esci</button>
+    </div>
+
+    <div class="hero">
+      <div class="title">VELO NERO</div>
+      <div class="subtitle">Diario</div>
+
+      <div class="nav">
+        <button id="navDashboard">Dashboard</button>
+        <button id="navUtenti">Utenti</button>
+        <button id="navAzioni">Azioni</button>
+        <button class="active" id="navDiario">Diario</button>
+        <button id="navLog">Log</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="search-row">
+        <div class="search-box">
+          <div class="search-ico">🔎</div>
+          <input id="q" type="text" placeholder="Cerca nel diario.. (titolo, nomi, accordi, note)" />
+        </div>
+
+        <button class="btn" id="btnSearch">Cerca</button>
+        <button class="btn" id="btnClear">Pulisci</button>
+        <button class="btn" id="btnNew">Nuova nota</button>
+      </div>
+
+      <div class="hint">Invio per cercare .. click su una riga per aprire la nota</div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Quando</th>
+            <th style="width:22%">Tipo</th>
+            <th>Risultato</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td class="empty-row" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    const go = (path) => { window.location.href = path; };
+
+    document.getElementById("navDashboard").onclick = () => go("index.html");
+    document.getElementById("navUtenti").onclick    = () => go("utenti.html");
+    document.getElementById("navAzioni").onclick    = () => go("azioni.html");
+    document.getElementById("navDiario").onclick    = () => go("diario.html");
+    document.getElementById("navLog").onclick       = () => go("logs.html");
+
+    document.getElementById("btnLogout").onclick = () => go("index.html");
+
+    const q = document.getElementById("q");
+    const tbody = document.getElementById("tbody");
+
+    function setEmpty(msg){
+      tbody.innerHTML = '<tr><td class="empty-row" colspan="3">' + msg + '</td></tr>';
+    }
+
+    document.getElementById("btnClear").onclick = () => {
+      q.value = "";
+      setEmpty("Scrivi qualcosa per cercare nel diario");
+      q.focus();
+    };
+
+    document.getElementById("btnNew").onclick = () => {
+      alert("Qui colleghiamo la creazione nuova nota (appena mi dici endpoint o logica).");
+    };
+
+    async function doSearch(){
+      const term = q.value.trim();
+      if(!term){
+        setEmpty("Scrivi qualcosa per cercare nel diario");
+        return;
+      }
+
+      // Qui va la fetch reale quando rimettiamo /api
+      // const r = await fetch("/api/diary/search?q=" + encodeURIComponent(term));
+      // const data = await r.json();
+
+      tbody.innerHTML = "";
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td>--</td><td>--</td><td>Ricerca: ' + term + '</td>';
+      tr.onclick = () => alert("Qui apriamo la nota selezionata.");
+      tbody.appendChild(tr);
+    }
+
+    document.getElementById("btnSearch").onclick = doSearch;
+    q.addEventListener("keydown", (e) => { if(e.key === "Enter") doSearch(); });
+  </script>
+</body>
+</html>
