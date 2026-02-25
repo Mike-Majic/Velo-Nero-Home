@@ -711,8 +711,19 @@
     }
 
     function goToDiario() { window.location.href = "diario.html"; }
-    function goToLogs() {
-      if (!isAdmin()) { alert("Permesso negato: solo gli admin possono visualizzare i log"); return; }
+function goToLogs() {
+  if (!isAdmin()) {
+    alert("Permesso negato: solo gli admin possono visualizzare i log");
+    return;
+  }
+
+  // costruisce l’URL corretto anche se sei in una sottopagina
+  const url = new URL("/logs.html", window.location.origin).href;
+
+  // navigazione forzata
+  window.location.assign(url);
+}
+    if (!isAdmin()) { alert("Permesso negato: solo gli admin possono visualizzare i log"); return; }
       window.location.href = "logs.html";
     }
 
