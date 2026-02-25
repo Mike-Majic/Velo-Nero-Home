@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Gestione - VELO NERO</title>
+  <title>Utenti - VELO NERO</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      background-color: #121212;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      padding: 40px 18px;
-      margin: 0;
-    }
+    body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px 18px; text-align: center; margin:0; }
+    h1 { color: #ff3b3b; font-size: 50px; margin: 12px 0 10px 0; text-shadow: 0 0 12px #ff3b3b80; }
 
     .topbar{
-      max-width:1200px; margin:0 auto 14px auto;
+      max-width:1200px; margin:0 auto 10px auto;
       display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
     }
     .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
@@ -32,142 +27,74 @@
     }
     .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
-    h1 {
-      color: #ff3b3b;
-      font-size: 46px;
-      margin: 10px auto 6px auto;
-      max-width: 1200px;
-      text-shadow: 0 0 12px #ff3b3b80;
-    }
-    .subtitle {
-      max-width: 1200px;
-      margin: 0 auto 16px auto;
-      color:#ff7b7b;
+    .hint { color:#ff7b7b; margin: 0 0 16px 0; }
+
+    table { width: 92%; max-width:1200px; margin: 0 auto; border-collapse: collapse; }
+    th, td { padding: 12px 14px; border: 1px solid #ff3b3b33; text-align: left; vertical-align: top; }
+    th { background-color: #1e1e1e; color: #ff3b3b; }
+    td { background-color: #1e1e1e; }
+    tr:hover td { background-color: #3a0000; }
+
+    select {
+      background:#121212; border:1px solid #ff1a1a55; color:#fff; border-radius:10px;
+      padding:8px 10px; outline:none;
     }
 
-    .wrap { max-width: 1200px; margin: 0 auto; }
-
-    .card{
-      background: linear-gradient(145deg, #1a1a1a, #2b0000);
-      border-radius: 12px;
-      box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
-      padding: 16px;
-      margin-top: 14px;
-    }
-
-    .row{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-      justify-content:space-between;
-      margin-bottom: 12px;
-    }
-
-    input, select{
-      padding:10px 12px;
-      border-radius:10px;
-      border:1px solid #ff1a1a55;
-      background:#141414;
-      color:#fff;
-      outline:none;
-      box-sizing:border-box;
-    }
-
-    table{
-      width:100%;
-      border-collapse: collapse;
-      overflow:hidden;
-      border-radius: 10px;
-    }
-    th, td{
-      border-bottom: 1px solid #ff1a1a22;
-      padding: 10px 10px;
-      text-align:left;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-    th{ color:#ffb3b3; font-weight: 700; }
-    tr:hover td{ background:#1a0c0c; }
-
-    .badge{
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:999px;
-      border:1px solid #ff1a1a55;
-      background:#1a1a1a;
-      font-size:12px;
-    }
-
-    .btn{
-      border:1px solid #ff1a1a55;
-      background:#1a1a1a;
-      color:#fff;
-      cursor:pointer;
-      padding:8px 12px;
-      border-radius:10px;
+    .btn {
+      padding: 9px 12px; border-radius: 8px; border: 1px solid #ff3b3b66;
+      background:#1a1a1a; color:#fff; cursor:pointer;
+      margin: 4px 6px 0 0;
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
     }
-    .btn:hover{ background:#2b0000; border-color:#ff1a1aaa; }
+    .btn:hover { background:#2b0000; }
+    .small { padding:7px 10px; font-size:13px; border-radius:8px; }
 
-    .ok { color:#7bffb5; font-size:13px; }
-    .err{ color:#ff7b7b; font-size:13px; }
-
-    .muted{ color:#ffb3b3; font-size:13px; }
+    .muted { color:#ff7b7b; }
+    .ok { color:#7bffb5; }
+    .err { color:#ff7b7b; }
   </style>
 </head>
 <body>
 
-  <div class="topbar">
-    <a href="index.html" class="linkbtn">⬅ Dashboard</a>
-    <div class="userpill">
-      <span class="pill" id="pillEmail">Non autenticato</span>
-      <span class="pill" id="pillRole">Ruolo: —</span>
-      <button class="linkbtn" onclick="logout()">Esci</button>
-    </div>
+<div class="topbar">
+  <a href="index.html" class="linkbtn">⬅ Dashboard</a>
+  <div class="userpill">
+    <span class="pill" id="pillEmail">Non autenticato</span>
+    <span class="pill" id="pillRole">Ruolo: —</span>
+    <button class="linkbtn" onclick="logout()">Esci</button>
   </div>
+</div>
 
-  <h1>Gestione</h1>
-  <div class="subtitle">Lista utenti + cambio ruolo (solo vice/boss/owner).</div>
+<h1>Utenti</h1>
+<p class="hint">Accesso riservato ad Admin (owner / boss / vice)</p>
 
-  <div class="wrap">
+<div id="msg" class="muted" style="max-width:1200px;margin:0 auto 10px auto;"></div>
 
-    <div class="card">
-      <div class="row">
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <input id="q" placeholder="Cerca email o nome" />
-          <button class="btn" onclick="loadUsers()">Aggiorna</button>
-        </div>
-        <div class="muted" id="meta">—</div>
-      </div>
+<div style="max-width:1200px;margin:0 auto 12px auto; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+  <button class="btn small" onclick="loadUsers()">Aggiorna</button>
+</div>
 
-      <div id="msg"></div>
+<table>
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Nome</th>
+      <th>Ruolo</th>
+      <th>Azioni</th>
+    </tr>
+  </thead>
+  <tbody id="usersBody"></tbody>
+</table>
 
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Nome</th>
-              <th>Ruolo</th>
-              <th style="min-width:220px;">Azioni</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <tr><td colspan="4" class="muted">Caricamento ..</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
+<a href="index.html" class="linkbtn" style="margin-top:18px;">Torna alla Dashboard</a>
 
 <script>
   const pillEmail = document.getElementById("pillEmail");
   const pillRole  = document.getElementById("pillRole");
-  const tbody = document.getElementById("tbody");
   const msgEl = document.getElementById("msg");
-  const metaEl = document.getElementById("meta");
-  const qEl = document.getElementById("q");
+  const tbody = document.getElementById("usersBody");
 
-  let meRole = "none";
+  let myRole = "none";
 
   async function apiGet(url){
     const r = await fetch(url, { method:"GET", credentials:"include" });
@@ -184,13 +111,8 @@
   }
 
   function setMsg(ok, text){
-    msgEl.innerHTML = "";
-    if (!text) return;
-    const d = document.createElement("div");
-    d.className = ok ? "ok" : "err";
-    d.style.margin = "10px 0";
-    d.textContent = text;
-    msgEl.appendChild(d);
+    msgEl.className = ok ? "ok" : "err";
+    msgEl.textContent = text || "";
   }
 
   async function logout(){
@@ -198,82 +120,93 @@
     window.location.href = "index.html";
   }
 
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function allowedRolesForMe(){
+    const all = ["none","member","vice","boss","owner"];
+    if (myRole === "vice") return ["none","member"];
+    if (myRole === "boss") return ["none","member","vice","boss"];
+    if (myRole === "owner") return all;
+    return [];
+  }
+
   async function guard(){
     const me = await apiGet("/api/auth/me");
     if (!me?.authenticated) {
       window.location.href = "index.html";
-      return;
+      return false;
     }
 
-    const role = (me.user?.role || "none").toLowerCase();
-    if (!["vice","boss","owner"].includes(role)) {
-      alert("Accesso non consentito.");
+    myRole = (me.user?.role || "none").toLowerCase();
+    if (!["vice","boss","owner"].includes(myRole)) {
+      alert("Accesso negato.");
       window.location.href = "index.html";
-      return;
+      return false;
     }
 
-    meRole = role;
     pillEmail.textContent = me.user.email || "—";
-    pillRole.textContent  = "Ruolo: " + role;
-  }
-
-  function roleBadge(role){
-    return `<span class="badge">${role}</span>`;
-  }
-
-  function roleOptions(current){
-    const roles = ["none","member","vice","boss","owner"];
-
-    // vice: può solo member/none
-    let allowed = roles;
-    if (meRole === "vice") allowed = ["none","member"];
-    if (meRole === "boss") allowed = ["none","member","vice","boss"];
-    if (meRole === "owner") allowed = roles;
-
-    return allowed.map(r => {
-      const sel = (r === (current || "none")) ? "selected" : "";
-      return `<option value="${r}" ${sel}>${r}</option>`;
-    }).join("");
+    pillRole.textContent  = "Ruolo: " + myRole;
+    return true;
   }
 
   function render(users){
-    const q = (qEl.value || "").trim().toLowerCase();
-
-    const filtered = (users || []).filter(u => {
-      const email = (u.email || "").toLowerCase();
-      const name  = (u.name || "").toLowerCase();
-      if (!q) return true;
-      return email.includes(q) || name.includes(q);
-    });
-
-    metaEl.textContent = `${filtered.length} utenti`;
-
-    if (!filtered.length) {
+    tbody.innerHTML = "";
+    if (!users || !users.length) {
       tbody.innerHTML = `<tr><td colspan="4" class="muted">Nessun utente</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = filtered.map(u => {
-      const email = u.email || "";
-      const name  = u.name || "";
-      const role  = (u.role || "none").toLowerCase();
+    const allowed = allowedRolesForMe();
 
-      return `
-        <tr>
-          <td>${email}</td>
-          <td>${name || "<span class='muted'>—</span>"}</td>
-          <td>${roleBadge(role)}</td>
-          <td>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <select id="sel_${email.replace(/[^a-z0-9]/gi,'_')}">
-                ${roleOptions(role)}
-              </select>
-              <button class="btn" onclick="setRole('${email}')">Salva</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join("");
+    users.forEach(u => {
+      const tr = document.createElement("tr");
+
+      const tdEmail = document.createElement("td");
+      tdEmail.innerHTML = escapeHtml(u.email || "—");
+
+      const tdName = document.createElement("td");
+      tdName.textContent = u.name || "—";
+
+      const tdRole = document.createElement("td");
+      const currentRole = (u.role || "none").toLowerCase();
+
+      const sel = document.createElement("select");
+      allowed.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = r;
+        if (r === currentRole) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      tdRole.appendChild(sel);
+
+      const tdActions = document.createElement("td");
+      const btn = document.createElement("button");
+      btn.className = "btn small";
+      btn.textContent = "Salva";
+      btn.onclick = async () => {
+        setMsg(true, "");
+        const out = await apiPost("/api/admin/set-role", { email: u.email, role: sel.value });
+        if (!out?.ok) return setMsg(false, out?.error || "Errore");
+        setMsg(true, "Ruolo aggiornato ✅");
+        loadUsers();
+      };
+      tdActions.appendChild(btn);
+
+      tr.appendChild(tdEmail);
+      tr.appendChild(tdName);
+      tr.appendChild(tdRole);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
   }
 
   async function loadUsers(){
@@ -290,24 +223,9 @@
     render(out.users || []);
   }
 
-  async function setRole(email){
-    const selId = "sel_" + email.replace(/[^a-z0-9]/gi,'_');
-    const sel = document.getElementById(selId);
-    const role = sel ? sel.value : "none";
-
-    const out = await apiPost("/api/admin/set-role", { email, role });
-    if (!out?.ok) {
-      setMsg(false, out?.error || "Errore nel salvataggio");
-      return;
-    }
-
-    setMsg(true, "Ruolo aggiornato ✅");
-    loadUsers();
-  }
-
   (async function init(){
-    await guard();
-    await loadUsers();
+    const ok = await guard();
+    if (ok) loadUsers();
   })();
 </script>
 
