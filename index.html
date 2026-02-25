@@ -50,15 +50,6 @@
     .box h2 { font-size:28px; margin:0 0 10px 0; color:#ff1a1a; text-align:center; }
     .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; }
 
-    /* BOX GRANDE SOTTO */
-    .box.wide {
-      display:block;
-      min-width:0;
-      max-width:620px;
-      margin:18px auto 0 auto;
-      padding:42px 40px;
-    }
-
     .hint { color:#ff7b7b; font-size:14px; margin-top:6px; }
     .muted { color:#ffaaaa; font-size:13px; }
 
@@ -165,7 +156,6 @@
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
     <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
-    <button id="btnDiario" onclick="goToDiario()">Diario</button>
     <button id="btnLog" onclick="goToLogs()" style="display:none;">📋 Log</button>
   </div>
 
@@ -338,13 +328,8 @@
         <p>Gestione</p>
       </div>
 
-      <div class="box" onclick="goToDiario()">
-        <h2>Diario</h2>
-        <p>Note</p>
-      </div>
-
-      <div class="box wide" onclick="window.location.href='comandi.html'">
-        <h2>Gestione Armi-Droga</h2>
+      <div class="box" onclick="window.location.href='comandi.html'">
+        <h2>Comandi</h2>
         <p>Funzioni</p>
       </div>
     </div>
@@ -449,13 +434,6 @@
     // CONFIG (OWNER EMAIL)
     // =========================
     const OWNER_EMAIL = "m.colurci@gmail.com";
-
-    // =========================
-    // NAV EXTRA
-    // =========================
-    function goToDiario() {
-      window.location.href = "diario.html";
-    }
 
     // =========================
     // PASSWORD EYE
@@ -964,6 +942,7 @@
 
       pendingUser = existing;
 
+      // trusted -> salta 2FA (solo se già configurato)
       if (!existing.totpNeedsSetup && isTrustedForEmail(existing.email)) {
         finishLogin(existing);
         return;
@@ -1098,10 +1077,10 @@
 
       if (!canEditOps()) {
         dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni.";
-        if (actionsHint) actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+        actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
       } else {
         dashHint.textContent = "";
-        if (actionsHint) actionsHint.textContent = "Note visibili a tutti. Inserimento e modifiche abilitate perché hai un ruolo.";
+        actionsHint.textContent = "Note visibili a tutti. Inserimento e modifiche abilitate perché hai un ruolo.";
       }
 
       showOnly("dashboard");
@@ -1137,6 +1116,7 @@
           sel.appendChild(opt);
         });
 
+        // 🔒 Owner intoccabile
         if ((u.role || "") === "Owner") sel.disabled = true;
 
         sel.onchange = () => {
@@ -1167,6 +1147,7 @@
         const menu = document.createElement("div");
         menu.className = "action-menu";
 
+        // Reset 2FA
         const b4 = document.createElement("button");
         b4.textContent = "Reset 2FA";
         b4.onclick = () => {
@@ -1183,6 +1164,7 @@
           alert("2FA resettato.");
         };
 
+        // Reset Password
         const b5 = document.createElement("button");
         b5.textContent = "Reset Password";
         b5.onclick = () => {
@@ -1273,12 +1255,409 @@
     });
 
     // =========================
-    // AZIONI: il resto del tuo codice rimane invariato
-    // (qui sotto NON lo riscrivo perché nel tuo messaggio era completo e lungo,
-    // ma se vuoi te lo reincollo tutto completo senza tagli)
+    // AZIONI (ridotta: resto identico al tuo)
     // =========================
+    const opsTabs = document.getElementById("opsTabs");
+    const panelWrapper = document.getElementById("panelWrapper");
 
+    function tabIdFromName(name) {
+      return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+    }
+
+    function fillItemSelect(selectEl) {
+      selectEl.innerHTML = "";
+      FIXED_ITEMS.forEach(it => {
+        const opt = document.createElement("option");
+        opt.value = it;
+        opt.textContent = it;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    const drafts = {};
+    function getDraft(category) { if (!drafts[category]) drafts[category] = []; return drafts[category]; }
+
+    function renderDraft(category) {
+      const tid = tabIdFromName(category);
+      const wrap = document.getElementById("draft_" + tid);
+      if (!wrap) return;
+
+      const draft = getDraft(category);
+      if (draft.length === 0) {
+        wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
+        return;
+      }
+
+      wrap.innerHTML = "";
+      draft.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${it.qty}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small ${canEditOps() ? "" : "disabled"}" ${canEditOps() ? "" : "disabled"} onclick="removeDraftItem('${escapeHtml(category)}','${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function addItemToDraft(category) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const tid = tabIdFromName(category);
+      const name = document.getElementById("item_" + tid).value;
+      let qty = parseInt(document.getElementById("qty_" + tid).value || "1", 10);
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const draft = getDraft(category);
+      const existing = draft.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else draft.push({ name, qty });
+
+      document.getElementById("qty_" + tid).value = "1";
+      renderDraft(category);
+    }
+
+    function removeDraftItem(category, name) {
+      if (!canEditOps()) return;
+      drafts[category] = getDraft(category).filter(x => x.name !== name);
+      renderDraft(category);
+    }
+
+    function saveDraftRecord(category) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const tid = tabIdFromName(category);
+      const type = document.getElementById("type_" + tid).value;
+      const moneyRaw = document.getElementById("money_" + tid).value;
+      const note = document.getElementById("note_" + tid).value || "";
+      const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
+      const items = getDraft(category);
+
+      if (money === 0 && items.length === 0 && note.trim() === "") {
+        return alert("Inserisci almeno soldi, o un item, o una nota.");
+      }
+
+      const ops = loadOps();
+      ops.push({
+        id: uid(),
+        ts: Date.now(),
+        userEmail: loadSession().email,
+        category,
+        type,
+        money,
+        note: note.trim(),
+        items: items.map(x => ({ name: x.name, qty: x.qty }))
+      });
+      saveOps(ops);
+
+      document.getElementById("money_" + tid).value = "";
+      document.getElementById("note_" + tid).value = "";
+      drafts[category] = [];
+      renderDraft(category);
+
+      renderCategory(category);
+      renderManageSummaries();
+    }
+
+    function deleteRecord(id, category) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      saveOps(loadOps().filter(r => r.id !== id));
+      renderCategory(category);
+      renderManageSummaries();
+    }
+
+    const editOverlay = document.getElementById("editOverlay");
+    const editInfo = document.getElementById("editInfo");
+    const editType = document.getElementById("editType");
+    const editMoney = document.getElementById("editMoney");
+    const editNote = document.getElementById("editNote");
+    const editItemSelect = document.getElementById("editItemSelect");
+    const editItemQty = document.getElementById("editItemQty");
+    const editItemsList = document.getElementById("editItemsList");
+    fillItemSelect(editItemSelect);
+
+    let editingId = null;
+    let editingItems = [];
+    let editingCategory = null;
+
+    function openEdit(id) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const ops = loadOps();
+      const rec = ops.find(r => r.id === id);
+      if (!rec) return;
+
+      editingId = id;
+      editingCategory = rec.category;
+      editingItems = (rec.items || []).map(x => ({ name: x.name, qty: x.qty }));
+
+      editInfo.textContent = `${rec.category} — ${rec.userEmail} — ${new Date(rec.ts).toLocaleString()}`;
+      editType.value = rec.type;
+      editMoney.value = String(rec.money || 0);
+      editNote.value = rec.note || "";
+
+      renderEditItems();
+      editOverlay.style.display = "block";
+    }
+
+    function closeEdit() {
+      editOverlay.style.display = "none";
+      editingId = null;
+      editingCategory = null;
+      editingItems = [];
+    }
+
+    function renderEditItems() {
+      if (editingItems.length === 0) {
+        editItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      editItemsList.innerHTML = "";
+      editingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${it.qty}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="editRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        editItemsList.appendChild(div);
+      });
+    }
+
+    function editAddItem() {
+      const name = editItemSelect.value;
+      let qty = parseInt(editItemQty.value || "1", 10);
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = editingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else editingItems.push({ name, qty });
+
+      editItemQty.value = "1";
+      renderEditItems();
+    }
+
+    function editRemoveItem(name) {
+      editingItems = editingItems.filter(x => x.name !== name);
+      renderEditItems();
+    }
+
+    function saveEdit() {
+      if (!editingId) return;
+      const ops = loadOps();
+      const rec = ops.find(r => r.id === editingId);
+      if (!rec) return;
+
+      rec.type = editType.value;
+      rec.money = Math.max(0, parseInt(editMoney.value || "0", 10) || 0);
+      rec.note = (editNote.value || "").trim();
+      rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
+
+      saveOps(ops);
+      closeEdit();
+      renderCategory(rec.category);
+    }
+
+    function computeCategory(category) {
+      const records = loadOps().filter(r => r.category === category);
+      let moneyGet = 0, moneyLost = 0;
+      const itemsGet = {}, itemsLost = {};
+
+      records.forEach(r => {
+        if (r.type === "ottenuto") moneyGet += (r.money || 0);
+        else moneyLost += (r.money || 0);
+
+        (r.items || []).forEach(it => {
+          const key = it.name.toLowerCase();
+          const qty = Number(it.qty || 0);
+          if (r.type === "ottenuto") {
+            if (!itemsGet[key]) itemsGet[key] = { label: it.name, qty: 0 };
+            itemsGet[key].qty += qty;
+          } else {
+            if (!itemsLost[key]) itemsLost[key] = { label: it.name, qty: 0 };
+            itemsLost[key].qty += qty;
+          }
+        });
+      });
+
+      return { records, moneyGet, moneyLost, itemsGet, itemsLost };
+    }
+
+    function renderCategory(category) {
+      const tid = tabIdFromName(category);
+      renderDraft(category);
+
+      const { records } = computeCategory(category);
+      const tableBody = document.getElementById("table_" + tid);
+
+      if (!records || records.length === 0) {
+        tableBody.innerHTML = `<tr><td class="muted" colspan="7">Nessuna registrazione</td></tr>`;
+        return;
+      }
+
+      const sorted = records.slice().sort((a,b) => b.ts - a.ts);
+      tableBody.innerHTML = "";
+
+      sorted.forEach(r => {
+        const when = new Date(r.ts).toLocaleString();
+        const tipo = r.type === "ottenuto" ? "OTTENUTO" : "PERSO";
+        const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
+        const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
+        const noteHtml = (r.note && r.note.trim()) ? `<div style="white-space:pre-wrap; font-size:13px;">${escapeHtml(r.note.trim())}</div>` : `<span class="muted">—</span>`;
+
+        const actionsHtml = canEditOps()
+          ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
+             <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
+          : `<span class="muted">—</span>`;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${when}</td>
+          <td>${escapeHtml(r.userEmail)}</td>
+          <td>${tipo}</td>
+          <td>${formatMoney(r.money || 0)}</td>
+          <td>${noteHtml}</td>
+          <td>${itemsHtml}</td>
+          <td>${actionsHtml}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function renderManageSummaries() {
+      const managePanel = document.getElementById("managePanel");
+      managePanel.style.display = canManageTotals() ? "block" : "none";
+    }
+
+    function resetAllOps() {
+      if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
+      const ok = confirm("Confermi AZZERA AZIONI?");
+      if (!ok) return;
+      localStorage.removeItem(OPS_KEY);
+      CATEGORIES.forEach(c => renderCategory(c));
+    }
+
+    function renderTabsAndPanels() {
+      opsTabs.innerHTML = "";
+      panelWrapper.innerHTML = "";
+
+      CATEGORIES.forEach((cat, idx) => {
+        const tid = tabIdFromName(cat);
+
+        const tab = document.createElement("button");
+        tab.id = "tab_" + tid;
+        tab.textContent = cat;
+        tab.onclick = () => showCat(cat);
+        opsTabs.appendChild(tab);
+
+        const panel = document.createElement("div");
+        panel.className = "panel opPanel";
+        panel.id = "panel_" + tid;
+
+        const disabledAttr = canEditOps() ? "" : "disabled";
+        const disabledCls = canEditOps() ? "" : "disabled";
+
+        panel.innerHTML = `
+          <h3 style="margin:0 0 6px 0; color:#ff3b3b;">${cat}</h3>
+
+          <div class="row">
+            <div class="field" style="min-width:180px;">
+              <label>Tipo</label>
+              <select id="type_${tid}" ${disabledAttr}>
+                <option value="ottenuto">OTTENUTO</option>
+                <option value="perso">PERSO</option>
+              </select>
+            </div>
+
+            <div class="field" style="min-width:220px;">
+              <label>Soldi ($)</label>
+              <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="flex:1; min-width:260px;">
+              <label>Note</label>
+              <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field" style="min-width:320px;">
+              <label>Item</label>
+              <select id="item_${tid}" ${disabledAttr}></select>
+            </div>
+
+            <div class="field" style="min-width:160px;">
+              <label>Quantità</label>
+              <input id="qty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="addItemToDraft('${cat}')">Aggiungi item</button>
+            </div>
+
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
+            </div>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:#ff3b3b;">Bozza items</h4>
+            <div id="draft_${tid}" style="margin-top:10px;"></div>
+          </div>
+
+          <h4 style="margin:16px 0 6px 0;">Registrazioni ${cat}</h4>
+          <table>
+            <thead>
+              <tr><th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi</th><th>Note</th><th>Items</th><th>Azioni</th></tr>
+            </thead>
+            <tbody id="table_${tid}">
+              <tr><td class="muted" colspan="7">Nessuna registrazione</td></tr>
+            </tbody>
+          </table>
+        `;
+
+        panelWrapper.appendChild(panel);
+
+        setTimeout(() => {
+          const itemSel = document.getElementById("item_" + tid);
+          if (itemSel) fillItemSelect(itemSel);
+          renderDraft(cat);
+          renderCategory(cat);
+        }, 0);
+
+        if (idx === 0) { tab.classList.add("active"); panel.classList.add("active"); }
+      });
+    }
+
+    function showCat(catName) {
+      const tid = tabIdFromName(catName);
+      document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
+      const tb = document.getElementById("tab_" + tid);
+      if (tb) tb.classList.add("active");
+      document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
+      const pn = document.getElementById("panel_" + tid);
+      if (pn) pn.classList.add("active");
+      renderCategory(catName);
+    }
+
+    // =========================
     // STARTUP
+    // =========================
     function boot() {
       setHeaderUser();
 
