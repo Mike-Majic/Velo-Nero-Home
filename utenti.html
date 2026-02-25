@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Utenti - VELO NERO</title>
+  <title>Gestione - VELO NERO</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px 18px; text-align: center; margin:0; }
-    h1 { color: #ff3b3b; font-size: 50px; margin: 12px 0 10px 0; text-shadow: 0 0 12px #ff3b3b80; }
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 40px 18px;
+      margin: 0;
+    }
 
     .topbar{
-      max-width:1200px; margin:0 auto 10px auto;
+      max-width:1200px; margin:0 auto 14px auto;
       display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
     }
     .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
@@ -27,403 +32,283 @@
     }
     .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
-    .hint { color:#ff7b7b; margin: 0 0 16px 0; }
-
-    table { width: 92%; max-width:1200px; margin: 0 auto; border-collapse: collapse; }
-    th, td { padding: 12px 14px; border: 1px solid #ff3b3b33; text-align: left; vertical-align: top; }
-    th { background-color: #1e1e1e; color: #ff3b3b; }
-    td { background-color: #1e1e1e; }
-    tr:hover td { background-color: #3a0000; }
-
-    select {
-      background:#121212; border:1px solid #ff1a1a55; color:#fff; border-radius:10px;
-      padding:8px 10px; outline:none;
+    h1 {
+      color: #ff3b3b;
+      font-size: 46px;
+      margin: 10px auto 6px auto;
+      max-width: 1200px;
+      text-shadow: 0 0 12px #ff3b3b80;
+    }
+    .subtitle {
+      max-width: 1200px;
+      margin: 0 auto 16px auto;
+      color:#ff7b7b;
     }
 
-    .btn {
-      padding: 9px 12px; border-radius: 8px; border: 1px solid #ff3b3b66;
-      background:#1a1a1a; color:#fff; cursor:pointer;
-      margin: 4px 6px 0 0;
+    .wrap { max-width: 1200px; margin: 0 auto; }
+
+    .card{
+      background: linear-gradient(145deg, #1a1a1a, #2b0000);
+      border-radius: 12px;
+      box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .row{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      justify-content:space-between;
+      margin-bottom: 12px;
+    }
+
+    input, select{
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #ff1a1a55;
+      background:#141414;
+      color:#fff;
+      outline:none;
+      box-sizing:border-box;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 10px;
+    }
+    th, td{
+      border-bottom: 1px solid #ff1a1a22;
+      padding: 10px 10px;
+      text-align:left;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    th{ color:#ffb3b3; font-weight: 700; }
+    tr:hover td{ background:#1a0c0c; }
+
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #ff1a1a55;
+      background:#1a1a1a;
+      font-size:12px;
+    }
+
+    .btn{
+      border:1px solid #ff1a1a55;
+      background:#1a1a1a;
+      color:#fff;
+      cursor:pointer;
+      padding:8px 12px;
+      border-radius:10px;
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
     }
-    .btn:hover { background:#2b0000; }
-    .danger { background:#2b0000; border-color:#ff3b3baa; }
-    .small { padding:7px 10px; font-size:13px; border-radius:8px; }
+    .btn:hover{ background:#2b0000; border-color:#ff1a1aaa; }
 
-    .blocked { color:#ff3b3b; font-weight:bold; }
-    .muted { color:#ff7b7b; }
+    .ok { color:#7bffb5; font-size:13px; }
+    .err{ color:#ff7b7b; font-size:13px; }
+
+    .muted{ color:#ffb3b3; font-size:13px; }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <a href="index.html" class="linkbtn">⬅ Dashboard</a>
-  <div class="userpill">
-    <span class="pill" id="pillEmail">Non autenticato</span>
-    <span class="pill" id="pillRole">Ruolo: —</span>
-    <button class="linkbtn" onclick="logout()">Esci</button>
+  <div class="topbar">
+    <a href="index.html" class="linkbtn">⬅ Dashboard</a>
+    <div class="userpill">
+      <span class="pill" id="pillEmail">Non autenticato</span>
+      <span class="pill" id="pillRole">Ruolo: —</span>
+      <button class="linkbtn" onclick="logout()">Esci</button>
+    </div>
   </div>
-</div>
 
-<h1>Utenti</h1>
-<p class="hint">Accesso riservato ad Admin (Owner / Boss / Vice Boss)</p>
+  <h1>Gestione</h1>
+  <div class="subtitle">Lista utenti + cambio ruolo (solo vice/boss/owner).</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Email</th>
-      <th>Nome in Game</th>
-      <th>Ruolo</th>
-      <th>Stato</th>
-      <th>Azioni</th>
-    </tr>
-  </thead>
-  <tbody id="usersBody"></tbody>
-</table>
+  <div class="wrap">
 
-<a href="index.html" class="linkbtn" style="margin-top:18px;">Torna alla Dashboard</a>
+    <div class="card">
+      <div class="row">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <input id="q" placeholder="Cerca email o nome" />
+          <button class="btn" onclick="loadUsers()">Aggiorna</button>
+        </div>
+        <div class="muted" id="meta">—</div>
+      </div>
+
+      <div id="msg"></div>
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Nome</th>
+              <th>Ruolo</th>
+              <th style="min-width:220px;">Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="4" class="muted">Caricamento ..</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 
 <script>
-/* ===== COSTANTI CONDIVISE ===== */
-const SESSION_KEY = "vn_session_v1";
-const USERS_KEY = "vn_users_v2";
-const TRUST_KEY = "vn_trusted_devices_v1";
-const DEVICE_ID_KEY = "vn_device_id_v1";
+  const pillEmail = document.getElementById("pillEmail");
+  const pillRole  = document.getElementById("pillRole");
+  const tbody = document.getElementById("tbody");
+  const msgEl = document.getElementById("msg");
+  const metaEl = document.getElementById("meta");
+  const qEl = document.getElementById("q");
 
-/* ===== RUOLI (stessi di index) ===== */
-const RUOLI = [
-  "Nessuno",
-  "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
-  "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
-  "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
-  "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
-];
+  let meRole = "none";
 
-/* ===== UI ===== */
-const pillEmail = document.getElementById("pillEmail");
-const pillRole  = document.getElementById("pillRole");
-
-/* ===== UTILS ===== */
-function loadSession() {
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
-}
-function clearSession(){ localStorage.removeItem(SESSION_KEY); }
-
-function loadUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-function saveUsers(arr){ localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
-
-function findUserByEmail(email) {
-  return loadUsers().find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
-}
-
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function isAdminRole(role){ return ["Owner","Boss","Vice Boss"].includes(role); }
-
-/* ===== TRUST DEVICE (per togliere “ricorda dispositivo” al reset) ===== */
-function getDeviceId() {
-  let id = localStorage.getItem(DEVICE_ID_KEY);
-  if (!id) {
-    id = (Math.random().toString(16).slice(2) + Date.now().toString(16));
-    localStorage.setItem(DEVICE_ID_KEY, id);
+  async function apiGet(url){
+    const r = await fetch(url, { method:"GET", credentials:"include" });
+    return r.json();
   }
-  return id;
-}
-function loadTrusted() { try { return JSON.parse(localStorage.getItem(TRUST_KEY)) || {}; } catch { return {}; } }
-function saveTrusted(obj){ localStorage.setItem(TRUST_KEY, JSON.stringify(obj)); }
-function clearTrustedForEmail(email) {
-  const deviceId = getDeviceId();
-  const t = loadTrusted();
-  const e = (email || "").toLowerCase();
-  if (t[e] && t[e][deviceId]) {
-    delete t[e][deviceId];
-    saveTrusted(t);
-  }
-}
-
-/* ===== 2FA secret generator (minimo necessario per reset) ===== */
-const B32_ALPH = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-function base32Encode(bytes) {
-  let bits = 0, value = 0, output = "";
-  for (const b of bytes) {
-    value = (value << 8) | b;
-    bits += 8;
-    while (bits >= 5) {
-      output += B32_ALPH[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
-  }
-  if (bits > 0) output += B32_ALPH[(value << (5 - bits)) & 31];
-  return output;
-}
-function randomBytes(n) { const a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
-function generateTotpSecret() { return base32Encode(randomBytes(20)); }
-
-/* ===== AUTH GUARD ===== */
-let ME = null;
-
-function setHeaderUser(){
-  const s = loadSession();
-  if (!s?.email) {
-    pillEmail.textContent = "Non autenticato";
-    pillRole.textContent = "Ruolo: —";
-    return;
-  }
-  const u = findUserByEmail(s.email);
-  pillEmail.textContent = s.email;
-  pillRole.textContent = "Ruolo: " + (u?.role || "Nessuno");
-}
-
-function logout(){
-  clearSession();
-  window.location.href = "index.html";
-}
-
-function bootGuard() {
-  const session = loadSession();
-  if (!session?.email) {
-    window.location.href = "index.html";
-    return false;
-  }
-
-  const me = findUserByEmail(session.email);
-  if (!me) {
-    clearSession();
-    window.location.href = "index.html";
-    return false;
-  }
-
-  if (me.blocked) {
-    alert("Account bloccato.");
-    clearSession();
-    window.location.href = "index.html";
-    return false;
-  }
-
-  if (!isAdminRole(me.role || "Nessuno")) {
-    alert("Accesso negato.");
-    window.location.href = "index.html";
-    return false;
-  }
-
-  ME = me;
-  setHeaderUser();
-  return true;
-}
-
-/* ===== PERMESSI ===== */
-function canBlockUnblock(){ return ["Owner","Boss"].includes(ME?.role); }
-function canExpel(){ return ["Owner","Boss","Vice Boss"].includes(ME?.role); }
-function canResetPassword(){ return ["Owner","Boss","Vice Boss"].includes(ME?.role); }
-function canReset2FA(){ return ["Owner","Boss"].includes(ME?.role); }
-
-/* ===== ACTIONS ===== */
-function setRole(userEmail, newRole){
-  const users = loadUsers();
-  const u = users.find(x => (x.email||"").toLowerCase() === (userEmail||"").toLowerCase());
-  if (!u) return;
-
-  u.role = newRole;
-  saveUsers(users);
-
-  // se ho cambiato me stesso aggiorna pill/permessi
-  const s = loadSession();
-  if (s?.email && s.email.toLowerCase() === u.email.toLowerCase()) {
-    ME = u;
-    setHeaderUser();
-  }
-  renderUsers();
-}
-
-function blockUser(userEmail, val){
-  if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
-  const users = loadUsers();
-  const u = users.find(x => (x.email||"").toLowerCase() === (userEmail||"").toLowerCase());
-  if (!u) return;
-
-  u.blocked = !!val;
-  saveUsers(users);
-
-  // se blocca se stesso -> logout
-  const s = loadSession();
-  if (s?.email && s.email.toLowerCase() === u.email.toLowerCase() && u.blocked) {
-    alert("Ti sei bloccato: logout.");
-    logout();
-    return;
-  }
-
-  renderUsers();
-}
-
-function expelUser(userEmail){
-  if (!canExpel()) return alert("Permesso negato");
-  const ok = confirm("Confermi espulsione di " + userEmail + "?");
-  if (!ok) return;
-
-  const users = loadUsers();
-  const filtered = users.filter(x => (x.email||"").toLowerCase() !== (userEmail||"").toLowerCase());
-  saveUsers(filtered);
-
-  // se espelle se stesso -> logout
-  const s = loadSession();
-  if (s?.email && s.email.toLowerCase() === userEmail.toLowerCase()) {
-    logout();
-    return;
-  }
-
-  renderUsers();
-}
-
-function resetPassword(userEmail){
-  if (!canResetPassword()) return alert("Permesso negato");
-  const ok = confirm("Confermi RESET PASSWORD per " + userEmail + "?\nL'utente dovrà impostarne una nuova al prossimo accesso.");
-  if (!ok) return;
-
-  const users = loadUsers();
-  const u = users.find(x => (x.email||"").toLowerCase() === (userEmail||"").toLowerCase());
-  if (!u) return;
-
-  u.passwordHash = null;
-  clearTrustedForEmail(u.email);
-
-  saveUsers(users);
-  alert("Password resettata.");
-  renderUsers();
-}
-
-function reset2FA(userEmail){
-  if (!canReset2FA()) return alert("Solo Owner e Boss possono resettare il 2FA");
-  const ok = confirm("Confermi RESET 2FA per " + userEmail + "?\nL'utente dovrà riconfigurare Authenticator al prossimo login.");
-  if (!ok) return;
-
-  const users = loadUsers();
-  const u = users.find(x => (x.email||"").toLowerCase() === (userEmail||"").toLowerCase());
-  if (!u) return;
-
-  u.totpSecret = generateTotpSecret();
-  u.totpNeedsSetup = true;
-  clearTrustedForEmail(u.email);
-
-  saveUsers(users);
-  alert("2FA resettato. Al prossimo login l’utente farà setup con QR/chiave.");
-  renderUsers();
-}
-
-/* ===== RENDER ===== */
-function renderUsers() {
-  const users = loadUsers().slice().sort((a,b) => (a.email || "").localeCompare(b.email || ""));
-  const tbody = document.getElementById("usersBody");
-  tbody.innerHTML = "";
-
-  if (users.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="color:#ff7b7b;">Nessun utente</td></tr>`;
-    return;
-  }
-
-  users.forEach(u => {
-    const tr = document.createElement("tr");
-
-    const tdEmail = document.createElement("td");
-    tdEmail.innerHTML = escapeHtml(u.email) + (u.blocked ? ` <span class="blocked">⛔</span>` : "");
-
-    const tdGame = document.createElement("td");
-    tdGame.textContent = u.gameName || "—";
-
-    const tdRole = document.createElement("td");
-    const sel = document.createElement("select");
-    RUOLI.forEach(r => {
-      const opt = document.createElement("option");
-      opt.value = r;
-      opt.textContent = r;
-      if (r === (u.role || "Nessuno")) opt.selected = true;
-      sel.appendChild(opt);
+  async function apiPost(url, data){
+    const r = await fetch(url, {
+      method:"POST",
+      credentials:"include",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(data || {})
     });
-    sel.onchange = () => setRole(u.email, sel.value);
-    tdRole.appendChild(sel);
+    return r.json();
+  }
 
-    const tdState = document.createElement("td");
-    tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
+  function setMsg(ok, text){
+    msgEl.innerHTML = "";
+    if (!text) return;
+    const d = document.createElement("div");
+    d.className = ok ? "ok" : "err";
+    d.style.margin = "10px 0";
+    d.textContent = text;
+    msgEl.appendChild(d);
+  }
 
-    const tdActions = document.createElement("td");
+  async function logout(){
+    try { await apiPost("/api/auth/logout", {}); } catch {}
+    window.location.href = "index.html";
+  }
 
-    // Reset 2FA
-    if (canReset2FA()) {
-      const b = document.createElement("button");
-      b.className = "btn small";
-      b.textContent = "Reset 2FA";
-      b.onclick = () => reset2FA(u.email);
-      tdActions.appendChild(b);
+  async function guard(){
+    const me = await apiGet("/api/auth/me");
+    if (!me?.authenticated) {
+      window.location.href = "index.html";
+      return;
     }
 
-    // Reset Password
-    if (canResetPassword()) {
-      const b = document.createElement("button");
-      b.className = "btn small";
-      b.textContent = "Reset Password";
-      b.onclick = () => resetPassword(u.email);
-      tdActions.appendChild(b);
+    const role = (me.user?.role || "none").toLowerCase();
+    if (!["vice","boss","owner"].includes(role)) {
+      alert("Accesso non consentito.");
+      window.location.href = "index.html";
+      return;
     }
 
-    // Blocca/Sblocca
-    if (canBlockUnblock()) {
-      const b1 = document.createElement("button");
-      b1.className = "btn small";
-      b1.textContent = "Blocca";
-      b1.onclick = () => blockUser(u.email, true);
+    meRole = role;
+    pillEmail.textContent = me.user.email || "—";
+    pillRole.textContent  = "Ruolo: " + role;
+  }
 
-      const b2 = document.createElement("button");
-      b2.className = "btn small";
-      b2.textContent = "Sblocca";
-      b2.onclick = () => blockUser(u.email, false);
+  function roleBadge(role){
+    return `<span class="badge">${role}</span>`;
+  }
 
-      tdActions.appendChild(b1);
-      tdActions.appendChild(b2);
+  function roleOptions(current){
+    const roles = ["none","member","vice","boss","owner"];
+
+    // vice: può solo member/none
+    let allowed = roles;
+    if (meRole === "vice") allowed = ["none","member"];
+    if (meRole === "boss") allowed = ["none","member","vice","boss"];
+    if (meRole === "owner") allowed = roles;
+
+    return allowed.map(r => {
+      const sel = (r === (current || "none")) ? "selected" : "";
+      return `<option value="${r}" ${sel}>${r}</option>`;
+    }).join("");
+  }
+
+  function render(users){
+    const q = (qEl.value || "").trim().toLowerCase();
+
+    const filtered = (users || []).filter(u => {
+      const email = (u.email || "").toLowerCase();
+      const name  = (u.name || "").toLowerCase();
+      if (!q) return true;
+      return email.includes(q) || name.includes(q);
+    });
+
+    metaEl.textContent = `${filtered.length} utenti`;
+
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">Nessun utente</td></tr>`;
+      return;
     }
 
-    // Espelli
-    if (canExpel()) {
-      const b = document.createElement("button");
-      b.className = "btn danger small";
-      b.textContent = "Espelli";
-      b.onclick = () => expelUser(u.email);
-      tdActions.appendChild(b);
+    tbody.innerHTML = filtered.map(u => {
+      const email = u.email || "";
+      const name  = u.name || "";
+      const role  = (u.role || "none").toLowerCase();
+
+      return `
+        <tr>
+          <td>${email}</td>
+          <td>${name || "<span class='muted'>—</span>"}</td>
+          <td>${roleBadge(role)}</td>
+          <td>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <select id="sel_${email.replace(/[^a-z0-9]/gi,'_')}">
+                ${roleOptions(role)}
+              </select>
+              <button class="btn" onclick="setRole('${email}')">Salva</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async function loadUsers(){
+    setMsg(true, "");
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">Caricamento ..</td></tr>`;
+
+    const out = await apiGet("/api/admin/list-users");
+    if (!out?.ok) {
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">Errore</td></tr>`;
+      setMsg(false, out?.error || "Errore");
+      return;
     }
 
-    // Vice Boss: niente blocca/sblocca, niente reset 2FA (come in index)
-    if (ME?.role === "Vice Boss") {
-      // rimuovo eventuali bottoni già aggiunti
-      Array.from(tdActions.querySelectorAll("button")).forEach(btn => {
-        if (btn.textContent === "Blocca" || btn.textContent === "Sblocca" || btn.textContent === "Reset 2FA") btn.remove();
-      });
+    render(out.users || []);
+  }
+
+  async function setRole(email){
+    const selId = "sel_" + email.replace(/[^a-z0-9]/gi,'_');
+    const sel = document.getElementById(selId);
+    const role = sel ? sel.value : "none";
+
+    const out = await apiPost("/api/admin/set-role", { email, role });
+    if (!out?.ok) {
+      setMsg(false, out?.error || "Errore nel salvataggio");
+      return;
     }
 
-    tr.appendChild(tdEmail);
-    tr.appendChild(tdGame);
-    tr.appendChild(tdRole);
-    tr.appendChild(tdState);
-    tr.appendChild(tdActions);
+    setMsg(true, "Ruolo aggiornato ✅");
+    loadUsers();
+  }
 
-    tbody.appendChild(tr);
-  });
-}
-
-/* ===== START ===== */
-if (bootGuard()) {
-  renderUsers();
-}
+  (async function init(){
+    await guard();
+    await loadUsers();
+  })();
 </script>
 
 </body>
