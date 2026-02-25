@@ -98,8 +98,39 @@
 
   <!-- DASHBOARD -->
   <div id="dashboard" class="section active">
-    <div class="cards">
+<div class="cards">
 
+  <!-- AZIONI -->
+  <div class="box" onclick="showSection('azioni')">
+    <h2>Azioni</h2>
+    <p>Azioni</p>
+  </div>
+
+  <!-- DIARIO -->
+  <div class="box" onclick="location.href='diario.html'">
+    <h2>Diario</h2>
+    <p>Note</p>
+  </div>
+
+  <!-- GESTIONE ARMI / DROGA (SUBITO DOPO DIARIO) -->
+  <div class="box wide" onclick="window.location.href='comandi.html'">
+    <h2>Gestione Armi-Droga</h2>
+    <p>Funzioni</p>
+  </div>
+
+  <!-- UTENTI -->
+  <div class="box" id="cardUtenti" onclick="showSection('utenti')">
+    <h2>Utenti</h2>
+    <p>Gestione</p>
+  </div>
+
+  <!-- CONTABILITÀ -->
+  <div class="box" onclick="showSection('contabilita')">
+    <h2>Contabilità</h2>
+    <p>Stipendi & Cassa</p>
+  </div>
+
+</div>
       <div class="box" onclick="showSection('azioni')">
         <h2>Azioni</h2>
         <p>Azioni</p>
