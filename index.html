@@ -138,21 +138,18 @@
     .eye:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
     /* =========================
-       GLOBAL SEARCH (DIARIO)
+       GLOBAL SEARCH TOP
        ========================= */
-    .searchWrap { margin-top:18px; }
-    .searchHead {
-      display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
-      margin-bottom:8px;
+    .searchWrap {
+      margin-top:18px;
+      padding:14px;
+      background:linear-gradient(145deg,#1a1a1a,#2b0000);
+      border-radius:12px;
+      box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
     }
-    .searchTitle {
-      color:#ff3b3b; margin:0; text-shadow:0 0 10px #ff3b3b80;
-      font-size:20px;
+    .searchWrap input {
+      font-size:15px;
     }
-    .searchBar {
-      display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
-    }
-    .searchBar .field { min-width:320px; flex:1; }
     .searchMetaRow {
       display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
       margin-top:8px;
@@ -349,43 +346,29 @@
 
   <!-- DASHBOARD -->
   <div id="dashboard" class="section">
-    <div class="cards">
-      <div class="box" onclick="showSection('azioni')">
-        <h2>Azioni</h2>
-        <p>Azioni</p>
-      </div>
-
-      <div class="box" id="cardUtenti" onclick="showSection('utenti')">
-        <h2>Utenti</h2>
-        <p>Gestione</p>
-      </div>
-
-      <div class="box" onclick="window.location.href='comandi.html'">
-        <h2>Comandi</h2>
-        <p>Funzioni</p>
-      </div>
-    </div>
-
-    <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
-
-    <!-- GLOBAL SEARCH PANEL -->
-    <div class="panel active searchWrap" id="globalSearchPanel" style="display:block;">
-      <div class="searchHead">
-        <h3 class="searchTitle">Ricerca globale (Diario)</h3>
-        <div>
-          <button class="btn small" onclick="goToDiario()">Apri diario</button>
+    <!-- SEARCH STRING IN ALTO -->
+    <div class="searchWrap">
+      <div class="row" style="margin-top:0;">
+        <div class="field" style="flex:1; min-width:280px;">
+          <label style="display:none;">Cerca</label>
+          <input
+            id="globalSearchInput"
+            type="text"
+            placeholder="🔎 Cerca nel diario.. (titolo, nomi, accordi, note)"
+          />
+          <div class="kbdhint">Invio per cercare .. click su una riga per aprire il diario</div>
         </div>
-      </div>
 
-      <div class="searchBar">
-        <div class="field">
-          <label>Cerca (titolo, testo, tag)</label>
-          <input id="globalSearchInput" type="text" placeholder="Es. rapina fleeca, targhe, nomi, note.." />
-          <div class="kbdhint">Invio per cercare .. clic su una riga per aprire il diario sulla voce</div>
-        </div>
-        <div class="field" style="min-width:220px;">
+        <div class="field" style="min-width:160px;">
           <button class="btn" id="btnGlobalSearch" onclick="runGlobalSearch()">Cerca</button>
-          <button class="btn danger" onclick="clearGlobalSearch()" style="margin-left:10px;">Pulisci</button>
+        </div>
+
+        <div class="field" style="min-width:160px;">
+          <button class="btn danger" onclick="clearGlobalSearch()">Pulisci</button>
+        </div>
+
+        <div class="field" style="min-width:160px;">
+          <button class="btn" onclick="goToDiario()">Apri diario</button>
         </div>
       </div>
 
@@ -403,10 +386,29 @@
           </tr>
         </thead>
         <tbody id="globalSearchBody">
-          <tr><td class="muted" colspan="3">Nessuna ricerca eseguita</td></tr>
+          <tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>
         </tbody>
       </table>
     </div>
+
+    <div class="cards" style="margin-top:18px;">
+      <div class="box" onclick="showSection('azioni')">
+        <h2>Azioni</h2>
+        <p>Azioni</p>
+      </div>
+
+      <div class="box" id="cardUtenti" onclick="showSection('utenti')">
+        <h2>Utenti</h2>
+        <p>Gestione</p>
+      </div>
+
+      <div class="box" onclick="window.location.href='comandi.html'">
+        <h2>Comandi</h2>
+        <p>Funzioni</p>
+      </div>
+    </div>
+
+    <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
   </div>
 
   <!-- UTENTI -->
@@ -529,12 +531,15 @@
       "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
     ];
 
+    // ✅ FIX: aggiunte sezioni ARMI e DROGA
     const CATEGORIES = [
       "Esiti Campi",
       "Esiti Rapine",
       "Esiti Freeroom",
       "Furti in casa",
-      "Auto Rubata"
+      "Auto Rubata",
+      "Armi",
+      "Droga"
     ];
 
     const FIXED_ITEMS = [
@@ -721,9 +726,6 @@
         renderTabsAndPanels();
         showCat(CATEGORIES[0]);
         renderManageSummaries();
-      }
-      if (id === "dashboard") {
-        // no-op
       }
     }
 
@@ -1144,7 +1146,7 @@
     }
 
     // =========================
-    // GLOBAL SEARCH (backend)
+    // GLOBAL SEARCH (API: /api/search?q=)
     // =========================
     const globalSearchInput = document.getElementById("globalSearchInput");
     const globalSearchBody = document.getElementById("globalSearchBody");
@@ -1157,13 +1159,12 @@
 
     function clearGlobalSearch() {
       if (globalSearchInput) globalSearchInput.value = "";
-      globalSearchHint.textContent = "";
-      globalSearchCount.textContent = "";
-      globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Nessuna ricerca eseguita</td></tr>`;
+      if (globalSearchHint) globalSearchHint.textContent = "";
+      if (globalSearchCount) globalSearchCount.textContent = "";
+      if (globalSearchBody) globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>`;
     }
 
     function normalizeResults(payload) {
-      // accetta: [] oppure {results: []} oppure {data: []}
       if (Array.isArray(payload)) return payload;
       if (payload && Array.isArray(payload.results)) return payload.results;
       if (payload && Array.isArray(payload.data)) return payload.data;
@@ -1187,19 +1188,22 @@
     }
 
     function renderGlobalResults(rows) {
+      if (!globalSearchBody) return;
+
       if (!rows || rows.length === 0) {
         globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Nessun risultato</td></tr>`;
-        globalSearchCount.textContent = "0 risultati";
+        if (globalSearchCount) globalSearchCount.textContent = "0 risultati";
         return;
       }
 
-      globalSearchCount.textContent = rows.length + " risultati";
+      if (globalSearchCount) globalSearchCount.textContent = rows.length + " risultati";
       globalSearchBody.innerHTML = "";
 
       rows.forEach(r => {
         const id = pick(r, ["id","_id","entryId","docId","key"], "");
         const when = fmtWhen(pick(r, ["ts","date","createdAt","updatedAt"], ""));
         const type = pick(r, ["type","category","kind","scope"], "Diario");
+
         const title = pick(r, ["title","name","subject"], "Voce diario");
         const snippet = pick(r, ["snippet","preview","text","content","note"], "");
 
@@ -1232,29 +1236,27 @@
       }
 
       const token = ++lastSearchToken;
-      globalSearchHint.textContent = "Ricerca in corso..";
-      btnGlobalSearch.classList.add("disabled");
-      btnGlobalSearch.disabled = true;
+      if (globalSearchHint) globalSearchHint.textContent = "Ricerca in corso..";
+      if (btnGlobalSearch) { btnGlobalSearch.classList.add("disabled"); btnGlobalSearch.disabled = true; }
 
       try {
-        // Endpoint previsto dal backend "ricerca globale" (se diverso, dimmelo e lo allineo)
         const res = await fetch("/api/search?q=" + encodeURIComponent(q), { method: "GET" });
         if (!res.ok) throw new Error("HTTP " + res.status);
 
         const data = await res.json();
-        if (token !== lastSearchToken) return; // risposta vecchia
+        if (token !== lastSearchToken) return;
 
         const rows = normalizeResults(data);
-        globalSearchHint.textContent = rows.length ? "" : "Nessun risultato.. prova un termine diverso";
+        if (globalSearchHint) globalSearchHint.textContent = rows.length ? "" : "Nessun risultato.. prova un termine diverso";
         renderGlobalResults(rows);
       } catch (e) {
         if (token !== lastSearchToken) return;
         console.error(e);
-        globalSearchHint.textContent = "Errore ricerca.. controlla endpoint /api/search (o dimmi quello corretto)";
-        globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Errore nel caricare i risultati</td></tr>`;
-        globalSearchCount.textContent = "";
+        if (globalSearchHint) globalSearchHint.textContent = "Errore ricerca.. controlla /api/search";
+        if (globalSearchBody) globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Errore nel caricare i risultati</td></tr>`;
+        if (globalSearchCount) globalSearchCount.textContent = "";
       } finally {
-        if (token === lastSearchToken) {
+        if (token === lastSearchToken && btnGlobalSearch) {
           btnGlobalSearch.classList.remove("disabled");
           btnGlobalSearch.disabled = false;
         }
@@ -1293,27 +1295,26 @@
       const actionsHint = document.getElementById("actionsHint");
 
       // Diario: visibile a tutti gli autenticati
-      btnDiario.style.display = "inline-block";
+      if (btnDiario) btnDiario.style.display = "inline-block";
 
       if (!isAdmin()) {
-        btnUtenti.style.display = "none";
-        cardUtenti.style.display = "none";
-        btnLog.style.display = "none";
+        if (btnUtenti) btnUtenti.style.display = "none";
+        if (cardUtenti) cardUtenti.style.display = "none";
+        if (btnLog) btnLog.style.display = "none";
       } else {
-        btnUtenti.style.display = "inline-block";
-        cardUtenti.style.display = "inline-block";
-        btnLog.style.display = "inline-block";
+        if (btnUtenti) btnUtenti.style.display = "inline-block";
+        if (cardUtenti) cardUtenti.style.display = "inline-block";
+        if (btnLog) btnLog.style.display = "inline-block";
       }
 
       if (!canEditOps()) {
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni.";
-        actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+        if (dashHint) dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni.";
+        if (actionsHint) actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
       } else {
-        dashHint.textContent = "";
-        actionsHint.textContent = "Note visibili a tutti. Inserimento e modifiche abilitate perché hai un ruolo.";
+        if (dashHint) dashHint.textContent = "";
+        if (actionsHint) actionsHint.textContent = "Note visibili a tutti. Inserimento e modifiche abilitate perché hai un ruolo.";
       }
 
-      // Dashboard + prepara ricerca
       showOnly("dashboard");
       wireGlobalSearchUI();
     }
@@ -1348,7 +1349,6 @@
           sel.appendChild(opt);
         });
 
-        // 🔒 Owner intoccabile
         if ((u.role || "") === "Owner") sel.disabled = true;
 
         sel.onchange = () => {
@@ -1379,7 +1379,6 @@
         const menu = document.createElement("div");
         menu.className = "action-menu";
 
-        // Reset 2FA
         const b4 = document.createElement("button");
         b4.textContent = "Reset 2FA";
         b4.onclick = () => {
@@ -1396,7 +1395,6 @@
           alert("2FA resettato.");
         };
 
-        // Reset Password
         const b5 = document.createElement("button");
         b5.textContent = "Reset Password";
         b5.onclick = () => {
@@ -1487,7 +1485,7 @@
     });
 
     // =========================
-    // AZIONI (ridotta: resto identico al tuo)
+    // AZIONI
     // =========================
     const opsTabs = document.getElementById("opsTabs");
     const panelWrapper = document.getElementById("panelWrapper");
