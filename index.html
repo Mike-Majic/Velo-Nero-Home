@@ -136,6 +136,37 @@
       user-select:none;
     }
     .eye:hover { background:#2b0000; border-color:#ff1a1aaa; }
+
+    /* =========================
+       GLOBAL SEARCH (DIARIO)
+       ========================= */
+    .searchWrap { margin-top:18px; }
+    .searchHead {
+      display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .searchTitle {
+      color:#ff3b3b; margin:0; text-shadow:0 0 10px #ff3b3b80;
+      font-size:20px;
+    }
+    .searchBar {
+      display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+    }
+    .searchBar .field { min-width:320px; flex:1; }
+    .searchMetaRow {
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .resultTable td { cursor:pointer; }
+    .tag {
+      display:inline-block; padding:4px 8px; border-radius:999px;
+      border:1px solid #ff1a1a55; background:#121212; color:#ffaaaa; font-size:12px;
+      box-shadow:0 0 10px #ff1a1a22 inset;
+      margin-right:6px;
+    }
+    .resTitle { color:#fff; font-weight:700; }
+    .resSnippet { color:#ffaaaa; font-size:13px; white-space:pre-wrap; margin-top:4px; }
+    .kbdhint { color:#ff7b7b; font-size:12px; }
   </style>
 </head>
 
@@ -156,6 +187,7 @@
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
     <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
+    <button id="btnDiario" onclick="goToDiario()" style="display:none;">Diario</button>
     <button id="btnLog" onclick="goToLogs()" style="display:none;">📋 Log</button>
   </div>
 
@@ -335,6 +367,46 @@
     </div>
 
     <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
+
+    <!-- GLOBAL SEARCH PANEL -->
+    <div class="panel active searchWrap" id="globalSearchPanel" style="display:block;">
+      <div class="searchHead">
+        <h3 class="searchTitle">Ricerca globale (Diario)</h3>
+        <div>
+          <button class="btn small" onclick="goToDiario()">Apri diario</button>
+        </div>
+      </div>
+
+      <div class="searchBar">
+        <div class="field">
+          <label>Cerca (titolo, testo, tag)</label>
+          <input id="globalSearchInput" type="text" placeholder="Es. rapina fleeca, targhe, nomi, note.." />
+          <div class="kbdhint">Invio per cercare .. clic su una riga per aprire il diario sulla voce</div>
+        </div>
+        <div class="field" style="min-width:220px;">
+          <button class="btn" id="btnGlobalSearch" onclick="runGlobalSearch()">Cerca</button>
+          <button class="btn danger" onclick="clearGlobalSearch()" style="margin-left:10px;">Pulisci</button>
+        </div>
+      </div>
+
+      <div class="searchMetaRow">
+        <div class="hint" id="globalSearchHint"></div>
+        <div class="muted" id="globalSearchCount"></div>
+      </div>
+
+      <table class="resultTable" style="margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="width:160px;">Quando</th>
+            <th style="width:160px;">Tipo</th>
+            <th>Risultato</th>
+          </tr>
+        </thead>
+        <tbody id="globalSearchBody">
+          <tr><td class="muted" colspan="3">Nessuna ricerca eseguita</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- UTENTI -->
@@ -649,6 +721,9 @@
         renderTabsAndPanels();
         showCat(CATEGORIES[0]);
         renderManageSummaries();
+      }
+      if (id === "dashboard") {
+        // no-op
       }
     }
 
@@ -1056,14 +1131,169 @@
     }
 
     // =========================
+    // DIARIO LINKS
+    // =========================
+    function goToDiario() {
+      if (!requireAuthOrShowLogin()) return;
+      window.location.href = "diario.html";
+    }
+    function openDiarioAtId(id) {
+      if (!requireAuthOrShowLogin()) return;
+      const safe = encodeURIComponent(String(id || "").trim());
+      window.location.href = "diario.html#" + safe;
+    }
+
+    // =========================
+    // GLOBAL SEARCH (backend)
+    // =========================
+    const globalSearchInput = document.getElementById("globalSearchInput");
+    const globalSearchBody = document.getElementById("globalSearchBody");
+    const globalSearchHint = document.getElementById("globalSearchHint");
+    const globalSearchCount = document.getElementById("globalSearchCount");
+    const btnGlobalSearch = document.getElementById("btnGlobalSearch");
+
+    let searchDebounce = null;
+    let lastSearchToken = 0;
+
+    function clearGlobalSearch() {
+      if (globalSearchInput) globalSearchInput.value = "";
+      globalSearchHint.textContent = "";
+      globalSearchCount.textContent = "";
+      globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Nessuna ricerca eseguita</td></tr>`;
+    }
+
+    function normalizeResults(payload) {
+      // accetta: [] oppure {results: []} oppure {data: []}
+      if (Array.isArray(payload)) return payload;
+      if (payload && Array.isArray(payload.results)) return payload.results;
+      if (payload && Array.isArray(payload.data)) return payload.data;
+      return [];
+    }
+
+    function fmtWhen(v) {
+      if (!v) return "—";
+      const n = Number(v);
+      const d = isNaN(n) ? new Date(v) : new Date(n);
+      if (isNaN(d.getTime())) return "—";
+      return d.toLocaleString();
+    }
+
+    function pick(obj, keys, fallback="") {
+      for (const k of keys) {
+        const v = obj?.[k];
+        if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+      }
+      return fallback;
+    }
+
+    function renderGlobalResults(rows) {
+      if (!rows || rows.length === 0) {
+        globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Nessun risultato</td></tr>`;
+        globalSearchCount.textContent = "0 risultati";
+        return;
+      }
+
+      globalSearchCount.textContent = rows.length + " risultati";
+      globalSearchBody.innerHTML = "";
+
+      rows.forEach(r => {
+        const id = pick(r, ["id","_id","entryId","docId","key"], "");
+        const when = fmtWhen(pick(r, ["ts","date","createdAt","updatedAt"], ""));
+        const type = pick(r, ["type","category","kind","scope"], "Diario");
+        const title = pick(r, ["title","name","subject"], "Voce diario");
+        const snippet = pick(r, ["snippet","preview","text","content","note"], "");
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(when)}</td>
+          <td><span class="tag">${escapeHtml(type)}</span></td>
+          <td>
+            <div class="resTitle">${escapeHtml(title)}</div>
+            <div class="resSnippet">${escapeHtml(String(snippet || "").slice(0, 220))}${String(snippet || "").length > 220 ? " .." : ""}</div>
+          </td>
+        `;
+
+        tr.onclick = () => {
+          if (!id) return alert("Questo risultato non ha un id apribile nel diario.");
+          openDiarioAtId(id);
+        };
+
+        globalSearchBody.appendChild(tr);
+      });
+    }
+
+    async function runGlobalSearch() {
+      if (!requireAuthOrShowLogin()) return;
+
+      const q = (globalSearchInput?.value || "").trim();
+      if (!q) {
+        clearGlobalSearch();
+        return;
+      }
+
+      const token = ++lastSearchToken;
+      globalSearchHint.textContent = "Ricerca in corso..";
+      btnGlobalSearch.classList.add("disabled");
+      btnGlobalSearch.disabled = true;
+
+      try {
+        // Endpoint previsto dal backend "ricerca globale" (se diverso, dimmelo e lo allineo)
+        const res = await fetch("/api/search?q=" + encodeURIComponent(q), { method: "GET" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+        if (token !== lastSearchToken) return; // risposta vecchia
+
+        const rows = normalizeResults(data);
+        globalSearchHint.textContent = rows.length ? "" : "Nessun risultato.. prova un termine diverso";
+        renderGlobalResults(rows);
+      } catch (e) {
+        if (token !== lastSearchToken) return;
+        console.error(e);
+        globalSearchHint.textContent = "Errore ricerca.. controlla endpoint /api/search (o dimmi quello corretto)";
+        globalSearchBody.innerHTML = `<tr><td class="muted" colspan="3">Errore nel caricare i risultati</td></tr>`;
+        globalSearchCount.textContent = "";
+      } finally {
+        if (token === lastSearchToken) {
+          btnGlobalSearch.classList.remove("disabled");
+          btnGlobalSearch.disabled = false;
+        }
+      }
+    }
+
+    function wireGlobalSearchUI() {
+      if (!globalSearchInput) return;
+
+      globalSearchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          runGlobalSearch();
+        }
+      });
+
+      globalSearchInput.addEventListener("input", () => {
+        if (searchDebounce) clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+          const q = (globalSearchInput.value || "").trim();
+          if (!q) return clearGlobalSearch();
+          runGlobalSearch();
+        }, 350);
+      });
+    }
+
+    // =========================
     // POST LOGIN UI
     // =========================
     function initAfterLogin() {
       const btnUtenti = document.getElementById("btnUtenti");
       const cardUtenti = document.getElementById("cardUtenti");
       const btnLog = document.getElementById("btnLog");
+      const btnDiario = document.getElementById("btnDiario");
       const dashHint = document.getElementById("dashHint");
       const actionsHint = document.getElementById("actionsHint");
+
+      // Diario: visibile a tutti gli autenticati
+      btnDiario.style.display = "inline-block";
 
       if (!isAdmin()) {
         btnUtenti.style.display = "none";
@@ -1083,7 +1313,9 @@
         actionsHint.textContent = "Note visibili a tutti. Inserimento e modifiche abilitate perché hai un ruolo.";
       }
 
+      // Dashboard + prepara ricerca
       showOnly("dashboard");
+      wireGlobalSearchUI();
     }
 
     // =========================
