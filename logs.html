@@ -1,48 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Log - VELO NERO</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; padding: 50px 18px; text-align: center; margin:0; }
-        h1 { color: #ff3b3b; font-size: 50px; margin: 12px 0 18px 0; text-shadow: 0 0 12px #ff3b3b80; }
+  <title>Logs - VELO NERO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { background-color:#121212; color:#fff; font-family: Arial, sans-serif; padding: 50px 18px; margin:0; }
+    h1 { color:#ff3b3b; font-size: 50px; margin: 12px 0 10px 0; text-shadow: 0 0 12px #ff3b3b80; text-align:center; }
 
-        .topbar{
-          max-width:1200px; margin:0 auto 10px auto;
-          display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
-        }
-        .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
-        .pill {
-          display:inline-block; padding:6px 10px; border-radius:999px;
-          border:1px solid #ff1a1a55; background:#1a1a1a; color:#fff; font-size:13px;
-          box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-        }
-        .linkbtn{
-          background:none; border:1px solid #ff1a1a55; color:#fff; cursor:pointer;
-          padding:8px 12px; border-radius:10px;
-          box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-        }
-        .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
+    .topbar{
+      max-width:1200px; margin:0 auto 10px auto;
+      display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
+    .pill {
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      border:1px solid #ff1a1a55; background:#1a1a1a; color:#fff; font-size:13px;
+      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
+    }
+    .linkbtn{
+      background:none; border:1px solid #ff1a1a55; color:#fff; cursor:pointer;
+      padding:8px 12px; border-radius:10px;
+      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
+      text-decoration:none;
+      display:inline-block;
+    }
+    .linkbtn:hover { background:#2b0000; border-color:#ff1a1a88; }
 
-        table { width: 92%; max-width:1200px; margin: 0 auto; border-collapse: collapse; }
-        th, td { padding: 12px 14px; border: 1px solid #ff3b3b33; text-align: left; vertical-align: top; }
-        th { background-color: #1e1e1e; color: #ff3b3b; }
-        td { background-color: #1e1e1e; }
-        tr:hover td { background-color: #3a0000; }
+    .wrap{ max-width:1200px; margin: 0 auto; }
+    .subtitle{ text-align:center; color:#ff7b7b; margin: 0 0 16px 0; }
 
-        .buttons { margin: 10px 0 14px 0; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
-        .btn { padding: 10px 14px; border-radius: 8px; border: 1px solid #ff3b3b66; background:#1a1a1a; color:#fff; cursor:pointer; }
-        .btn:hover { background:#2b0000; }
-        .danger { background:#2b0000; border-color:#ff3b3baa; }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
 
-        a.back { display: inline-block; margin-top: 20px; padding: 10px 20px; color: #fff; background-color: #ff3b3b; border-radius: 6px; text-decoration: none; transition: 0.3s; }
-        a.back:hover { background-color: #cc0000; }
+    .card{
+      background: linear-gradient(145deg, #1a1a1a, #2b0000);
+      border-radius: 12px;
+      box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
+      padding: 16px;
+    }
 
-        .section { margin-top: 26px; }
-        h2 { color:#ff7b7b; text-shadow:0 0 10px #ff000040; margin: 6px 0 10px 0; }
-        .muted { color:#ff7b7b; }
-    </style>
+    .headrow{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+    .headrow h2{ margin:0; font-size:18px; }
+    .btn{
+      border:1px solid #ff1a1a55;
+      background:#1a1a1a;
+      color:#fff;
+      cursor:pointer;
+      padding:8px 12px;
+      border-radius:10px;
+      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
+    }
+    .btn:hover{ background:#2b0000; border-color:#ff1a1a88; }
+
+    table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius:10px; }
+    th, td{ padding:10px; border-bottom:1px solid #ff1a1a22; text-align:left; font-size:13px; vertical-align: top; }
+    th{ color:#ffb3b3; font-weight:700; }
+    tr:hover td{ background:#1a0c0c; }
+
+    .muted{ color:#ffb3b3; font-size:13px; }
+    .ok{ color:#7bffb5; font-size:13px; }
+    .err{ color:#ff7b7b; font-size:13px; }
+
+    .badge{
+      display:inline-block; padding:4px 10px; border-radius:999px;
+      border:1px solid #ff1a1a55; background:#1a1a1a; font-size:12px;
+    }
+  </style>
 </head>
 <body>
 
@@ -51,250 +78,250 @@
   <div class="userpill">
     <span class="pill" id="pillEmail">Non autenticato</span>
     <span class="pill" id="pillRole">Ruolo: —</span>
-    <button class="linkbtn" id="btnLogout" onclick="logout()">Esci</button>
+    <button class="linkbtn" onclick="logout()">Esci</button>
   </div>
 </div>
 
-<h1>Log Attività</h1>
+<h1>Logs</h1>
+<div class="subtitle">Ruoli / Azioni / Traffico (armi & droga)</div>
 
-<!-- Sezione Login History -->
-<div class="section">
-    <h2>📋 Cronologia Login</h2>
-    <div class="buttons">
-        <button class="btn" onclick="refreshLoginLogs()">🔄 Aggiorna</button>
-        <button class="btn danger" onclick="clearLoginLogs()">🗑️ Cancella Cronologia</button>
+<div class="wrap">
+  <div id="msg" class="muted" style="margin:0 0 12px 0;"></div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="headrow">
+        <h2>Log ruoli</h2>
+        <button class="btn" onclick="loadRolesLog()">Aggiorna</button>
+      </div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Quando</th>
+              <th>Chi</th>
+              <th>Target</th>
+              <th>Ruolo</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRoles">
+            <tr><td colspan="4" class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Data/Ora</th>
-                <th>Email</th>
-                <th>Nome in Game</th>
-                <th>Azione</th>
-            </tr>
-        </thead>
-        <tbody id="loginLogBody">
-            <tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>
-        </tbody>
-    </table>
-</div>
 
-<!-- Sezione Utenti Registrati -->
-<div class="section">
-    <h2>👥 Utenti Registrati</h2>
-    <table>
-        <thead>
+    <div class="card">
+      <div class="headrow">
+        <h2>Azioni</h2>
+        <button class="btn" onclick="loadActions()">Aggiorna</button>
+      </div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
             <tr>
-                <th>Email</th>
-                <th>Nome in Game</th>
-                <th>Ruolo</th>
-                <th>Ultimo Accesso</th>
+              <th>Quando</th>
+              <th>Importo</th>
+              <th>Note</th>
+              <th>Chi</th>
             </tr>
-        </thead>
-        <tbody id="usersBody">
-            <tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun utente registrato</td></tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- Sezione Log Attività Generale -->
-<div class="section">
-    <h2>⚙️ Log Attività</h2>
-    <div class="buttons">
-        <button class="btn" onclick="refreshActivityLogs()">🔄 Aggiorna</button>
-        <button class="btn danger" onclick="clearActivityLogs()">🗑️ Cancella Log</button>
+          </thead>
+          <tbody id="tbodyActions">
+            <tr><td colspan="4" class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Data/Ora</th>
-                <th>Utente</th>
-                <th>Azione</th>
-            </tr>
-        </thead>
-        <tbody id="logBody"></tbody>
-    </table>
-</div>
 
-<a href="index.html" class="back">Torna al Dashboard</a>
+    <div class="card">
+      <div class="headrow">
+        <h2>Traffico - Armi</h2>
+        <button class="btn" onclick="loadTraffic('armi')">Aggiorna</button>
+      </div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Quando</th>
+              <th>Tipo</th>
+              <th>Articolo</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyArmi">
+            <tr><td colspan="4" class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="headrow">
+        <h2>Traffico - Droga</h2>
+        <button class="btn" onclick="loadTraffic('droga')">Aggiorna</button>
+      </div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Quando</th>
+              <th>Tipo</th>
+              <th>Prodotto</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDroga">
+            <tr><td colspan="4" class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
-const LOGS_KEY = "vn_login_logs";
-const ACTIVITY_LOGS_KEY = "vn_activity_logs";
-const USERS_KEY = "vn_users_v2";
-const SESSION_KEY = "vn_session_v1";
+  const pillEmail = document.getElementById("pillEmail");
+  const pillRole  = document.getElementById("pillRole");
+  const msgEl = document.getElementById("msg");
 
-const logBody = document.getElementById('logBody');
-const loginLogBody = document.getElementById('loginLogBody');
-const usersBody = document.getElementById('usersBody');
+  const tbodyRoles = document.getElementById("tbodyRoles");
+  const tbodyActions = document.getElementById("tbodyActions");
+  const tbodyArmi = document.getElementById("tbodyArmi");
+  const tbodyDroga = document.getElementById("tbodyDroga");
 
-const pillEmail = document.getElementById("pillEmail");
-const pillRole = document.getElementById("pillRole");
-
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-
-// ===== AUTH / SESSION =====
-function loadSession() {
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
-}
-function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
-function clearSession() { localStorage.removeItem(SESSION_KEY); }
-
-function loadUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-function findUserByEmail(email) {
-  return loadUsers().find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
-}
-function isAdminRole(role) {
-  return ["Owner","Boss","Vice Boss"].includes(role);
-}
-
-function setHeaderUser() {
-  const s = loadSession();
-  if (!s?.email) {
-    pillEmail.textContent = "Non autenticato";
-    pillRole.textContent = "Ruolo: —";
-    return;
+  async function apiGet(url){
+    const r = await fetch(url, { method:"GET", credentials:"include" });
+    return r.json();
   }
-  const u = findUserByEmail(s.email);
-  pillEmail.textContent = s.email;
-  pillRole.textContent = "Ruolo: " + (u?.role || "Nessuno");
-}
-
-function logout() {
-  clearSession();
-  window.location.href = "index.html";
-}
-
-// ===== GUARD (solo admin) =====
-(function guard(){
-  const s = loadSession();
-  if (!s?.email) { window.location.href = "index.html"; return; }
-  const u = findUserByEmail(s.email);
-  if (!u) { clearSession(); window.location.href = "index.html"; return; }
-  if (u.blocked) { clearSession(); alert("Account bloccato."); window.location.href = "index.html"; return; }
-  if (!isAdminRole(u.role || "Nessuno")) { alert("Permesso negato."); window.location.href = "index.html"; return; }
-  setHeaderUser();
-})();
-
-// ===== LOGIN LOGS =====
-function loadLoginLogs() {
-  try {
-    const raw = localStorage.getItem(LOGS_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-
-function refreshLoginLogs() {
-  const logs = loadLoginLogs().slice().sort((a, b) => (b.ts||0) - (a.ts||0));
-  loginLogBody.innerHTML = "";
-
-  if (logs.length === 0) {
-    loginLogBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
-    return;
+  async function apiPost(url, data){
+    const r = await fetch(url, {
+      method:"POST",
+      credentials:"include",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(data || {})
+    });
+    return r.json();
   }
 
-  logs.forEach(log => {
-    const when = new Date(log.ts).toLocaleString();
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(when)}</td>
-      <td>${escapeHtml(log.email)}</td>
-      <td>${escapeHtml(log.gameName || '—')}</td>
-      <td>${escapeHtml(log.action || 'LOGIN')}</td>
-    `;
-    loginLogBody.appendChild(tr);
-  });
-}
-
-function clearLoginLogs() {
-  const ok = confirm("Confermi cancellazione di TUTTI i log di login?");
-  if (!ok) return;
-  localStorage.removeItem(LOGS_KEY);
-  refreshLoginLogs();
-  refreshUsers();
-}
-
-// ===== UTENTI + ULTIMO ACCESSO (vero max ts) =====
-function refreshUsers() {
-  const users = loadUsers().slice().sort((a, b) => (a.email || "").localeCompare(b.email || ""));
-  const allLogs = loadLoginLogs();
-  usersBody.innerHTML = "";
-
-  if (users.length === 0) {
-    usersBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff7b7b;">Nessun utente registrato</td></tr>`;
-    return;
+  function setMsg(ok, text){
+    msgEl.className = ok ? "ok" : "err";
+    msgEl.textContent = text || "";
   }
 
-  users.forEach(u => {
-    const userLogs = allLogs.filter(l => (l.email || "").toLowerCase() === (u.email || "").toLowerCase());
-    const lastTs = userLogs.reduce((m, x) => Math.max(m, Number(x.ts || 0)), 0);
-    const lastLogin = lastTs ? new Date(lastTs).toLocaleString() : "Mai";
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(u.email)}</td>
-      <td>${escapeHtml(u.gameName || '—')}</td>
-      <td>${escapeHtml(u.role || 'Nessuno')}</td>
-      <td>${escapeHtml(lastLogin)}</td>
-    `;
-    usersBody.appendChild(tr);
-  });
-}
-
-// ===== ACTIVITY LOGS =====
-function loadActivityLogs() {
-  try {
-    const raw = localStorage.getItem(ACTIVITY_LOGS_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-
-function refreshActivityLogs() {
-  const logs = loadActivityLogs().slice().sort((a, b) => (b.ts||0) - (a.ts||0));
-  logBody.innerHTML = "";
-
-  if (logs.length === 0) {
-    logBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #ff7b7b;">Nessun log disponibile</td></tr>`;
-    return;
+  async function logout(){
+    try { await apiPost("/api/auth/logout", {}); } catch {}
+    window.location.href = "index.html";
   }
 
-  logs.forEach(log => {
-    const when = new Date(log.ts).toLocaleString();
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(when)}</td>
-      <td>${escapeHtml(log.user || '—')}</td>
-      <td>${escapeHtml(log.action || '—')}</td>
-    `;
-    logBody.appendChild(tr);
-  });
-}
+  function fmtWhen(ms){
+    if (!ms) return "—";
+    try { return new Date(ms).toLocaleString(); } catch { return String(ms); }
+  }
 
-function clearActivityLogs() {
-  const ok = confirm("Confermi cancellazione di TUTTI i log attività?");
-  if (!ok) return;
-  localStorage.removeItem(ACTIVITY_LOGS_KEY);
-  refreshActivityLogs();
-}
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
 
-// ===== INIT =====
-(function init(){
-  refreshLoginLogs();
-  refreshUsers();
-  refreshActivityLogs();
-})();
+  async function guard(){
+    const me = await apiGet("/api/auth/me");
+    if (!me?.authenticated) {
+      window.location.href = "index.html";
+      return;
+    }
+    const role = (me.user?.role || "none").toLowerCase();
+    if (role === "none") {
+      alert("Sei in attesa di ruolo: accesso non consentito.");
+      window.location.href = "index.html";
+      return;
+    }
+    pillEmail.textContent = me.user.email || "—";
+    pillRole.textContent  = "Ruolo: " + role;
+  }
+
+  async function loadRolesLog(){
+    tbodyRoles.innerHTML = `<tr><td colspan="4" class="muted">Caricamento ..</td></tr>`;
+    const out = await apiGet("/api/admin/get-roles-log?limit=50");
+    if (!out?.ok) {
+      tbodyRoles.innerHTML = `<tr><td colspan="4" class="muted">Errore</td></tr>`;
+      return;
+    }
+    const items = out.items || [];
+    if (!items.length) {
+      tbodyRoles.innerHTML = `<tr><td colspan="4" class="muted">Nessun log</td></tr>`;
+      return;
+    }
+    tbodyRoles.innerHTML = items.map(x => `
+      <tr>
+        <td>${fmtWhen(x.at)}</td>
+        <td>${escapeHtml(x.by || "—")} <span class="badge">${escapeHtml(x.byRole || "—")}</span></td>
+        <td>${escapeHtml(x.target || "—")}</td>
+        <td><span class="badge">${escapeHtml(x.role || "—")}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  async function loadActions(){
+    tbodyActions.innerHTML = `<tr><td colspan="4" class="muted">Caricamento ..</td></tr>`;
+    const out = await apiGet("/api/actions/list?limit=100");
+    if (!out?.ok) {
+      tbodyActions.innerHTML = `<tr><td colspan="4" class="muted">Errore</td></tr>`;
+      return;
+    }
+    const items = out.items || [];
+    if (!items.length) {
+      tbodyActions.innerHTML = `<tr><td colspan="4" class="muted">Nessuna azione</td></tr>`;
+      return;
+    }
+    tbodyActions.innerHTML = items.map(x => `
+      <tr>
+        <td>${fmtWhen(x.at)}</td>
+        <td>${escapeHtml(String(x.amount ?? "—"))}</td>
+        <td>${escapeHtml(x.notes || "")}</td>
+        <td>${escapeHtml(x.by || "—")} <span class="badge">${escapeHtml(x.byRole || "—")}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  async function loadTraffic(area){
+    const tbody = area === "armi" ? tbodyArmi : tbodyDroga;
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">Caricamento ..</td></tr>`;
+
+    const out = await apiGet("/api/traffic/list?area=" + encodeURIComponent(area) + "&limit=100");
+    if (!out?.ok) {
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">Errore</td></tr>`;
+      return;
+    }
+
+    const items = out.items || [];
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">Nessun record</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = items.map(x => `
+      <tr>
+        <td>${fmtWhen(x.at)}</td>
+        <td><span class="badge">${escapeHtml(x.type || "—")}</span></td>
+        <td>${escapeHtml(x.item || "—")}</td>
+        <td>${escapeHtml(String(x.qty ?? "—"))}</td>
+      </tr>
+    `).join("");
+  }
+
+  (async function init(){
+    await guard();
+    loadRolesLog();
+    loadActions();
+    loadTraffic("armi");
+    loadTraffic("droga");
+  })();
 </script>
 
 </body>
