@@ -232,7 +232,7 @@
     <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
     <button id="btnDiario" onclick="showSection('diario')">Diario</button>
-    <button id="btnLog" onclick="goToLogs()" style="display:none;">📋 Log</button>
+    <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
   </div>
 
   <!-- LOGIN -->
@@ -478,6 +478,39 @@
         </thead>
         <tbody id="diaryTableBody">
           <tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- LOG -->
+  <div id="log" class="section">
+    <div class="hint">Log accessi (solo admin). Click su una riga per vedere i dettagli.</div>
+
+    <div class="diaryBar" style="margin-top:12px;">
+      <div class="diarySearch" style="min-width:320px;">
+        <span class="icon">🔎</span>
+        <input id="logQuery" type="text" placeholder="Cerca nei log.. (email, nome, azione)" />
+      </div>
+
+      <button class="btn" onclick="logSearch()">Cerca</button>
+      <button class="btn" onclick="logClear()">Pulisci</button>
+      <button class="btn danger" onclick="logClearAll()">Svuota log</button>
+    </div>
+
+    <div class="diaryTableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:220px;">Quando</th>
+            <th style="width:280px;">Email</th>
+            <th style="width:220px;">Nome in Game</th>
+            <th>Azione</th>
+          </tr>
+        </thead>
+        <tbody id="logTableBody">
+          <tr><td class="muted" colspan="4">Nessun log</td></tr>
         </tbody>
       </table>
     </div>
@@ -763,8 +796,25 @@
       const body = document.getElementById("diaryTableBody");
       const all = loadDiary().slice().sort((a,b)=> (b.ts||0)-(a.ts||0));
 
+      // Se query vuota: mostra ultimi 50 record
       if (!q) {
-        body.innerHTML = `<tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>`;
+        const latest = all.slice(0, 50);
+        if (latest.length === 0) {
+          body.innerHTML = `<tr><td class="muted" colspan="3">Nessuna nota presente</td></tr>`;
+          return;
+        }
+        body.innerHTML = "";
+        latest.forEach(n => {
+          const tr = document.createElement("tr");
+          tr.className = "clickRow";
+          tr.onclick = () => openNoteModal(n.id);
+          tr.innerHTML = `
+            <td>${new Date(n.ts).toLocaleString()}</td>
+            <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Nota")}</td>
+            <td><div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
+          `;
+          body.appendChild(tr);
+        });
         return;
       }
 
@@ -781,7 +831,7 @@
       }
 
       body.innerHTML = "";
-      filtered.forEach(n => {
+      filtered.slice(0, 50).forEach(n => {
         const tr = document.createElement("tr");
         tr.className = "clickRow";
         tr.onclick = () => openNoteModal(n.id);
@@ -796,8 +846,7 @@
 
     function diaryClear() {
       document.getElementById("diaryQuery").value = "";
-      const body = document.getElementById("diaryTableBody");
-      body.innerHTML = `<tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>`;
+      diarySearch(); // mostra ultimi 50
     }
 
     document.addEventListener("keydown", (e) => {
@@ -806,6 +855,10 @@
         if (active && active.id === "diaryQuery") {
           e.preventDefault();
           diarySearch();
+        }
+        if (active && active.id === "logQuery") {
+          e.preventDefault();
+          logSearch();
         }
       }
       if (e.key === "Escape") {
@@ -830,21 +883,34 @@
     let editingNoteId = null;
 
     function openNoteModal(id) {
-      const canEdit = canEditOps();
       editingNoteId = id;
 
-      // permessi
-      btnSaveNote.disabled = !canEdit;
-      if (!canEdit) {
-        btnSaveNote.classList.add("disabled");
-        notePermHint.textContent = "⚠️ In attesa di ruolo: puoi visualizzare le note, ma non crearle/modificarle.";
-        document.getElementById("btnNewNote").classList.add("disabled");
-        document.getElementById("btnNewNote").disabled = true;
+      const canAdd = canAddDiaryNote();
+      const canEdit = canEditDiaryNote();
+
+      // default: enable fields for "new note" only if canAdd; for existing note only if canEdit
+      const isExisting = !!id;
+
+      const fields = [noteType, noteTitle, noteNames, noteAgreements, noteBody];
+      fields.forEach(f => { if (f) f.disabled = isExisting ? !canEdit : !canAdd; });
+
+      btnSaveNote.disabled = isExisting ? !canEdit : !canAdd;
+      btnSaveNote.classList.toggle("disabled", btnSaveNote.disabled);
+
+      // hint permessi
+      if (isExisting && !canEdit) {
+        notePermHint.textContent = "Solo Owner, Boss e Vice Boss possono modificare le note.";
+      } else if (!isExisting && !canAdd) {
+        notePermHint.textContent = "⚠️ In attesa di ruolo: puoi leggere, ma non inserire note.";
       } else {
-        btnSaveNote.classList.remove("disabled");
         notePermHint.textContent = "";
-        document.getElementById("btnNewNote").classList.remove("disabled");
-        document.getElementById("btnNewNote").disabled = false;
+      }
+
+      // pulsante nuova nota
+      const btnNew = document.getElementById("btnNewNote");
+      if (btnNew) {
+        btnNew.disabled = !canAdd;
+        btnNew.classList.toggle("disabled", !canAdd);
       }
 
       if (id) {
@@ -861,7 +927,7 @@
 
         btnDeleteNote.style.display = canEdit ? "inline-block" : "none";
       } else {
-        if (!canEdit) return alert("Sei in attesa di ruolo: non puoi creare note.");
+        if (!canAdd) return alert("Sei in attesa di ruolo: non puoi inserire note.");
         noteModalTitle.textContent = "Nuova nota";
         noteInfo.textContent = "";
         noteType.value = "Nota";
@@ -881,7 +947,9 @@
     }
 
     function saveNote() {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi creare/modificare.");
+      const isExisting = !!editingNoteId;
+      if (isExisting && !canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono modificare.");
+      if (!isExisting && !canAddDiaryNote()) return alert("Sei in attesa di ruolo: non puoi inserire note.");
 
       const t = (noteType.value || "Nota").trim();
       const title = (noteTitle.value || "").trim();
@@ -924,7 +992,7 @@
     }
 
     function deleteNote() {
-      if (!canEditOps()) return;
+      if (!canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono eliminare.");
       if (!editingNoteId) return;
 
       const ok = confirm("Confermi eliminazione nota?");
@@ -949,6 +1017,8 @@
     }
     function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canEditOps() { return myRole() !== "Nessuno"; }
+    function canAddDiaryNote() { return myRole() !== "Nessuno"; }
+    function canEditDiaryNote() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canManageTotals() { return ["Boss","Vice Boss"].includes(myRole()); }
     function canBlockUnblock() { return ["Owner","Boss"].includes(myRole()); }
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
@@ -994,6 +1064,7 @@
       if (id === "utenti") return "Utenti";
       if (id === "azioni") return "Azioni";
       if (id === "diario") return "Diario";
+      if (id === "log") return "Log";
       return "Sistema Privato Interno";
     }
 
@@ -1006,6 +1077,7 @@
       if (id === "utenti") document.getElementById("btnUtenti").classList.add("active");
       if (id === "azioni") document.getElementById("btnAzioni").classList.add("active");
       if (id === "diario") document.getElementById("btnDiario").classList.add("active");
+      if (id === "log") document.getElementById("btnLog").classList.add("active");
 
       if (pageSubtitle) pageSubtitle.textContent = subtitleForSection(id);
     }
@@ -1013,7 +1085,7 @@
     function showSection(id) {
       if (!requireAuthOrShowLogin()) return;
 
-      if (id === "utenti" && !isAdmin()) {
+      if ((id === "utenti" || id === "log") && !isAdmin()) {
         return showOnly("dashboard");
       }
 
@@ -1026,12 +1098,15 @@
         renderManageSummaries();
       }
       if (id === "diario") {
-        // abilita/disabilita "Nuova nota" in base al ruolo
         const btnNew = document.getElementById("btnNewNote");
         if (btnNew) {
-          btnNew.disabled = !canEditOps();
-          btnNew.classList.toggle("disabled", !canEditOps());
+          btnNew.disabled = !canAddDiaryNote();
+          btnNew.classList.toggle("disabled", !canAddDiaryNote());
         }
+        diarySearch(); // mostra ultimi 50 se query vuota
+      }
+      if (id === "log") {
+        logSearch();
       }
     }
 
@@ -1057,10 +1132,73 @@
     }
 
     function goToLogs() {
+      // mantenuto per compatibilità: ora i log sono dentro questa pagina
+      showSection('log');
+    }
+
+    // =========================
+    // LOG VIEW (IN-PAGE)
+    // =========================
+    function loadLoginLogs() {
+      try {
+        const raw = localStorage.getItem(LOGS_KEY) || "[]";
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch { return []; }
+    }
+    function saveLoginLogs(arr) {
+      localStorage.setItem(LOGS_KEY, JSON.stringify(arr || []));
+    }
+
+    function logSearch() {
       if (!isAdmin()) {
         alert("Permesso negato: solo gli admin possono visualizzare i log");
+        showOnly("dashboard");
         return;
       }
+
+      const q = (document.getElementById("logQuery")?.value || "").trim().toLowerCase();
+      const body = document.getElementById("logTableBody");
+      const all = loadLoginLogs().slice().sort((a,b)=> (b.ts||0)-(a.ts||0));
+
+      const filtered = !q ? all.slice(0, 50) : all.filter(x => {
+        const hay = [x.email, x.gameName, x.action].map(v => String(v||"").toLowerCase()).join(" | ");
+        return hay.includes(q);
+      }).slice(0, 50);
+
+      if (!filtered.length) {
+        body.innerHTML = `<tr><td class="muted" colspan="4">Nessun log</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = "";
+      filtered.forEach(l => {
+        const tr = document.createElement("tr");
+        tr.className = "clickRow";
+        tr.innerHTML = `
+          <td>${new Date(l.ts).toLocaleString()}</td>
+          <td>${escapeHtml(l.email || "—")}</td>
+          <td>${escapeHtml(l.gameName || "—")}</td>
+          <td style="font-weight:900; color:var(--red2)">${escapeHtml(l.action || "—")}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function logClear() {
+      const q = document.getElementById("logQuery");
+      if (q) q.value = "";
+      logSearch();
+    }
+
+    function logClearAll() {
+      if (!isAdmin()) return alert("Permesso negato");
+      const ok = confirm("Confermi svuotamento log?");
+      if (!ok) return;
+      saveLoginLogs([]);
+      logSearch();
+    }
+
       window.location.href = "logs.html";
     }
 
@@ -2065,4 +2203,3 @@
   </script>
 </body>
 </html>
-
