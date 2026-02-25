@@ -718,8 +718,9 @@ function goToLogs() {
   }
 
   // costruisce l’URL corretto anche se sei in una sottopagina
-  const url = new URL("/logs.html", window.location.origin).href;
-
+const url = new URL("/logs/", window.location.origin).href;
+window.location.assign(url);
+  
   // navigazione forzata
   window.location.assign(url);
 }
