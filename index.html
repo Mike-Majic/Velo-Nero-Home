@@ -2651,10 +2651,14 @@
           <div class="row">
             <div class="field" style="min-width:180px;">
               <label>Tipo</label>
-              <select id="invType_${tid}" ${disabledAttr}>
-                <option value="add">AGGIUNTO</option>
-                <option value="rem">RIMOSSO</option>
-              </select>
+<select id="invType_${tid}" ${disabledAttr}>
+  <option value="add">AGGIUNTO</option>
+  <option value="rem">RIMOSSO</option>
+  <option value="sold">VENDUTO</option>
+  <option value="buy">ACQUISTATO</option>
+
+  
+</select>
             </div>
 
             <div class="field" style="min-width:320px; flex:1;">
