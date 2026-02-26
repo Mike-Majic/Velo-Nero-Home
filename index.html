@@ -283,6 +283,48 @@
     </div>
   </div>
 
+  <!-- RICERCA GLOBALE (in alto) -->
+<div class="diaryBar" id="globalBar" style="max-width:1200px; margin:0 auto 18px auto; display:none;">
+  <div class="diarySearch">
+    <span class="icon">🔎</span>
+    <input id="globalQuery" type="text" placeholder="Cerca ovunque.. (Diario, Azioni, Gestione, Contabilità .. Log se admin)" />
+  </div>
+
+  <button class="btn" onclick="globalSearch()">Cerca</button>
+  <button class="btn" onclick="globalClear()">Pulisci</button>
+</div>
+
+<!-- OVERLAY RISULTATI RICERCA -->
+<div id="globalOverlay">
+  <div id="globalModal">
+    <h3 style="margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900;">
+      Risultati ricerca
+    </h3>
+
+    <div class="muted" id="globalInfo" style="margin-bottom:10px;"></div>
+
+    <div class="diaryTableWrap" style="margin-top:0;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:220px;">Quando</th>
+            <th style="width:190px;">Sezione</th>
+            <th>Risultato</th>
+          </tr>
+        </thead>
+        <tbody id="globalResultsBody">
+          <tr><td class="muted" colspan="3">Nessun risultato</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;">
+      <button class="btn small" onclick="globalClose()">Chiudi</button>
+    </div>
+  </div>
+</div>
+  
+
   <h1>VELO NERO</h1>
   <p class="subtitle" id="pageSubtitle">Sistema Privato Interno</p>
 
