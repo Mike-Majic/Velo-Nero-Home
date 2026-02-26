@@ -224,7 +224,7 @@
       text-shadow:0 0 10px #ff3b3b80;
     }
     .tagSelected{
-      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap;
       margin-top:8px;
     }
     .tagPill{
@@ -527,11 +527,11 @@
           <h3 class="sideTitle">Tag (Utente)</h3>
           <div class="muted">Doppio click su un nome per selezionarlo .. ordinati per ruolo.</div>
 
-<div class="tagSelected">
-  <div class="muted">Selezionati:</div>
-  <div id="tagSelectedWrap" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-  <button class="btn small danger" onclick="clearSelectedTags()">Pulisci</button>
-</div>
+          <div class="tagSelected">
+            <div class="muted">Selezionati:</div>
+            <div id="tagSelectedWrap" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
 
           <div class="tagSearchRow">
             <span style="opacity:.9; color:#ffb3b3;">🔎</span>
@@ -549,7 +549,7 @@
             </table>
           </div>
 
-          <div class="hint">Il tag viene salvato dentro le registrazioni (Azioni e Gestione).</div>
+          <div class="hint">I tag vengono salvati dentro le registrazioni (Azioni e Gestione).</div>
         </div>
       </div>
     </div>
@@ -675,11 +675,11 @@
           <h3 class="sideTitle">Tag (Utente)</h3>
           <div class="muted">Doppio click su un nome per selezionarlo .. vale anche per questa sezione.</div>
 
-<div class="tagSelected">
-  <div class="muted">Selezionati:</div>
-  <div id="tagSelectedWrapInv" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-  <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
-</div>
+          <div class="tagSelected">
+            <div class="muted">Selezionati:</div>
+            <div id="tagSelectedWrapInv" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
 
           <div class="tagSearchRow">
             <span style="opacity:.9; color:#ffb3b3;">🔎</span>
@@ -762,7 +762,7 @@
         <div class="field" style="min-width:320px;">
           <label>Tag (Nome in game)</label>
           <input id="editTagName" disabled />
-          <div class="hint">Per cambiare tag: seleziona un nome nella lista a destra e poi salva.</div>
+          <div class="hint">Per cambiare tag: seleziona uno o più nomi nella lista a destra e poi salva.</div>
         </div>
       </div>
 
@@ -2042,140 +2042,111 @@
       document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
     });
 
-// =========================
-// TAG (multi-selezione) usato sia per Azioni che per Gestione
-// =========================
-let selectedTagUserIds = [];
+    // =========================
+    // TAG (multi-selezione) usato sia per Azioni che per Gestione
+    // =========================
+    let selectedTagUserIds = [];
 
-function isTagSelected(id){ return selectedTagUserIds.includes(id); }
+    function isTagSelected(id){ return selectedTagUserIds.includes(id); }
 
-function toggleSelectedTag(id) {
-  if (!id) return;
-  if (isTagSelected(id)) {
-    selectedTagUserIds = selectedTagUserIds.filter(x => x !== id);
-  } else {
-    selectedTagUserIds.push(id);
-  }
-  syncSelectedTagsUI();
-}
+    function toggleSelectedTag(id) {
+      if (!id) return;
+      if (isTagSelected(id)) {
+        selectedTagUserIds = selectedTagUserIds.filter(x => x !== id);
+      } else {
+        selectedTagUserIds.push(id);
+      }
+      syncSelectedTagsUI();
+    }
 
-function clearSelectedTags() {
-  selectedTagUserIds = [];
-  syncSelectedTagsUI();
-}
+    function clearSelectedTags() {
+      selectedTagUserIds = [];
+      syncSelectedTagsUI();
+    }
 
-function selectedTagUsers() {
-  const users = loadUsers();
-  return selectedTagUserIds
-    .map(id => users.find(u => u.id === id))
-    .filter(Boolean);
-}
+    function selectedTagUsers() {
+      const users = loadUsers();
+      return selectedTagUserIds
+        .map(id => users.find(u => u.id === id))
+        .filter(Boolean);
+    }
 
-function selectedTagNames() {
-  return selectedTagUsers().map(u => (u.gameName || u.email || "—"));
-}
+    function selectedTagNames() {
+      return selectedTagUsers().map(u => (u.gameName || u.email || "—"));
+    }
 
-function syncSelectedTagsUI() {
-  const wrap = document.getElementById("tagSelectedWrap");
-  const wrapInv = document.getElementById("tagSelectedWrapInv");
+    function syncSelectedTagsUI() {
+      const wrap = document.getElementById("tagSelectedWrap");
+      const wrapInv = document.getElementById("tagSelectedWrapInv");
 
-  const names = selectedTagNames();
-  const html = names.length
-    ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
-    : `<span class="tagPill">—</span>`;
+      const names = selectedTagNames();
+      const html = names.length
+        ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+        : `<span class="tagPill">—</span>`;
 
-  if (wrap) wrap.innerHTML = html;
-  if (wrapInv) wrapInv.innerHTML = html;
+      if (wrap) wrap.innerHTML = html;
+      if (wrapInv) wrapInv.innerHTML = html;
 
-  // aggiorna i campi "Tag" dentro Gestione armi-droga (form)
-  (window.INV_CATEGORIES || []).forEach(cat => {
-    const tid = invTabId(cat);
-    const inp = document.getElementById("invTag_" + tid);
-    if (inp) inp.value = names.length ? names.join(", ") : "—";
-  });
+      // aggiorna i campi "Tag" dentro Gestione armi-droga (form)
+      (window.INV_CATEGORIES || []).forEach(cat => {
+        const tid = invTabId(cat);
+        const inp = document.getElementById("invTag_" + tid);
+        if (inp) inp.value = names.length ? names.join(", ") : "—";
+      });
 
-  // aggiorna il campo tag nel modal edit azioni
-  const editTag = document.getElementById("editTagName");
-  if (editTag) editTag.value = names.length ? names.join(", ") : "—";
-}
+      // aggiorna il campo tag nel modal edit azioni
+      const editTag = document.getElementById("editTagName");
+      if (editTag) editTag.value = names.length ? names.join(", ") : "—";
+    }
 
-function getTagSortedUsers(filterQuery) {
-  const q = (filterQuery || "").trim().toLowerCase();
-  return loadUsers()
-    .slice()
-    .filter(u => !u.blocked)
-    .sort((a,b) => {
-      const ra = roleRank(a.role), rb = roleRank(b.role);
-      if (ra !== rb) return ra - rb;
-      return (a.gameName||"").localeCompare(b.gameName||"");
-    })
-    .filter(u => {
-      if (!q) return true;
-      const hay = `${u.gameName||""} ${u.role||""} ${u.email||""}`.toLowerCase();
-      return hay.includes(q);
-    });
-}
+    function getTagSortedUsers(filterQuery) {
+      const q = (filterQuery || "").trim().toLowerCase();
+      return loadUsers()
+        .slice()
+        .filter(u => !u.blocked)
+        .sort((a,b) => {
+          const ra = roleRank(a.role), rb = roleRank(b.role);
+          if (ra !== rb) return ra - rb;
+          return (a.gameName||"").localeCompare(b.gameName||"");
+        })
+        .filter(u => {
+          if (!q) return true;
+          const hay = `${u.gameName||""} ${u.role||""} ${u.email||""}`.toLowerCase();
+          return hay.includes(q);
+        });
+    }
 
-function renderTagList() {
-  const body = document.getElementById("tagTableBody");
-  const q = (document.getElementById("tagSearch")?.value || "");
-  const users = getTagSortedUsers(q);
+    function renderTagList() {
+      const body = document.getElementById("tagTableBody");
+      const q = (document.getElementById("tagSearch")?.value || "");
+      const users = getTagSortedUsers(q);
 
-  if (!users.length) {
-    body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
-    return;
-  }
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncSelectedTagsUI();
+        return;
+      }
 
-  body.innerHTML = "";
-  users.forEach(u => {
-    const tr = document.createElement("tr");
-    const isSelected = isTagSelected(u.id);
-    tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSelected = isTagSelected(u.id);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
 
-    // doppio click = toggle selezione + evidenzia
-    tr.ondblclick = () => {
-      toggleSelectedTag(u.id);
-      renderTagList();
-      renderTagListInv();
-    };
+        tr.ondblclick = () => {
+          toggleSelectedTag(u.id);
+          renderTagList();
+          renderTagListInv();
+        };
 
-    tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
-    body.appendChild(tr);
-  });
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
 
-  syncSelectedTagsUI();
-}
+      syncSelectedTagsUI();
+    }
 
-function renderTagListInv() {
-  const body = document.getElementById("tagTableBodyInv");
-  if (!body) return;
-
-  const q = (document.getElementById("tagSearchInv")?.value || "");
-  const users = getTagSortedUsers(q);
-
-  if (!users.length) {
-    body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
-    return;
-  }
-
-  body.innerHTML = "";
-  users.forEach(u => {
-    const tr = document.createElement("tr");
-    const isSelected = isTagSelected(u.id);
-    tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
-
-    tr.ondblclick = () => {
-      toggleSelectedTag(u.id);
-      renderTagList();
-      renderTagListInv();
-    };
-
-    tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
-    body.appendChild(tr);
-  });
-
-  syncSelectedTagsUI();
-}
+    function renderTagListInv() {
       const body = document.getElementById("tagTableBodyInv");
       if (!body) return;
 
@@ -2184,17 +2155,18 @@ function renderTagListInv() {
 
       if (!users.length) {
         body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncSelectedTagsUI();
         return;
       }
 
       body.innerHTML = "";
       users.forEach(u => {
         const tr = document.createElement("tr");
-        const isSelected = (u.id === selectedTagUserId);
+        const isSelected = isTagSelected(u.id);
         tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
 
         tr.ondblclick = () => {
-          setSelectedTag(u.id);
+          toggleSelectedTag(u.id);
           renderTagList();
           renderTagListInv();
         };
@@ -2202,6 +2174,8 @@ function renderTagListInv() {
         tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
         body.appendChild(tr);
       });
+
+      syncSelectedTagsUI();
     }
 
     // =========================
@@ -2273,9 +2247,6 @@ function renderTagListInv() {
 
       document.getElementById("qty_" + tid).value = "1";
       renderDraft(category);
-
-      // Totali gestione si aggiornano quando entri in Gestione, ma se vuoi live:
-      // invRenderTotals();
     }
 
     function removeDraftItem(category, name) {
@@ -2301,8 +2272,8 @@ function renderTagListInv() {
       const me = getMyUser();
       const createdByName = me?.gameName || me?.email || "—";
 
-const tagUserIds = selectedTagUserIds.slice();
-const tagNames = selectedTagNames();
+      const tagUserIds = selectedTagUserIds.slice();
+      const tagNames = selectedTagNames();
 
       const ops = loadOps();
       ops.push({
@@ -2315,8 +2286,10 @@ const tagNames = selectedTagNames();
         money,
         note: note.trim(),
         items: items.map(x => ({ name: x.name, qty: x.qty })),
-tagUserIds,
-tagNames
+        tagUserIds,
+        tagNames,
+        // compat vecchio
+        tagName: tagNames.length ? tagNames[0] : null
       });
       saveOps(ops);
 
@@ -2327,7 +2300,7 @@ tagNames
 
       renderCategory(category);
       renderManageSummaries();
-      invRenderTotals(); // Totali gestione includono anche Azioni
+      invRenderTotals();
     }
 
     function deleteRecord(id, category) {
@@ -2367,9 +2340,10 @@ tagNames
       editType.value = rec.type;
       editMoney.value = String(rec.money || 0);
       editNote.value = rec.note || "";
-const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
-editTagName.value = tnames.length ? tnames.join(", ") : "—";
-      
+
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      editTagName.value = tnames.length ? tnames.join(", ") : "—";
+
       renderEditItems();
       editOverlay.style.display = "block";
     }
@@ -2436,11 +2410,9 @@ editTagName.value = tnames.length ? tnames.join(", ") : "—";
       rec.note = (editNote.value || "").trim();
       rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
 
-rec.tagUserIds = selectedTagUserIds.slice();
-rec.tagNames = selectedTagNames();
-
-// compatibilità: aggiorno anche il vecchio campo singolo (primo tag)
-rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
+      rec.tagUserIds = selectedTagUserIds.slice();
+      rec.tagNames = selectedTagNames();
+      rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
       saveOps(ops);
       closeEdit();
@@ -2469,11 +2441,12 @@ rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
         const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
         const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
         const noteHtml = (r.note && r.note.trim()) ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>` : `<span class="muted">—</span>`;
-const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-const tagHtml = tnames.length
-  ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-  : `<span class="muted">—</span>`;
-        
+
+        const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+        const tagHtml = tnames.length
+          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+          : `<span class="muted">—</span>`;
+
         const actionsHtml = canEditOps()
           ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
              <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
@@ -2714,8 +2687,8 @@ const tagHtml = tnames.length
           <div class="row">
             <div class="field" style="min-width:320px;">
               <label>Tag (dalla lista a destra)</label>
-              <input id="invTag_${tid}" disabled value="Seleziona un Tag a destra .." />
-              <div class="hint">Il tag selezionato vale anche qui.</div>
+              <input id="invTag_${tid}" disabled value="—" />
+              <div class="hint">I tag selezionati valgono anche qui.</div>
             </div>
           </div>
 
@@ -2752,6 +2725,7 @@ const tagHtml = tnames.length
             sel.appendChild(o);
           });
           invRenderTable(cat);
+          syncSelectedTagsUI();
         }, 0);
 
         if (idx === 0) {
@@ -2778,6 +2752,7 @@ const tagHtml = tnames.length
 
       invRenderTable(cat);
       invRenderTotals();
+      syncSelectedTagsUI();
     }
 
     function invSaveRecord(cat) {
@@ -2797,11 +2772,25 @@ const tagHtml = tnames.length
 
       const who = myGameNameOrEmail();
 
-const tagUserIds = selectedTagUserIds.slice();
-const tagNames = selectedTagNames();
+      const tagUserIds = selectedTagUserIds.slice();
+      const tagNames = selectedTagNames();
 
       const all = invLoad();
-      all.push({ id: uid(), ts: Date.now(), category: cat, type, item, qty, money, note, who, tagUserIds, tagNames });
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        category: cat,
+        type,
+        item,
+        qty,
+        money,
+        note,
+        who,
+        tagUserIds,
+        tagNames,
+        // compat vecchio
+        tagName: tagNames.length ? tagNames[0] : null
+      });
       invSave(all);
 
       document.getElementById("invQty_" + tid).value = "1";
@@ -2827,10 +2816,11 @@ const tagNames = selectedTagNames();
       rows.forEach(r => {
         const tr = document.createElement("tr");
         const t = r.type === "add" ? "AGGIUNTO" : "RIMOSSO";
-const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-const tagHtml = tnames.length
-  ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-  : `<span class="muted">—</span>`;
+        const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+        const tagHtml = tnames.length
+          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+          : `<span class="muted">—</span>`;
+
         tr.innerHTML = `
           <td>${new Date(r.ts).toLocaleString()}</td>
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
@@ -2845,6 +2835,13 @@ const tagHtml = tnames.length
       });
     }
 
+    function normalizeTotalItemName(name) {
+      const n = String(name || "").trim();
+      if (!n) return "";
+      if (n.toLowerCase().startsWith("munizioni")) return "Munizioni";
+      return n;
+    }
+
     // ✅ Totali: includono anche gli item delle Azioni
     function invComputeTotals() {
       const totals = {};
@@ -2852,7 +2849,7 @@ const tagHtml = tnames.length
 
       // 1) Gestione armi-droga (INV)
       invLoad().forEach(r => {
-        const key = String(r.item || "").trim();
+        const key = normalizeTotalItemName(r.item);
         if (key) {
           if (!totals[key]) totals[key] = 0;
           const q = Number(r.qty || 0);
@@ -2866,7 +2863,7 @@ const tagHtml = tnames.length
       // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
       loadOps().forEach(op => {
         (op.items || []).forEach(it => {
-          const key = String(it.name || "").trim();
+          const key = normalizeTotalItemName(it.name);
           if (!key) return;
           if (!totals[key]) totals[key] = 0;
           const q = Number(it.qty || 0);
@@ -3262,6 +3259,7 @@ const tagHtml = tnames.length
     function boot() {
       ensureDemoUsersIfEmpty();
       setHeaderUser();
+      syncSelectedTagsUI();
 
       const s = loadSession();
       if (!s?.email) {
