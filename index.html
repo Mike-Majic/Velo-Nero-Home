@@ -2819,7 +2819,12 @@
       body.innerHTML = "";
       rows.forEach(r => {
         const tr = document.createElement("tr");
-        const t = r.type === "add" ? "AGGIUNTO" : "RIMOSSO";
+const t =
+  r.type === "add" ? "AGGIUNTO" :
+  r.type === "rem" ? "RIMOSSO" :
+  r.type === "sold" ? "VENDUTO" :
+  r.type === "buy" ? "ACQUISTATO" :
+  "—";
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
         const tagHtml = tnames.length
           ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
@@ -2851,18 +2856,24 @@
       const totals = {};
       let addMoney = 0, remMoney = 0;
 
-      // 1) Gestione armi-droga (INV)
-      invLoad().forEach(r => {
-        const key = normalizeTotalItemName(r.item);
-        if (key) {
-          if (!totals[key]) totals[key] = 0;
-          const q = Number(r.qty || 0);
-          totals[key] += (r.type === "add" ? q : -q);
-        }
-        const m = Number(r.money || 0);
-        if (r.type === "add") addMoney += m;
-        else remMoney += m;
-      });
+// 1) Gestione armi-droga (INV)
+invLoad().forEach(r => {
+  const key = normalizeTotalItemName(r.item);
+  const q = Number(r.qty || 0);
+  const m = Number(r.money || 0);
+
+  // ITEM: add/buy = + .. rem/sold = -
+  if (key) {
+    if (!totals[key]) totals[key] = 0;
+
+    if (r.type === "add" || r.type === "buy") totals[key] += q;
+    else if (r.type === "rem" || r.type === "sold") totals[key] -= q;
+  }
+
+  // SOLDI: add/sold = entrata .. rem/buy = uscita
+  if (r.type === "add" || r.type === "sold") addMoney += m;
+  else if (r.type === "rem" || r.type === "buy") remMoney += m;
+});
 
       // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
       loadOps().forEach(op => {
