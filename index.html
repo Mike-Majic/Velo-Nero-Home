@@ -78,12 +78,6 @@
       border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
       transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
     }
-    .box.wide {
-      display:block;
-      max-width:620px;
-      margin:18px auto 0 auto;
-      padding:42px 40px;
-    }
     .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
     .box h2 { font-size:28px; margin:0 0 10px 0; color:var(--red); text-align:center; font-weight:900; text-shadow:0 0 10px #ff000066; }
     .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; font-weight:800; }
@@ -138,6 +132,8 @@
     th { color:var(--red2); font-weight:900; letter-spacing:.3px; }
     tr:hover td { background-color:#3a0000; }
 
+    tr.selectedRow td { background-color:#5a0000 !important; }
+
     .btn-edit { background:none; border:none; cursor:pointer; color:var(--red2); font-size:18px; transition:transform .2s ease, text-shadow .2s ease; }
     .btn-edit:hover { transform:scale(1.2); text-shadow:0 0 6px #ff000080; }
     .action-menu {
@@ -150,7 +146,6 @@
       font-weight:900;
     }
     .action-menu button:hover { background-color:#3a0000; }
-    .blocked-icon { color:var(--red2); font-size:18px; margin-left:8px; vertical-align:middle; }
 
     #editOverlay, #noteOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
     #editModal, #noteModal {
@@ -182,7 +177,7 @@
     }
     .eye:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
-    /* DIARIO (layout come foto) */
+    /* DIARIO */
     .diaryBar{
       display:flex; gap:12px; flex-wrap:wrap; align-items:center;
       padding:14px; border-radius:12px;
@@ -270,6 +265,11 @@
     .twoColInv{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
     .colMainInv{ flex:1; min-width:520px; }
     .colSideInv{ width:360px; min-width:280px; position:sticky; top:16px; }
+
+    /* Contabilità: layout 2 colonne */
+    .twoColAcc{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
+    .colMainAcc{ flex:1; min-width:520px; }
+    .colSideAcc{ width:360px; min-width:280px; position:sticky; top:16px; }
   </style>
 </head>
 
@@ -286,12 +286,14 @@
   <h1>VELO NERO</h1>
   <p class="subtitle" id="pageSubtitle">Sistema Privato Interno</p>
 
+  <!-- NAV (riordinata) -->
   <div class="nav">
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
-    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
     <button id="btnDiario" onclick="showSection('diario')">Diario</button>
-    <button id="btnComandi" onclick="showSection('comandi')">Gestione</button>
+    <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
+    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
+    <button id="btnContabilita" onclick="showSection('contabilita')">Contabilità</button>
     <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
   </div>
 
@@ -300,7 +302,6 @@
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Accesso</h2>
     <div class="hint">Accesso in 3 passaggi: Email → Password → Codice 2FA.</div>
 
-    <!-- STEP 1 -->
     <div class="panel active" id="stepEmail" style="display:block;">
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
@@ -313,7 +314,6 @@
       </div>
     </div>
 
-    <!-- STEP 2 LOGIN -->
     <div class="panel" id="stepPassword">
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
@@ -358,7 +358,6 @@
       </div>
     </div>
 
-    <!-- STEP 2 REG -->
     <div class="panel" id="stepRegister">
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
@@ -394,7 +393,6 @@
       </div>
     </div>
 
-    <!-- STEP 3 2FA -->
     <div class="panel" id="step2FA">
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
@@ -451,12 +449,22 @@
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- DASHBOARD (layout aggiornato) -->
   <div id="dashboard" class="section">
     <div class="cards">
       <div class="box" onclick="showSection('azioni')">
         <h2>Azioni</h2>
         <p>Azioni</p>
+      </div>
+
+      <div class="box" onclick="showSection('comandi')">
+        <h2>Gestione Armi-Droga</h2>
+        <p>Funzioni</p>
+      </div>
+
+      <div class="box" onclick="showSection('contabilita')">
+        <h2>Contabilità</h2>
+        <p>Stipendi</p>
       </div>
 
       <div class="box" onclick="showSection('diario')">
@@ -467,11 +475,6 @@
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
         <h2>Utenti</h2>
         <p>Gestione</p>
-      </div>
-
-      <div class="box wide" onclick="showSection('comandi')">
-        <h2>Gestione Armi-Droga</h2>
-        <p>Funzioni</p>
       </div>
     </div>
 
@@ -522,7 +525,7 @@
       <div class="colSide">
         <div class="sidePanel">
           <h3 class="sideTitle">Tag (Utente)</h3>
-          <div class="muted">Clicca un nome per selezionarlo come tag .. ordinati per ruolo.</div>
+          <div class="muted">Doppio click su un nome per selezionarlo .. ordinati per ruolo.</div>
 
           <div class="tagSelected">
             <div class="muted">Selezionato:</div>
@@ -583,6 +586,46 @@
     </div>
   </div>
 
+  <!-- CONTABILITÀ -->
+  <div id="contabilita" class="section">
+    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Contabilità</h2>
+    <div class="hint">Stipendi + Entrate/Uscite (mini bilancio) .. inserimento solo se hai un ruolo.</div>
+
+    <div class="twoColAcc">
+      <div class="colMainAcc">
+        <div class="tabs" id="accTabs"></div>
+        <div id="accPanels"></div>
+
+        <div id="accAdminPanel" class="panel" style="display:none;">
+          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
+          <div class="muted">Reset totale contabilità.</div>
+
+          <div class="row" style="margin-top:14px;">
+            <button class="btn danger" onclick="accResetAll()">AZZERA CONTABILITÀ</button>
+            <div class="muted">Cancella stipendi + bilancio.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="colSideAcc">
+        <div class="sidePanel">
+          <h3 class="sideTitle">Riepilogo</h3>
+          <div class="muted">Totali aggiornati.</div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bilancio</h4>
+            <div class="muted" id="accBalanceSummary">Entrate: $0 .. Uscite: $0 .. Saldo: $0</div>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Stipendi</h4>
+            <div class="muted" id="accSalarySummary">Totale stipendi: $0 .. Ultimi 30gg: $0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- LOG -->
   <div id="log" class="section">
     <div class="hint">Log accessi (solo admin). Click su una riga per vedere i dettagli.</div>
@@ -618,7 +661,7 @@
   <!-- GESTIONE ARMI-DROGA (IN-PAGE) -->
   <div id="comandi" class="section">
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Gestione Armi-Droga</h2>
-    <div class="hint">Inserisci armi/droga/oggetti + soldi .. salva anche Tag utente.</div>
+    <div class="hint">Inserisci armi/droga/oggetti + soldi .. salva anche Tag utente .. Totali includono anche gli item delle Azioni.</div>
 
     <div class="twoColInv">
       <div class="colMainInv">
@@ -627,9 +670,38 @@
       </div>
 
       <div class="colSideInv">
+        <!-- TAG anche qui -->
         <div class="sidePanel">
+          <h3 class="sideTitle">Tag (Utente)</h3>
+          <div class="muted">Doppio click su un nome per selezionarlo .. vale anche per questa sezione.</div>
+
+          <div class="tagSelected">
+            <div class="muted">Selezionato:</div>
+            <span class="tagPill" id="tagSelectedPill_inv">—</span>
+            <button class="btn small danger" onclick="clearSelectedTag(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
+
+          <div class="tagSearchRow">
+            <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+            <input id="tagSearchInv" type="text" placeholder="Cerca tag.." oninput="renderTagListInv()" />
+          </div>
+
+          <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+            <table style="margin-top:0;">
+              <thead><tr><th>Nome</th></tr></thead>
+              <tbody id="tagTableBodyInv">
+                <tr><td class="muted">Nessun utente</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="hint">Il tag selezionato viene salvato nelle registrazioni di Gestione.</div>
+        </div>
+
+        <!-- Totali -->
+        <div class="sidePanel" style="margin-top:14px;">
           <h3 class="sideTitle">Resoconto Totali</h3>
-          <div class="muted">Saldo item = aggiunti - rimossi .. soldi separati.</div>
+          <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
 
           <div style="margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
             <table style="margin-top:0;">
@@ -813,7 +885,7 @@
     // STORAGE
     // =========================
     const USERS_KEY = "vn_users_v2";
-    const OPS_KEY = "vn_ops_v6";        // bump per includere tag + createdByName
+    const OPS_KEY = "vn_ops_v6";
     const SESSION_KEY = "vn_session_v1";
     const LOGS_KEY = "vn_login_logs";
     const DIARY_KEY = "vn_diary_v1";
@@ -823,6 +895,9 @@
 
     // Gestione Armi/Droga
     const INV_KEY = "vn_inv_v1";
+
+    // Contabilità
+    const ACC_KEY = "vn_accounting_v1";
 
     // =========================
     // HELPERS
@@ -883,7 +958,6 @@
         totpNeedsSetup: false
       }));
 
-      // bootstrap owner (creato al primo login, ma se vuoi già presente basta aggiungerlo qui)
       saveUsers(seeded);
     }
 
@@ -912,6 +986,7 @@
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canReset2FA() { return ["Owner","Boss"].includes(myRole()); }
     function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+    function canResetAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
     function myGameNameOrEmail() {
       const u = getMyUser();
@@ -954,7 +1029,7 @@
         u = {
           id: uid(),
           email: e,
-          role: "", // vuoto = in attesa
+          role: "",
           blocked: false,
           passwordHash: password ? simpleHash(password) : null,
           gameName: gameName || "",
@@ -968,7 +1043,6 @@
 
       if (gameName) u.gameName = gameName;
 
-      // bootstrap owner
       if (e === (OWNER_EMAIL || "").trim().toLowerCase()) {
         u.role = "Owner";
       }
@@ -1088,7 +1162,6 @@
 
       const canAdd = canAddDiaryNote();
       const canEdit = canEditDiaryNote();
-
       const isExisting = !!id;
 
       const fields = [noteType, noteTitle, noteNames, noteAgreements, noteBody];
@@ -1684,7 +1757,8 @@
       if (id === "azioni") return "Azioni";
       if (id === "diario") return "Diario";
       if (id === "log") return "Log";
-      if (id === "comandi") return "Gestione";
+      if (id === "comandi") return "Gestione armi-droga";
+      if (id === "contabilita") return "Contabilità";
       return "Sistema Privato Interno";
     }
 
@@ -1694,11 +1768,12 @@
 
       document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
       if (id === "dashboard") document.getElementById("btnDashboard").classList.add("active");
-      if (id === "utenti") document.getElementById("btnUtenti").classList.add("active");
       if (id === "azioni") document.getElementById("btnAzioni").classList.add("active");
       if (id === "diario") document.getElementById("btnDiario").classList.add("active");
-      if (id === "log") document.getElementById("btnLog").classList.add("active");
       if (id === "comandi") document.getElementById("btnComandi").classList.add("active");
+      if (id === "utenti") document.getElementById("btnUtenti").classList.add("active");
+      if (id === "contabilita") document.getElementById("btnContabilita").classList.add("active");
+      if (id === "log") document.getElementById("btnLog").classList.add("active");
 
       if (pageSubtitle) pageSubtitle.textContent = subtitleForSection(id);
     }
@@ -1713,12 +1788,14 @@
       showOnly(id);
 
       if (id === "utenti") renderUsersTable();
+
       if (id === "azioni") {
         renderTagList();
         renderTabsAndPanels();
         showCat(CATEGORIES[0]);
         renderManageSummaries();
       }
+
       if (id === "diario") {
         const btnNew = document.getElementById("btnNewNote");
         if (btnNew) {
@@ -1727,11 +1804,21 @@
         }
         diarySearch();
       }
+
       if (id === "log") logSearch();
+
       if (id === "comandi") {
         invRenderTabs();
         invShowTab(INV_CATEGORIES[0]);
+        renderTagListInv();
         invRenderTotals();
+      }
+
+      if (id === "contabilita") {
+        accRenderTabs();
+        accShowTab(ACC_TABS[0]);
+        accRenderSummary();
+        accRenderAdminPanel();
       }
     }
 
@@ -1763,7 +1850,7 @@
       }
 
       if (!canEditOps()) {
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni e diario.";
+        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni, diario e contabilità.";
         actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
       } else {
         dashHint.textContent = "";
@@ -1800,7 +1887,6 @@
         const tdRole = document.createElement("td");
         const sel = document.createElement("select");
 
-        // ✅ ruolo vuoto
         const optEmpty = document.createElement("option");
         optEmpty.value = "";
         optEmpty.textContent = "—";
@@ -1816,7 +1902,6 @@
 
         sel.value = u.role || "";
 
-        // 🔒 Owner intoccabile
         if ((u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) sel.disabled = true;
 
         sel.onchange = () => {
@@ -1830,6 +1915,7 @@
           setHeaderUser();
           initAfterLogin();
           renderTagList();
+          renderTagListInv();
         };
         tdRole.appendChild(sel);
 
@@ -1851,7 +1937,6 @@
         const menu = document.createElement("div");
         menu.className = "action-menu";
 
-        // Reset 2FA
         const b4 = document.createElement("button");
         b4.textContent = "Reset 2FA";
         b4.onclick = () => {
@@ -1868,7 +1953,6 @@
           alert("2FA resettato.");
         };
 
-        // Reset Password
         const b5 = document.createElement("button");
         b5.textContent = "Reset Password";
         b5.onclick = () => {
@@ -1965,9 +2049,14 @@
 
     function setSelectedTag(id) {
       selectedTagUserId = id;
-      const pill = document.getElementById("tagSelectedPill");
+
       const u = loadUsers().find(x => x.id === id);
-      pill.textContent = u ? (u.gameName || u.email || "—") : "—";
+
+      const pill = document.getElementById("tagSelectedPill");
+      if (pill) pill.textContent = u ? (u.gameName || u.email || "—") : "—";
+
+      const pillInv = document.getElementById("tagSelectedPill_inv");
+      if (pillInv) pillInv.textContent = u ? (u.gameName || u.email || "—") : "—";
 
       const editTag = document.getElementById("editTagName");
       if (editTag) editTag.value = u ? (u.gameName || u.email || "—") : "—";
@@ -1975,16 +2064,17 @@
 
     function clearSelectedTag() {
       selectedTagUserId = null;
-      document.getElementById("tagSelectedPill").textContent = "—";
+      const pill = document.getElementById("tagSelectedPill");
+      if (pill) pill.textContent = "—";
+      const pillInv = document.getElementById("tagSelectedPill_inv");
+      if (pillInv) pillInv.textContent = "—";
       const editTag = document.getElementById("editTagName");
       if (editTag) editTag.value = "—";
     }
 
-    function renderTagList() {
-      const body = document.getElementById("tagTableBody");
-      const q = (document.getElementById("tagSearch")?.value || "").trim().toLowerCase();
-
-      const users = loadUsers()
+    function getTagSortedUsers(filterQuery) {
+      const q = (filterQuery || "").trim().toLowerCase();
+      return loadUsers()
         .slice()
         .filter(u => !u.blocked)
         .sort((a,b) => {
@@ -1997,6 +2087,12 @@
           const hay = `${u.gameName||""} ${u.role||""} ${u.email||""}`.toLowerCase();
           return hay.includes(q);
         });
+    }
+
+    function renderTagList() {
+      const body = document.getElementById("tagTableBody");
+      const q = (document.getElementById("tagSearch")?.value || "");
+      const users = getTagSortedUsers(q);
 
       if (!users.length) {
         body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
@@ -2006,8 +2102,45 @@
       body.innerHTML = "";
       users.forEach(u => {
         const tr = document.createElement("tr");
-        tr.className = "clickRow";
-        tr.onclick = () => setSelectedTag(u.id);
+        const isSelected = (u.id === selectedTagUserId);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+        // ✅ doppio click = seleziona + evidenzia
+        tr.ondblclick = () => {
+          setSelectedTag(u.id);
+          renderTagList();
+          renderTagListInv();
+        };
+
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderTagListInv() {
+      const body = document.getElementById("tagTableBodyInv");
+      if (!body) return;
+
+      const q = (document.getElementById("tagSearchInv")?.value || "");
+      const users = getTagSortedUsers(q);
+
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSelected = (u.id === selectedTagUserId);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+        tr.ondblclick = () => {
+          setSelectedTag(u.id);
+          renderTagList();
+          renderTagListInv();
+        };
+
         tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
         body.appendChild(tr);
       });
@@ -2082,6 +2215,9 @@
 
       document.getElementById("qty_" + tid).value = "1";
       renderDraft(category);
+
+      // Totali gestione si aggiornano quando entri in Gestione, ma se vuoi live:
+      // invRenderTotals();
     }
 
     function removeDraftItem(category, name) {
@@ -2133,6 +2269,7 @@
 
       renderCategory(category);
       renderManageSummaries();
+      invRenderTotals(); // Totali gestione includono anche Azioni
     }
 
     function deleteRecord(id, category) {
@@ -2140,6 +2277,7 @@
       saveOps(loadOps().filter(r => r.id !== id));
       renderCategory(category);
       renderManageSummaries();
+      invRenderTotals();
     }
 
     const editOverlay = document.getElementById("editOverlay");
@@ -2248,6 +2386,7 @@
       saveOps(ops);
       closeEdit();
       renderCategory(rec.category);
+      invRenderTotals();
     }
 
     function renderCategory(category) {
@@ -2304,6 +2443,7 @@
       if (!ok) return;
       localStorage.removeItem(OPS_KEY);
       CATEGORIES.forEach(c => renderCategory(c));
+      invRenderTotals();
     }
 
     function renderTabsAndPanels() {
@@ -2511,9 +2651,9 @@
 
           <div class="row">
             <div class="field" style="min-width:320px;">
-              <label>Tag (dal pannello a destra)</label>
-              <input id="invTag_${tid}" disabled value="Usa la lista Tag a destra .." />
-              <div class="hint">Il tag selezionato (Azioni) vale anche qui.</div>
+              <label>Tag (dalla lista a destra)</label>
+              <input id="invTag_${tid}" disabled value="Seleziona un Tag a destra .." />
+              <div class="hint">Il tag selezionato vale anche qui.</div>
             </div>
           </div>
 
@@ -2640,10 +2780,12 @@
       });
     }
 
+    // ✅ Totali: includono anche gli item delle Azioni
     function invComputeTotals() {
       const totals = {};
       let addMoney = 0, remMoney = 0;
 
+      // 1) Gestione armi-droga (INV)
       invLoad().forEach(r => {
         const key = String(r.item || "").trim();
         if (key) {
@@ -2654,6 +2796,17 @@
         const m = Number(r.money || 0);
         if (r.type === "add") addMoney += m;
         else remMoney += m;
+      });
+
+      // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
+      loadOps().forEach(op => {
+        (op.items || []).forEach(it => {
+          const key = String(it.name || "").trim();
+          if (!key) return;
+          if (!totals[key]) totals[key] = 0;
+          const q = Number(it.qty || 0);
+          totals[key] += (op.type === "ottenuto" ? q : -q);
+        });
       });
 
       return { totals, addMoney, remMoney };
@@ -2695,6 +2848,326 @@
       localStorage.removeItem(INV_KEY);
       INV_CATEGORIES.forEach(c => invRenderTable(c));
       invRenderTotals();
+    }
+
+    // =========================
+    // CONTABILITÀ (Stipendi + Bilancio)
+    // =========================
+    const ACC_TABS = ["Stipendi", "Bilancio"];
+
+    function accLoad() {
+      try {
+        const raw = localStorage.getItem(ACC_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch { return []; }
+    }
+    function accSave(arr) { localStorage.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+
+    function accTabId(name) {
+      return "acc_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+    }
+
+    function accRenderTabs() {
+      const tabs = document.getElementById("accTabs");
+      const panels = document.getElementById("accPanels");
+      if (!tabs || !panels) return;
+
+      tabs.innerHTML = "";
+      panels.innerHTML = "";
+
+      ACC_TABS.forEach((tname, idx) => {
+        const tid = accTabId(tname);
+
+        const b = document.createElement("button");
+        b.id = "accTab_" + tid;
+        b.textContent = tname;
+        b.onclick = () => accShowTab(tname);
+        tabs.appendChild(b);
+
+        const p = document.createElement("div");
+        p.className = "panel accPanel";
+        p.id = "accPanel_" + tid;
+
+        const disabledAttr = canEditOps() ? "" : "disabled";
+        const disabledCls = canEditOps() ? "" : "disabled";
+
+        if (tname === "Stipendi") {
+          p.innerHTML = `
+            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
+            <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
+
+            <div class="row">
+              <div class="field" style="min-width:320px; flex:1;">
+                <label>A chi</label>
+                <input id="salTo_${tid}" type="text" placeholder="Nome / reparto" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <label>Importo ($)</label>
+                <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:320px; flex:1;">
+                <label>Note</label>
+                <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddSalary()">Salva</button>
+              </div>
+            </div>
+
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:200px;">Quando</th>
+                  <th style="width:220px;">Chi</th>
+                  <th>A chi</th>
+                  <th style="width:160px;">Importo</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody id="accTable_${tid}">
+                <tr><td class="muted" colspan="5">Nessun dato</td></tr>
+              </tbody>
+            </table>
+          `;
+        } else {
+          p.innerHTML = `
+            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Bilancio (Entrate/Uscite)</h3>
+            <div class="muted">Registra entrate o uscite ..</div>
+
+            <div class="row">
+              <div class="field" style="min-width:220px;">
+                <label>Tipo</label>
+                <select id="balType_${tid}" ${disabledAttr}>
+                  <option value="in">ENTRATA</option>
+                  <option value="out">USCITA</option>
+                </select>
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <label>Importo ($)</label>
+                <input id="balAmt_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:320px; flex:1;">
+                <label>Causale</label>
+                <input id="balReason_${tid}" type="text" placeholder="es. Vendita / Acquisto / Varie" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddBalance()">Salva</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field" style="flex:1; min-width:320px;">
+                <label>Note</label>
+                <input id="balNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+              </div>
+            </div>
+
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Movimenti</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:200px;">Quando</th>
+                  <th style="width:220px;">Chi</th>
+                  <th style="width:120px;">Tipo</th>
+                  <th style="width:160px;">Importo</th>
+                  <th style="width:220px;">Causale</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody id="accTable_${tid}">
+                <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+              </tbody>
+            </table>
+          `;
+        }
+
+        panels.appendChild(p);
+
+        if (idx === 0) {
+          b.classList.add("active");
+          p.classList.add("active");
+        }
+      });
+
+      setTimeout(() => {
+        accRenderTable("Stipendi");
+        accRenderTable("Bilancio");
+      }, 0);
+    }
+
+    function accShowTab(name) {
+      const tid = accTabId(name);
+      document.querySelectorAll("#accTabs button").forEach(x => x.classList.remove("active"));
+      const tb = document.getElementById("accTab_" + tid);
+      if (tb) tb.classList.add("active");
+
+      document.querySelectorAll(".accPanel").forEach(x => x.classList.remove("active"));
+      const pn = document.getElementById("accPanel_" + tid);
+      if (pn) pn.classList.add("active");
+
+      accRenderTable(name);
+      accRenderSummary();
+      accRenderAdminPanel();
+    }
+
+    function accRenderAdminPanel() {
+      const panel = document.getElementById("accAdminPanel");
+      if (!panel) return;
+      panel.style.display = canResetAccounting() ? "block" : "none";
+    }
+
+    function accAddSalary() {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+      const tid = accTabId("Stipendi");
+      const to = (document.getElementById("salTo_" + tid)?.value || "").trim();
+      const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
+      const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
+
+      if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
+
+      const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "salary",
+        who: myGameNameOrEmail(),
+        to,
+        amount: amt,
+        note
+      });
+      accSave(all);
+
+      document.getElementById("salTo_" + tid).value = "";
+      document.getElementById("salAmt_" + tid).value = "";
+      document.getElementById("salNote_" + tid).value = "";
+
+      accRenderTable("Stipendi");
+      accRenderSummary();
+    }
+
+    function accAddBalance() {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+      const tid = accTabId("Bilancio");
+      const type = document.getElementById("balType_" + tid)?.value || "in";
+      const amt = Math.max(0, parseInt(document.getElementById("balAmt_" + tid)?.value || "0", 10) || 0);
+      const reason = (document.getElementById("balReason_" + tid)?.value || "").trim();
+      const note = (document.getElementById("balNote_" + tid)?.value || "").trim();
+
+      if (amt === 0 && !reason && !note) return alert("Inserisci almeno importo o causale/note.");
+
+      const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "balance",
+        who: myGameNameOrEmail(),
+        type, // in/out
+        amount: amt,
+        reason,
+        note
+      });
+      accSave(all);
+
+      document.getElementById("balAmt_" + tid).value = "";
+      document.getElementById("balReason_" + tid).value = "";
+      document.getElementById("balNote_" + tid).value = "";
+
+      accRenderTable("Bilancio");
+      accRenderSummary();
+    }
+
+    function accRenderTable(tabName) {
+      const tid = accTabId(tabName);
+      const body = document.getElementById("accTable_" + tid);
+      if (!body) return;
+
+      const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
+      const rows = all.filter(r => (tabName === "Stipendi" ? r.kind === "salary" : r.kind === "balance")).slice(0, 50);
+
+      if (!rows.length) {
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 5 : 6}">Nessun dato</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = "";
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        if (tabName === "Stipendi") {
+          tr.innerHTML = `
+            <td>${new Date(r.ts).toLocaleString()}</td>
+            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+            <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
+            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          `;
+        } else {
+          const t = r.type === "in" ? "ENTRATA" : "USCITA";
+          tr.innerHTML = `
+            <td>${new Date(r.ts).toLocaleString()}</td>
+            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+            <td style="font-weight:900; color:var(--red2)">${t}</td>
+            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+            <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
+            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          `;
+        }
+        body.appendChild(tr);
+      });
+    }
+
+    function accComputeSummary() {
+      const all = accLoad();
+      let income = 0, expense = 0;
+      let salaryTotal = 0, salary30 = 0;
+      const now = Date.now();
+      const days30 = 30 * 24 * 60 * 60 * 1000;
+
+      all.forEach(r => {
+        if (r.kind === "balance") {
+          const amt = Number(r.amount || 0);
+          if (r.type === "in") income += amt;
+          else expense += amt;
+        }
+        if (r.kind === "salary") {
+          const amt = Number(r.amount || 0);
+          salaryTotal += amt;
+          if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
+        }
+      });
+
+      return { income, expense, salaryTotal, salary30 };
+    }
+
+    function accRenderSummary() {
+      const b = document.getElementById("accBalanceSummary");
+      const s = document.getElementById("accSalarySummary");
+      if (!b || !s) return;
+
+      const { income, expense, salaryTotal, salary30 } = accComputeSummary();
+      const saldo = income - expense;
+
+      b.textContent = `Entrate: ${formatMoney(income)} .. Uscite: ${formatMoney(expense)} .. Saldo: ${formatMoney(saldo)}`;
+      s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
+    }
+
+    function accResetAll() {
+      if (!canResetAccounting()) return alert("Permesso negato");
+      const ok = confirm("Confermi AZZERA CONTABILITÀ?");
+      if (!ok) return;
+      localStorage.removeItem(ACC_KEY);
+      accRenderTable("Stipendi");
+      accRenderTable("Bilancio");
+      accRenderSummary();
     }
 
     // =========================
