@@ -527,11 +527,11 @@
           <h3 class="sideTitle">Tag (Utente)</h3>
           <div class="muted">Doppio click su un nome per selezionarlo .. ordinati per ruolo.</div>
 
-          <div class="tagSelected">
-            <div class="muted">Selezionato:</div>
-            <span class="tagPill" id="tagSelectedPill">—</span>
-            <button class="btn small danger" onclick="clearSelectedTag()">Pulisci</button>
-          </div>
+<div class="tagSelected">
+  <div class="muted">Selezionati:</div>
+  <div id="tagSelectedWrap" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  <button class="btn small danger" onclick="clearSelectedTags()">Pulisci</button>
+</div>
 
           <div class="tagSearchRow">
             <span style="opacity:.9; color:#ffb3b3;">🔎</span>
@@ -675,11 +675,11 @@
           <h3 class="sideTitle">Tag (Utente)</h3>
           <div class="muted">Doppio click su un nome per selezionarlo .. vale anche per questa sezione.</div>
 
-          <div class="tagSelected">
-            <div class="muted">Selezionato:</div>
-            <span class="tagPill" id="tagSelectedPill_inv">—</span>
-            <button class="btn small danger" onclick="clearSelectedTag(); renderTagList(); renderTagListInv();">Pulisci</button>
-          </div>
+<div class="tagSelected">
+  <div class="muted">Selezionati:</div>
+  <div id="tagSelectedWrapInv" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+</div>
 
           <div class="tagSearchRow">
             <span style="opacity:.9; color:#ffb3b3;">🔎</span>
@@ -2042,82 +2042,140 @@
       document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
     });
 
-    // =========================
-    // TAG (usato sia per Azioni che per Gestione)
-    // =========================
-    let selectedTagUserId = null;
+// =========================
+// TAG (multi-selezione) usato sia per Azioni che per Gestione
+// =========================
+let selectedTagUserIds = [];
 
-    function setSelectedTag(id) {
-      selectedTagUserId = id;
+function isTagSelected(id){ return selectedTagUserIds.includes(id); }
 
-      const u = loadUsers().find(x => x.id === id);
+function toggleSelectedTag(id) {
+  if (!id) return;
+  if (isTagSelected(id)) {
+    selectedTagUserIds = selectedTagUserIds.filter(x => x !== id);
+  } else {
+    selectedTagUserIds.push(id);
+  }
+  syncSelectedTagsUI();
+}
 
-      const pill = document.getElementById("tagSelectedPill");
-      if (pill) pill.textContent = u ? (u.gameName || u.email || "—") : "—";
+function clearSelectedTags() {
+  selectedTagUserIds = [];
+  syncSelectedTagsUI();
+}
 
-      const pillInv = document.getElementById("tagSelectedPill_inv");
-      if (pillInv) pillInv.textContent = u ? (u.gameName || u.email || "—") : "—";
+function selectedTagUsers() {
+  const users = loadUsers();
+  return selectedTagUserIds
+    .map(id => users.find(u => u.id === id))
+    .filter(Boolean);
+}
 
-      const editTag = document.getElementById("editTagName");
-      if (editTag) editTag.value = u ? (u.gameName || u.email || "—") : "—";
-    }
+function selectedTagNames() {
+  return selectedTagUsers().map(u => (u.gameName || u.email || "—"));
+}
 
-    function clearSelectedTag() {
-      selectedTagUserId = null;
-      const pill = document.getElementById("tagSelectedPill");
-      if (pill) pill.textContent = "—";
-      const pillInv = document.getElementById("tagSelectedPill_inv");
-      if (pillInv) pillInv.textContent = "—";
-      const editTag = document.getElementById("editTagName");
-      if (editTag) editTag.value = "—";
-    }
+function syncSelectedTagsUI() {
+  const wrap = document.getElementById("tagSelectedWrap");
+  const wrapInv = document.getElementById("tagSelectedWrapInv");
 
-    function getTagSortedUsers(filterQuery) {
-      const q = (filterQuery || "").trim().toLowerCase();
-      return loadUsers()
-        .slice()
-        .filter(u => !u.blocked)
-        .sort((a,b) => {
-          const ra = roleRank(a.role), rb = roleRank(b.role);
-          if (ra !== rb) return ra - rb;
-          return (a.gameName||"").localeCompare(b.gameName||"");
-        })
-        .filter(u => {
-          if (!q) return true;
-          const hay = `${u.gameName||""} ${u.role||""} ${u.email||""}`.toLowerCase();
-          return hay.includes(q);
-        });
-    }
+  const names = selectedTagNames();
+  const html = names.length
+    ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+    : `<span class="tagPill">—</span>`;
 
-    function renderTagList() {
-      const body = document.getElementById("tagTableBody");
-      const q = (document.getElementById("tagSearch")?.value || "");
-      const users = getTagSortedUsers(q);
+  if (wrap) wrap.innerHTML = html;
+  if (wrapInv) wrapInv.innerHTML = html;
 
-      if (!users.length) {
-        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
-        return;
-      }
+  // aggiorna i campi "Tag" dentro Gestione armi-droga (form)
+  (window.INV_CATEGORIES || []).forEach(cat => {
+    const tid = invTabId(cat);
+    const inp = document.getElementById("invTag_" + tid);
+    if (inp) inp.value = names.length ? names.join(", ") : "—";
+  });
 
-      body.innerHTML = "";
-      users.forEach(u => {
-        const tr = document.createElement("tr");
-        const isSelected = (u.id === selectedTagUserId);
-        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+  // aggiorna il campo tag nel modal edit azioni
+  const editTag = document.getElementById("editTagName");
+  if (editTag) editTag.value = names.length ? names.join(", ") : "—";
+}
 
-        // ✅ doppio click = seleziona + evidenzia
-        tr.ondblclick = () => {
-          setSelectedTag(u.id);
-          renderTagList();
-          renderTagListInv();
-        };
+function getTagSortedUsers(filterQuery) {
+  const q = (filterQuery || "").trim().toLowerCase();
+  return loadUsers()
+    .slice()
+    .filter(u => !u.blocked)
+    .sort((a,b) => {
+      const ra = roleRank(a.role), rb = roleRank(b.role);
+      if (ra !== rb) return ra - rb;
+      return (a.gameName||"").localeCompare(b.gameName||"");
+    })
+    .filter(u => {
+      if (!q) return true;
+      const hay = `${u.gameName||""} ${u.role||""} ${u.email||""}`.toLowerCase();
+      return hay.includes(q);
+    });
+}
 
-        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
-        body.appendChild(tr);
-      });
-    }
+function renderTagList() {
+  const body = document.getElementById("tagTableBody");
+  const q = (document.getElementById("tagSearch")?.value || "");
+  const users = getTagSortedUsers(q);
 
-    function renderTagListInv() {
+  if (!users.length) {
+    body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = "";
+  users.forEach(u => {
+    const tr = document.createElement("tr");
+    const isSelected = isTagSelected(u.id);
+    tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+    // doppio click = toggle selezione + evidenzia
+    tr.ondblclick = () => {
+      toggleSelectedTag(u.id);
+      renderTagList();
+      renderTagListInv();
+    };
+
+    tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+    body.appendChild(tr);
+  });
+
+  syncSelectedTagsUI();
+}
+
+function renderTagListInv() {
+  const body = document.getElementById("tagTableBodyInv");
+  if (!body) return;
+
+  const q = (document.getElementById("tagSearchInv")?.value || "");
+  const users = getTagSortedUsers(q);
+
+  if (!users.length) {
+    body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = "";
+  users.forEach(u => {
+    const tr = document.createElement("tr");
+    const isSelected = isTagSelected(u.id);
+    tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+    tr.ondblclick = () => {
+      toggleSelectedTag(u.id);
+      renderTagList();
+      renderTagListInv();
+    };
+
+    tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+    body.appendChild(tr);
+  });
+
+  syncSelectedTagsUI();
+}
       const body = document.getElementById("tagTableBodyInv");
       if (!body) return;
 
@@ -2243,8 +2301,8 @@
       const me = getMyUser();
       const createdByName = me?.gameName || me?.email || "—";
 
-      const tagUser = selectedTagUserId ? loadUsers().find(x => x.id === selectedTagUserId) : null;
-      const tagName = tagUser ? (tagUser.gameName || tagUser.email || "—") : null;
+const tagUserIds = selectedTagUserIds.slice();
+const tagNames = selectedTagNames();
 
       const ops = loadOps();
       ops.push({
@@ -2257,8 +2315,8 @@
         money,
         note: note.trim(),
         items: items.map(x => ({ name: x.name, qty: x.qty })),
-        tagUserId: selectedTagUserId,
-        tagName
+tagUserIds,
+tagNames
       });
       saveOps(ops);
 
@@ -2309,8 +2367,9 @@
       editType.value = rec.type;
       editMoney.value = String(rec.money || 0);
       editNote.value = rec.note || "";
-      editTagName.value = rec.tagName || "—";
-
+const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+editTagName.value = tnames.length ? tnames.join(", ") : "—";
+      
       renderEditItems();
       editOverlay.style.display = "block";
     }
@@ -2377,11 +2436,11 @@
       rec.note = (editNote.value || "").trim();
       rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
 
-      if (selectedTagUserId) {
-        const tagUser = loadUsers().find(x => x.id === selectedTagUserId);
-        rec.tagUserId = selectedTagUserId;
-        rec.tagName = tagUser ? (tagUser.gameName || tagUser.email || "—") : null;
-      }
+rec.tagUserIds = selectedTagUserIds.slice();
+rec.tagNames = selectedTagNames();
+
+// compatibilità: aggiorno anche il vecchio campo singolo (primo tag)
+rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
       saveOps(ops);
       closeEdit();
@@ -2410,8 +2469,11 @@
         const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
         const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
         const noteHtml = (r.note && r.note.trim()) ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>` : `<span class="muted">—</span>`;
-        const tagHtml = r.tagName ? `<span style="font-weight:900;">${escapeHtml(r.tagName)}</span>` : `<span class="muted">—</span>`;
-
+const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+const tagHtml = tnames.length
+  ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+  : `<span class="muted">—</span>`;
+        
         const actionsHtml = canEditOps()
           ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
              <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
@@ -2735,11 +2797,11 @@
 
       const who = myGameNameOrEmail();
 
-      const tagUser = selectedTagUserId ? loadUsers().find(x => x.id === selectedTagUserId) : null;
-      const tagName = tagUser ? (tagUser.gameName || tagUser.email || "—") : null;
+const tagUserIds = selectedTagUserIds.slice();
+const tagNames = selectedTagNames();
 
       const all = invLoad();
-      all.push({ id: uid(), ts: Date.now(), category: cat, type, item, qty, money, note, who, tagUserId: selectedTagUserId, tagName });
+      all.push({ id: uid(), ts: Date.now(), category: cat, type, item, qty, money, note, who, tagUserIds, tagNames });
       invSave(all);
 
       document.getElementById("invQty_" + tid).value = "1";
@@ -2765,7 +2827,10 @@
       rows.forEach(r => {
         const tr = document.createElement("tr");
         const t = r.type === "add" ? "AGGIUNTO" : "RIMOSSO";
-        const tagHtml = r.tagName ? `<span style="font-weight:900;">${escapeHtml(r.tagName)}</span>` : `<span class="muted">—</span>`;
+const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+const tagHtml = tnames.length
+  ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+  : `<span class="muted">—</span>`;
         tr.innerHTML = `
           <td>${new Date(r.ts).toLocaleString()}</td>
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
