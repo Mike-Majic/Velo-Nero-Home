@@ -1,200 +1,531 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html_content = """<!DOCTYPE html>
+<!-- VELO NERO - FILE UNICO COMPLETO -->
+<!-- VERSIONE STABILE COPIA & INCOLLA -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
 <title>VELO NERO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body{margin:0;font-family:Arial;background:#0d0d0d;color:#fff}
-h1{text-align:center;color:#ff1a1a;letter-spacing:6px}
-.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px}
-.nav button{background:#1a1a1a;color:#fff;border:1px solid #ff1a1a55;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:800}
-.nav button.active{background:#300;border-color:#ff1a1a}
-.section{display:none;max-width:1100px;margin:0 auto;padding:20px}
+/* =====================
+   STILE BASE
+===================== */
+:root{
+  --bg:#0d0d0d;
+  --panel:#1a1a1a;
+  --panel2:#121212;
+  --red:#ff1a1a;
+  --red2:#ff3b3b;
+  --border:#ff1a1a55;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:Arial,system-ui,sans-serif;
+}
+h1{
+  text-align:center;
+  color:var(--red);
+  letter-spacing:6px;
+  margin:20px 0 5px;
+}
+.subtitle{
+  text-align:center;
+  color:#ff7777;
+  font-weight:700;
+}
+.nav{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin:20px 0;
+  flex-wrap:wrap;
+}
+.nav button{
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:900;
+}
+.nav button.active{
+  background:#2b0000;
+}
+.section{
+  display:none;
+  max-width:1200px;
+  margin:0 auto 60px;
+  padding:0 15px;
+}
 .section.active{display:block}
-.box{background:#1a1a1a;border:1px solid #ff1a1a44;border-radius:10px;padding:16px;margin-bottom:16px}
-input,select,textarea{background:#121212;color:#fff;border:1px solid #ff1a1a44;border-radius:6px;padding:8px}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ff1a1a33;padding:8px}
-th{color:#ff3b3b}
-.btn{background:#1a1a1a;border:1px solid #ff1a1a99;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:800}
-.btn.danger{background:#300}
-.tag{display:inline-block;background:#300;border:1px solid #ff1a1a55;padding:4px 8px;border-radius:999px;font-size:12px;margin:2px}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:20px;
+}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  min-width:200px;
+}
+input,select,textarea{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:#fff;
+  border-radius:8px;
+  padding:8px 10px;
+  font-weight:800;
+}
+.btn{
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:900;
+}
+.btn.danger{background:#2b0000}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #ff1a1a33;
+  padding:8px 10px;
+}
+th{
+  color:var(--red2);
+}
+.muted{color:#ffaaaa;font-size:13px}
 </style>
 </head>
 
 <body>
 
 <h1>VELO NERO</h1>
+<div class="subtitle">Sistema Interno</div>
 
 <div class="nav">
-<button onclick="show('dashboard')" class="active">Dashboard</button>
-<button onclick="show('azioni')">Azioni</button>
-<button onclick="show('diario')">Diario</button>
-<button onclick="show('gestione')">Gestione</button>
-<button onclick="show('contabilita')">Contabilità</button>
-<button onclick="show('utenti')">Utenti</button>
+  <button onclick="show('dashboard')" id="b_dashboard">Dashboard</button>
+  <button onclick="show('azioni')" id="b_azioni">Azioni</button>
+  <button onclick="show('diario')" id="b_diario">Diario</button>
+  <button onclick="show('gestione')" id="b_gestione">Gestione Armi-Droga</button>
+  <button onclick="show('contabilita')" id="b_contabilita">Contabilità</button>
+  <button onclick="show('log')" id="b_log">Log</button>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="section active">
-<div class="box">Sistema operativo VELO NERO attivo.</div>
+  <div class="panel">
+    <h2>Dashboard</h2>
+    <div class="muted">Pannello principale VELO NERO</div>
+  </div>
 </div>
 
 <!-- AZIONI -->
 <div id="azioni" class="section">
-<div class="box">
-<h3>Nuova azione</h3>
-<input id="azioneTesto" placeholder="Descrizione azione">
-<button class="btn" onclick="addAzione()">Salva</button>
-</div>
-<div class="box">
-<h3>Storico azioni</h3>
-<ul id="azioniList"></ul>
-</div>
+  <div class="panel">
+    <h2>Azioni</h2>
+    <div class="row">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="az_tipo">
+          <option>OTTENUTO</option>
+          <option>PERSO</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Soldi</label>
+        <input type="number" id="az_soldi">
+      </div>
+      <div class="field" style="flex:1">
+        <label>Note</label>
+        <input id="az_note">
+      </div>
+      <div class="field">
+        <button class="btn" onclick="addAzione()">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Quando</th><th>Tipo</th><th>Soldi</th><th>Note</th></tr>
+    </thead>
+    <tbody id="azioni_table"></tbody>
+  </table>
 </div>
 
 <!-- DIARIO -->
 <div id="diario" class="section">
-<div class="box">
-<h3>Nuova nota</h3>
-<input id="notaTitolo" placeholder="Titolo"><br><br>
-<textarea id="notaTesto" placeholder="Testo nota"></textarea><br><br>
-<button class="btn" onclick="addNota()">Salva nota</button>
-</div>
-<div class="box">
-<h3>Diario</h3>
-<ul id="diarioList"></ul>
-</div>
+  <div class="panel">
+    <h2>Diario</h2>
+    <div class="row">
+      <div class="field" style="flex:1">
+        <label>Nota</label>
+        <textarea id="diario_text"></textarea>
+      </div>
+      <div class="field">
+        <button class="btn" onclick="addNota()">Salva</button>
+      </div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Quando</th><th>Nota</th></tr></thead>
+    <tbody id="diario_table"></tbody>
+  </table>
 </div>
 
 <!-- GESTIONE -->
 <div id="gestione" class="section">
-<div class="box">
-<h3>Gestione armi / droga</h3>
-<input id="itemNome" placeholder="Item">
-<input id="itemQty" type="number" value="1">
-<button class="btn" onclick="addItem()">Aggiungi</button>
-</div>
-<div class="box">
-<h3>Inventario</h3>
-<ul id="invList"></ul>
-</div>
+  <div class="panel">
+    <h2>Gestione Armi-Droga</h2>
+    <div class="row">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="inv_tipo">
+          <option>AGGIUNTO</option>
+          <option>RIMOSSO</option>
+          <option>VENDUTO</option>
+          <option>ACQUISTATO</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Item</label>
+        <input id="inv_item">
+      </div>
+      <div class="field">
+        <label>Quantità</label>
+        <input type="number" id="inv_qta" value="1">
+      </div>
+      <div class="field">
+        <button class="btn" onclick="addInv()">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Quando</th><th>Tipo</th><th>Item</th><th>Qtà</th></tr></thead>
+    <tbody id="inv_table"></tbody>
+  </table>
 </div>
 
-<!-- CONTABILITÀ -->
+<!-- CONTABILITA -->
 <div id="contabilita" class="section">
-<div class="box">
-<h3>Movimento</h3>
-<input id="moneyVal" type="number" placeholder="Importo">
-<select id="moneyType">
-<option value="in">Entrata</option>
-<option value="out">Uscita</option>
-</select>
-<button class="btn" onclick="addMoney()">Registra</button>
-</div>
-<div class="box">
-<h3>Saldo</h3>
-<div id="saldo">$0</div>
-</div>
+  <div class="panel">
+    <h2>Contabilità</h2>
+    <div class="row">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="cont_tipo">
+          <option>ENTRATA</option>
+          <option>USCITA</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Importo</label>
+        <input type="number" id="cont_imp">
+      </div>
+      <div class="field" style="flex:1">
+        <label>Note</label>
+        <input id="cont_note">
+      </div>
+      <div class="field">
+        <button class="btn" onclick="addCont()">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Quando</th><th>Tipo</th><th>Importo</th><th>Note</th></tr></thead>
+    <tbody id="cont_table"></tbody>
+  </table>
 </div>
 
-<!-- UTENTI -->
-<div id="utenti" class="section">
-<div class="box">
-<h3>Utenti (demo)</h3>
-<div class="tag">Owner</div>
-<div class="tag">Boss</div>
-<div class="tag">Soldato</div>
-</div>
+<!-- LOG -->
+<div id="log" class="section">
+  <div class="panel">
+    <h2>Log</h2>
+    <div class="muted">Azioni effettuate nel sistema</div>
+  </div>
+  <table>
+    <thead><tr><th>Quando</th><th>Azione</th></tr></thead>
+    <tbody id="log_table"></tbody>
+  </table>
 </div>
 
 <script>
+/* =====================
+   NAV
+===================== */
 function show(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
-document.getElementById(id).classList.add('active')
-document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
-event.target.classList.add('active')
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('b_'+id).classList.add('active');
 }
 
-/* AZIONI */
+/* =====================
+   STORAGE
+===================== */
+function load(k){return JSON.parse(localStorage.getItem(k)||'[]')}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function log(msg){
+  const l=load('log');
+  l.push({t:new Date().toLocaleString(),m:msg});
+  save('log',l);
+  renderLog();
+}
+
+/* =====================
+   AZIONI
+===================== */
 function addAzione(){
-const t=document.getElementById('azioneTesto').value
-if(!t) return
-const a=JSON.parse(localStorage.getItem('azioni')||'[]')
-a.push(t)
-localStorage.setItem('azioni',JSON.stringify(a))
-renderAzioni()
+  const a=load('azioni');
+  a.push({
+    t:new Date().toLocaleString(),
+    tipo:az_tipo.value,
+    soldi:az_soldi.value||0,
+    note:az_note.value
+  });
+  save('azioni',a);
+  az_soldi.value='';az_note.value='';
+  log('Inserita azione');
+  renderAzioni();
 }
 function renderAzioni(){
-const ul=document.getElementById('azioniList')
-ul.innerHTML=''
-JSON.parse(localStorage.getItem('azioni')||'[]').forEach(x=>{
-const li=document.createElement('li')
-li.textContent=x
-ul.appendChild(li)
-})
+  azioni_table.innerHTML='';
+  load('azioni').forEach(r=>{
+    azioni_table.innerHTML+=`<tr><td>${r.t}</td><td>${r.tipo}</td><td>${r.soldi}</td><td>${r.note}</td></tr>`
+  })
 }
 
-/* DIARIO */
+/* =====================
+   DIARIO
+===================== */
 function addNota(){
-const t=document.getElementById('notaTitolo').value
-const b=document.getElementById('notaTesto').value
-if(!t||!b) return
-const d=JSON.parse(localStorage.getItem('diario')||'[]')
-d.push({t,b})
-localStorage.setItem('diario',JSON.stringify(d))
-renderDiario()
+  const d=load('diario');
+  d.push({t:new Date().toLocaleString(),txt:diario_text.value});
+  save('diario',d);
+  diario_text.value='';
+  log('Inserita nota diario');
+  renderDiario();
 }
 function renderDiario(){
-const ul=document.getElementById('diarioList')
-ul.innerHTML=''
-JSON.parse(localStorage.getItem('diario')||'[]').forEach(n=>{
-const li=document.createElement('li')
-li.textContent=n.t+' – '+n.b
-ul.appendChild(li)
-})
+  diario_table.innerHTML='';
+  load('diario').forEach(r=>{
+    diario_table.innerHTML+=`<tr><td>${r.t}</td><td>${r.txt}</td></tr>`
+  })
 }
 
-/* GESTIONE */
-function addItem(){
-const n=document.getElementById('itemNome').value
-const q=parseInt(document.getElementById('itemQty').value)
-if(!n||q<=0) return
-const inv=JSON.parse(localStorage.getItem('inv')||'{}')
-inv[n]=(inv[n]||0)+q
-localStorage.setItem('inv',JSON.stringify(inv))
-renderInv()
+/* =====================
+   INVENTARIO
+===================== */
+function addInv(){
+  const i=load('inv');
+  i.push({
+    t:new Date().toLocaleString(),
+    tipo:inv_tipo.value,
+    item:inv_item.value,
+    q:inv_qta.value
+  });
+  save('inv',i);
+  inv_item.value='';
+  inv_qta.value=1;
+  log('Gestione inventario');
+  renderInv();
 }
 function renderInv(){
-const ul=document.getElementById('invList')
-ul.innerHTML=''
-const inv=JSON.parse(localStorage.getItem('inv')||'{}')
-for(let k in inv){
-const li=document.createElement('li')
-li.textContent=k+': '+inv[k]
-ul.appendChild(li)
-}
+  inv_table.innerHTML='';
+  load('inv').forEach(r=>{
+    inv_table.innerHTML+=`<tr><td>${r.t}</td><td>${r.tipo}</td><td>${r.item}</td><td>${r.q}</td></tr>`
+  })
 }
 
-/* CONTABILITÀ */
-function addMoney(){
-const v=parseInt(document.getElementById('moneyVal').value)
-if(!v) return
-let s=parseInt(localStorage.getItem('saldo')||'0')
-s+=document.getElementById('moneyType').value==='in'?v:-v
-localStorage.setItem('saldo',s)
-renderSaldo()
+/* =====================
+   CONTABILITA
+===================== */
+function addCont(){
+  const c=load('cont');
+  c.push({
+    t:new Date().toLocaleString(),
+    tipo:cont_tipo.value,
+    imp:cont_imp.value,
+    note:cont_note.value
+  });
+  save('cont',c);
+  cont_imp.value='';cont_note.value='';
+  log('Movimento contabile');
+  renderCont();
 }
-function renderSaldo(){
-document.getElementById('saldo').textContent='$'+(localStorage.getItem('saldo')||0)
+function renderCont(){
+  cont_table.innerHTML='';
+  load('cont').forEach(r=>{
+    cont_table.innerHTML+=`<tr><td>${r.t}</td><td>${r.tipo}</td><td>${r.imp}</td><td>${r.note}</td></tr>`
+  })
 }
 
-renderAzioni()
-renderDiario()
-renderInv()
-renderSaldo()
+/* =====================
+   LOG
+===================== */
+function renderLog(){
+  log_table.innerHTML='';
+  load('log').forEach(r=>{
+    log_table.innerHTML+=`<tr><td>${r.t}</td><td>${r.m}</td></tr>`
+  })
+}
+
+/* START */
+renderAzioni();
+renderDiario();
+renderInv();
+renderCont();
+renderLog();
 </script>
+<!-- =========================
+VELO NERO – MODULO AVANZATO
+TAG UTENTI + RUOLI + INVENTARIO + CONTABILITÀ
+DA INCOLLARE PRIMA DI </body>
+========================= -->
+
+<script>
+/* =========================
+   UTENTI + RUOLI
+========================= */
+const VN_USERS_KEY = "vn_users_adv";
+const VN_ROLES = ["Owner","Boss","Vice Boss","Soldato","Associato"];
+
+function vnLoadUsers(){
+  return JSON.parse(localStorage.getItem(VN_USERS_KEY)||"[]");
+}
+function vnSaveUsers(u){
+  localStorage.setItem(VN_USERS_KEY,JSON.stringify(u));
+}
+function vnSeedUsers(){
+  if(vnLoadUsers().length) return;
+  vnSaveUsers([
+    {id:1,name:"Don Ricci",role:"Boss"},
+    {id:2,name:"Squalo Nero",role:"Vice Boss"},
+    {id:3,name:"Marco",role:"Soldato"},
+    {id:4,name:"Luca",role:"Associato"}
+  ]);
+}
+vnSeedUsers();
+
+/* =========================
+   TAG UTENTI (multi)
+========================= */
+let vnSelectedTags = [];
+
+function vnToggleTag(id){
+  vnSelectedTags = vnSelectedTags.includes(id)
+    ? vnSelectedTags.filter(x=>x!==id)
+    : [...vnSelectedTags,id];
+  vnRenderTagBox();
+}
+
+function vnRenderTagBox(){
+  const box=document.getElementById("vnTagsBox");
+  if(!box) return;
+  const users=vnLoadUsers();
+  box.innerHTML=vnSelectedTags.length
+    ? vnSelectedTags.map(id=>{
+        const u=users.find(x=>x.id===id);
+        return `<span style="padding:4px 8px;border:1px solid #ff1a1a55;border-radius:10px;font-size:12px">${u.name}</span>`;
+      }).join(" ")
+    : "<span class='muted'>—</span>";
+}
+
+/* =========================
+   LISTA TAG UI
+========================= */
+function vnRenderTagList(){
+  const t=document.getElementById("vnTagTable");
+  if(!t) return;
+  t.innerHTML="";
+  vnLoadUsers().forEach(u=>{
+    const tr=document.createElement("tr");
+    tr.ondblclick=()=>vnToggleTag(u.id);
+    tr.innerHTML=`<td style="font-size:13px;font-weight:800">${u.name} <span class='muted'>${u.role}</span></td>`;
+    t.appendChild(tr);
+  });
+}
+
+/* =========================
+   INVENTARIO GTA V (FiveM)
+========================= */
+const VN_GTA_WEAPONS=[
+"Pistol","Combat Pistol","AP Pistol","SMG","Micro SMG","Assault Rifle",
+"Carbine Rifle","Pump Shotgun","Heavy Sniper","Knife"
+];
+const VN_GTA_DRUGS=[
+"Marijuana","Cocaine","Meth","Opium","Crack"
+];
+
+function vnFillInvSelect(){
+  const s=document.getElementById("vnInvItem");
+  if(!s) return;
+  [...VN_GTA_WEAPONS,...VN_GTA_DRUGS].forEach(i=>{
+    const o=document.createElement("option");
+    o.textContent=i;
+    s.appendChild(o);
+  });
+}
+
+/* =========================
+   CONTABILITÀ – STIPENDI
+========================= */
+function vnFillSalaryUser(){
+  const s=document.getElementById("vnSalaryUser");
+  if(!s) return;
+  vnLoadUsers().forEach(u=>{
+    const o=document.createElement("option");
+    o.value=u.name;
+    o.textContent=u.name+" ("+u.role+")";
+    s.appendChild(o);
+  });
+}
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded",()=>{
+  vnRenderTagList();
+  vnRenderTagBox();
+  vnFillInvSelect();
+  vnFillSalaryUser();
+});
+</script>
+
+<!-- UI TAG -->
+<div class="panel">
+  <h3>Tag Utenti</h3>
+  <div id="vnTagsBox" class="muted">—</div>
+  <table>
+    <tbody id="vnTagTable"></tbody>
+  </table>
+</div>
 
 </body>
 </html>
+"""
+
+path = Path("/mnt/data/VELO_NERO.html")
+path.write_text(html_content, encoding="utf-8")
+
+path
