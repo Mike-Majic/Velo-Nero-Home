@@ -1364,6 +1364,13 @@ function canEditOps() {
 
     const users = loadUsers();
     let u = users.find(x => normEmail(x.email) === email);
+    
+    // TEMP: forza reset password per riallineare i dati (rimuovi dopo)
+if (email === normEmail(OWNER_EMAIL) && u) {
+  u.passwordHash = null;
+  u.passwordSalt = null;
+  saveUsers(users);
+}
 
     // se non esiste -> vai a register
     if (!u) {
