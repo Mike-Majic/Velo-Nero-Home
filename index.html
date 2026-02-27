@@ -884,8 +884,11 @@
   }
   function myRole() { return String(getMyUser()?.role || "").trim(); }
   function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
-  function canEditOps() { return myRole() !== ""; }
-  function myGameNameOrEmail() {
+function canEditOps() {
+  const s = loadSession();
+  return !!s?.email && myRole() !== "";
+}
+    function myGameNameOrEmail() {
     const u = getMyUser();
     return u?.gameName || u?.email || "—";
   }
