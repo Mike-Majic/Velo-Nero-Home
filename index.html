@@ -1244,6 +1244,14 @@
         n.names = names;
         n.agreements = agreements;
         n.body = body;
+
+        logEvent("DIARIO_UPDATE", {
+  id: editingNoteId,
+  type: t,
+  title: title,
+  names: names
+});
+        
         n.updatedAt = Date.now();
       } else {
         all.push({
@@ -1254,9 +1262,15 @@
           names,
           agreements,
           body,
-          createdBy: me
-        });
+  createdBy: getMyUser()?.gameName || ""
+});
       }
+      
+      logEvent("DIARIO_CREATE", {
+  type: t,
+  title: title,
+  names: names
+});
 
       saveDiary(all);
       closeNoteModal();
@@ -1278,16 +1292,35 @@
     // =========================
     // LOGIN LOGS
     // =========================
-    function recordLoginToLogs(email, gameName) {
-      try {
-        const raw = localStorage.getItem(LOGS_KEY) || "[]";
-        const logs = JSON.parse(raw);
-        logs.push({ ts: Date.now(), email, gameName, action: "LOGIN" });
-        localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
-      } catch (e) {
-        console.error("Errore nel registrare il login", e);
-      }
-    }
+function logEvent(action, details = {}) {
+  try {
+    const s = loadSession() || {};
+    const u = getMyUser() || {};
+    const email = (u.email || s.email || "—");
+    const gameName = (u.gameName || "—");
+
+    const raw = localStorage.getItem(LOGS_KEY) || "[]";
+    const logs = JSON.parse(raw);
+
+    logs.push({
+      id: uid(),
+      ts: Date.now(),
+      email,
+      gameName,
+      action: String(action || "EVENTO"),
+      details: details || {}
+    });
+
+    localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+  } catch (e) {
+    console.error("Errore nel log eventi", e);
+  }
+}
+
+// compat: uso vecchio
+function recordLoginToLogs(email, gameName) {
+  logEvent("LOGIN", { email: email || "", gameName: gameName || "" });
+}
     function loadLoginLogs() {
       try {
         const raw = localStorage.getItem(LOGS_KEY) || "[]";
@@ -1322,8 +1355,20 @@
       body.innerHTML = "";
       filtered.forEach(l => {
         const tr = document.createElement("tr");
-        tr.className = "clickRow";
-        tr.innerHTML = `
+tr.className = "clickRow";
+tr.dataset.id = l.id || "";
+tr.onclick = () => {
+  const pretty = JSON.stringify(l.details || {}, null, 2);
+  alert(
+    `LOG EVENTO\n\n` +
+    `Quando: ${new Date(l.ts).toLocaleString()}\n` +
+    `Email: ${l.email || "—"}\n` +
+    `Nome: ${l.gameName || "—"}\n` +
+    `Azione: ${l.action || "—"}\n\n` +
+    `Dettagli:\n${pretty}`
+  );
+};
+tr.innerHTML = `
           <td>${new Date(l.ts).toLocaleString()}</td>
           <td>${escapeHtml(l.email || "—")}</td>
           <td>${escapeHtml(l.gameName || "—")}</td>
@@ -2293,6 +2338,23 @@
         tagName: tagNames.length ? tagNames[0] : null
       });
       saveOps(ops);
+      logEvent("AZIONI_UPDATE", {
+  id: rec.id,
+  category: rec.category,
+  type: rec.type,
+  money: rec.money,
+  note: rec.note,
+  items: rec.items,
+  tags: rec.tagNames || []
+});
+      logEvent("AZIONI_CREATE", {
+  category,
+  type,
+  money,
+  note: (note || "").trim(),
+  items: items.map(x => ({ name: x.name, qty: x.qty })),
+  tags: selectedTagNames()
+});
 
       document.getElementById("money_" + tid).value = "";
       document.getElementById("note_" + tid).value = "";
@@ -2306,6 +2368,7 @@
 
     function deleteRecord(id, category) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      logEvent("AZIONI_DELETE", { id, category });
       saveOps(loadOps().filter(r => r.id !== id));
       renderCategory(category);
       renderManageSummaries();
@@ -2478,6 +2541,7 @@
       const ok = confirm("Confermi AZZERA AZIONI?");
       if (!ok) return;
       localStorage.removeItem(OPS_KEY);
+      logEvent("AZIONI_RESET_ALL", {});
       CATEGORIES.forEach(c => renderCategory(c));
       invRenderTotals();
     }
@@ -2797,6 +2861,15 @@
         tagName: tagNames.length ? tagNames[0] : null
       });
       invSave(all);
+      logEvent("GESTIONE_CREATE", {
+  category: cat,
+  type,
+  item,
+  qty,
+  money,
+  note,
+  tags: selectedTagNames()
+});
 
       document.getElementById("invQty_" + tid).value = "1";
       document.getElementById("invMoney_" + tid).value = "";
@@ -2924,6 +2997,7 @@ invLoad().forEach(r => {
       const ok = confirm("Confermi AZZERA GESTIONE?");
       if (!ok) return;
       localStorage.removeItem(INV_KEY);
+      logEvent("GESTIONE_RESET_ALL", {});
       INV_CATEGORIES.forEach(c => invRenderTable(c));
       invRenderTotals();
     }
