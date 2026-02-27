@@ -1203,6 +1203,22 @@ function canEditDiaryNote() {
         noteBody.value = n.body || "";
 
         btnDeleteNote.style.display = canEdit ? "inline-block" : "none";
+
+        // ✅ FIX: se sono admin, sblocco sempre i campi (forzo rimozione disabled)
+if (canEditDiaryNote()) {
+  const fieldsFix = [noteType, noteTitle, noteNames, noteAgreements, noteBody];
+  fieldsFix.forEach(f => {
+    if (!f) return;
+    f.disabled = false;
+    f.readOnly = false;
+    f.removeAttribute("disabled");
+    f.removeAttribute("readonly");
+  });
+
+  btnSaveNote.disabled = false;
+  btnSaveNote.classList.remove("disabled");
+}
+        
       } else {
         if (!canAdd) return alert("Sei in attesa di ruolo: non puoi inserire note.");
         noteModalTitle.textContent = "Nuova nota";
