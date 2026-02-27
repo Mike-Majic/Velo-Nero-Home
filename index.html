@@ -972,16 +972,21 @@
       if (!s?.email) return null;
       return findUserByEmail(s.email);
     }
-    function myRole() {
-      const u = getMyUser();
-      return u?.role || "";
-    }
-    function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
-
+function myRole() {
+  const u = getMyUser();
+  return String(u?.role || "").trim();
+}
+function isAdmin() {
+  const r = myRole();
+  return ["Owner","Boss","Vice Boss"].includes(r);
+}
     // permessi
     function canEditOps() { return myRole() !== ""; }
     function canAddDiaryNote() { return myRole() !== ""; }
-    function canEditDiaryNote() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+function canEditDiaryNote() {
+  const r = myRole();
+  return ["Owner","Boss","Vice Boss"].includes(r);
+}
     function canManageTotals() { return ["Boss","Vice Boss"].includes(myRole()); }
     function canBlockUnblock() { return ["Owner","Boss"].includes(myRole()); }
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
@@ -3367,7 +3372,19 @@ invLoad().forEach(r => {
 
       initAfterLogin();
     }
-
+function debugMe() {
+  const s = loadSession();
+  const u = getMyUser();
+  alert(
+    "DEBUG\n\n" +
+    "session email: " + (s?.email || "—") + "\n" +
+    "user email: " + (u?.email || "—") + "\n" +
+    "gameName: " + (u?.gameName || "—") + "\n" +
+    "role: [" + (u?.role || "—") + "]\n" +
+    "myRole(): [" + myRole() + "]\n" +
+    "canEditDiaryNote(): " + canEditDiaryNote()
+  );
+}
     boot();
   </script>
 </body>
