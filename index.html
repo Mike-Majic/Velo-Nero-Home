@@ -2967,20 +2967,32 @@ showLoginStep("stepEmail");
     if (!panelWrapper && window.panelWrapper) panelWrapper = window.panelWrapper;
   } catch {}
 
-  // =========================
-  // AVVIO RENDER BASE (quando apri sezioni)
-  // =========================
-  // (non richiamiamo boot qui: nel tuo file boot() è già chiamata alla fine)
-  // ma prepariamo render UI se l’utente è già loggato
-  try {
-    if (loadSession()?.email) {
-      // prepara tabs
-      if (typeof renderTabsAndPanels === "function") renderTabsAndPanels();
-      if (typeof invRenderTabs === "function") invRenderTabs();
-      if (typeof accRenderTabs === "function") accRenderTabs();
-      if (typeof diaryRender === "function") diaryRender();
-    }
-  } catch {}
+// =========================
+// BOOT (avvio unico)
+// =========================
+function boot() {
+  ensureDemoUsersIfEmpty();
+  setHeaderUser();
+
+  const s = loadSession();
+  if (!s?.email) {
+    showOnly("login");
+    showLoginStep("stepEmail");
+    return;
+  }
+
+  const u = getMyUser();
+  if (u?.blocked) {
+    alert("Account bloccato.");
+    logout();
+    return;
+  }
+
+  initAfterLogin();
+  showOnly("dashboard");
+}
+
+boot();
 
 </script>
 </body>
