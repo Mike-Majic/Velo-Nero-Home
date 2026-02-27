@@ -87,10 +87,7 @@
       font-weight:800;
     }
 
-    .linkbtn:hover {
-      background:#2b0000;
-      border-color:#ff1a1aaa;
-    }
+    .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
     .nav {
       display:flex;
@@ -118,25 +115,11 @@
       transform:scale(1.03);
       box-shadow:0 0 16px #ff1a1a77 inset, 0 0 16px #ff000088;
     }
+    .nav button.active { background-color:#2b0000; border-color:#ff1a1aaa; box-shadow:var(--shadowInStrong); }
 
-    .nav button.active {
-      background-color:#2b0000;
-      border-color:#ff1a1aaa;
-      box-shadow:var(--shadowInStrong);
-    }
-
-    .section {
-      display:none;
-      max-width:1200px;
-      margin:0 auto;
-      text-align:left;
-    }
-
-    .section.active {
-      display:block;
-    }
-
-        .cards { text-align:center; }
+    .section { display:none; max-width:1200px; margin:0 auto; text-align:left; }
+    .section.active { display:block; }
+    .cards { text-align:center; }
 
     .box {
       display:inline-block;
@@ -150,11 +133,7 @@
       color:#fff;
       min-width:260px;
     }
-
-    .box:hover {
-      transform:scale(1.03);
-      box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc;
-    }
+    .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
 
     .box h2 {
       font-size:28px;
@@ -164,25 +143,12 @@
       font-weight:900;
       text-shadow:0 0 10px #ff000066;
     }
-
-    .box p {
-      font-size:16px;
-      color:#ff6666;
-      margin:0;
-      text-align:center;
-      font-weight:800;
-    }
+    .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; font-weight:800; }
 
     .hint { color:var(--muted2); font-size:14px; margin-top:6px; }
     .muted { color:var(--muted); font-size:13px; }
 
-    .tabs {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .tabs button {
       background-color:var(--panel);
       color:#fff;
@@ -195,16 +161,8 @@
       font-size:13px;
       font-weight:900;
     }
-
-    .tabs button:hover {
-      transform:scale(1.02);
-      box-shadow:0 0 12px #ff1a1a55 inset, 0 0 12px #ff000077;
-    }
-
-    .tabs button.active {
-      background-color:#2b0000;
-      border-color:#ff1a1aaa;
-    }
+    .tabs button:hover { transform:scale(1.02); box-shadow:0 0 12px #ff1a1a55 inset, 0 0 12px #ff000077; }
+    .tabs button.active { background-color:#2b0000; border-color:#ff1a1aaa; }
 
     .panel {
       display:none;
@@ -214,30 +172,13 @@
       border-radius:12px;
       box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
     }
-
     .panel.active { display:block; }
 
-    .row {
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:flex-end;
-      margin-top:12px;
-    }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
 
-    .field {
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-width:220px;
-    }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
 
-    label {
-      color:var(--muted2);
-      font-size:13px;
-      font-weight:800;
-      letter-spacing:.2px;
-    }
+    label { color:var(--muted2); font-size:13px; font-weight:800; letter-spacing:.2px; }
 
     input, select, textarea {
       background:var(--panel2);
@@ -248,11 +189,7 @@
       outline:none;
       font-weight:800;
     }
-
-    textarea {
-      min-height:90px;
-      resize:vertical;
-    }
+    textarea { min-height:90px; resize:vertical; }
 
     .btn {
       background:var(--panel);
@@ -266,34 +203,12 @@
       font-weight:900;
       letter-spacing:.2px;
     }
+    .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
+    .danger { background:#2b0000; border-color:#ff1a1aaa; }
+    .small { padding:7px 10px; font-size:13px; border-radius:9px; }
+    .disabled { opacity:.5; cursor:not-allowed; }
 
-    .btn:hover {
-      transform:scale(1.02);
-      box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088;
-    }
-
-    .danger {
-      background:#2b0000;
-      border-color:#ff1a1aaa;
-    }
-
-    .small {
-      padding:7px 10px;
-      font-size:13px;
-      border-radius:9px;
-    }
-
-    .disabled {
-      opacity:.5;
-      cursor:not-allowed;
-    }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-      margin-top:12px;
-    }
-
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
     th, td {
       padding:10px 12px;
       border:1px solid #ff1a1a33;
@@ -301,19 +216,110 @@
       background-color:#1e1e1e;
       vertical-align:top;
     }
+    th { color:var(--red2); font-weight:900; letter-spacing:.3px; }
+    tr:hover td { background-color:#3a0000; }
+    tr.selectedRow td { background-color:#5a0000 !important; }
 
-    th {
-      color:var(--red2);
+    /* piccoli pezzi UI mancanti */
+    .pwbox{ display:flex; gap:8px; align-items:center; }
+    .pwbox input{ flex:1; }
+    .eye{ border:1px solid var(--border); background:var(--panel); color:#fff; border-radius:10px; padding:10px 12px; cursor:pointer; font-weight:900; }
+    .eye:hover{ background:#2b0000; }
+
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .qrwrap img{ max-width:220px; border-radius:12px; border:1px solid var(--border); box-shadow:0 0 12px #ff1a1a44; }
+
+    .tagPill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--panel2);
+      font-size:12px;
       font-weight:900;
-      letter-spacing:.3px;
+      margin:3px 6px 0 0;
+      box-shadow:0 0 10px #ff1a1a22 inset;
+    }
+    .tagRole{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid #ff1a1a66;
+      background:#2b0000;
+      font-size:11px;
+      font-weight:900;
+      margin-left:8px;
+      color:#ffd1d1;
     }
 
-    tr:hover td {
-      background-color:#3a0000;
+    .action-menu{
+      display:none;
+      position:absolute;
+      right:0;
+      top:34px;
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:8px;
+      min-width:200px;
+      box-shadow:0 0 14px #ff1a1a44;
+      z-index:50;
     }
+    .action-menu button{
+      width:100%;
+      margin:6px 0 0 0;
+      background:var(--panel);
+      border:1px solid var(--border);
+      color:#fff;
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:900;
+      text-align:left;
+    }
+    .action-menu button:hover{ background:#2b0000; }
+    .btn-edit{
+      background:var(--panel);
+      border:1px solid var(--border);
+      color:#fff;
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
+      box-shadow:0 0 10px #ff1a1a22 inset;
+    }
+    .btn-edit:hover{ background:#2b0000; }
 
-    tr.selectedRow td {
-      background-color:#5a0000 !important;
+    /* Modal generici */
+    #noteOverlay, #editOverlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.75);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:200;
+    }
+    #noteModal, #editModal{
+      width:min(920px, 100%);
+      background:linear-gradient(145deg,var(--panel),#2b0000);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 0 20px #ff1a1a55, 0 0 26px #ff000055 inset;
+      padding:18px;
+      text-align:left;
+    }
+    pre{ white-space:pre-wrap; word-break:break-word; }
+
+    /* layout rapido taglist quando manca HTML specifico */
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .twoCol{ grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -341,7 +347,7 @@
     <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
   </div>
 
-    <!-- LOGIN -->
+  <!-- LOGIN -->
   <div id="login" class="section">
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Accesso</h2>
     <div class="hint">Accesso in 3 passaggi: Email → Password → Codice 2FA.</div>
@@ -350,12 +356,13 @@
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
           <label>Email</label>
-          <input id="loginEmail" type="email" placeholder="nome@gmail.com" />
+          <input id="loginEmail" type="email" placeholder="nome@gmail.com" autocomplete="email" />
         </div>
         <div class="field" style="min-width:220px;">
-          <button class="btn" onclick="loginStepEmail()">Continua</button>
+          <button class="btn" type="button" onclick="loginStepEmail()">Continua</button>
         </div>
       </div>
+      <div class="hint" id="emailStepHint"></div>
     </div>
 
     <div class="panel" id="stepPassword">
@@ -370,13 +377,13 @@
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
-            <input id="loginPassword" type="password" placeholder="Password" />
+            <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
             <button class="eye" type="button" onclick="togglePassword('loginPassword', this)">👁</button>
           </div>
         </div>
         <div class="field" style="min-width:220px;">
-          <button class="btn" onclick="loginStepPassword()">Accedi</button>
-          <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
+          <button class="btn" type="button" onclick="loginStepPassword()">Accedi</button>
+          <button class="btn danger" type="button" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
 
@@ -386,20 +393,22 @@
 
           <label>Nuova password</label>
           <div class="pwbox">
-            <input id="newPassword" type="password" placeholder="Nuova password" />
+            <input id="newPassword" type="password" placeholder="Nuova password" autocomplete="new-password" />
             <button class="eye" type="button" onclick="togglePassword('newPassword', this)">👁</button>
           </div>
 
           <label>Conferma nuova password</label>
           <div class="pwbox">
-            <input id="newPassword2" type="password" placeholder="Conferma" />
+            <input id="newPassword2" type="password" placeholder="Conferma" autocomplete="new-password" />
             <button class="eye" type="button" onclick="togglePassword('newPassword2', this)">👁</button>
           </div>
         </div>
         <div class="field" style="min-width:220px;">
-          <button class="btn" onclick="saveNewPassword()">Salva password</button>
+          <button class="btn" type="button" onclick="saveNewPassword()">Salva password</button>
         </div>
       </div>
+
+      <div class="hint" id="pwStepHint"></div>
     </div>
 
     <div class="panel" id="stepRegister">
@@ -413,17 +422,17 @@
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
           <label>Nome utente in game</label>
-          <input id="regGameName" type="text" placeholder="Il tuo nick in game" />
+          <input id="regGameName" type="text" placeholder="Il tuo nick in game" autocomplete="nickname" />
         </div>
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
-            <input id="regPassword" type="password" placeholder="Password" />
+            <input id="regPassword" type="password" placeholder="Password" autocomplete="new-password" />
             <button class="eye" type="button" onclick="togglePassword('regPassword', this)">👁</button>
           </div>
           <label>Conferma password</label>
           <div class="pwbox">
-            <input id="regPassword2" type="password" placeholder="Conferma password" />
+            <input id="regPassword2" type="password" placeholder="Conferma password" autocomplete="new-password" />
             <button class="eye" type="button" onclick="togglePassword('regPassword2', this)">👁</button>
           </div>
         </div>
@@ -431,10 +440,12 @@
 
       <div class="row">
         <div class="field" style="min-width:220px;">
-          <button class="btn" onclick="registerAccount()">Crea account</button>
-          <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
+          <button class="btn" type="button" onclick="registerAccount()">Crea account</button>
+          <button class="btn danger" type="button" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
+
+      <div class="hint" id="regStepHint"></div>
     </div>
 
     <div class="panel" id="step2FA">
@@ -454,7 +465,7 @@
 
           <div class="row" style="margin-top:10px; align-items:flex-start;">
             <div class="field" style="min-width:220px;">
-              <button class="btn small" id="btnToggleQR" onclick="toggleQR()">Mostra QR</button>
+              <button class="btn small" id="btnToggleQR" type="button" onclick="toggleQR()">Mostra QR</button>
             </div>
 
             <div class="field qrwrap" id="qrWrap" style="display:none; min-width:220px;">
@@ -482,8 +493,8 @@
             <input id="rememberDevice" type="checkbox" />
             Ricorda questo dispositivo per 30 giorni
           </label>
-          <button class="btn" onclick="loginStep2FA()">Verifica e entra</button>
-          <button class="btn danger" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
+          <button class="btn" type="button" onclick="loginStep2FA()">Verifica e entra</button>
+          <button class="btn danger" type="button" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
     </div>
@@ -540,14 +551,99 @@
     </table>
   </div>
 
-    <!-- AZIONI -->
+  <!-- AZIONI -->
   <div id="azioni" class="section">
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Azioni</h2>
     <div class="hint" id="actionsHint"></div>
 
-    <div class="tabs" id="actionTabs"></div>
+    <div class="twoCol">
+      <div>
+        <div class="tabs" id="opsTabs"></div>
+        <div id="panelWrapper"></div>
+      </div>
 
-    <div id="actionPanels"></div>
+      <div class="panel active" style="display:block;">
+        <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Tag utenti</h3>
+        <div class="row" style="margin-top:8px;">
+          <div class="field" style="min-width:220px; flex:1;">
+            <label>Cerca</label>
+            <input id="tagSearch" type="text" placeholder="Cerca nome/ruolo.." oninput="renderTagList()" />
+          </div>
+          <div class="field" style="min-width:140px;">
+            <button class="btn small" type="button" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">Doppio click sul nome = seleziona/deseleziona ..</div>
+
+        <table style="margin-top:10px;">
+          <tbody id="tagTableBody"></tbody>
+        </table>
+
+        <div class="hint" style="margin-top:10px;">Selezionati:</div>
+        <div id="tagSelectedWrap" style="margin-top:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT AZIONI -->
+  <div id="editOverlay">
+    <div id="editModal">
+      <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Modifica registrazione</h3>
+      <div class="muted" id="editInfo"></div>
+
+      <div class="row">
+        <div class="field" style="min-width:180px;">
+          <label>Tipo</label>
+          <select id="editType">
+            <option value="ottenuto">OTTENUTO</option>
+            <option value="perso">PERSO</option>
+          </select>
+        </div>
+
+        <div class="field" style="min-width:220px;">
+          <label>Soldi ($)</label>
+          <input id="editMoney" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="flex:1; min-width:260px;">
+          <label>Note</label>
+          <input id="editNote" type="text" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1; min-width:320px;">
+          <label>Tag (dalla selezione attuale)</label>
+          <input id="editTagName" disabled value="—" />
+        </div>
+      </div>
+
+      <div class="panel active" style="display:block;">
+        <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
+
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;">
+            <label>Item</label>
+            <select id="editItemSelect"></select>
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input id="editItemQty" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field" style="min-width:220px;">
+            <button class="btn" type="button" onclick="editAddItem()">Aggiungi</button>
+          </div>
+        </div>
+
+        <div id="editItemsList" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="row" style="justify-content:flex-end;">
+        <button class="btn danger small" type="button" onclick="closeEdit()">Chiudi</button>
+        <button class="btn small" type="button" onclick="saveEdit()">Salva</button>
+      </div>
+    </div>
   </div>
 
   <!-- DIARIO -->
@@ -556,10 +652,10 @@
     <div class="hint">Note e accordi interni. Tutti possono leggere.</div>
 
     <div class="row">
-      <button class="btn" id="btnNewNote" onclick="openNoteModal()">➕ Nuova nota</button>
+      <button class="btn" id="btnNewNote" type="button" onclick="openNoteModal()">➕ Nuova nota</button>
     </div>
 
-    <div class="panel active">
+    <div class="panel active" style="display:block;">
       <table>
         <thead>
           <tr>
@@ -577,7 +673,7 @@
   </div>
 
   <!-- MODALE DIARIO -->
-  <div id="noteOverlay" style="display:none;">
+  <div id="noteOverlay">
     <div id="noteModal">
       <h3 style="margin:0 0 10px 0; color:var(--red2); font-weight:900;">Nota Diario</h3>
 
@@ -614,9 +710,9 @@
       <div class="hint" id="notePermHint"></div>
 
       <div class="row" style="justify-content:flex-end;">
-        <button class="btn danger small" id="btnDeleteNote" onclick="deleteNote()">Elimina</button>
-        <button class="btn small" onclick="closeNoteModal()">Annulla</button>
-        <button class="btn small" id="btnSaveNote" onclick="saveNote()">Salva</button>
+        <button class="btn danger small" id="btnDeleteNote" type="button" onclick="deleteNote()">Elimina</button>
+        <button class="btn small" type="button" onclick="closeNoteModal()">Annulla</button>
+        <button class="btn small" id="btnSaveNote" type="button" onclick="saveNote()">Salva</button>
       </div>
     </div>
   </div>
@@ -626,9 +722,49 @@
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Gestione Armi / Droga</h2>
     <div class="hint">Registro interno di armi, droga e oggetti.</div>
 
-    <div class="tabs" id="invTabs"></div>
+    <div class="twoCol">
+      <div>
+        <div class="tabs" id="invTabs"></div>
+        <div id="invPanels"></div>
 
-    <div id="invPanels"></div>
+        <div class="panel active" style="display:block;">
+          <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totali inventario</h3>
+          <div class="hint" id="invMoneySummary"></div>
+          <table>
+            <thead>
+              <tr><th>Item</th><th style="width:120px;">Qtà</th></tr>
+            </thead>
+            <tbody id="invTotalsBody"></tbody>
+          </table>
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn danger small" type="button" onclick="invResetAll()">Azzera gestione</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel active" style="display:block;">
+        <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Tag utenti</h3>
+
+        <div class="row" style="margin-top:8px;">
+          <div class="field" style="min-width:220px; flex:1;">
+            <label>Cerca</label>
+            <input id="tagSearchInv" type="text" placeholder="Cerca nome/ruolo.." oninput="renderTagListInv()" />
+          </div>
+          <div class="field" style="min-width:140px;">
+            <button class="btn small" type="button" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">Doppio click sul nome = seleziona/deseleziona ..</div>
+
+        <table style="margin-top:10px;">
+          <tbody id="tagTableBodyInv"></tbody>
+        </table>
+
+        <div class="hint" style="margin-top:10px;">Selezionati:</div>
+        <div id="tagSelectedWrapInv" style="margin-top:6px;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- CONTABILITÀ -->
@@ -636,20 +772,30 @@
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Contabilità</h2>
     <div class="hint">Stipendi e bilancio.</div>
 
-    <div class="tabs">
+    <div class="tabs" id="accTabs">
       <button id="tabStipendi" onclick="accShowTab('Stipendi')">Stipendi</button>
       <button id="tabBilancio" onclick="accShowTab('Bilancio')">Bilancio</button>
+    </div>
+
+    <div class="panel active" style="display:block;">
+      <div class="hint" id="accBalanceSummary"></div>
+      <div class="hint" id="accSalarySummary"></div>
+      <div class="row" style="justify-content:flex-end;">
+        <div id="accAdminPanel" style="display:none;">
+          <button class="btn danger small" type="button" onclick="accResetAll()">Azzera contabilità</button>
+        </div>
+      </div>
     </div>
 
     <div id="accPanels"></div>
   </div>
 
-    <!-- LOG -->
+  <!-- LOG -->
   <div id="log" class="section">
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Log Eventi</h2>
     <div class="hint">Registro completo eventi di sistema (solo admin).</div>
 
-    <div class="panel active">
+    <div class="panel active" style="display:block;">
       <table>
         <thead>
           <tr>
@@ -666,7 +812,7 @@
 
   <script>
   // =========================
-  // COSTANTI
+  // COSTANTI / STORAGE
   // =========================
   const USERS_KEY = "vn_users";
   const OPS_KEY   = "vn_ops";
@@ -675,16 +821,23 @@
   const ACC_KEY   = "vn_accounting";
   const LOGS_KEY  = "vn_logs";
   const SESSION_KEY = "vn_session";
+  const TRUSTED_KEY = "vn_trusted_devices";
 
   const OWNER_EMAIL = "m.colurci@gmail.com";
 
+  // Categorie Azioni + item base (minimo funzionante)
+  window.CATEGORIES = ["Rapina", "Scorta", "Ricatto", "Altro"];
+  window.FIXED_ITEMS = [
+    "Contanti","Lingotti","Gioielli","Chip",
+    "Arma (generico)","Munizioni (generico)","Droga (generico)","Oggetto (generico)"
+  ];
+
   // =========================
-  // UTILS BASE
+  // UTILS
   // =========================
   function uid() {
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
-
   function escapeHtml(str) {
     return String(str || "")
       .replace(/&/g,"&amp;")
@@ -693,75 +846,51 @@
       .replace(/"/g,"&quot;")
       .replace(/'/g,"&#039;");
   }
-
   function formatMoney(v) {
     const n = Number(v || 0);
     return n.toLocaleString("it-IT") + " $";
   }
-
-  // =========================
-  // STORAGE HELPERS
-  // =========================
   function load(key, def=[]) {
     try { return JSON.parse(localStorage.getItem(key)) || def; }
     catch { return def; }
   }
-
-  function save(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
-  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
   function loadUsers() { return load(USERS_KEY, []); }
   function saveUsers(v) { save(USERS_KEY, v); }
-
   function loadOps() { return load(OPS_KEY, []); }
   function saveOps(v) { save(OPS_KEY, v); }
-
   function loadDiary() { return load(DIARY_KEY, []); }
   function saveDiary(v) { save(DIARY_KEY, v); }
-
-  function invLoad() { return load(INV_KEY, []); }
-  function invSave(v) { save(INV_KEY, v); }
-
-  function accLoad() { return load(ACC_KEY, []); }
-  function accSave(v) { save(ACC_KEY, v); }
-
   function loadLoginLogs() { return load(LOGS_KEY, []); }
   function saveLoginLogs(v) { save(LOGS_KEY, v); }
 
-  // =========================
-  // SESSION / USER
-  // =========================
-  function loadSession() {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-  }
+  function loadSession() { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }
+  function saveSession(v) { localStorage.setItem(SESSION_KEY, JSON.stringify(v)); }
+  function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
-  function saveSession(v) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(v));
-  }
-
-  function clearSession() {
-    localStorage.removeItem(SESSION_KEY);
-  }
+  function normEmail(e){ return String(e || "").trim().toLowerCase(); }
 
   function getMyUser() {
     const s = loadSession();
     if (!s) return null;
-    return loadUsers().find(u => u.email === s.email) || null;
+    return loadUsers().find(u => normEmail(u.email) === normEmail(s.email)) || null;
   }
-
-  function myRole() {
+  function myRole() { return String(getMyUser()?.role || "").trim(); }
+  function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+  function canEditOps() { return myRole() !== ""; }
+  function myGameNameOrEmail() {
     const u = getMyUser();
-    return String(u?.role || "").trim();
+    return u?.gameName || u?.email || "—";
   }
 
-  function isAdmin() {
-    return ["Owner","Boss","Vice Boss"].includes(myRole());
-  }
-
-  function canEditOps() {
-    return myRole() !== "";
-  }
+  // permessi admin granulari (semplici)
+  function canReset2FA(){ return ["Owner","Boss"].includes(myRole()); }
+  function canResetPassword(){ return ["Owner","Boss"].includes(myRole()); }
+  function canBlockUnblock(){ return ["Owner","Boss"].includes(myRole()); }
+  function canExpel(){ return ["Owner","Boss"].includes(myRole()); }
+  function canManageTotals(){ return ["Boss","Vice Boss","Owner"].includes(myRole()); }
+  function canResetAccounting(){ return ["Owner","Boss"].includes(myRole()); }
 
   // =========================
   // LOG EVENTI
@@ -770,7 +899,6 @@
     try {
       const u = getMyUser();
       const logs = loadLoginLogs();
-
       logs.push({
         id: uid(),
         ts: Date.now(),
@@ -779,21 +907,26 @@
         action,
         details
       });
-
       saveLoginLogs(logs);
-    } catch(e) {
-      console.error("LOG ERROR", e);
-    }
+    } catch(e) { console.error("LOG ERROR", e); }
   }
 
-  function renderLogs() {
-    if (!isAdmin()) return;
-
+  function renderLogsReal() {
     const body = document.getElementById("logTableBody");
+    if (!body) return;
+
+    if (!isAdmin()) {
+      body.innerHTML = `<tr><td class="muted" colspan="4">Permesso negato</td></tr>`;
+      return;
+    }
+
     const logs = loadLoginLogs().slice().reverse();
+    if (!logs.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="4">Nessun log</td></tr>`;
+      return;
+    }
 
     body.innerHTML = "";
-
     logs.forEach(l => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -806,7 +939,7 @@
     });
   }
 
-      // =========================
+  // =========================
   // RUOLI (scaletta + ordinamento)
   // =========================
   const RUOLI = [
@@ -825,11 +958,29 @@
   }
 
   // =========================
-  // SEED UTENTI DEMO (10)
+  // SEED UTENTI DEMO + OWNER PLACEHOLDER
   // =========================
   function ensureDemoUsersIfEmpty() {
     const users = loadUsers();
-    if (users.length > 0) return;
+    if (users.length > 0) {
+      // garantisci owner presente
+      const hasOwner = users.some(u => normEmail(u.email) === normEmail(OWNER_EMAIL));
+      if (!hasOwner) {
+        users.push({
+          id: uid(),
+          email: normEmail(OWNER_EMAIL),
+          gameName: "Owner",
+          role: "Owner",
+          blocked: false,
+          passwordHash: null,
+          passwordSalt: null,
+          totpSecret: null,
+          totpNeedsSetup: true
+        });
+        saveUsers(users);
+      }
+      return;
+    }
 
     const demo = [
       { email:"boss.demo@vn.local",      gameName:"Don_Ricci",      role:"Boss" },
@@ -846,19 +997,33 @@
 
     const seeded = demo.map(d => ({
       id: uid(),
-      email: String(d.email || "").toLowerCase(),
+      email: normEmail(d.email),
       gameName: d.gameName || "",
       role: d.role || "",
       blocked: false,
       passwordHash: null,
+      passwordSalt: null,
       totpSecret: null,
-      totpNeedsSetup: false
+      totpNeedsSetup: true
     }));
+
+    // aggiungi owner
+    seeded.push({
+      id: uid(),
+      email: normEmail(OWNER_EMAIL),
+      gameName: "Owner",
+      role: "Owner",
+      blocked: false,
+      passwordHash: null,
+      passwordSalt: null,
+      totpSecret: null,
+      totpNeedsSetup: true
+    });
 
     saveUsers(seeded);
   }
 
-  // =========================
+      // =========================
   // HEADER UI (pill + logout)
   // =========================
   function setHeaderUser() {
@@ -887,6 +1052,7 @@
     clearSession();
     setHeaderUser();
     showOnly("login");
+    showLoginStep("stepEmail");
   }
 
   // =========================
@@ -932,13 +1098,13 @@
     const s = loadSession();
     if (!s?.email) {
       showOnly("login");
+      showLoginStep("stepEmail");
       return false;
     }
     return true;
   }
 
   function initAfterLogin() {
-    // Mostra/nasconde voci admin
     const btnUtenti = document.getElementById("btnUtenti");
     const cardUtenti = document.getElementById("cardUtenti");
     const btnLog = document.getElementById("btnLog");
@@ -947,28 +1113,31 @@
     if (btnLog) btnLog.style.display = isAdmin() ? "inline-block" : "none";
     if (cardUtenti) cardUtenti.style.display = isAdmin() ? "inline-block" : "none";
 
-    // Hint dashboard / azioni
     const dashHint = document.getElementById("dashHint");
     const actionsHint = document.getElementById("actionsHint");
-    if (dashHint && !canEditOps()) {
-      dashHint.textContent = "Sei registrato .. in attesa di ruolo: puoi leggere, ma non inserire/modificare.";
-    } else if (dashHint) {
-      dashHint.textContent = "";
-    }
 
-    if (actionsHint && !canEditOps()) {
-      actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
-    } else if (actionsHint) {
-      actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
-    }
+    if (dashHint && !canEditOps()) dashHint.textContent = "Sei registrato .. in attesa di ruolo: puoi leggere, ma non inserire/modificare.";
+    else if (dashHint) dashHint.textContent = "";
 
+    if (actionsHint && !canEditOps()) actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+    else if (actionsHint) actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
+
+    // render iniziali
+    renderUsersTable();
+    renderTagList();
+    renderTagListInv();
+    renderTabsAndPanels();
+    invRenderTabs();
+    invRenderTotals();
+    accRenderTabs();
+    accRenderSummary();
+    diaryRender();
     showOnly("dashboard");
   }
 
   function showSection(id) {
     if (!requireAuthOrShowLogin()) return;
 
-    // blocco accesso admin
     if ((id === "utenti" || id === "log") && !isAdmin()) {
       showOnly("dashboard");
       return;
@@ -976,78 +1145,458 @@
 
     showOnly(id);
 
-    // chiamate render (alcune arrivano nei prossimi blocchi)
-    if (id === "utenti" && typeof renderUsersTable === "function") renderUsersTable();
-
-    if (id === "azioni") {
-      if (typeof renderTagList === "function") renderTagList();
-      if (typeof renderTabsAndPanels === "function") renderTabsAndPanels();
-      if (typeof invRenderTotals === "function") invRenderTotals();
-    }
-
-    if (id === "diario" && typeof diarySearch === "function") diarySearch();
-
-    if (id === "comandi") {
-      if (typeof invRenderTabs === "function") invRenderTabs();
-      if (typeof invRenderTotals === "function") invRenderTotals();
-      if (typeof renderTagListInv === "function") renderTagListInv();
-    }
-
-    if (id === "contabilita") {
-      if (typeof accRenderTabs === "function") accRenderTabs();
-      if (typeof accRenderSummary === "function") accRenderSummary();
-    }
-
-    if (id === "log") {
-      renderLogs();
-    }
+    if (id === "utenti") renderUsersTable();
+    if (id === "azioni") { renderTagList(); renderTabsAndPanels(); invRenderTotals(); }
+    if (id === "diario") diaryRender();
+    if (id === "comandi") { invRenderTabs(); invRenderTotals(); renderTagListInv(); }
+    if (id === "contabilita") { accRenderTabs(); accRenderSummary(); accRenderAdminPanel(); }
+    if (id === "log") renderLogsReal();
   }
 
   // =========================
-  // PROTEZIONI ANTI-ERRORI (finché arrivano i blocchi successivi)
+  // LOGIN FLOW (FIX: ora "Continua" va avanti)
   // =========================
-  if (typeof renderUsersTable !== "function") window.renderUsersTable = function(){};
-  if (typeof renderTagList !== "function") window.renderTagList = function(){};
-  if (typeof renderTagListInv !== "function") window.renderTagListInv = function(){};
-  if (typeof renderTabsAndPanels !== "function") window.renderTabsAndPanels = function(){};
-  if (typeof diarySearch !== "function") window.diarySearch = function(){};
-  if (typeof invRenderTabs !== "function") window.invRenderTabs = function(){};
-  if (typeof invRenderTotals !== "function") window.invRenderTotals = function(){};
-  if (typeof accRenderTabs !== "function") window.accRenderTabs = function(){};
-  if (typeof accRenderSummary !== "function") window.accRenderSummary = function(){};
+  function showLoginStep(stepId){
+    ["stepEmail","stepPassword","stepRegister","step2FA"].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("active");
+      el.style.display = "none";
+    });
+    const s = document.getElementById(stepId);
+    if (s){ s.classList.add("active"); s.style.display = "block"; }
+  }
 
-  // =========================
-  // BOOT
-  // =========================
-  function boot() {
-    ensureDemoUsersIfEmpty();
+  function backToEmail(){
+    showLoginStep("stepEmail");
+    document.getElementById("loginEmail")?.focus();
+  }
+
+  function backToPasswordOrEmail(){
+    // se l'utente esiste -> password .. altrimenti email
+    const e = normEmail(document.getElementById("twofaEmailInline")?.value || "");
+    const u = loadUsers().find(x => normEmail(x.email) === e);
+    if (u) showLoginStep("stepPassword");
+    else showLoginStep("stepEmail");
+  }
+
+  function togglePassword(id, btn){
+    const inp = document.getElementById(id);
+    if (!inp) return;
+    inp.type = (inp.type === "password") ? "text" : "password";
+    if (btn) btn.textContent = (inp.type === "password") ? "👁" : "🙈";
+  }
+
+  // Trusted device (30gg)
+  function loadTrusted(){ return load(TRUSTED_KEY, {}); }
+  function saveTrusted(v){ save(TRUSTED_KEY, v || {}); }
+  function isTrusted(email){
+    const t = loadTrusted();
+    const exp = Number(t[normEmail(email)] || 0);
+    return exp > Date.now();
+  }
+  function setTrusted(email){
+    const t = loadTrusted();
+    t[normEmail(email)] = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    saveTrusted(t);
+  }
+  function clearTrustedForEmail(email){
+    const t = loadTrusted();
+    delete t[normEmail(email)];
+    saveTrusted(t);
+  }
+
+  // Crypto helpers (password)
+  function bufToHex(buf){
+    const arr = new Uint8Array(buf);
+    let s = "";
+    for (let i=0;i<arr.length;i++){
+      const h = arr[i].toString(16).padStart(2,"0");
+      s += h;
+    }
+    return s;
+  }
+  function strToBuf(str){ return new TextEncoder().encode(str); }
+
+  async function sha256(str){
+    const b = await crypto.subtle.digest("SHA-256", strToBuf(str));
+    return bufToHex(b);
+  }
+
+  async function makePasswordHash(password, salt){
+    return sha256(salt + "::" + password);
+  }
+
+  function randomSalt(){
+    const a = new Uint8Array(16);
+    crypto.getRandomValues(a);
+    return Array.from(a).map(x=>x.toString(16).padStart(2,"0")).join("");
+  }
+
+  // TOTP (Base32 + RFC6238)
+  const BASE32_ALPH = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  function base32DecodeToBytes(b32){
+    const clean = String(b32 || "").toUpperCase().replace(/[^A-Z2-7]/g,"");
+    let bits = "";
+    for (const ch of clean){
+      const val = BASE32_ALPH.indexOf(ch);
+      if (val < 0) continue;
+      bits += val.toString(2).padStart(5,"0");
+    }
+    const bytes = [];
+    for (let i=0;i+8<=bits.length;i+=8){
+      bytes.push(parseInt(bits.slice(i,i+8),2));
+    }
+    return new Uint8Array(bytes);
+  }
+
+  function generateTotpSecret(){
+    const a = new Uint8Array(20);
+    crypto.getRandomValues(a);
+    let out = "";
+    let bits = 0, val = 0;
+    for (let i=0;i<a.length;i++){
+      val = (val << 8) | a[i];
+      bits += 8;
+      while (bits >= 5){
+        out += BASE32_ALPH[(val >>> (bits - 5)) & 31];
+        bits -= 5;
+      }
+    }
+    if (bits > 0) out += BASE32_ALPH[(val << (5 - bits)) & 31];
+    return out;
+  }
+
+  function leftPad(n, len){ return String(n).padStart(len,"0"); }
+
+  async function totpCode(secret, timeMs=Date.now(), step=30){
+    const keyBytes = base32DecodeToBytes(secret);
+    const counter = Math.floor(timeMs / 1000 / step);
+
+    const msg = new Uint8Array(8);
+    let tmp = counter;
+    for (let i=7;i>=0;i--){
+      msg[i] = tmp & 0xff;
+      tmp = Math.floor(tmp / 256);
+    }
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name:"HMAC", hash:"SHA-1" },
+      false,
+      ["sign"]
+    );
+
+    const sig = await crypto.subtle.sign("HMAC", cryptoKey, msg);
+    const h = new Uint8Array(sig);
+
+    const offset = h[h.length - 1] & 0x0f;
+    const bin =
+      ((h[offset] & 0x7f) << 24) |
+      ((h[offset+1] & 0xff) << 16) |
+      ((h[offset+2] & 0xff) << 8) |
+      (h[offset+3] & 0xff);
+
+    const otp = bin % 1000000;
+    return leftPad(otp, 6);
+  }
+
+  async function verifyTotp(secret, code){
+    const c = String(code || "").trim();
+    if (!/^\d{6}$/.test(c)) return false;
+
+    const now = Date.now();
+    const codes = await Promise.all([
+      totpCode(secret, now - 30000),
+      totpCode(secret, now),
+      totpCode(secret, now + 30000)
+    ]);
+    return codes.includes(c);
+  }
+
+  function buildOtpAuthUri(email, secret){
+    const issuer = "VELO NERO";
+    const label = encodeURIComponent(issuer + ":" + normEmail(email));
+    const iss = encodeURIComponent(issuer);
+    const sec = encodeURIComponent(secret);
+    return `otpauth://totp/${label}?secret=${sec}&issuer=${iss}&digits=6&period=30`;
+  }
+
+  // QR: uso servizio pubblico per immagine QR (solo rendering, non salva nulla)
+  function setQrImage(email, secret){
+    const uri = buildOtpAuthUri(email, secret);
+    const img = document.getElementById("twofaQR");
+    if (!img) return;
+    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(uri);
+    img.src = qrUrl;
+  }
+
+  function toggleQR(){
+    const wrap = document.getElementById("qrWrap");
+    const btn = document.getElementById("btnToggleQR");
+    if (!wrap || !btn) return;
+
+    const show = wrap.style.display !== "block";
+    wrap.style.display = show ? "block" : "none";
+    btn.textContent = show ? "Nascondi QR" : "Mostra QR";
+  }
+
+  // step 1: email
+  function loginStepEmail(){
+    const email = normEmail(document.getElementById("loginEmail")?.value || "");
+    const hint = document.getElementById("emailStepHint");
+    if (hint) hint.textContent = "";
+
+    if (!email || !email.includes("@")) {
+      if (hint) hint.textContent = "Inserisci un'email valida.";
+      return;
+    }
+
+    const users = loadUsers();
+    let u = users.find(x => normEmail(x.email) === email);
+
+    // se non esiste -> vai a register
+    if (!u) {
+      document.getElementById("regEmail").value = email;
+      document.getElementById("regGameName").value = "";
+      document.getElementById("regPassword").value = "";
+      document.getElementById("regPassword2").value = "";
+      document.getElementById("regStepHint").textContent = "Account non trovato .. crea il tuo profilo.";
+      showLoginStep("stepRegister");
+      document.getElementById("regGameName")?.focus();
+      return;
+    }
+
+    if (u.blocked) {
+      if (hint) hint.textContent = "Account bloccato.";
+      return;
+    }
+
+    // se passwordHash mancante -> deve impostare password (register light)
+    if (!u.passwordHash) {
+      document.getElementById("regEmail").value = email;
+      document.getElementById("regGameName").value = u.gameName || "";
+      document.getElementById("regStepHint").textContent = "Imposta la password per completare l'account.";
+      showLoginStep("stepRegister");
+      document.getElementById("regPassword")?.focus();
+      return;
+    }
+
+    // vai a password
+    document.getElementById("pwEmail").value = email;
+    document.getElementById("loginPassword").value = "";
+    document.getElementById("pwResetBox").style.display = "none";
+    document.getElementById("pwStepHint").textContent = "";
+    showLoginStep("stepPassword");
+    document.getElementById("loginPassword")?.focus();
+  }
+
+  // step 2: password
+  async function loginStepPassword(){
+    const email = normEmail(document.getElementById("pwEmail")?.value || "");
+    const pw = String(document.getElementById("loginPassword")?.value || "");
+    const hint = document.getElementById("pwStepHint");
+    if (hint) hint.textContent = "";
+
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === email);
+    if (!u) { if (hint) hint.textContent = "Utente non trovato."; backToEmail(); return; }
+    if (u.blocked) { if (hint) hint.textContent = "Account bloccato."; return; }
+
+    // password resettata -> deve impostarne una nuova
+    if (!u.passwordHash) {
+      document.getElementById("pwResetBox").style.display = "block";
+      if (hint) hint.textContent = "Password assente: devi impostarne una nuova.";
+      return;
+    }
+
+    if (!pw) { if (hint) hint.textContent = "Inserisci la password."; return; }
+
+    const salt = u.passwordSalt || "";
+    const computed = await makePasswordHash(pw, salt);
+    if (computed !== u.passwordHash) {
+      if (hint) hint.textContent = "Password errata.";
+      return;
+    }
+
+    // ok password -> step 2FA (o trusted)
+    await goTo2FA(email);
+  }
+
+  async function saveNewPassword(){
+    const email = normEmail(document.getElementById("pwEmail")?.value || "");
+    const p1 = String(document.getElementById("newPassword")?.value || "");
+    const p2 = String(document.getElementById("newPassword2")?.value || "");
+    const hint = document.getElementById("pwStepHint");
+
+    if (!p1 || p1.length < 6) { if (hint) hint.textContent = "Password troppo corta (min 6)."; return; }
+    if (p1 !== p2) { if (hint) hint.textContent = "Le password non combaciano."; return; }
+
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === email);
+    if (!u) { if (hint) hint.textContent = "Utente non trovato."; return; }
+
+    const salt = randomSalt();
+    u.passwordSalt = salt;
+    u.passwordHash = await makePasswordHash(p1, salt);
+
+    // se non ha 2FA, gliela preparo
+    if (!u.totpSecret) {
+      u.totpSecret = generateTotpSecret();
+      u.totpNeedsSetup = true;
+    }
+
+    saveUsers(users);
+    clearTrustedForEmail(email);
+
+    document.getElementById("pwResetBox").style.display = "none";
+    if (hint) hint.textContent = "Password salvata .. ora verifica 2FA.";
+    await goTo2FA(email);
+  }
+
+  // register (crea o completa)
+  async function registerAccount(){
+    const email = normEmail(document.getElementById("regEmail")?.value || "");
+    const gameName = String(document.getElementById("regGameName")?.value || "").trim();
+    const p1 = String(document.getElementById("regPassword")?.value || "");
+    const p2 = String(document.getElementById("regPassword2")?.value || "");
+    const hint = document.getElementById("regStepHint");
+    if (hint) hint.textContent = "";
+
+    if (!email || !email.includes("@")) { if (hint) hint.textContent = "Email non valida."; return; }
+    if (!gameName) { if (hint) hint.textContent = "Inserisci il nome in game."; return; }
+    if (!p1 || p1.length < 6) { if (hint) hint.textContent = "Password troppo corta (min 6)."; return; }
+    if (p1 !== p2) { if (hint) hint.textContent = "Le password non combaciano."; return; }
+
+    const users = loadUsers();
+    let u = users.find(x => normEmail(x.email) === email);
+
+    if (!u) {
+      u = {
+        id: uid(),
+        email,
+        gameName,
+        role: (email === normEmail(OWNER_EMAIL)) ? "Owner" : "",
+        blocked: false,
+        passwordHash: null,
+        passwordSalt: null,
+        totpSecret: null,
+        totpNeedsSetup: true
+      };
+      users.push(u);
+    }
+
+    u.gameName = gameName;
+    if (email === normEmail(OWNER_EMAIL)) u.role = "Owner";
+
+    const salt = randomSalt();
+    u.passwordSalt = salt;
+    u.passwordHash = await makePasswordHash(p1, salt);
+
+    if (!u.totpSecret) u.totpSecret = generateTotpSecret();
+    u.totpNeedsSetup = true;
+
+    saveUsers(users);
+    clearTrustedForEmail(email);
+
+    logEvent("REGISTER_OR_SETUP", { email, gameName });
+
+    if (hint) hint.textContent = "Account creato .. ora configura 2FA.";
+    await goTo2FA(email);
+  }
+
+  async function goTo2FA(email){
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === normEmail(email));
+    if (!u) return;
+
+    // trusted? entra diretto
+    if (isTrusted(email) && u.totpSecret && !u.totpNeedsSetup) {
+      saveSession({ email: normEmail(email), ts: Date.now() });
+      setHeaderUser();
+      logEvent("LOGIN_TRUSTED", { email });
+      initAfterLogin();
+      return;
+    }
+
+    document.getElementById("twofaEmailInline").value = normEmail(email);
+    document.getElementById("login2fa").value = "";
+    document.getElementById("twofaHintInline").textContent = "";
+
+    // mostra setup se serve
+    const setupBox = document.getElementById("twofaSetupBox");
+    const secretInline = document.getElementById("twofaSecretInline");
+    const confirmAdded = document.getElementById("confirmAdded");
+    const qrWrap = document.getElementById("qrWrap");
+    const btnToggle = document.getElementById("btnToggleQR");
+
+    if (u.totpNeedsSetup) {
+      if (!u.totpSecret) u.totpSecret = generateTotpSecret();
+      saveUsers(users);
+
+      if (setupBox) setupBox.style.display = "flex";
+      if (secretInline) secretInline.value = u.totpSecret;
+      if (confirmAdded) confirmAdded.checked = false;
+      if (qrWrap) qrWrap.style.display = "none";
+      if (btnToggle) btnToggle.textContent = "Mostra QR";
+      setQrImage(email, u.totpSecret);
+
+      document.getElementById("twofaHintInline").textContent = "Prima aggiungi la chiave (o QR) sull'app .. poi inserisci il codice.";
+    } else {
+      if (setupBox) setupBox.style.display = "none";
+      document.getElementById("twofaHintInline").textContent = "Inserisci il codice dall'app Authenticator.";
+    }
+
+    showLoginStep("step2FA");
+    document.getElementById("login2fa")?.focus();
+  }
+
+  async function loginStep2FA(){
+    const email = normEmail(document.getElementById("twofaEmailInline")?.value || "");
+    const code = String(document.getElementById("login2fa")?.value || "").trim();
+    const remember = !!document.getElementById("rememberDevice")?.checked;
+    const hint = document.getElementById("twofaHintInline");
+    if (hint) hint.textContent = "";
+
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === email);
+    if (!u) { if (hint) hint.textContent = "Utente non trovato."; backToEmail(); return; }
+    if (u.blocked) { if (hint) hint.textContent = "Account bloccato."; return; }
+    if (!u.totpSecret) { if (hint) hint.textContent = "2FA non configurato."; return; }
+
+    if (u.totpNeedsSetup) {
+      const okChecked = !!document.getElementById("confirmAdded")?.checked;
+      if (!okChecked) { if (hint) hint.textContent = "Spunta la conferma che hai aggiunto l'account nell'app."; return; }
+    }
+
+    const ok = await verifyTotp(u.totpSecret, code);
+    if (!ok) { if (hint) hint.textContent = "Codice 2FA errato."; return; }
+
+    // setup completato
+    if (u.totpNeedsSetup) {
+      u.totpNeedsSetup = false;
+      saveUsers(users);
+    }
+
+    if (remember) setTrusted(email);
+
+    saveSession({ email, ts: Date.now() });
     setHeaderUser();
 
-    const s = loadSession();
-    if (!s?.email) {
-      showOnly("login");
-      return;
-    }
-
-    const u = getMyUser();
-    if (u?.blocked) {
-      alert("Account bloccato.");
-      logout();
-      return;
-    }
+    logEvent("LOGIN_OK", { email, remember });
 
     initAfterLogin();
   }
 
-  boot();
-
-      // =========================
-  // UTENTI TABLE (ordinati per grado + ruolo vuoto selezionabile)
+  // =========================
+  // UTENTI TABLE
   // =========================
   const usersTableBody = document.getElementById("usersTableBody");
 
   function renderUsersTable() {
-    if (!isAdmin()) return;
+    if (!usersTableBody) return;
+    if (!isAdmin()) { usersTableBody.innerHTML = ""; return; }
 
     const users = loadUsers()
       .slice()
@@ -1057,19 +1606,16 @@
         return (a.email||"").localeCompare(b.email||"");
       });
 
-    if (!usersTableBody) return;
     usersTableBody.innerHTML = "";
 
     users.forEach(u => {
       const tr = document.createElement("tr");
 
-      // Nome in game + badge ruolo
       const tdGameName = document.createElement("td");
       tdGameName.innerHTML =
         `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span>` +
         ` <span class="tagRole">${escapeHtml(u.role || "—")}</span>`;
 
-      // Ruolo (select) -> consente anche vuoto
       const tdRole = document.createElement("td");
       const sel = document.createElement("select");
 
@@ -1078,20 +1624,17 @@
       optEmpty.textContent = "—";
       sel.appendChild(optEmpty);
 
-      RUOLI
-        .filter(r => r !== "Nessuno")
-        .forEach(r => {
-          const opt = document.createElement("option");
-          opt.value = r;
-          opt.textContent = r;
-          sel.appendChild(opt);
-        });
+      RUOLI.filter(r => r !== "Nessuno").forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = r;
+        sel.appendChild(opt);
+      });
 
       sel.value = u.role || "";
 
-      const isOwnerEmail = (String(u.email||"").toLowerCase() === String(OWNER_EMAIL||"").toLowerCase());
+      const isOwnerEmail = (normEmail(u.email) === normEmail(OWNER_EMAIL));
       const isOwnerRole  = (String(u.role||"") === "Owner");
-
       if (isOwnerEmail || isOwnerRole) sel.disabled = true;
 
       sel.onchange = () => {
@@ -1100,7 +1643,6 @@
           renderUsersTable();
           return;
         }
-
         const all = loadUsers();
         const ref = all.find(x => x.id === u.id);
         if (!ref) return;
@@ -1108,13 +1650,11 @@
         ref.role = sel.value || "";
         saveUsers(all);
 
-        // aggiorna header + permessi live
         setHeaderUser();
         initAfterLogin();
 
-        // aggiorna liste tag
-        if (typeof renderTagList === "function") renderTagList();
-        if (typeof renderTagListInv === "function") renderTagListInv();
+        renderTagList();
+        renderTagListInv();
 
         logEvent("USER_ROLE_UPDATE", {
           targetEmail: ref.email || "",
@@ -1122,44 +1662,37 @@
           newRole: ref.role || ""
         });
 
-        // ricarica tabella ordinata (perché cambia rank)
         renderUsersTable();
       };
-
       tdRole.appendChild(sel);
 
-      // Email
       const tdEmail = document.createElement("td");
       tdEmail.textContent = u.email || "—";
 
-      // Stato
       const tdState = document.createElement("td");
       tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
 
-      // Azioni (menu)
       const tdActions = document.createElement("td");
       const wrap = document.createElement("div");
       wrap.style.position = "relative";
 
       const btnEdit = document.createElement("button");
       btnEdit.className = "btn-edit";
+      btnEdit.type = "button";
       btnEdit.textContent = "✎";
       wrap.appendChild(btnEdit);
 
       const menu = document.createElement("div");
       menu.className = "action-menu";
 
-      // Reset 2FA
       const b4 = document.createElement("button");
+      b4.type = "button";
       b4.textContent = "Reset 2FA";
       b4.onclick = () => {
         if (!canReset2FA()) return alert("Solo Owner e Boss possono resettare il 2FA");
         if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
 
-        const ok = confirm(
-          "Confermi RESET 2FA per " + (u.email || "—") + "?\n" +
-          "Dovrà riconfigurare Authenticator al prossimo login."
-        );
+        const ok = confirm("Confermi RESET 2FA per " + (u.email || "—") + "?\nDovrà riconfigurare Authenticator al prossimo login.");
         if (!ok) return;
 
         const all = loadUsers();
@@ -1169,26 +1702,22 @@
         ref.totpSecret = generateTotpSecret();
         ref.totpNeedsSetup = true;
         clearTrustedForEmail(ref.email);
-
         saveUsers(all);
+
         menu.style.display = "none";
         renderUsersTable();
-
         logEvent("USER_2FA_RESET", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
         alert("2FA resettato.");
       };
 
-      // Reset Password
       const b5 = document.createElement("button");
+      b5.type = "button";
       b5.textContent = "Reset Password";
       b5.onclick = () => {
         if (!canResetPassword()) return alert("Permesso negato");
         if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
 
-        const ok = confirm(
-          "Confermi RESET PASSWORD per " + (u.email || "—") + "?\n" +
-          "Dovrà impostarne una nuova al prossimo accesso."
-        );
+        const ok = confirm("Confermi RESET PASSWORD per " + (u.email || "—") + "?\nDovrà impostarne una nuova al prossimo accesso.");
         if (!ok) return;
 
         const all = loadUsers();
@@ -1196,9 +1725,10 @@
         if (!ref) return;
 
         ref.passwordHash = null;
+        ref.passwordSalt = null;
         clearTrustedForEmail(ref.email);
-
         saveUsers(all);
+
         menu.style.display = "none";
         renderUsersTable();
 
@@ -1206,8 +1736,8 @@
         alert("Password resettata.");
       };
 
-      // Blocca
       const b1 = document.createElement("button");
+      b1.type = "button";
       b1.textContent = "Blocca";
       b1.onclick = () => {
         if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
@@ -1222,15 +1752,14 @@
 
         menu.style.display = "none";
         renderUsersTable();
-
         logEvent("USER_BLOCK", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
 
-        const me = getMyUser();
-        if (me?.email && me.email === ref.email && ref.blocked) logout();
+        const s = loadSession();
+        if (s?.email && normEmail(s.email) === normEmail(ref.email) && ref.blocked) logout();
       };
 
-      // Sblocca
       const b2 = document.createElement("button");
+      b2.type = "button";
       b2.textContent = "Sblocca";
       b2.onclick = () => {
         if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
@@ -1245,12 +1774,11 @@
 
         menu.style.display = "none";
         renderUsersTable();
-
         logEvent("USER_UNBLOCK", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
       };
 
-      // Espelli
       const b3 = document.createElement("button");
+      b3.type = "button";
       b3.textContent = "Espelli";
       b3.onclick = () => {
         if (!canExpel()) return alert("Permesso negato");
@@ -1260,19 +1788,16 @@
         if (!ok) return;
 
         const all = loadUsers();
-        const filtered = all.filter(x => x.id !== u.id);
-        saveUsers(filtered);
+        saveUsers(all.filter(x => x.id !== u.id));
 
         menu.style.display = "none";
         renderUsersTable();
-
         logEvent("USER_EXPEL", { targetEmail: u.email || "", targetGameName: u.gameName || "" });
 
         const s = loadSession();
-        if (s?.email && String(s.email).toLowerCase() === String(u.email||"").toLowerCase()) logout();
+        if (s?.email && normEmail(s.email) === normEmail(u.email)) logout();
       };
 
-      // Vice Boss: limita alcune azioni
       if (myRole() === "Vice Boss") {
         b1.style.display = "none";
         b2.style.display = "none";
@@ -1305,24 +1830,12 @@
     });
   }
 
-  // Chiude tutti i menu ✎ quando clicchi fuori
   document.addEventListener("click", () => {
     document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
   });
 
-  // helper: mostra logs (se serve e non ancora definito)
-  function renderLogs() {
-    if (typeof logSearch === "function") {
-      logSearch();
-      return;
-    }
-    // fallback: se logSearch arriva dopo, almeno non crasha
-    const body = document.getElementById("logTableBody");
-    if (body) body.innerHTML = `<tr><td class="muted" colspan="4">Caricamento log..</td></tr>`;
-  }
-
-      // =========================
-  // TAG (multi-selezione) usato sia per Azioni che per Gestione
+  // =========================
+  // TAG (multi-selezione)
   // =========================
   let selectedTagUserIds = [];
 
@@ -1330,34 +1843,22 @@
 
   function toggleSelectedTag(id) {
     if (!id) return;
-    if (isTagSelected(id)) {
-      selectedTagUserIds = selectedTagUserIds.filter(x => x !== id);
-    } else {
-      selectedTagUserIds.push(id);
-    }
+    if (isTagSelected(id)) selectedTagUserIds = selectedTagUserIds.filter(x => x !== id);
+    else selectedTagUserIds.push(id);
     syncSelectedTagsUI();
   }
 
-  function clearSelectedTags() {
-    selectedTagUserIds = [];
-    syncSelectedTagsUI();
-  }
+  function clearSelectedTags() { selectedTagUserIds = []; syncSelectedTagsUI(); }
 
   function selectedTagUsers() {
     const users = loadUsers();
-    return selectedTagUserIds
-      .map(id => users.find(u => u.id === id))
-      .filter(Boolean);
+    return selectedTagUserIds.map(id => users.find(u => u.id === id)).filter(Boolean);
   }
 
-  function selectedTagNames() {
-    return selectedTagUsers().map(u => (u.gameName || u.email || "—"));
-  }
+  function selectedTagNames() { return selectedTagUsers().map(u => (u.gameName || u.email || "—")); }
 
   function syncSelectedTagsUI() {
-    // pill azioni
     const wrap = document.getElementById("tagSelectedWrap");
-    // pill gestione armi-droga
     const wrapInv = document.getElementById("tagSelectedWrapInv");
 
     const names = selectedTagNames();
@@ -1368,7 +1869,6 @@
     if (wrap) wrap.innerHTML = html;
     if (wrapInv) wrapInv.innerHTML = html;
 
-    // aggiorna i campi Tag nei form Gestione armi-droga (uno per tab)
     try {
       (window.INV_CATEGORIES || []).forEach(cat => {
         const tid = invTabId(cat);
@@ -1377,7 +1877,6 @@
       });
     } catch {}
 
-    // aggiorna il campo tag nel modal edit azioni
     const editTag = document.getElementById("editTagName");
     if (editTag) editTag.value = names.length ? names.join(", ") : "—";
   }
@@ -1399,7 +1898,6 @@
       });
   }
 
-  // ---- Render lista Tag (AZIONI)
   function renderTagList() {
     const body = document.getElementById("tagTableBody");
     if (!body) return;
@@ -1417,9 +1915,8 @@
     users.forEach(u => {
       const tr = document.createElement("tr");
       const isSelected = isTagSelected(u.id);
-      tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+      tr.className = isSelected ? "selectedRow" : "";
 
-      // Doppio click = seleziona/deseleziona e evidenzia
       tr.ondblclick = () => {
         toggleSelectedTag(u.id);
         renderTagList();
@@ -1438,7 +1935,6 @@
     syncSelectedTagsUI();
   }
 
-  // ---- Render lista Tag (GESTIONE)
   function renderTagListInv() {
     const body = document.getElementById("tagTableBodyInv");
     if (!body) return;
@@ -1456,7 +1952,7 @@
     users.forEach(u => {
       const tr = document.createElement("tr");
       const isSelected = isTagSelected(u.id);
-      tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+      tr.className = isSelected ? "selectedRow" : "";
 
       tr.ondblclick = () => {
         toggleSelectedTag(u.id);
@@ -1476,11 +1972,8 @@
     syncSelectedTagsUI();
   }
 
-  // Prima sync (utile quando entri in pagina)
-  try { syncSelectedTagsUI(); } catch {}
-
-      // =========================
-  // AZIONI
+  // =========================
+  // AZIONI (come nel tuo codice, ma con wrapper esistenti)
   // =========================
   const opsTabs = document.getElementById("opsTabs");
   const panelWrapper = document.getElementById("panelWrapper");
@@ -1509,17 +2002,14 @@
     if (!wrap) return;
 
     const draft = getDraft(category);
-    if (draft.length === 0) {
-      wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
-      return;
-    }
+    if (draft.length === 0) { wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`; return; }
 
     wrap.innerHTML = "";
     draft.forEach(it => {
       const div = document.createElement("div");
-      div.className = "itemRow";
+      div.className = "row";
       div.innerHTML = `
-        <div class="field" style="min-width:320px;">
+        <div class="field" style="min-width:320px; flex:1;">
           <label>Item</label>
           <input value="${escapeHtml(it.name)}" disabled />
         </div>
@@ -1527,9 +2017,9 @@
           <label>Quantità</label>
           <input value="${Number(it.qty || 0)}" disabled />
         </div>
-        <div class="right">
+        <div class="field" style="min-width:160px;">
           <button class="btn danger small ${canEditOps() ? "" : "disabled"}" ${canEditOps() ? "" : "disabled"}
-            onclick="removeDraftItem('${escapeHtml(category)}','${escapeHtml(it.name)}')">Rimuovi</button>
+            type="button" onclick="removeDraftItem('${escapeHtml(category)}','${escapeHtml(it.name)}')">Rimuovi</button>
         </div>
       `;
       wrap.appendChild(div);
@@ -1583,9 +2073,7 @@
       return alert("Inserisci almeno soldi, o un item, o una nota.");
     }
 
-    const me = getMyUser();
-    const createdByName = me?.gameName || me?.email || "—";
-
+    const createdByName = myGameNameOrEmail();
     const tagUserIds = selectedTagUserIds.slice();
     const tagNames = selectedTagNames();
 
@@ -1602,52 +2090,35 @@
       items: items.map(x => ({ name: x.name, qty: x.qty })),
       tagUserIds,
       tagNames,
-      // compat vecchio
       tagName: tagNames.length ? tagNames[0] : null
     };
 
     ops.push(newRec);
     saveOps(ops);
 
-    // LOG evento (create)
-    logEvent("AZIONI_CREATE", {
-      id: newRec.id,
-      category,
-      type,
-      money,
-      note,
-      items: newRec.items,
-      tags: tagNames
-    });
+    logEvent("AZIONI_CREATE", { id:newRec.id, category, type, money, note, items:newRec.items, tags:tagNames });
 
-    // reset form
     moneyEl.value = "";
     noteEl.value = "";
     drafts[category] = [];
     renderDraft(category);
 
-    // refresh
     renderCategory(category);
-    renderManageSummaries();
     invRenderTotals();
   }
 
   function deleteRecord(id, category) {
     if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-
     const ok = confirm("Confermi eliminazione registrazione?");
     if (!ok) return;
 
     logEvent("AZIONI_DELETE", { id, category });
     saveOps(loadOps().filter(r => r.id !== id));
     renderCategory(category);
-    renderManageSummaries();
     invRenderTotals();
   }
 
-  // =========================
-  // MODAL EDIT (AZIONI)
-  // =========================
+  // MODAL EDIT
   const editOverlay = document.getElementById("editOverlay");
   const editInfo = document.getElementById("editInfo");
   const editType = document.getElementById("editType");
@@ -1685,7 +2156,7 @@
     if (editTagName) editTagName.value = tnames.length ? tnames.join(", ") : "—";
 
     renderEditItems();
-    if (editOverlay) editOverlay.style.display = "block";
+    if (editOverlay) editOverlay.style.display = "flex";
   }
 
   function closeEdit() {
@@ -1697,16 +2168,13 @@
 
   function renderEditItems() {
     if (!editItemsList) return;
-    if (editingItems.length === 0) {
-      editItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
-      return;
-    }
+    if (editingItems.length === 0) { editItemsList.innerHTML = `<div class="muted">Nessun item</div>`; return; }
     editItemsList.innerHTML = "";
     editingItems.forEach(it => {
       const div = document.createElement("div");
-      div.className = "itemRow";
+      div.className = "row";
       div.innerHTML = `
-        <div class="field" style="min-width:320px;">
+        <div class="field" style="min-width:320px; flex:1;">
           <label>Item</label>
           <input value="${escapeHtml(it.name)}" disabled />
         </div>
@@ -1714,8 +2182,8 @@
           <label>Quantità</label>
           <input value="${Number(it.qty || 0)}" disabled />
         </div>
-        <div class="right">
-          <button class="btn danger small" onclick="editRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+        <div class="field" style="min-width:160px;">
+          <button class="btn danger small" type="button" onclick="editRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
         </div>
       `;
       editItemsList.appendChild(div);
@@ -1736,10 +2204,7 @@
     renderEditItems();
   }
 
-  function editRemoveItem(name) {
-    editingItems = editingItems.filter(x => x.name !== name);
-    renderEditItems();
-  }
+  function editRemoveItem(name) { editingItems = editingItems.filter(x => x.name !== name); renderEditItems(); }
 
   function saveEdit() {
     if (!editingId) return;
@@ -1753,32 +2218,19 @@
     rec.note = (editNote?.value || "").trim();
     rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
 
-    // tag dai selezionati attuali
     rec.tagUserIds = selectedTagUserIds.slice();
     rec.tagNames = selectedTagNames();
     rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
     saveOps(ops);
 
-    // LOG evento (update)
-    logEvent("AZIONI_UPDATE", {
-      id: rec.id,
-      category: rec.category,
-      type: rec.type,
-      money: rec.money,
-      note: rec.note,
-      items: rec.items,
-      tags: rec.tagNames || []
-    });
+    logEvent("AZIONI_UPDATE", { id: rec.id, category: rec.category, type: rec.type, money: rec.money, note: rec.note, items: rec.items, tags: rec.tagNames || [] });
 
     closeEdit();
     renderCategory(rec.category);
     invRenderTotals();
   }
 
-  // =========================
-  // RENDER TABELLA PER CATEGORIA
-  // =========================
   function renderCategory(category) {
     const tid = tabIdFromName(category);
     renderDraft(category);
@@ -1787,7 +2239,7 @@
     const tableBody = document.getElementById("table_" + tid);
     if (!tableBody) return;
 
-    if (!records || records.length === 0) {
+    if (!records.length) {
       tableBody.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
       return;
     }
@@ -1813,8 +2265,8 @@
         : `<span class="muted">—</span>`;
 
       const actionsHtml = canEditOps()
-        ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
-           <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
+        ? `<button class="btn small" type="button" onclick="openEdit('${r.id}')">Modifica</button>
+           <button class="btn danger small" type="button" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
         : `<span class="muted">—</span>`;
 
       const tr = document.createElement("tr");
@@ -1832,25 +2284,6 @@
     });
   }
 
-  function renderManageSummaries() {
-    const managePanel = document.getElementById("managePanel");
-    if (!managePanel) return;
-    managePanel.style.display = canManageTotals() ? "block" : "none";
-  }
-
-  function resetAllOps() {
-    if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
-    const ok = confirm("Confermi AZZERA AZIONI?");
-    if (!ok) return;
-    localStorage.removeItem(OPS_KEY);
-    logEvent("AZIONI_RESET_ALL", {});
-    (window.CATEGORIES || []).forEach(c => renderCategory(c));
-    invRenderTotals();
-  }
-
-  // =========================
-  // TABS + PANELS (AZIONI)
-  // =========================
   function renderTabsAndPanels() {
     if (!opsTabs || !panelWrapper) return;
 
@@ -1908,11 +2341,11 @@
           </div>
 
           <div class="field" style="min-width:180px;">
-            <button class="btn ${disabledCls}" ${disabledAttr} onclick="addItemToDraft('${cat}')">Aggiungi item</button>
+            <button class="btn ${disabledCls}" ${disabledAttr} type="button" onclick="addItemToDraft('${cat}')">Aggiungi item</button>
           </div>
 
-          <div class="field" style="min-width:180px;">
-            <button class="btn ${disabledCls}" ${disabledAttr} onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
+          <div class="field" style="min-width:200px;">
+            <button class="btn ${disabledCls}" ${disabledAttr} type="button" onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
           </div>
         </div>
 
@@ -1954,20 +2387,18 @@
     const tid = tabIdFromName(catName);
 
     document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
-    const tb = document.getElementById("tab_" + tid);
-    if (tb) tb.classList.add("active");
+    document.getElementById("tab_" + tid)?.classList.add("active");
 
     document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
-    const pn = document.getElementById("panel_" + tid);
-    if (pn) pn.classList.add("active");
+    document.getElementById("panel_" + tid)?.classList.add("active");
 
     renderCategory(catName);
   }
 
-      // =========================
-  // GESTIONE ARMI/DROGA (con TAG + SOLDI) + TOTALI (include Azioni)
   // =========================
-  const INV_CATEGORIES = ["Armi", "Droga", "Oggetti/Varie"];
+  // GESTIONE ARMI/DROGA + TOTALI
+  // =========================
+  window.INV_CATEGORIES = ["Armi", "Droga", "Oggetti/Varie"];
   const INV_ITEMS = {
     "Armi": [
       "Pistola","Pistola Pesante","Revolver",
@@ -2007,7 +2438,7 @@
     tabs.innerHTML = "";
     panels.innerHTML = "";
 
-    INV_CATEGORIES.forEach((cat, idx) => {
+    window.INV_CATEGORIES.forEach((cat, idx) => {
       const tid = invTabId(cat);
 
       const b = document.createElement("button");
@@ -2024,7 +2455,8 @@
       const disabledCls = canEditOps() ? "" : "disabled";
 
       p.innerHTML = `
-        <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
+        <h3 style="margin:0 0
+          0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
         <div class="row">
           <div class="field" style="min-width:180px;">
@@ -2113,12 +2545,13 @@
       if (idx === 0) {
         b.classList.add("active");
         p.classList.add("active");
+        invSetActive(cat);
       }
     });
   }
 
   function invSetActive(cat) { window.__inv_active = cat; }
-  function invGetActive() { return window.__inv_active || INV_CATEGORIES[0]; }
+  function invGetActive() { return window.__inv_active || (window.INV_CATEGORIES ? window.INV_CATEGORIES[0] : "Armi"); }
 
   function invShowTab(cat) {
     invSetActive(cat);
@@ -2135,6 +2568,9 @@
     invRenderTable(cat);
     invRenderTotals();
     syncSelectedTagsUI();
+
+    // anche lista tag a destra (se esiste)
+    if (typeof renderTagListInv === "function") renderTagListInv();
   }
 
   function invSaveRecord(cat) {
@@ -2171,7 +2607,6 @@
       who,
       tagUserIds,
       tagNames,
-      // compat vecchio
       tagName: tagNames.length ? tagNames[0] : null
     };
 
@@ -2253,31 +2688,28 @@
     return n;
   }
 
-  // ✅ Totali: includono anche gli item delle Azioni (OPS)
+  // Totali: includono anche gli item delle Azioni (OPS)
   function invComputeTotals() {
     const totals = {};
     let addMoney = 0, remMoney = 0;
 
-    // 1) Gestione armi-droga (INV)
+    // 1) Gestione (INV)
     invLoad().forEach(r => {
       const key = normalizeTotalItemName(r.item);
       const q = Number(r.qty || 0);
       const m = Number(r.money || 0);
 
-      // ITEM: add/buy = + .. rem/sold = -
       if (key) {
         if (!totals[key]) totals[key] = 0;
-
         if (r.type === "add" || r.type === "buy") totals[key] += q;
         else if (r.type === "rem" || r.type === "sold") totals[key] -= q;
       }
 
-      // SOLDI: add/sold = entrata .. rem/buy = uscita
       if (r.type === "add" || r.type === "sold") addMoney += m;
       else if (r.type === "rem" || r.type === "buy") remMoney += m;
     });
 
-    // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
+    // 2) Azioni (OPS): solo items
     loadOps().forEach(op => {
       (op.items || []).forEach(it => {
         const key = normalizeTotalItemName(it.name);
@@ -2326,408 +2758,650 @@
     if (!ok) return;
     localStorage.removeItem(INV_KEY);
     logEvent("GESTIONE_RESET_ALL", {});
-    INV_CATEGORIES.forEach(c => invRenderTable(c));
+    (window.INV_CATEGORIES || []).forEach(c => invRenderTable(c));
     invRenderTotals();
   }
 
       // =========================
-  // CONTABILITÀ (Stipendi + Bilancio)
+  // DIARIO (CRUD + permessi: tutti leggono, solo Owner/Boss/Vice Boss modificano note già create)
   // =========================
-  const ACC_TABS = ["Stipendi", "Bilancio"];
+  let editingNoteId = null;
 
-  function accLoad() {
-    try {
-      const raw = localStorage.getItem(ACC_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch { return []; }
-  }
-  function accSave(arr) { localStorage.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+  function diaryLoad(){ return load(DIARY_KEY, []); }
+  function diarySave(arr){ save(DIARY_KEY, arr || []); }
 
-  function accTabId(name) {
-    return "acc_" + String(name || "").toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+  function canEditExistingDiaryNote(note) {
+    // tutti possono creare .. ma modificare note esistenti solo admin
+    return isAdmin();
   }
 
-  function accRenderTabs() {
-    const tabs = document.getElementById("accTabs");
-    const panels = document.getElementById("accPanels");
-    if (!tabs || !panels) return;
-
-    tabs.innerHTML = "";
-    panels.innerHTML = "";
-
-    ACC_TABS.forEach((tname, idx) => {
-      const tid = accTabId(tname);
-
-      const b = document.createElement("button");
-      b.id = "accTab_" + tid;
-      b.textContent = tname;
-      b.onclick = () => accShowTab(tname);
-      tabs.appendChild(b);
-
-      const p = document.createElement("div");
-      p.className = "panel accPanel";
-      p.id = "accPanel_" + tid;
-
-      const disabledAttr = canEditOps() ? "" : "disabled";
-      const disabledCls = canEditOps() ? "" : "disabled";
-
-      if (tname === "Stipendi") {
-        p.innerHTML = `
-          <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
-          <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
-
-          <div class="row">
-            <div class="field" style="min-width:320px; flex:1;">
-              <label>A chi</label>
-              <input id="salTo_${tid}" type="text" placeholder="Nome / reparto" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <label>Importo ($)</label>
-              <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:320px; flex:1;">
-              <label>Note</label>
-              <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddSalary()">Salva</button>
-            </div>
-          </div>
-
-          <h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi</h4>
-          <table>
-            <thead>
-              <tr>
-                <th style="width:200px;">Quando</th>
-                <th style="width:220px;">Chi</th>
-                <th>A chi</th>
-                <th style="width:160px;">Importo</th>
-                <th>Note</th>
-              </tr>
-            </thead>
-            <tbody id="accTable_${tid}">
-              <tr><td class="muted" colspan="5">Nessun dato</td></tr>
-            </tbody>
-          </table>
-        `;
-      } else {
-        p.innerHTML = `
-          <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Bilancio (Entrate/Uscite)</h3>
-          <div class="muted">Registra entrate o uscite ..</div>
-
-          <div class="row">
-            <div class="field" style="min-width:220px;">
-              <label>Tipo</label>
-              <select id="balType_${tid}" ${disabledAttr}>
-                <option value="in">ENTRATA</option>
-                <option value="out">USCITA</option>
-              </select>
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <label>Importo ($)</label>
-              <input id="balAmt_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:320px; flex:1;">
-              <label>Causale</label>
-              <input id="balReason_${tid}" type="text" placeholder="es. Vendita / Acquisto / Varie" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddBalance()">Salva</button>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field" style="flex:1; min-width:320px;">
-              <label>Note</label>
-              <input id="balNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
-            </div>
-          </div>
-
-          <h4 style="margin:16px 0 6px 0; font-weight:900;">Movimenti</h4>
-          <table>
-            <thead>
-              <tr>
-                <th style="width:200px;">Quando</th>
-                <th style="width:220px;">Chi</th>
-                <th style="width:120px;">Tipo</th>
-                <th style="width:160px;">Importo</th>
-                <th style="width:220px;">Causale</th>
-                <th>Note</th>
-              </tr>
-            </thead>
-            <tbody id="accTable_${tid}">
-              <tr><td class="muted" colspan="6">Nessun dato</td></tr>
-            </tbody>
-          </table>
-        `;
-      }
-
-      panels.appendChild(p);
-
-      if (idx === 0) {
-        b.classList.add("active");
-        p.classList.add("active");
-      }
-    });
-
-    setTimeout(() => {
-      accRenderTable("Stipendi");
-      accRenderTable("Bilancio");
-    }, 0);
-  }
-
-  function accShowTab(name) {
-    const tid = accTabId(name);
-
-    document.querySelectorAll("#accTabs button").forEach(x => x.classList.remove("active"));
-    const tb = document.getElementById("accTab_" + tid);
-    if (tb) tb.classList.add("active");
-
-    document.querySelectorAll(".accPanel").forEach(x => x.classList.remove("active"));
-    const pn = document.getElementById("accPanel_" + tid);
-    if (pn) pn.classList.add("active");
-
-    accRenderTable(name);
-    accRenderSummary();
-    accRenderAdminPanel();
-  }
-
-  function accRenderAdminPanel() {
-    const panel = document.getElementById("accAdminPanel");
-    if (!panel) return;
-    panel.style.display = canResetAccounting() ? "block" : "none";
-  }
-
-  function accAddSalary() {
-    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-
-    const tid = accTabId("Stipendi");
-    const to = (document.getElementById("salTo_" + tid)?.value || "").trim();
-    const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
-    const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
-
-    if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
-
-    const all = accLoad();
-    const rec = {
-      id: uid(),
-      ts: Date.now(),
-      kind: "salary",
-      who: myGameNameOrEmail(),
-      to,
-      amount: amt,
-      note
-    };
-    all.push(rec);
-    accSave(all);
-
-    logEvent("CONTABILITA_SALARY_CREATE", {
-      id: rec.id,
-      who: rec.who,
-      to: rec.to,
-      amount: rec.amount,
-      note: rec.note
-    });
-
-    document.getElementById("salTo_" + tid).value = "";
-    document.getElementById("salAmt_" + tid).value = "";
-    document.getElementById("salNote_" + tid).value = "";
-
-    accRenderTable("Stipendi");
-    accRenderSummary();
-  }
-
-  function accAddBalance() {
-    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-
-    const tid = accTabId("Bilancio");
-    const type = document.getElementById("balType_" + tid)?.value || "in";
-    const amt = Math.max(0, parseInt(document.getElementById("balAmt_" + tid)?.value || "0", 10) || 0);
-    const reason = (document.getElementById("balReason_" + tid)?.value || "").trim();
-    const note = (document.getElementById("balNote_" + tid)?.value || "").trim();
-
-    if (amt === 0 && !reason && !note) return alert("Inserisci almeno importo o causale/note.");
-
-    const all = accLoad();
-    const rec = {
-      id: uid(),
-      ts: Date.now(),
-      kind: "balance",
-      who: myGameNameOrEmail(),
-      type, // in/out
-      amount: amt,
-      reason,
-      note
-    };
-    all.push(rec);
-    accSave(all);
-
-    logEvent("CONTABILITA_BALANCE_CREATE", {
-      id: rec.id,
-      who: rec.who,
-      type: rec.type,
-      amount: rec.amount,
-      reason: rec.reason,
-      note: rec.note
-    });
-
-    document.getElementById("balAmt_" + tid).value = "";
-    document.getElementById("balReason_" + tid).value = "";
-    document.getElementById("balNote_" + tid).value = "";
-
-    accRenderTable("Bilancio");
-    accRenderSummary();
-  }
-
-  function accRenderTable(tabName) {
-    const tid = accTabId(tabName);
-    const body = document.getElementById("accTable_" + tid);
+  function diaryRender() {
+    const body = document.getElementById("diaryTableBody");
     if (!body) return;
 
-    const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
-    const rows = all
-      .filter(r => (tabName === "Stipendi" ? r.kind === "salary" : r.kind === "balance"))
-      .slice(0, 50);
-
+    const rows = diaryLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
     if (!rows.length) {
-      body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 5 : 6}">Nessun dato</td></tr>`;
+      body.innerHTML = `<tr><td class="muted" colspan="6">Nessuna nota</td></tr>`;
       return;
     }
 
     body.innerHTML = "";
-    rows.forEach(r => {
+    rows.forEach(n => {
+      const canEdit = canEditExistingDiaryNote(n);
+
       const tr = document.createElement("tr");
-      if (tabName === "Stipendi") {
-        tr.innerHTML = `
-          <td>${new Date(r.ts).toLocaleString()}</td>
-          <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-          <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
-          <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-        `;
-      } else {
-        const t = r.type === "in" ? "ENTRATA" : "USCITA";
-        tr.innerHTML = `
-          <td>${new Date(r.ts).toLocaleString()}</td>
-          <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-          <td style="font-weight:900; color:var(--red2)">${t}</td>
-          <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-          <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
-          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-        `;
-      }
+      tr.innerHTML = `
+        <td>${new Date(n.ts).toLocaleString()}</td>
+        <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Generale")}</td>
+        <td style="font-weight:900;">${escapeHtml(n.title || "—")}</td>
+        <td>${n.names ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(n.names)}</div>` : `<span class="muted">—</span>`}<br>
+            ${n.body ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(n.body)}</div>` : `<span class="muted">—</span>`}
+        </td>
+        <td style="font-weight:900;">${escapeHtml(n.author || "—")}</td>
+        <td>${canEdit ? `<button class="btn small" onclick="openNoteModal('${n.id}')">Modifica</button>` : `<span class="muted">—</span>`}</td>
+      `;
       body.appendChild(tr);
     });
   }
 
-  function accComputeSummary() {
-    const all = accLoad();
-    let income = 0, expense = 0;
-    let salaryTotal = 0, salary30 = 0;
+  function diarySearch() { diaryRender(); } // compat: nel tuo codice la chiami così
 
-    const now = Date.now();
-    const days30 = 30 * 24 * 60 * 60 * 1000;
+  function openNoteModal(id=null) {
+    editingNoteId = id;
 
-    all.forEach(r => {
-      if (r.kind === "balance") {
-        const amt = Number(r.amount || 0);
-        if (r.type === "in") income += amt;
-        else expense += amt;
-      }
-      if (r.kind === "salary") {
-        const amt = Number(r.amount || 0);
-        salaryTotal += amt;
-        if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
-      }
-    });
+    const ov = document.getElementById("noteOverlay");
+    const permHint = document.getElementById("notePermHint");
+    const btnDel = document.getElementById("btnDeleteNote");
+    const btnSave = document.getElementById("btnSaveNote");
 
-    return { income, expense, salaryTotal, salary30 };
+    const typeEl = document.getElementById("noteType");
+    const titleEl = document.getElementById("noteTitle");
+    const namesEl = document.getElementById("noteNames");
+    const bodyEl = document.getElementById("noteBody");
+
+    const me = getMyUser();
+    const author = me?.gameName || me?.email || "—";
+
+    if (!id) {
+      // nuova nota (tutti possono)
+      if (typeEl) typeEl.value = "Generale";
+      if (titleEl) titleEl.value = "";
+      if (namesEl) namesEl.value = "";
+      if (bodyEl) bodyEl.value = "";
+      if (permHint) permHint.textContent = "Crei una nuova nota .. Modifiche alle note esistenti solo admin.";
+      if (btnDel) btnDel.style.display = "none";
+      if (btnSave) btnSave.disabled = false;
+      if (ov) ov.style.display = "block";
+      return;
+    }
+
+    const note = diaryLoad().find(x => x.id === id);
+    if (!note) return;
+
+    if (!canEditExistingDiaryNote(note)) {
+      alert("Solo Owner/Boss/Vice Boss possono modificare note già create.");
+      return;
+    }
+
+    if (typeEl) typeEl.value = note.type || "Generale";
+    if (titleEl) titleEl.value = note.title || "";
+    if (namesEl) namesEl.value = note.names || "";
+    if (bodyEl) bodyEl.value = note.body || "";
+
+    if (permHint) permHint.textContent = `Stai modificando una nota .. Autore: ${note.author || author}`;
+    if (btnDel) btnDel.style.display = "inline-block";
+    if (btnSave) btnSave.disabled = false;
+
+    if (ov) ov.style.display = "block";
   }
 
-  function accRenderSummary() {
-    const b = document.getElementById("accBalanceSummary");
-    const s = document.getElementById("accSalarySummary");
-    if (!b || !s) return;
-
-    const { income, expense, salaryTotal, salary30 } = accComputeSummary();
-    const saldo = income - expense;
-
-    b.textContent = `Entrate: ${formatMoney(income)} .. Uscite: ${formatMoney(expense)} .. Saldo: ${formatMoney(saldo)}`;
-    s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
+  function closeNoteModal() {
+    const ov = document.getElementById("noteOverlay");
+    if (ov) ov.style.display = "none";
+    editingNoteId = null;
   }
 
-  function accResetAll() {
-    if (!canResetAccounting()) return alert("Permesso negato");
-    const ok = confirm("Confermi AZZERA CONTABILITÀ?");
+  function saveNote() {
+    const typeEl = document.getElementById("noteType");
+    const titleEl = document.getElementById("noteTitle");
+    const namesEl = document.getElementById("noteNames");
+    const bodyEl = document.getElementById("noteBody");
+
+    const type = typeEl?.value || "Generale";
+    const title = (titleEl?.value || "").trim();
+    const names = (namesEl?.value || "").trim();
+    const body = (bodyEl?.value || "").trim();
+
+    if (!title && !names && !body) return alert("Inserisci almeno titolo o testo.");
+
+    const me = getMyUser();
+    const author = me?.gameName || me?.email || "—";
+
+    const all = diaryLoad();
+
+    if (!editingNoteId) {
+      const rec = { id: uid(), ts: Date.now(), type, title, names, body, author };
+      all.push(rec);
+      diarySave(all);
+      logEvent("DIARIO_CREATE", { id: rec.id, type, title });
+    } else {
+      const rec = all.find(x => x.id === editingNoteId);
+      if (!rec) return;
+      if (!canEditExistingDiaryNote(rec)) return alert("Permesso negato.");
+
+      rec.type = type;
+      rec.title = title;
+      rec.names = names;
+      rec.body = body;
+      diarySave(all);
+      logEvent("DIARIO_UPDATE", { id: rec.id, type, title });
+    }
+
+    closeNoteModal();
+    diaryRender();
+  }
+
+  function deleteNote() {
+    if (!editingNoteId) return;
+    const all = diaryLoad();
+    const rec = all.find(x => x.id === editingNoteId);
+    if (!rec) return;
+
+    if (!canEditExistingDiaryNote(rec)) return alert("Permesso negato.");
+    const ok = confirm("Confermi eliminazione nota?");
     if (!ok) return;
 
-    localStorage.removeItem(ACC_KEY);
-    logEvent("CONTABILITA_RESET_ALL", {});
-
-    accRenderTable("Stipendi");
-    accRenderTable("Bilancio");
-    accRenderSummary();
+    diarySave(all.filter(x => x.id !== editingNoteId));
+    logEvent("DIARIO_DELETE", { id: editingNoteId });
+    closeNoteModal();
+    diaryRender();
   }
 
-      // =========================
-  // KEYBOARD: Enter / Escape
   // =========================
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const active = document.activeElement;
-
-      if (active && active.id === "diaryQuery") {
-        e.preventDefault();
-        diarySearch();
-      }
-
-      if (active && active.id === "logQuery") {
-        e.preventDefault();
-        logSearch();
-      }
-    }
-
-    if (e.key === "Escape") {
-      const noteOv = document.getElementById("noteOverlay");
-      const editOv = document.getElementById("editOverlay");
-      if (noteOv && noteOv.style.display === "block") closeNoteModal();
-      if (editOv && editOv.style.display === "block") closeEdit();
-    }
-  });
+  // LOG SEARCH (se hai input logQuery in futuro)
+  // =========================
+  function logSearch() { renderLogs(); }
 
   // =========================
-  // STARTUP
+  // AUTH / LOGIN (fix: il bottone 'Continua' ora funziona)
   // =========================
-  function boot() {
-    ensureDemoUsersIfEmpty();
-    setHeaderUser();
-    syncSelectedTagsUI();
+  const TRUST_KEY = "vn_trusted";
 
-    const s = loadSession();
-    if (!s?.email) {
-      showOnly("login");
-      showLoginStep("stepEmail");
-      return;
-    }
+  function normalizeEmail(e) {
+    return String(e || "").trim().toLowerCase();
+  }
 
+  function myGameNameOrEmail() {
     const u = getMyUser();
-    if (u?.blocked) {
-      alert("Account bloccato.");
-      logout();
+    const s = loadSession();
+    return u?.gameName || u?.email || s?.email || "—";
+  }
+
+  function loadTrusted(){ return load(TRUST_KEY, []); }
+  function saveTrusted(v){ save(TRUST_KEY, v); }
+
+  function clearTrustedForEmail(email) {
+    const e = normalizeEmail(email);
+    saveTrusted(loadTrusted().filter(x => normalizeEmail(x.email) !== e));
+  }
+
+  function isTrustedDevice(email) {
+    const e = normalizeEmail(email);
+    const now = Date.now();
+    return loadTrusted().some(x => normalizeEmail(x.email) === e && Number(x.exp||0) > now);
+  }
+
+  function setTrustedDevice(email, days=30) {
+    const e = normalizeEmail(email);
+    const now = Date.now();
+    const exp = now + (days * 24 * 60 * 60 * 1000);
+    const arr = loadTrusted().filter(x => normalizeEmail(x.email) !== e);
+    arr.push({ email: e, exp });
+    saveTrusted(arr);
+  }
+
+  function showLoginStep(stepId) {
+    ["stepEmail","stepPassword","stepRegister","step2FA"].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("active");
+      el.style.display = (id === stepId) ? "block" : "none";
+      if (id === stepId) el.classList.add("active");
+    });
+  }
+
+  function backToEmail() {
+    showLoginStep("stepEmail");
+    const e = document.getElementById("loginEmail");
+    if (e) e.focus();
+  }
+
+  function backToPasswordOrEmail() {
+    const email = normalizeEmail(document.getElementById("pwEmail")?.value || document.getElementById("twofaEmailInline")?.value || "");
+    if (!email) return backToEmail();
+
+    const u = loadUsers().find(x => normalizeEmail(x.email) === email);
+    if (!u) return backToEmail();
+    if (u.passwordHash) showLoginStep("stepPassword");
+    else showLoginStep("stepRegister");
+  }
+
+  function togglePassword(inputId, btn) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.type = (el.type === "password") ? "text" : "password";
+    if (btn) btn.textContent = (el.type === "password") ? "👁" : "🙈";
+  }
+
+  function ensureOwnerUser() {
+    const all = loadUsers();
+    const ownerEmail = normalizeEmail(OWNER_EMAIL);
+
+    let u = all.find(x => normalizeEmail(x.email) === ownerEmail);
+    if (!u) {
+      u = {
+        id: uid(),
+        email: ownerEmail,
+        gameName: "Owner",
+        role: "Owner",
+        blocked: false,
+        passwordHash: null,
+        totpSecret: null,
+        totpNeedsSetup: true
+      };
+      all.push(u);
+      saveUsers(all);
+    } else {
+      // forziamo ruolo
+      if (u.role !== "Owner") {
+        u.role = "Owner";
+        saveUsers(all);
+      }
+    }
+  }
+
+  async function sha256(text) {
+    const enc = new TextEncoder().encode(String(text));
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+  }
+
+  function generateTotpSecret(len=20) {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    let out = "";
+    const bytes = new Uint8Array(len);
+    crypto.getRandomValues(bytes);
+    for (let i=0;i<len;i++) out += alphabet[bytes[i] % alphabet.length];
+    return out;
+  }
+
+  function base32ToBytes(base32) {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    const clean = String(base32||"").replace(/=+$/,"").toUpperCase().replace(/[^A-Z2-7]/g,"");
+    let bits = "";
+    for (const c of clean) {
+      const v = alphabet.indexOf(c);
+      if (v < 0) continue;
+      bits += v.toString(2).padStart(5,"0");
+    }
+    const bytes = [];
+    for (let i=0;i+8<=bits.length;i+=8) bytes.push(parseInt(bits.slice(i,i+8),2));
+    return new Uint8Array(bytes);
+  }
+
+  async function hmacSha1(keyBytes, msgBytes) {
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "HMAC", hash: "SHA-1" },
+      false,
+      ["sign"]
+    );
+    const sig = await crypto.subtle.sign("HMAC", key, msgBytes);
+    return new Uint8Array(sig);
+  }
+
+  async function totpCode(secret, timeStep=30, digits=6, forTime=Date.now()) {
+    const key = base32ToBytes(secret);
+    const counter = Math.floor(forTime / 1000 / timeStep);
+
+    const msg = new Uint8Array(8);
+    let x = counter;
+    for (let i=7;i>=0;i--) { msg[i] = x & 0xff; x = Math.floor(x / 256); }
+
+    const hash = await hmacSha1(key, msg);
+    const offset = hash[hash.length - 1] & 0x0f;
+    const bin =
+      ((hash[offset] & 0x7f) << 24) |
+      ((hash[offset+1] & 0xff) << 16) |
+      ((hash[offset+2] & 0xff) << 8) |
+      (hash[offset+3] & 0xff);
+
+    const mod = 10 ** digits;
+    return String(bin % mod).padStart(digits, "0");
+  }
+
+  async function verifyTotp(secret, code) {
+    const c = String(code||"").trim();
+    if (!/^\d{6}$/.test(c)) return false;
+
+    const now = Date.now();
+    // finestra +-30s
+    const codes = [
+      await totpCode(secret, 30, 6, now - 30000),
+      await totpCode(secret, 30, 6, now),
+      await totpCode(secret, 30, 6, now + 30000)
+    ];
+    return codes.includes(c);
+  }
+
+  function totpOtpAuthUrl(email, secret) {
+    const issuer = "VELO%20NERO";
+    const label = encodeURIComponent("VELO NERO:" + email);
+    return `otpauth://totp/${label}?secret=${encodeURIComponent(secret)}&issuer=${issuer}&digits=6&period=30`;
+  }
+
+  function toggleQR() {
+    const wrap = document.getElementById("qrWrap");
+    const img = document.getElementById("twofaQR");
+    const btn = document.getElementById("btnToggleQR");
+    const secret = document.getElementById("twofaSecretInline")?.value || "";
+    const email = document.getElementById("twofaEmailInline")?.value || "";
+
+    if (!wrap || !img || !btn) return;
+
+    if (wrap.style.display === "none") {
+      const url = totpOtpAuthUrl(email, secret);
+      // QR via Google Chart (semplice)
+      img.src = "https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=" + encodeURIComponent(url);
+      wrap.style.display = "block";
+      btn.textContent = "Nascondi QR";
+    } else {
+      wrap.style.display = "none";
+      btn.textContent = "Mostra QR";
+    }
+  }
+
+  function canBlockUnblock(){ return ["Owner","Boss"].includes(myRole()); }
+  function canReset2FA(){ return ["Owner","Boss"].includes(myRole()); }
+  function canResetPassword(){ return ["Owner","Boss"].includes(myRole()); }
+  function canExpel(){ return ["Owner","Boss"].includes(myRole()); }
+  function canManageTotals(){ return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+  function canResetAccounting(){ return ["Owner","Boss"].includes(myRole()); }
+
+  function loginStepEmail() {
+    ensureOwnerUser();
+
+    const email = normalizeEmail(document.getElementById("loginEmail")?.value || "");
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      alert("Inserisci una email valida.");
       return;
     }
+
+    // set email in step successivi
+    const pwEmail = document.getElementById("pwEmail");
+    const regEmail = document.getElementById("regEmail");
+    const twofaEmail = document.getElementById("twofaEmailInline");
+    if (pwEmail) pwEmail.value = email;
+    if (regEmail) regEmail.value = email;
+    if (twofaEmail) twofaEmail.value = email;
+
+    const u = loadUsers().find(x => normalizeEmail(x.email) === email);
+
+    // se già trusted -> login diretto (salta 2FA) solo se account ha già password+2fa configurati
+    if (u && u.passwordHash && u.totpSecret && !u.totpNeedsSetup && isTrustedDevice(email)) {
+      saveSession({ email });
+      setHeaderUser();
+      logEvent("LOGIN_TRUSTED", { email });
+      initAfterLogin();
+      return;
+    }
+
+    if (!u) {
+      // non esiste -> registrazione
+      showLoginStep("stepRegister");
+      return;
+    }
+
+    if (u.blocked) {
+      alert("Account bloccato.");
+      return;
+    }
+
+    // esiste -> se non ha password => deve registrare (completa profilo)
+    if (!u.passwordHash) {
+      showLoginStep("stepRegister");
+      return;
+    }
+
+    // ha password -> step password
+    showLoginStep("stepPassword");
+    const pw = document.getElementById("loginPassword");
+    if (pw) pw.focus();
+  }
+
+  async function registerAccount() {
+    ensureOwnerUser();
+
+    const email = normalizeEmail(document.getElementById("regEmail")?.value || "");
+    const gameName = (document.getElementById("regGameName")?.value || "").trim();
+    const p1 = String(document.getElementById("regPassword")?.value || "");
+    const p2 = String(document.getElementById("regPassword2")?.value || "");
+
+    if (!email) return alert("Email mancante.");
+    if (!gameName) return alert("Inserisci il nome in game.");
+    if (p1.length < 6) return alert("Password troppo corta (min 6).");
+    if (p1 !== p2) return alert("Le password non coincidono.");
+
+    const all = loadUsers();
+    let u = all.find(x => normalizeEmail(x.email) === email);
+
+    if (!u) {
+      u = {
+        id: uid(),
+        email,
+        gameName,
+        role: "", // in attesa
+        blocked: false,
+        passwordHash: null,
+        totpSecret: null,
+        totpNeedsSetup: true
+      };
+      all.push(u);
+    } else {
+      if (u.blocked) return alert("Account bloccato.");
+      // aggiorna profilo
+      u.gameName = gameName;
+    }
+
+    u.passwordHash = await sha256(p1);
+    if (!u.totpSecret) u.totpSecret = generateTotpSecret();
+    u.totpNeedsSetup = true;
+
+    saveUsers(all);
+
+    logEvent("REGISTER", { email, gameName });
+
+    // vai a 2FA setup
+    prepare2FA(email);
+    showLoginStep("step2FA");
+  }
+
+  async function loginStepPassword() {
+    ensureOwnerUser();
+
+    const email = normalizeEmail(document.getElementById("pwEmail")?.value || "");
+    const pass = String(document.getElementById("loginPassword")?.value || "");
+
+    if (!email) return alert("Email mancante.");
+    const u = loadUsers().find(x => normalizeEmail(x.email) === email);
+    if (!u) return alert("Account non trovato.");
+    if (u.blocked) return alert("Account bloccato.");
+
+    // se password resettata
+    const resetBox = document.getElementById("pwResetBox");
+    if (!u.passwordHash) {
+      if (resetBox) resetBox.style.display = "flex";
+      alert("Password resettata .. imposta una nuova password.");
+      return;
+    } else {
+      if (resetBox) resetBox.style.display = "none";
+    }
+
+    const h = await sha256(pass);
+    if (h !== u.passwordHash) {
+      logEvent("LOGIN_PW_FAIL", { email });
+      return alert("Password errata.");
+    }
+
+    // ok -> 2FA
+    prepare2FA(email);
+    showLoginStep("step2FA");
+  }
+
+  async function saveNewPassword() {
+    const email = normalizeEmail(document.getElementById("pwEmail")?.value || "");
+    if (!email) return alert("Email mancante.");
+
+    const p1 = String(document.getElementById("newPassword")?.value || "");
+    const p2 = String(document.getElementById("newPassword2")?.value || "");
+    if (p1.length < 6) return alert("Password troppo corta (min 6).");
+    if (p1 !== p2) return alert("Le password non coincidono.");
+
+    const all = loadUsers();
+    const u = all.find(x => normalizeEmail(x.email) === email);
+    if (!u) return alert("Account non trovato.");
+    if (u.blocked) return alert("Account bloccato.");
+
+    u.passwordHash = await sha256(p1);
+    // forza 2FA re-check
+    if (!u.totpSecret) u.totpSecret = generateTotpSecret();
+    u.totpNeedsSetup = true;
+
+    saveUsers(all);
+    logEvent("PASSWORD_SET_AFTER_RESET", { email });
+
+    prepare2FA(email);
+    showLoginStep("step2FA");
+  }
+
+  function prepare2FA(email) {
+    const u = loadUsers().find(x => normalizeEmail(x.email) === normalizeEmail(email));
+    if (!u) return;
+
+    const secret = u.totpSecret || (u.totpSecret = generateTotpSecret());
+    u.totpNeedsSetup = !!u.totpNeedsSetup;
+    saveUsers(loadUsers()); // salva eventuale secret creato ora
+
+    const twofaEmail = document.getElementById("twofaEmailInline");
+    const secretEl = document.getElementById("twofaSecretInline");
+    const setupBox = document.getElementById("twofaSetupBox");
+    const hint = document.getElementById("twofaHintInline");
+    const confirmCb = document.getElementById("confirmAdded");
+    const qrWrap = document.getElementById("qrWrap");
+    const btn = document.getElementById("btnToggleQR");
+
+    if (twofaEmail) twofaEmail.value = email;
+    if (secretEl) secretEl.value = secret;
+
+    // se needs setup -> mostra box
+    if (setupBox) setupBox.style.display = u.totpNeedsSetup ? "flex" : "none";
+    if (hint) hint.textContent = u.totpNeedsSetup ? "Prima volta: configura 2FA e poi inserisci il codice." : "Inserisci il codice 2FA.";
+    if (confirmCb) confirmCb.checked = false;
+
+    // reset QR UI
+    if (qrWrap) qrWrap.style.display = "none";
+    if (btn) btn.textContent = "Mostra QR";
+  }
+
+  async function loginStep2FA() {
+    const email = normalizeEmail(document.getElementById("twofaEmailInline")?.value || "");
+    const code = String(document.getElementById("login2fa")?.value || "").trim();
+    const remember = !!document.getElementById("rememberDevice")?.checked;
+
+    if (!email) return alert("Email mancante.");
+    const all = loadUsers();
+    const u = all.find(x => normalizeEmail(x.email) === email);
+    if (!u) return alert("Account non trovato.");
+    if (u.blocked) return alert("Account bloccato.");
+
+    // se trusted (già gestito a stepEmail per chi ha già tutto), qui evitiamo shortcut per sicurezza
+
+    // se setup obbligatorio -> richiede checkbox conferma
+    if (u.totpNeedsSetup) {
+      const okAdded = !!document.getElementById("confirmAdded")?.checked;
+      if (!okAdded) return alert("Conferma di aver aggiunto l’account nell’app Authenticator.");
+    }
+
+    const secret = u.totpSecret;
+    if (!secret) return alert("2FA non configurato (secret mancante).");
+
+    const ok = await verifyTotp(secret, code);
+    if (!ok) {
+      logEvent("LOGIN_2FA_FAIL", { email });
+      return alert("Codice 2FA non valido.");
+    }
+
+    // ok -> sessione
+    u.totpNeedsSetup = false;
+    saveUsers(all);
+
+    if (remember) setTrustedDevice(email, 30);
+
+    saveSession({ email });
+    setHeaderUser();
+
+    logEvent("LOGIN_OK", { email, rememberDevice: remember });
 
     initAfterLogin();
   }
 
-  boot();
+  // =========================
+  // DEFAULTS (se mancano)
+  // =========================
+  // categorie azioni
+  if (!window.CATEGORIES) window.CATEGORIES = ["Rapina", "Inseguimento", "Scambio", "Altro"];
+  // items azioni
+  if (!window.FIXED_ITEMS) window.FIXED_ITEMS = [
+    "Pistola","Pistola Pesante","Revolver","Micro SMG","SMG",
+    "Carabina","AK-47","Fucile a pompa","Cecchino",
+    "Munizioni Pistola","Munizioni SMG","Munizioni Fucile","Munizioni Pompa","Munizioni Cecchino",
+    "Giubbotto antiproiettile",
+    "Erba","Cocaina","Metanfetamina","Crack","Oppio",
+    "Radio","Grimaldello","Bende","Medikit"
+  ];
+
+  // per compat: in alcuni punti usi window.INV_CATEGORIES
+  if (!window.INV_CATEGORIES) window.INV_CATEGORIES = INV_CATEGORIES;
+
+  // =========================
+  // PATCH: elementi mancanti nei tuoi riferimenti (opsTabs/panelWrapper)
+  // =========================
+  // se nel DOM hai actionTabs/actionPanels (come nel tuo HTML), agganciamoli qui
+  if (!window.opsTabs && document.getElementById("actionTabs")) window.opsTabs = document.getElementById("actionTabs");
+  if (!window.panelWrapper && document.getElementById("actionPanels")) window.panelWrapper = document.getElementById("actionPanels");
+
+  // rebind alle variabili locali se erano null
+  try {
+    if (!opsTabs && window.opsTabs) opsTabs = window.opsTabs;
+    if (!panelWrapper && window.panelWrapper) panelWrapper = window.panelWrapper;
+  } catch {}
+
+  // =========================
+  // AVVIO RENDER BASE (quando apri sezioni)
+  // =========================
+  // (non richiamiamo boot qui: nel tuo file boot() è già chiamata alla fine)
+  // ma prepariamo render UI se l’utente è già loggato
+  try {
+    if (loadSession()?.email) {
+      // prepara tabs
+      if (typeof renderTabsAndPanels === "function") renderTabsAndPanels();
+      if (typeof invRenderTabs === "function") invRenderTabs();
+      if (typeof accRenderTabs === "function") accRenderTabs();
+      if (typeof diaryRender === "function") diaryRender();
+    }
+  } catch {}
+
 </script>
 </body>
 </html>
