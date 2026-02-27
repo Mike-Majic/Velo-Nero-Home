@@ -470,7 +470,7 @@
 
             <div class="field qrwrap" id="qrWrap" style="display:none; min-width:220px;">
               <div class="hint">Scansiona il QR con l’app Authenticator</div>
-              <img id="twofaQR" alt="QR 2FA" />
+              <img id="twofaQR" alt="QR 2FA" referrerpolicy="no-referrer" />
             </div>
           </div>
 
@@ -3101,26 +3101,46 @@
     return `otpauth://totp/${label}?secret=${encodeURIComponent(secret)}&issuer=${issuer}&digits=6&period=30`;
   }
 
-  function toggleQR() {
-    const wrap = document.getElementById("qrWrap");
-    const img = document.getElementById("twofaQR");
-    const btn = document.getElementById("btnToggleQR");
-    const secret = document.getElementById("twofaSecretInline")?.value || "";
-    const email = document.getElementById("twofaEmailInline")?.value || "";
+function toggleQR(){
+  const wrap = document.getElementById("qrWrap");
+  const img  = document.getElementById("twofaQR");
+  const btn  = document.getElementById("btnToggleQR");
 
-    if (!wrap || !img || !btn) return;
+  const secret = (document.getElementById("twofaSecretInline")?.value || "").trim();
+  const email  = (document.getElementById("twofaEmailInline")?.value || "").trim();
 
-    if (wrap.style.display === "none") {
-      const url = totpOtpAuthUrl(email, secret);
-      // QR via Google Chart (semplice)
-      img.src = "https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=" + encodeURIComponent(url);
-      wrap.style.display = "block";
-      btn.textContent = "Nascondi QR";
-    } else {
-      wrap.style.display = "none";
-      btn.textContent = "Mostra QR";
-    }
+  if (!wrap || !img || !btn) return;
+
+  const willShow = wrap.style.display !== "block";
+
+  if (!willShow) {
+    wrap.style.display = "none";
+    btn.textContent = "Mostra QR";
+    return;
   }
+
+  if (!secret || !email) {
+    wrap.style.display = "none";
+    btn.textContent = "Mostra QR";
+    alert("Secret o email mancanti .. torna indietro e riprova.");
+    return;
+  }
+
+  const issuer = "VELO NERO";
+  const label  = encodeURIComponent(`${issuer}:${email.toLowerCase()}`);
+  const uri    = `otpauth://totp/${label}?secret=${encodeURIComponent(secret)}&issuer=${encodeURIComponent(issuer)}&digits=6&period=30`;
+
+  const url1 = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(uri);
+  const url2 = "https://quickchart.io/qr?size=220&text=" + encodeURIComponent(uri);
+
+  img.onerror = () => {
+    if (img.src !== url2) img.src = url2;
+  };
+
+  img.src = url1;
+  wrap.style.display = "block";
+  btn.textContent = "Nascondi QR";
+}
 
   function canBlockUnblock(){ return ["Owner","Boss"].includes(myRole()); }
   function canReset2FA(){ return ["Owner","Boss"].includes(myRole()); }
