@@ -2967,33 +2967,374 @@ showLoginStep("stepEmail");
     if (!panelWrapper && window.panelWrapper) panelWrapper = window.panelWrapper;
   } catch {}
 
-// =========================
-// BOOT (avvio unico)
-// =========================
-function boot() {
-  ensureDemoUsersIfEmpty();
-  setHeaderUser();
+    // =========================
+    // CONTABILITÀ (Stipendi + Bilancio)
+    // =========================
+    const ACC_TABS = ["Stipendi", "Bilancio"];
 
-  const s = loadSession();
-  if (!s?.email) {
-    showOnly("login");
-    showLoginStep("stepEmail");
-    return;
-  }
+    function accLoad() {
+      try {
+        const raw = localStorage.getItem(ACC_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch { return []; }
+    }
+    function accSave(arr) { localStorage.setItem(ACC_KEY, JSON.stringify(arr || [])); }
 
-  const u = getMyUser();
-  if (u?.blocked) {
-    alert("Account bloccato.");
-    logout();
-    return;
-  }
+    function accTabId(name) {
+      return "acc_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+    }
 
-  initAfterLogin();
-  showOnly("dashboard");
-}
+    function accRenderTabs() {
+      const tabs = document.getElementById("accTabs");
+      const panels = document.getElementById("accPanels");
+      if (!tabs || !panels) return;
 
-boot();
+      tabs.innerHTML = "";
+      panels.innerHTML = "";
 
-</script>
+      ACC_TABS.forEach((tname, idx) => {
+        const tid = accTabId(tname);
+
+        const b = document.createElement("button");
+        b.id = "accTab_" + tid;
+        b.textContent = tname;
+        b.onclick = () => accShowTab(tname);
+        tabs.appendChild(b);
+
+        const p = document.createElement("div");
+        p.className = "panel accPanel";
+        p.id = "accPanel_" + tid;
+
+        const disabledAttr = canEditOps() ? "" : "disabled";
+        const disabledCls = canEditOps() ? "" : "disabled";
+
+        if (tname === "Stipendi") {
+          p.innerHTML = `
+            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
+            <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
+
+            <div class="row">
+              <div class="field" style="min-width:320px; flex:1;">
+                <label>A chi</label>
+                <input id="salTo_${tid}" type="text" placeholder="Nome / reparto" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <label>Importo ($)</label>
+                <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:320px; flex:1;">
+                <label>Note</label>
+                <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddSalary()">Salva</button>
+              </div>
+            </div>
+
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:200px;">Quando</th>
+                  <th style="width:220px;">Chi</th>
+                  <th>A chi</th>
+                  <th style="width:160px;">Importo</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody id="accTable_${tid}">
+                <tr><td class="muted" colspan="5">Nessun dato</td></tr>
+              </tbody>
+            </table>
+          `;
+        } else {
+          p.innerHTML = `
+            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Bilancio (Entrate/Uscite)</h3>
+            <div class="muted">Registra entrate o uscite ..</div>
+
+            <div class="row">
+              <div class="field" style="min-width:220px;">
+                <label>Tipo</label>
+                <select id="balType_${tid}" ${disabledAttr}>
+                  <option value="in">ENTRATA</option>
+                  <option value="out">USCITA</option>
+                </select>
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <label>Importo ($)</label>
+                <input id="balAmt_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:320px; flex:1;">
+                <label>Causale</label>
+                <input id="balReason_${tid}" type="text" placeholder="es. Vendita / Acquisto / Varie" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddBalance()">Salva</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field" style="flex:1; min-width:320px;">
+                <label>Note</label>
+                <input id="balNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+              </div>
+            </div>
+
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Movimenti</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:200px;">Quando</th>
+                  <th style="width:220px;">Chi</th>
+                  <th style="width:120px;">Tipo</th>
+                  <th style="width:160px;">Importo</th>
+                  <th style="width:220px;">Causale</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody id="accTable_${tid}">
+                <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+              </tbody>
+            </table>
+          `;
+        }
+
+        panels.appendChild(p);
+
+        if (idx === 0) {
+          b.classList.add("active");
+          p.classList.add("active");
+        }
+      });
+
+      setTimeout(() => {
+        accRenderTable("Stipendi");
+        accRenderTable("Bilancio");
+      }, 0);
+    }
+
+    function accShowTab(name) {
+      const tid = accTabId(name);
+      document.querySelectorAll("#accTabs button").forEach(x => x.classList.remove("active"));
+      const tb = document.getElementById("accTab_" + tid);
+      if (tb) tb.classList.add("active");
+
+      document.querySelectorAll(".accPanel").forEach(x => x.classList.remove("active"));
+      const pn = document.getElementById("accPanel_" + tid);
+      if (pn) pn.classList.add("active");
+
+      accRenderTable(name);
+      accRenderSummary();
+      accRenderAdminPanel();
+    }
+
+    function accRenderAdminPanel() {
+      const panel = document.getElementById("accAdminPanel");
+      if (!panel) return;
+      panel.style.display = canResetAccounting() ? "block" : "none";
+    }
+
+    function accAddSalary() {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+      const tid = accTabId("Stipendi");
+      const to = (document.getElementById("salTo_" + tid)?.value || "").trim();
+      const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
+      const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
+
+      if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
+
+      const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "salary",
+        who: myGameNameOrEmail(),
+        to,
+        amount: amt,
+        note
+      });
+      accSave(all);
+
+      document.getElementById("salTo_" + tid).value = "";
+      document.getElementById("salAmt_" + tid).value = "";
+      document.getElementById("salNote_" + tid).value = "";
+
+      accRenderTable("Stipendi");
+      accRenderSummary();
+    }
+
+    function accAddBalance() {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+      const tid = accTabId("Bilancio");
+      const type = document.getElementById("balType_" + tid)?.value || "in";
+      const amt = Math.max(0, parseInt(document.getElementById("balAmt_" + tid)?.value || "0", 10) || 0);
+      const reason = (document.getElementById("balReason_" + tid)?.value || "").trim();
+      const note = (document.getElementById("balNote_" + tid)?.value || "").trim();
+
+      if (amt === 0 && !reason && !note) return alert("Inserisci almeno importo o causale/note.");
+
+      const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "balance",
+        who: myGameNameOrEmail(),
+        type, // in/out
+        amount: amt,
+        reason,
+        note
+      });
+      accSave(all);
+
+      document.getElementById("balAmt_" + tid).value = "";
+      document.getElementById("balReason_" + tid).value = "";
+      document.getElementById("balNote_" + tid).value = "";
+
+      accRenderTable("Bilancio");
+      accRenderSummary();
+    }
+
+    function accRenderTable(tabName) {
+      const tid = accTabId(tabName);
+      const body = document.getElementById("accTable_" + tid);
+      if (!body) return;
+
+      const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
+      const rows = all.filter(r => (tabName === "Stipendi" ? r.kind === "salary" : r.kind === "balance")).slice(0, 50);
+
+      if (!rows.length) {
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 5 : 6}">Nessun dato</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = "";
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        if (tabName === "Stipendi") {
+          tr.innerHTML = `
+            <td>${new Date(r.ts).toLocaleString()}</td>
+            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+            <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
+            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          `;
+        } else {
+          const t = r.type === "in" ? "ENTRATA" : "USCITA";
+          tr.innerHTML = `
+            <td>${new Date(r.ts).toLocaleString()}</td>
+            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+            <td style="font-weight:900; color:var(--red2)">${t}</td>
+            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+            <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
+            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          `;
+        }
+        body.appendChild(tr);
+      });
+    }
+
+    function accComputeSummary() {
+      const all = accLoad();
+      let income = 0, expense = 0;
+      let salaryTotal = 0, salary30 = 0;
+      const now = Date.now();
+      const days30 = 30 * 24 * 60 * 60 * 1000;
+
+      all.forEach(r => {
+        if (r.kind === "balance") {
+          const amt = Number(r.amount || 0);
+          if (r.type === "in") income += amt;
+          else expense += amt;
+        }
+        if (r.kind === "salary") {
+          const amt = Number(r.amount || 0);
+          salaryTotal += amt;
+          if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
+        }
+      });
+
+      return { income, expense, salaryTotal, salary30 };
+    }
+
+    function accRenderSummary() {
+      const b = document.getElementById("accBalanceSummary");
+      const s = document.getElementById("accSalarySummary");
+      if (!b || !s) return;
+
+      const { income, expense, salaryTotal, salary30 } = accComputeSummary();
+      const saldo = income - expense;
+
+      b.textContent = `Entrate: ${formatMoney(income)} .. Uscite: ${formatMoney(expense)} .. Saldo: ${formatMoney(saldo)}`;
+      s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
+    }
+
+    function accResetAll() {
+      if (!canResetAccounting()) return alert("Permesso negato");
+      const ok = confirm("Confermi AZZERA CONTABILITÀ?");
+      if (!ok) return;
+      localStorage.removeItem(ACC_KEY);
+      accRenderTable("Stipendi");
+      accRenderTable("Bilancio");
+      accRenderSummary();
+    }
+
+    // =========================
+    // KEYBOARD: Enter / Escape
+    // =========================
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const active = document.activeElement;
+        if (active && active.id === "diaryQuery") {
+          e.preventDefault();
+          diarySearch();
+        }
+        if (active && active.id === "logQuery") {
+          e.preventDefault();
+          logSearch();
+        }
+      }
+      if (e.key === "Escape") {
+        if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
+        if (document.getElementById("editOverlay").style.display === "block") closeEdit();
+      }
+    });
+
+    // =========================
+    // STARTUP
+    // =========================
+    function boot() {
+      ensureDemoUsersIfEmpty();
+      setHeaderUser();
+      syncSelectedTagsUI();
+
+      const s = loadSession();
+      if (!s?.email) {
+        showOnly("login");
+        showLoginStep("stepEmail");
+        return;
+      }
+
+      const u = getMyUser();
+      if (u?.blocked) {
+        alert("Account bloccato.");
+        logout();
+        return;
+      }
+
+      initAfterLogin();
+    }
+
+    boot();
+  </script>
 </body>
 </html>
+
