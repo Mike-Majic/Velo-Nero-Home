@@ -1603,6 +1603,9 @@ if (email === normEmail(OWNER_EMAIL) && u) {
     logEvent("LOGIN_OK", { email, remember });
 
     initAfterLogin();
+    
+showOnly("dashboard");
+showLoginStep("stepEmail");
   }
 
   // =========================
