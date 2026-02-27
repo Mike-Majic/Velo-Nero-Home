@@ -1,35 +1,32 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <title>VELO NERO</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#0d0d0d;
-      --panel:#1a1a1a;
-      --panel2:#121212;
-      --red:#ff1a1a;
-      --red2:#ff3b3b;
-      --muted:#ffaaaa;
-      --muted2:#ff7b7b;
-      --border: #ff1a1a55;
       --shadowIn: 0 0 12px #ff1a1a44 inset, 0 0 12px #ff000066;
       --shadowInStrong: 0 0 18px #ff1a1a88 inset, 0 0 18px #ff0000aa;
     }
+
     body {
+      background-color:var(--bg);
+      color:#fff;
       background-color:var(--bg); color:#fff;
       font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      text-align:center;
+      padding:60px 20px;
+      margin:0;
       text-align:center; padding:60px 20px; margin:0;
     }
 
     h1 {
+      font-size:60px;
+      letter-spacing:8px;
+      color:var(--red);
       font-size:60px; letter-spacing:8px; color:var(--red);
       text-shadow:0 0 16px #ff0000aa, 0 0 32px #ff000055;
       margin:0 0 6px 0;
       font-weight:900;
     }
+
     p.subtitle {
+      font-size:18px;
+      color:#ff6666;
+      margin:0 0 22px 0;
       font-size:18px; color:#ff6666; margin:0 0 22px 0;
       letter-spacing:.5px;
       font-weight:700;
@@ -37,27 +34,72 @@
     }
 
     .topbar {
+      max-width:1200px;
+      margin:0 auto 18px auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
       max-width:1200px; margin:0 auto 18px auto;
       display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
       text-align:left;
     }
+
+    .userpill {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
     .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
     .pill {
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--panel);
+      color:#fff;
+      font-size:13px;
       display:inline-block; padding:6px 10px; border-radius:999px;
       border:1px solid var(--border); background:var(--panel); color:#fff; font-size:13px;
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
       font-weight:800;
     }
+
     .linkbtn {
+      background:none;
+      border:1px solid var(--border);
+      color:#fff;
+      cursor:pointer;
+      padding:8px 12px;
+      border-radius:10px;
       background:none; border:1px solid var(--border); color:#fff; cursor:pointer;
       padding:8px 12px; border-radius:10px;
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
       font-weight:800;
     }
+
     .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
+
+    .nav {
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:22px;
+    }
 
     .nav { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:22px; }
     .nav button {
+      background-color:var(--panel);
+      color:#fff;
+      border:1px solid var(--border);
+      padding:10px 16px;
+      border-radius:10px;
+      cursor:pointer;
       background-color:var(--panel); color:#fff; border:1px solid var(--border);
       padding:10px 16px; border-radius:10px; cursor:pointer;
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
@@ -66,19 +108,44 @@
       font-weight:900;
       letter-spacing:.3px;
     }
+
+    .nav button:hover {
+      transform:scale(1.03);
+      box-shadow:0 0 16px #ff1a1a77 inset, 0 0 16px #ff000088;
+    }
     .nav button:hover { transform:scale(1.03); box-shadow:0 0 16px #ff1a1a77 inset, 0 0 16px #ff000088; }
     .nav button.active { background-color:#2b0000; border-color:#ff1a1aaa; box-shadow:var(--shadowInStrong); }
 
     .section { display:none; max-width:1200px; margin:0 auto; text-align:left; }
     .section.active { display:block; }
+    .cards { text-align:center; }
 
     .cards { text-align:center; }
     .box {
+      display:inline-block;
+      background-color:var(--panel);
+      padding:40px 60px;
+      margin:12px;
+      border-radius:12px;
+      box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
+      transition:transform .3s ease, box-shadow .3s ease;
+      cursor:pointer;
+      color:#fff;
+      min-width:260px;
       display:inline-block; background-color:var(--panel); padding:40px 60px; margin:12px;
       border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
       transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
     }
     .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
+
+    .box h2 {
+      font-size:28px;
+      margin:0 0 10px 0;
+      color:var(--red);
+      text-align:center;
+      font-weight:900;
+      text-shadow:0 0 10px #ff000066;
+    }
     .box h2 { font-size:28px; margin:0 0 10px 0; color:var(--red); text-align:center; font-weight:900; text-shadow:0 0 10px #ff000066; }
     .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; font-weight:800; }
 
@@ -87,27 +154,45 @@
 
     .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .tabs button {
+      background-color:var(--panel);
+      color:#fff;
+      border:1px solid var(--border);
+      padding:8px 12px;
+      border-radius:10px;
+      cursor:pointer;
       background-color:var(--panel); color:#fff; border:1px solid var(--border);
       padding:8px 12px; border-radius:10px; cursor:pointer;
       box-shadow:0 0 8px #ff1a1a33 inset, 0 0 10px #ff000055;
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
       font-size:13px;
-      font-weight:900;
-    }
-    .tabs button:hover { transform:scale(1.02); box-shadow:0 0 12px #ff1a1a55 inset, 0 0 12px #ff000077; }
+@@ -165,39 +98,25 @@
     .tabs button.active { background-color:#2b0000; border-color:#ff1a1aaa; }
 
     .panel {
+      display:none;
+      margin-top:14px;
+      padding:18px 18px;
       display:none; margin-top:14px; padding:18px 18px;
       background:linear-gradient(145deg,var(--panel),#2b0000);
+      border-radius:12px;
+      box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
       border-radius:12px; box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
     }
     .panel.active { display:block; }
 
     .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
+
     .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
+
     label { color:var(--muted2); font-size:13px; font-weight:800; letter-spacing:.2px; }
+
     input, select, textarea {
+      background:var(--panel2);
+      border:1px solid var(--border);
+      color:#fff;
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
       background:var(--panel2); border:1px solid var(--border); color:#fff; border-radius:10px;
       padding:10px 12px; outline:none;
       font-weight:800;
@@ -115,25 +200,56 @@
     textarea { min-height:90px; resize:vertical; }
 
     .btn {
+      background:var(--panel);
+      border:1px solid #ff1a1a99;
+      color:#fff;
+      border-radius:10px;
+      padding:10px 14px;
+      cursor:pointer;
       background:var(--panel); border:1px solid #ff1a1a99; color:#fff; border-radius:10px;
       padding:10px 14px; cursor:pointer;
       box-shadow:var(--shadowIn);
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
       font-weight:900;
-      letter-spacing:.2px;
-    }
-    .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
-    .danger { background:#2b0000; border-color:#ff1a1aaa; }
-    .small { padding:7px 10px; font-size:13px; border-radius:9px; }
+@@ -209,124 +128,148 @@
     .disabled { opacity:.5; cursor:not-allowed; }
 
     table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td {
+      padding:10px 12px;
+      border:1px solid #ff1a1a33;
+      text-align:left;
+      background-color:#1e1e1e;
+      vertical-align:top;
+    }
     th, td { padding:10px 12px; border:1px solid #ff1a1a33; text-align:left; background-color:#1e1e1e; vertical-align:top; }
     th { color:var(--red2); font-weight:900; letter-spacing:.3px; }
     tr:hover td { background-color:#3a0000; }
 
     tr.selectedRow td { background-color:#5a0000 !important; }
 
+    /* piccoli pezzi UI mancanti */
+    .pwbox{ display:flex; gap:8px; align-items:center; }
+    .pwbox input{ flex:1; }
+    .eye{ border:1px solid var(--border); background:var(--panel); color:#fff; border-radius:10px; padding:10px 12px; cursor:pointer; font-weight:900; }
+    .eye:hover{ background:#2b0000; }
+
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+.qrwrap img{
+  max-width:220px;
+  display:block;
+  border-radius:12px;
+  border:1px solid var(--border);
+  box-shadow:0 0 12px #ff1a1a44;
+}
+    
+    .tagPill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--panel2);
+      font-size:12px;
     .btn-edit { background:none; border:none; cursor:pointer; color:var(--red2); font-size:18px; transition:transform .2s ease, text-shadow .2s ease; }
     .btn-edit:hover { transform:scale(1.2); text-shadow:0 0 6px #ff000080; }
     .action-menu {
@@ -144,7 +260,16 @@
       display:block; background:none; border:1px solid #ff3b3b44; color:#fff; padding:7px 10px;
       margin:6px 0; border-radius:6px; cursor:pointer; width:100%; text-align:left;
       font-weight:900;
+      margin:3px 6px 0 0;
+      box-shadow:0 0 10px #ff1a1a22 inset;
     }
+    .tagRole{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid #ff1a1a66;
+      background:#2b0000;
+      font-size:11px;
     .action-menu button:hover { background-color:#3a0000; }
 
     #editOverlay, #noteOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
@@ -174,9 +299,23 @@
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
       user-select:none;
       font-weight:900;
+      margin-left:8px;
+      color:#ffd1d1;
     }
     .eye:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
+    .action-menu{
+      display:none;
+      position:absolute;
+      right:0;
+      top:34px;
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:8px;
+      min-width:200px;
+      box-shadow:0 0 14px #ff1a1a44;
+      z-index:50;
     /* DIARIO */
     .diaryBar{
       display:flex; gap:12px; flex-wrap:wrap; align-items:center;
@@ -185,18 +324,48 @@
       box-shadow:0 0 12px #ff1a1a33 inset, 0 0 14px #ff000044;
       background:linear-gradient(145deg,#111,#220000);
     }
+    .action-menu button{
+      width:100%;
+      margin:6px 0 0 0;
+      background:var(--panel);
+      border:1px solid var(--border);
+      color:#fff;
     .diarySearch{
       flex:1; min-width:320px; display:flex; gap:10px; align-items:center;
       background:#101010; border:1px solid #ff1a1a33; border-radius:12px;
       padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:900;
+      text-align:left;
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000022;
     }
+    .action-menu button:hover{ background:#2b0000; }
+    .btn-edit{
+      background:var(--panel);
+      border:1px solid var(--border);
+      color:#fff;
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
     .diarySearch .icon{ opacity:.9; color:#ffb3b3; }
     .diarySearch input{
       border:none; outline:none; background:transparent; padding:0;
       width:100%;
       font-weight:900;
+      box-shadow:0 0 10px #ff1a1a22 inset;
     }
+    .btn-edit:hover{ background:#2b0000; }
+
+    /* Modal generici */
+    #noteOverlay, #editOverlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.75);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:200;
     .diaryTableWrap{
       margin-top:14px;
       border-radius:12px;
@@ -204,6 +373,8 @@
       border:1px solid #ff1a1a33;
       box-shadow:0 0 12px #ff1a1a22 inset, 0 0 14px #ff000033;
     }
+    #noteModal, #editModal{
+      width:min(920px, 100%);
     .clickRow{ cursor:pointer; }
 
     /* LAYOUT 2 COLONNE (Tag a destra) */
@@ -212,11 +383,24 @@
     .colSide { width:360px; min-width:280px; position:sticky; top:16px; }
     .sidePanel{
       background:linear-gradient(145deg,var(--panel),#2b0000);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 0 20px #ff1a1a55, 0 0 26px #ff000055 inset;
+      padding:18px;
+      text-align:left;
       border:1px solid #ff1a1a55;
       border-radius:12px;
       box-shadow:0 0 12px #ff1a1a33 inset, 0 0 14px #ff000044;
       padding:14px;
     }
+    pre{ white-space:pre-wrap; word-break:break-word; }
+
+    /* layout rapido taglist quando manca HTML specifico */
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:14px;
+      align-items:start;
     .sideTitle{
       margin:0 0 8px 0;
       color:var(--red2);
@@ -248,6 +432,8 @@
       border:none; outline:none; background:transparent; padding:0; width:100%;
       font-weight:900;
     }
+    @media (max-width: 980px){
+      .twoCol{ grid-template-columns:1fr; }
     .tagRole{
       display:inline-block;
       padding:2px 6px;
@@ -273,16 +459,7 @@
   </style>
 </head>
 
-<body>
-  <div class="topbar">
-    <div></div>
-    <div class="userpill">
-      <span class="pill" id="pillEmail">Non autenticato</span>
-      <span class="pill" id="pillRole">Ruolo: —</span>
-      <button class="linkbtn" id="btnLogout" onclick="logout()" style="display:none;">Esci</button>
-    </div>
-  </div>
-
+@@ -343,6 +286,7 @@
   <h1>VELO NERO</h1>
   <p class="subtitle" id="pageSubtitle">Sistema Privato Interno</p>
 
@@ -290,95 +467,82 @@
   <div class="nav">
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
-    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
-    <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
-    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
-    <button id="btnContabilita" onclick="showSection('contabilita')">Contabilità</button>
-    <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="login" class="section">
-    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Accesso</h2>
-    <div class="hint">Accesso in 3 passaggi: Email → Password → Codice 2FA.</div>
-
-    <div class="panel active" id="stepEmail" style="display:block;">
+@@ -362,13 +306,12 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
           <label>Email</label>
+          <input id="loginEmail" type="email" placeholder="nome@gmail.com" autocomplete="email" />
           <input id="loginEmail" type="email" placeholder="nome@gmail.com" />
         </div>
         <div class="field" style="min-width:220px;">
+          <button class="btn" type="button" onclick="loginStepEmail()">Continua</button>
           <button class="btn" onclick="loginStepEmail()">Continua</button>
         </div>
       </div>
+      <div class="hint" id="emailStepHint"></div>
     </div>
 
     <div class="panel" id="stepPassword">
-      <div class="row">
-        <div class="field" style="min-width:320px; flex:1;">
-          <label>Email</label>
-          <input id="pwEmail" type="email" disabled />
-        </div>
-      </div>
-
-      <div class="row">
+@@ -383,13 +326,13 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
+            <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
             <input id="loginPassword" type="password" placeholder="Password" />
             <button class="eye" type="button" onclick="togglePassword('loginPassword', this)">👁</button>
           </div>
         </div>
         <div class="field" style="min-width:220px;">
+          <button class="btn" type="button" onclick="loginStepPassword()">Accedi</button>
+          <button class="btn danger" type="button" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
           <button class="btn" onclick="loginStepPassword()">Accedi</button>
           <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
 
-      <div class="row" id="pwResetBox" style="display:none;">
-        <div class="field" style="min-width:320px; flex:1;">
-          <div class="hint">⚠️ Password resettata da un admin: devi impostarne una nuova.</div>
+@@ -399,22 +342,20 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
 
           <label>Nuova password</label>
           <div class="pwbox">
+            <input id="newPassword" type="password" placeholder="Nuova password" autocomplete="new-password" />
             <input id="newPassword" type="password" placeholder="Nuova password" />
             <button class="eye" type="button" onclick="togglePassword('newPassword', this)">👁</button>
           </div>
 
           <label>Conferma nuova password</label>
           <div class="pwbox">
+            <input id="newPassword2" type="password" placeholder="Conferma" autocomplete="new-password" />
             <input id="newPassword2" type="password" placeholder="Conferma" />
             <button class="eye" type="button" onclick="togglePassword('newPassword2', this)">👁</button>
           </div>
         </div>
         <div class="field" style="min-width:220px;">
+          <button class="btn" type="button" onclick="saveNewPassword()">Salva password</button>
           <button class="btn" onclick="saveNewPassword()">Salva password</button>
         </div>
       </div>
+
+      <div class="hint" id="pwStepHint"></div>
     </div>
 
     <div class="panel" id="stepRegister">
-      <div class="row">
-        <div class="field" style="min-width:320px; flex:1;">
-          <label>Email</label>
-          <input id="regEmail" type="email" disabled />
-        </div>
-      </div>
-
+@@ -428,30 +369,28 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
       <div class="row">
         <div class="field" style="min-width:320px; flex:1;">
           <label>Nome utente in game</label>
+          <input id="regGameName" type="text" placeholder="Il tuo nick in game" autocomplete="nickname" />
           <input id="regGameName" type="text" placeholder="Il tuo nick in game" />
         </div>
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
+            <input id="regPassword" type="password" placeholder="Password" autocomplete="new-password" />
             <input id="regPassword" type="password" placeholder="Password" />
             <button class="eye" type="button" onclick="togglePassword('regPassword', this)">👁</button>
           </div>
           <label>Conferma password</label>
           <div class="pwbox">
+            <input id="regPassword2" type="password" placeholder="Conferma password" autocomplete="new-password" />
             <input id="regPassword2" type="password" placeholder="Conferma password" />
             <button class="eye" type="button" onclick="togglePassword('regPassword2', this)">👁</button>
           </div>
@@ -387,34 +551,28 @@
 
       <div class="row">
         <div class="field" style="min-width:220px;">
+          <button class="btn" type="button" onclick="registerAccount()">Crea account</button>
+          <button class="btn danger" type="button" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
           <button class="btn" onclick="registerAccount()">Crea account</button>
           <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
         </div>
       </div>
+
+      <div class="hint" id="regStepHint"></div>
     </div>
 
     <div class="panel" id="step2FA">
-      <div class="row">
-        <div class="field" style="min-width:320px; flex:1;">
-          <label>Email</label>
-          <input id="twofaEmailInline" disabled />
-        </div>
-      </div>
-
-      <div class="row" id="twofaSetupBox" style="display:none;">
-        <div class="field" style="min-width:320px; flex:1;">
-          <div class="hint">Configura 2FA (obbligatorio) su Google Authenticator (o simili).</div>
-
-          <label>Chiave segreta 2FA</label>
-          <input id="twofaSecretInline" class="mono" disabled />
+@@ -471,19 +410,23 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
 
           <div class="row" style="margin-top:10px; align-items:flex-start;">
             <div class="field" style="min-width:220px;">
+              <button class="btn small" id="btnToggleQR" type="button" onclick="toggleQR()">Mostra QR</button>
               <button class="btn small" id="btnToggleQR" onclick="toggleQR()">Mostra QR</button>
             </div>
 
             <div class="field qrwrap" id="qrWrap" style="display:none; min-width:220px;">
               <div class="hint">Scansiona il QR con l’app Authenticator</div>
+              <img id="twofaQR" alt="QR 2FA" referrerpolicy="no-referrer" />
               <img id="twofaQR" alt="QR 2FA" />
             </div>
           </div>
@@ -430,18 +588,12 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="field" style="min-width:240px;">
-          <label>Codice 2FA (6 cifre)</label>
-          <input id="login2fa" type="text" inputmode="numeric" maxlength="6" placeholder="123456" />
-          <div class="hint" id="twofaHintInline"></div>
-        </div>
-
-        <div class="field" style="min-width:320px;">
-          <label style="display:flex; align-items:center; gap:8px;">
+@@ -499,14 +442,14 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
             <input id="rememberDevice" type="checkbox" />
             Ricorda questo dispositivo per 30 giorni
           </label>
+          <button class="btn" type="button" onclick="loginStep2FA()">Verifica e entra</button>
+          <button class="btn danger" type="button" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
           <button class="btn" onclick="loginStep2FA()">Verifica e entra</button>
           <button class="btn danger" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
         </div>
@@ -449,63 +601,16 @@
     </div>
   </div>
 
+  <!-- DASHBOARD -->
   <!-- DASHBOARD (layout aggiornato) -->
   <div id="dashboard" class="section">
     <div class="cards">
       <div class="box" onclick="showSection('azioni')">
-        <h2>Azioni</h2>
-        <p>Azioni</p>
-      </div>
-
-      <div class="box" onclick="showSection('comandi')">
-        <h2>Gestione Armi-Droga</h2>
-        <p>Funzioni</p>
-      </div>
-
-      <div class="box" onclick="showSection('contabilita')">
-        <h2>Contabilità</h2>
-        <p>Stipendi</p>
-      </div>
-
-      <div class="box" onclick="showSection('diario')">
-        <h2>Diario</h2>
-        <p>Note</p>
-      </div>
-
-      <div class="box" id="cardUtenti" onclick="showSection('utenti')">
-        <h2>Utenti</h2>
-        <p>Gestione</p>
-      </div>
-    </div>
-
-    <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
-  </div>
-
-  <!-- UTENTI -->
-  <div id="utenti" class="section">
-    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Utenti</h2>
-    <div class="hint">Qui assegni i ruoli. Solo Owner / Boss / Vice Boss .. ordinati per grado (alti sopra).</div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Nome in Game</th>
-          <th>Ruolo</th>
-          <th>Email</th>
-          <th>Stato</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody id="usersTableBody"></tbody>
-    </table>
-  </div>
-
-  <!-- AZIONI -->
-  <div id="azioni" class="section">
-    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Azioni</h2>
+@@ -563,39 +506,231 @@ <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80;
     <div class="hint" id="actionsHint"></div>
 
     <div class="twoCol">
+      <div>
       <div class="colMain">
         <div class="tabs" id="opsTabs"></div>
         <div id="panelWrapper"></div>
@@ -669,6 +774,12 @@
         <div id="invPanels"></div>
       </div>
 
+      <div class="panel active" style="display:block;">
+        <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Tag utenti</h3>
+        <div class="row" style="margin-top:8px;">
+          <div class="field" style="min-width:220px; flex:1;">
+            <label>Cerca</label>
+            <input id="tagSearch" type="text" placeholder="Cerca nome/ruolo.." oninput="renderTagList()" />
       <div class="colSideInv">
         <!-- TAG anche qui -->
         <div class="sidePanel">
@@ -685,6 +796,8 @@
             <span style="opacity:.9; color:#ffb3b3;">🔎</span>
             <input id="tagSearchInv" type="text" placeholder="Cerca tag.." oninput="renderTagListInv()" />
           </div>
+          <div class="field" style="min-width:140px;">
+            <button class="btn small" type="button" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
 
           <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
             <table style="margin-top:0;">
@@ -698,6 +811,7 @@
           <div class="hint">Il tag selezionato viene salvato nelle registrazioni di Gestione.</div>
         </div>
 
+        <div class="hint" style="margin-top:10px;">Doppio click sul nome = seleziona/deseleziona ..</div>
         <!-- Totali -->
         <div class="sidePanel" style="margin-top:14px;">
           <h3 class="sideTitle">Resoconto Totali</h3>
@@ -714,11 +828,16 @@
             </table>
           </div>
 
+        <table style="margin-top:10px;">
+          <tbody id="tagTableBody"></tbody>
+        </table>
           <div class="panel active" style="display:block; margin-top:12px;">
             <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Soldi</h4>
             <div class="muted" id="invMoneySummary">Aggiunti: $0 .. Rimossi: $0 .. Saldo: $0</div>
           </div>
 
+        <div class="hint" style="margin-top:10px;">Selezionati:</div>
+        <div id="tagSelectedWrap" style="margin-top:6px;"></div>
           <div class="row" style="margin-top:10px;">
             <button class="btn danger small" onclick="invResetAll()">AZZERA GESTIONE</button>
           </div>
@@ -727,27 +846,21 @@
     </div>
   </div>
 
+  <!-- MODAL EDIT AZIONI -->
   <!-- EDIT MODAL (AZIONI) -->
   <div id="editOverlay">
     <div id="editModal">
+      <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Modifica registrazione</h3>
       <h3>Modifica registrazione</h3>
       <div class="muted" id="editInfo"></div>
 
       <div class="row">
-        <div class="field" style="min-width:180px;">
-          <label>Tipo</label>
-          <select id="editType">
-            <option value="ottenuto">OTTENUTO</option>
-            <option value="perso">PERSO</option>
-          </select>
-        </div>
-
-        <div class="field" style="min-width:220px;">
-          <label>Soldi ($)</label>
-          <input id="editMoney" type="number" min="0" step="1" />
+@@ -613,2359 +748,2169 @@ <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Modifica regis
         </div>
 
         <div class="field" style="flex:1; min-width:260px;">
+          <label>Note</label>
+          <input id="editNote" type="text" />
           <label>Note (visibili a tutti)</label>
           <input id="editNote" type="text" placeholder="Motivo / dettaglio..." />
         </div>
@@ -758,6 +871,10 @@
         </div>
       </div>
 
+      <div class="row">
+        <div class="field" style="flex:1; min-width:320px;">
+          <label>Tag (dalla selezione attuale)</label>
+          <input id="editTagName" disabled value="—" />
       <div class="row" style="margin-top:10px;">
         <div class="field" style="min-width:320px;">
           <label>Tag (Nome in game)</label>
@@ -766,10 +883,13 @@
         </div>
       </div>
 
+      <div class="panel active" style="display:block;">
+        <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
       <div style="margin-top:14px;">
         <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items (lista fissa + quantità)</h4>
 
         <div class="row">
+          <div class="field" style="min-width:320px; flex:1;">
           <div class="field" style="min-width:320px;">
             <label>Item</label>
             <select id="editItemSelect"></select>
@@ -778,20 +898,56 @@
             <label>Quantità</label>
             <input id="editItemQty" type="number" min="1" step="1" value="1" />
           </div>
+          <div class="field" style="min-width:220px;">
+            <button class="btn" type="button" onclick="editAddItem()">Aggiungi</button>
           <div class="field" style="min-width:180px;">
             <button class="btn" onclick="editAddItem()">Aggiungi item</button>
           </div>
         </div>
 
+        <div id="editItemsList" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="row" style="justify-content:flex-end;">
+        <button class="btn danger small" type="button" onclick="closeEdit()">Chiudi</button>
+        <button class="btn small" type="button" onclick="saveEdit()">Salva</button>
         <div id="editItemsList"></div>
         <div class="hint">Se aggiungi lo stesso item, somma le quantità.</div>
       </div>
     </div>
   </div>
 
+  <!-- DIARIO -->
+  <div id="diario" class="section">
+    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Diario</h2>
+    <div class="hint">Note e accordi interni. Tutti possono leggere.</div>
+
+    <div class="row">
+      <button class="btn" id="btnNewNote" type="button" onclick="openNoteModal()">➕ Nuova nota</button>
+    </div>
+
+    <div class="panel active" style="display:block;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:180px;">Data</th>
+            <th style="width:160px;">Tipo</th>
+            <th style="width:220px;">Titolo</th>
+            <th>Nomi / Accordi</th>
+            <th style="width:140px;">Autore</th>
+            <th style="width:120px;">Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="diaryTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODALE DIARIO -->
   <!-- NOTE MODAL (DIARIO) -->
   <div id="noteOverlay">
     <div id="noteModal">
+      <h3 style="margin:0 0 10px 0; color:var(--red2); font-weight:900;">Nota Diario</h3>
       <h3 id="noteModalTitle">Nuova nota</h3>
       <div class="muted" id="noteInfo"></div>
 
@@ -799,8 +955,10 @@
         <div class="field" style="min-width:200px;">
           <label>Tipo</label>
           <select id="noteType">
+            <option value="Generale">Generale</option>
             <option value="Nota">Nota</option>
             <option value="Accordo">Accordo</option>
+            <option value="Avviso">Avviso</option>
             <option value="Info">Info</option>
             <option value="Altro">Altro</option>
           </select>
@@ -808,11 +966,15 @@
 
         <div class="field" style="flex:1; min-width:260px;">
           <label>Titolo</label>
+          <input id="noteTitle" type="text" />
           <input id="noteTitle" type="text" placeholder="Titolo nota.." />
         </div>
       </div>
 
       <div class="row">
+        <div class="field" style="flex:1;">
+          <label>Nomi / Coinvolti</label>
+          <input id="noteNames" type="text" placeholder="Separati da virgola" />
         <div class="field" style="flex:1; min-width:260px;">
           <label>Nomi</label>
           <input id="noteNames" type="text" placeholder="Nomi coinvolti.." />
@@ -820,12 +982,16 @@
       </div>
 
       <div class="row">
+        <div class="field" style="flex:1;">
+          <label>Accordi / Dettagli</label>
+          <textarea id="noteBody"></textarea>
         <div class="field" style="flex:1; min-width:260px;">
           <label>Accordi</label>
           <textarea id="noteAgreements" placeholder="Accordi / punti chiave.."></textarea>
         </div>
       </div>
 
+      <div class="hint" id="notePermHint"></div>
       <div class="row">
         <div class="field" style="flex:1; min-width:260px;">
           <label>Note</label>
@@ -833,6 +999,10 @@
         </div>
       </div>
 
+      <div class="row" style="justify-content:flex-end;">
+        <button class="btn danger small" id="btnDeleteNote" type="button" onclick="deleteNote()">Elimina</button>
+        <button class="btn small" type="button" onclick="closeNoteModal()">Annulla</button>
+        <button class="btn small" id="btnSaveNote" type="button" onclick="saveNote()">Salva</button>
       <div class="row" style="align-items:center;">
         <div class="muted" id="notePermHint"></div>
         <div class="right">
@@ -844,12 +1014,35 @@
     </div>
   </div>
 
+  <!-- GESTIONE ARMI / DROGA -->
+  <div id="comandi" class="section">
+    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Gestione Armi / Droga</h2>
+    <div class="hint">Registro interno di armi, droga e oggetti.</div>
+
+    <div class="twoCol">
+      <div>
+        <div class="tabs" id="invTabs"></div>
+        <div id="invPanels"></div>
   <script>
     // =========================
     // CONFIG (OWNER EMAIL)
     // =========================
     const OWNER_EMAIL = "m.colurci@gmail.com";
 
+        <div class="panel active" style="display:block;">
+          <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totali inventario</h3>
+          <div class="hint" id="invMoneySummary"></div>
+          <table>
+            <thead>
+              <tr><th>Item</th><th style="width:120px;">Qtà</th></tr>
+            </thead>
+            <tbody id="invTotalsBody"></tbody>
+          </table>
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn danger small" type="button" onclick="invResetAll()">Azzera gestione</button>
+          </div>
+        </div>
+      </div>
     // =========================
     // RUOLI (scaletta + ordinamento)
     // =========================
@@ -875,12 +1068,23 @@
       "Auto Rubata"
     ];
 
+      <div class="panel active" style="display:block;">
+        <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Tag utenti</h3>
     const FIXED_ITEMS = [
       "Pistola","Pistola Pesante","SMG","Micro SMG","Carabina","AK-47","Fucile a pompa","Munizioni",
       "Giubbotto antiproiettile","Radio",
       "Grimaldello","Altri oggetti","Droga","Cibo","Bevande","Telecamera","Bende","Medikit"
     ];
 
+        <div class="row" style="margin-top:8px;">
+          <div class="field" style="min-width:220px; flex:1;">
+            <label>Cerca</label>
+            <input id="tagSearchInv" type="text" placeholder="Cerca nome/ruolo.." oninput="renderTagListInv()" />
+          </div>
+          <div class="field" style="min-width:140px;">
+            <button class="btn small" type="button" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
+        </div>
     // =========================
     // STORAGE
     // =========================
@@ -890,15 +1094,28 @@
     const LOGS_KEY = "vn_login_logs";
     const DIARY_KEY = "vn_diary_v1";
 
+        <div class="hint" style="margin-top:10px;">Doppio click sul nome = seleziona/deseleziona ..</div>
     const TRUST_KEY = "vn_trusted_devices_v1";
     const DEVICE_ID_KEY = "vn_device_id_v1";
 
+        <table style="margin-top:10px;">
+          <tbody id="tagTableBodyInv"></tbody>
+        </table>
     // Gestione Armi/Droga
     const INV_KEY = "vn_inv_v1";
 
+        <div class="hint" style="margin-top:10px;">Selezionati:</div>
+        <div id="tagSelectedWrapInv" style="margin-top:6px;"></div>
+      </div>
+    </div>
+  </div>
     // Contabilità
     const ACC_KEY = "vn_accounting_v1";
 
+  <!-- CONTABILITÀ -->
+  <div id="contabilita" class="section">
+    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Contabilità</h2>
+    <div class="hint">Stipendi e bilancio.</div>
     // =========================
     // HELPERS
     // =========================
@@ -909,6 +1126,10 @@
     }
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString(); }
 
+    <div class="tabs" id="accTabs">
+      <button id="tabStipendi" onclick="accShowTab('Stipendi')">Stipendi</button>
+      <button id="tabBilancio" onclick="accShowTab('Bilancio')">Bilancio</button>
+    </div>
     // =========================
     // SESSION
     // =========================
@@ -918,6 +1139,15 @@
     function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
     function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
+    <div class="panel active" style="display:block;">
+      <div class="hint" id="accBalanceSummary"></div>
+      <div class="hint" id="accSalarySummary"></div>
+      <div class="row" style="justify-content:flex-end;">
+        <div id="accAdminPanel" style="display:none;">
+          <button class="btn danger small" type="button" onclick="accResetAll()">Azzera contabilità</button>
+        </div>
+      </div>
+    </div>
     // =========================
     // USERS + SEED 10 UTENTI
     // =========================
@@ -958,14 +1188,34 @@
         totpNeedsSetup: false
       }));
 
+    <div id="accPanels"></div>
+  </div>
       saveUsers(seeded);
     }
 
+  <!-- LOG -->
+  <div id="log" class="section">
+    <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Log Eventi</h2>
+    <div class="hint">Registro completo eventi di sistema (solo admin).</div>
     function findUserByEmail(email) {
       const users = loadUsers();
       return users.find(u => (u.email || "").toLowerCase() === (email || "").toLowerCase()) || null;
     }
 
+    <div class="panel active" style="display:block;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:180px;">Data</th>
+            <th style="width:200px;">Utente</th>
+            <th style="width:160px;">Azione</th>
+            <th>Dettagli</th>
+          </tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+      </table>
+    </div>
+  </div>
     function getMyUser() {
       const s = loadSession();
       if (!s?.email) return null;
@@ -988,8 +1238,166 @@
     function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canResetAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
+  <script>
+  // =========================
+  // COSTANTI / STORAGE
+  // =========================
+  const USERS_KEY = "vn_users";
+  const OPS_KEY   = "vn_ops";
+  const DIARY_KEY = "vn_diary";
+  const INV_KEY   = "vn_inventory";
+  const ACC_KEY   = "vn_accounting";
+  const LOGS_KEY  = "vn_logs";
+  const SESSION_KEY = "vn_session";
+  const TRUSTED_KEY = "vn_trusted_devices";
+
+  const OWNER_EMAIL = "m.colurci@gmail.com";
+
+  // Categorie Azioni + item base (minimo funzionante)
+  window.CATEGORIES = ["Rapina", "Scorta", "Ricatto", "Altro"];
+  window.FIXED_ITEMS = [
+    "Contanti","Lingotti","Gioielli","Chip",
+    "Arma (generico)","Munizioni (generico)","Droga (generico)","Oggetto (generico)"
+  ];
+
+  // =========================
+  // UTILS
+  // =========================
+  function uid() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+  function formatMoney(v) {
+    const n = Number(v || 0);
+    return n.toLocaleString("it-IT") + " $";
+  }
+  function load(key, def=[]) {
+    try { return JSON.parse(localStorage.getItem(key)) || def; }
+    catch { return def; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  function loadUsers() { return load(USERS_KEY, []); }
+  function saveUsers(v) { save(USERS_KEY, v); }
+  function loadOps() { return load(OPS_KEY, []); }
+  function saveOps(v) { save(OPS_KEY, v); }
+  function loadDiary() { return load(DIARY_KEY, []); }
+  function saveDiary(v) { save(DIARY_KEY, v); }
+  function loadLoginLogs() { return load(LOGS_KEY, []); }
+  function saveLoginLogs(v) { save(LOGS_KEY, v); }
+
+  function loadSession() { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }
+  function saveSession(v) { localStorage.setItem(SESSION_KEY, JSON.stringify(v)); }
+  function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+  function normEmail(e){ return String(e || "").trim().toLowerCase(); }
+
+  function getMyUser() {
+    const s = loadSession();
+    if (!s) return null;
+    return loadUsers().find(u => normEmail(u.email) === normEmail(s.email)) || null;
+  }
+  function myRole() { return String(getMyUser()?.role || "").trim(); }
+  function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+function canEditOps() {
+  const s = loadSession();
+  return !!s?.email && myRole() !== "";
+}
     function myGameNameOrEmail() {
+    const u = getMyUser();
+    return u?.gameName || u?.email || "—";
+  }
+
+  // permessi admin granulari (semplici)
+  function canReset2FA(){ return ["Owner","Boss"].includes(myRole()); }
+  function canResetPassword(){ return ["Owner","Boss"].includes(myRole()); }
+  function canBlockUnblock(){ return ["Owner","Boss"].includes(myRole()); }
+  function canExpel(){ return ["Owner","Boss"].includes(myRole()); }
+  function canManageTotals(){ return ["Boss","Vice Boss","Owner"].includes(myRole()); }
+  function canResetAccounting(){ return ["Owner","Boss"].includes(myRole()); }
+
+  // =========================
+  // LOG EVENTI
+  // =========================
+  function logEvent(action, details={}) {
+    try {
       const u = getMyUser();
+      const logs = loadLoginLogs();
+      logs.push({
+        id: uid(),
+        ts: Date.now(),
+        email: u?.email || "—",
+        gameName: u?.gameName || "—",
+        action,
+        details
+      });
+      saveLoginLogs(logs);
+    } catch(e) { console.error("LOG ERROR", e); }
+  }
+
+  function renderLogsReal() {
+    const body = document.getElementById("logTableBody");
+    if (!body) return;
+
+    if (!isAdmin()) {
+      body.innerHTML = `<tr><td class="muted" colspan="4">Permesso negato</td></tr>`;
+      return;
+    }
+
+    const logs = loadLoginLogs().slice().reverse();
+    if (!logs.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="4">Nessun log</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = "";
+    logs.forEach(l => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${new Date(l.ts).toLocaleString()}</td>
+        <td>${escapeHtml(l.gameName)}<br><span class="muted">${escapeHtml(l.email)}</span></td>
+        <td><strong>${escapeHtml(l.action)}</strong></td>
+        <td><pre style="margin:0; font-size:12px;">${escapeHtml(JSON.stringify(l.details,null,2))}</pre></td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  // =========================
+  // RUOLI (scaletta + ordinamento)
+  // =========================
+  const RUOLI = [
+    "Nessuno",
+    "Owner","Boss","Vice Boss","Consigliere","Gestore incontri","Gestore Gang",
+    "Gestore droga","Resp. reperimento droga","Gestore armi","Resp. Craft armi",
+    "Capo Gestore braccio armato","Gestore braccio a.","Capo sq. d'assalto Est.",
+    "Guardia del corpo","Soldato","Scagnozzo","Scagnozzo in prova"
+  ];
+
+  function roleRank(role) {
+    const r = String(role || "").trim();
+    if (!r || r === "Nessuno") return 9998;
+    const idx = RUOLI.indexOf(r);
+    return idx === -1 ? 9999 : idx;
+  }
+
+  // =========================
+  // SEED UTENTI DEMO + OWNER PLACEHOLDER
+  // =========================
+  function ensureDemoUsersIfEmpty() {
+    const users = loadUsers();
+    if (users.length > 0) {
+      // garantisci owner presente
+      const hasOwner = users.some(u => normEmail(u.email) === normEmail(OWNER_EMAIL));
+      if (!hasOwner) {
+        users.push({
       if (u?.gameName) return u.gameName;
       return loadSession()?.email || "—";
     }
@@ -1028,12 +1436,18 @@
       if (!u) {
         u = {
           id: uid(),
+          email: normEmail(OWNER_EMAIL),
+          gameName: "Owner",
+          role: "Owner",
           email: e,
           role: "",
           blocked: false,
+          passwordHash: null,
+          passwordSalt: null,
           passwordHash: password ? simpleHash(password) : null,
           gameName: gameName || "",
           totpSecret: null,
+          totpNeedsSetup: true
           totpNeedsSetup: false
         };
         users.push(u);
@@ -1620,7 +2034,46 @@
         saveUsers(users);
         pendingUser = u;
       }
+      return;
+    }
 
+    const demo = [
+      { email:"boss.demo@vn.local",      gameName:"Don_Ricci",      role:"Boss" },
+      { email:"vice.demo@vn.local",      gameName:"Squalo_Nero",    role:"Vice Boss" },
+      { email:"cons.demo@vn.local",      gameName:"Il_Consigliere", role:"Consigliere" },
+      { email:"gang.demo@vn.local",      gameName:"Capo_Gang",      role:"Gestore Gang" },
+      { email:"armi.demo@vn.local",      gameName:"Armaiolo",       role:"Gestore armi" },
+      { email:"craft.demo@vn.local",     gameName:"Craft_Master",   role:"Resp. Craft armi" },
+      { email:"droga.demo@vn.local",     gameName:"Chimico",        role:"Gestore droga" },
+      { email:"respdrop.demo@vn.local",  gameName:"Reperitore",     role:"Resp. reperimento droga" },
+      { email:"guardia.demo@vn.local",   gameName:"Bodyguard_01",   role:"Guardia del corpo" },
+      { email:"soldato.demo@vn.local",   gameName:"Soldato_02",     role:"Soldato" }
+    ];
+
+    const seeded = demo.map(d => ({
+      id: uid(),
+      email: normEmail(d.email),
+      gameName: d.gameName || "",
+      role: d.role || "",
+      blocked: false,
+      passwordHash: null,
+      passwordSalt: null,
+      totpSecret: null,
+      totpNeedsSetup: true
+    }));
+
+    // aggiungi owner
+    seeded.push({
+      id: uid(),
+      email: normEmail(OWNER_EMAIL),
+      gameName: "Owner",
+      role: "Owner",
+      blocked: false,
+      passwordHash: null,
+      passwordSalt: null,
+      totpSecret: null,
+      totpNeedsSetup: true
+    });
       const fresh = findUserByEmail(existing.email);
       if (fresh.totpNeedsSetup) {
         document.getElementById("twofaSecretInline").value = fresh.totpSecret;
@@ -1632,6 +2085,8 @@
         document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA.";
       }
 
+    saveUsers(seeded);
+  }
       document.getElementById("login2fa").value = "";
       document.getElementById("rememberDevice").checked = true;
       showLoginStep("step2FA");
@@ -1685,6 +2140,12 @@
       showLoginStep("step2FA");
     }
 
+      // =========================
+  // HEADER UI (pill + logout)
+  // =========================
+  function setHeaderUser() {
+    const s = loadSession();
+    const u = getMyUser();
     async function loginStep2FA() {
       if (!pendingUser?.email) return backToEmail();
 
@@ -1721,10 +2182,66 @@
     // HEADER UI
     // =========================
     const pillEmail = document.getElementById("pillEmail");
+    const pillRole  = document.getElementById("pillRole");
     const pillRole = document.getElementById("pillRole");
     const btnLogout = document.getElementById("btnLogout");
     const pageSubtitle = document.getElementById("pageSubtitle");
 
+    if (!pillEmail || !pillRole || !btnLogout) return;
+
+    if (!s?.email) {
+      pillEmail.textContent = "Non autenticato";
+      pillRole.textContent  = "Ruolo: —";
+      btnLogout.style.display = "none";
+      return;
+    }
+
+    pillEmail.textContent = s.email;
+    pillRole.textContent  = "Ruolo: " + (u?.role || "—");
+    btnLogout.style.display = "inline-block";
+  }
+
+  function logout() {
+    clearSession();
+    setHeaderUser();
+    showOnly("login");
+    showLoginStep("stepEmail");
+  }
+
+  // =========================
+  // NAV / SEZIONI
+  // =========================
+  function subtitleForSection(id) {
+    const map = {
+      dashboard: "Dashboard",
+      azioni: "Azioni",
+      diario: "Diario",
+      comandi: "Gestione armi-droga",
+      utenti: "Utenti",
+      contabilita: "Contabilità",
+      log: "Log"
+    };
+    return map[id] || "Sistema Privato Interno";
+  }
+
+  function showOnly(id) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    const sec = document.getElementById(id);
+    if (sec) sec.classList.add("active");
+
+    document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+
+    const btnMap = {
+      dashboard: "btnDashboard",
+      azioni: "btnAzioni",
+      diario: "btnDiario",
+      comandi: "btnComandi",
+      utenti: "btnUtenti",
+      contabilita: "btnContabilita",
+      log: "btnLog"
+    };
+    const bid = btnMap[id];
+    if (bid && document.getElementById(bid)) document.getElementById(bid).classList.add("active");
     function setHeaderUser() {
       const s = loadSession();
       const u = getMyUser();
@@ -1751,6 +2268,9 @@
       return true;
     }
 
+    const sub = document.getElementById("pageSubtitle");
+    if (sub) sub.textContent = subtitleForSection(id);
+  }
     function subtitleForSection(id) {
       if (id === "dashboard") return "Dashboard";
       if (id === "utenti") return "Utenti";
@@ -1822,11 +2342,54 @@
       }
     }
 
+  function requireAuthOrShowLogin() {
+    const s = loadSession();
+    if (!s?.email) {
     function logout() {
       clearSession();
       setHeaderUser();
       showOnly("login");
       showLoginStep("stepEmail");
+      return false;
+    }
+    return true;
+  }
+
+  function initAfterLogin() {
+    const btnUtenti = document.getElementById("btnUtenti");
+    const cardUtenti = document.getElementById("cardUtenti");
+    const btnLog = document.getElementById("btnLog");
+
+    if (btnUtenti) btnUtenti.style.display = isAdmin() ? "inline-block" : "none";
+    if (btnLog) btnLog.style.display = isAdmin() ? "inline-block" : "none";
+    if (cardUtenti) cardUtenti.style.display = isAdmin() ? "inline-block" : "none";
+
+    const dashHint = document.getElementById("dashHint");
+    const actionsHint = document.getElementById("actionsHint");
+
+    if (dashHint && !canEditOps()) dashHint.textContent = "Sei registrato .. in attesa di ruolo: puoi leggere, ma non inserire/modificare.";
+    else if (dashHint) dashHint.textContent = "";
+
+    if (actionsHint && !canEditOps()) actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+    else if (actionsHint) actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
+
+    // render iniziali
+    renderUsersTable();
+    renderTagList();
+    renderTagListInv();
+    renderTabsAndPanels();
+    invRenderTabs();
+    invRenderTotals();
+    accRenderTabs();
+    accRenderSummary();
+    diaryRender();
+    showOnly("dashboard");
+  }
+
+  function showSection(id) {
+    if (!requireAuthOrShowLogin()) return;
+
+    if ((id === "utenti" || id === "log") && !isAdmin()) {
     }
 
     // =========================
@@ -1858,6 +2421,28 @@
       }
 
       showOnly("dashboard");
+      return;
+    }
+
+    showOnly(id);
+
+    if (id === "utenti") renderUsersTable();
+    if (id === "azioni") { renderTagList(); renderTabsAndPanels(); invRenderTotals(); }
+    if (id === "diario") diaryRender();
+    if (id === "comandi") { invRenderTabs(); invRenderTotals(); renderTagListInv(); }
+    if (id === "contabilita") { accRenderTabs(); accRenderSummary(); accRenderAdminPanel(); }
+    if (id === "log") renderLogsReal();
+  }
+
+  // =========================
+  // LOGIN FLOW (FIX: ora "Continua" va avanti)
+  // =========================
+  function showLoginStep(stepId){
+    ["stepEmail","stepPassword","stepRegister","step2FA"].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("active");
+      el.style.display = "none";
     }
 
     // =========================
@@ -2041,6 +2626,104 @@
     document.addEventListener("click", () => {
       document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
     });
+    const s = document.getElementById(stepId);
+    if (s){ s.classList.add("active"); s.style.display = "block"; }
+  }
+
+  function backToEmail(){
+    showLoginStep("stepEmail");
+    document.getElementById("loginEmail")?.focus();
+  }
+
+  function backToPasswordOrEmail(){
+    // se l'utente esiste -> password .. altrimenti email
+    const e = normEmail(document.getElementById("twofaEmailInline")?.value || "");
+    const u = loadUsers().find(x => normEmail(x.email) === e);
+    if (u) showLoginStep("stepPassword");
+    else showLoginStep("stepEmail");
+  }
+
+  function togglePassword(id, btn){
+    const inp = document.getElementById(id);
+    if (!inp) return;
+    inp.type = (inp.type === "password") ? "text" : "password";
+    if (btn) btn.textContent = (inp.type === "password") ? "👁" : "🙈";
+  }
+
+  // Trusted device (30gg)
+  function loadTrusted(){ return load(TRUSTED_KEY, {}); }
+  function saveTrusted(v){ save(TRUSTED_KEY, v || {}); }
+  function isTrusted(email){
+    const t = loadTrusted();
+    const exp = Number(t[normEmail(email)] || 0);
+    return exp > Date.now();
+  }
+  function setTrusted(email){
+    const t = loadTrusted();
+    t[normEmail(email)] = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    saveTrusted(t);
+  }
+  function clearTrustedForEmail(email){
+    const t = loadTrusted();
+    delete t[normEmail(email)];
+    saveTrusted(t);
+  }
+
+  // Crypto helpers (password)
+  function bufToHex(buf){
+    const arr = new Uint8Array(buf);
+    let s = "";
+    for (let i=0;i<arr.length;i++){
+      const h = arr[i].toString(16).padStart(2,"0");
+      s += h;
+    }
+    return s;
+  }
+  function strToBuf(str){ return new TextEncoder().encode(str); }
+
+  async function sha256(str){
+    const b = await crypto.subtle.digest("SHA-256", strToBuf(str));
+    return bufToHex(b);
+  }
+
+  async function makePasswordHash(password, salt){
+    return sha256(salt + "::" + password);
+  }
+
+  function randomSalt(){
+    const a = new Uint8Array(16);
+    crypto.getRandomValues(a);
+    return Array.from(a).map(x=>x.toString(16).padStart(2,"0")).join("");
+  }
+
+  // TOTP (Base32 + RFC6238)
+  const BASE32_ALPH = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  function base32DecodeToBytes(b32){
+    const clean = String(b32 || "").toUpperCase().replace(/[^A-Z2-7]/g,"");
+    let bits = "";
+    for (const ch of clean){
+      const val = BASE32_ALPH.indexOf(ch);
+      if (val < 0) continue;
+      bits += val.toString(2).padStart(5,"0");
+    }
+    const bytes = [];
+    for (let i=0;i+8<=bits.length;i+=8){
+      bytes.push(parseInt(bits.slice(i,i+8),2));
+    }
+    return new Uint8Array(bytes);
+  }
+
+  function generateTotpSecret(){
+    const a = new Uint8Array(20);
+    crypto.getRandomValues(a);
+    let out = "";
+    let bits = 0, val = 0;
+    for (let i=0;i<a.length;i++){
+      val = (val << 8) | a[i];
+      bits += 8;
+      while (bits >= 5){
+        out += BASE32_ALPH[(val >>> (bits - 5)) & 31];
+        bits -= 5;
 
     // =========================
     // TAG (multi-selezione) usato sia per Azioni che per Gestione
@@ -2058,6 +2741,229 @@
       }
       syncSelectedTagsUI();
     }
+    if (bits > 0) out += BASE32_ALPH[(val << (5 - bits)) & 31];
+    return out;
+  }
+
+  function leftPad(n, len){ return String(n).padStart(len,"0"); }
+
+  async function totpCode(secret, timeMs=Date.now(), step=30){
+    const keyBytes = base32DecodeToBytes(secret);
+    const counter = Math.floor(timeMs / 1000 / step);
+
+    const msg = new Uint8Array(8);
+    let tmp = counter;
+    for (let i=7;i>=0;i--){
+      msg[i] = tmp & 0xff;
+      tmp = Math.floor(tmp / 256);
+    }
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name:"HMAC", hash:"SHA-1" },
+      false,
+      ["sign"]
+    );
+
+    const sig = await crypto.subtle.sign("HMAC", cryptoKey, msg);
+    const h = new Uint8Array(sig);
+
+    const offset = h[h.length - 1] & 0x0f;
+    const bin =
+      ((h[offset] & 0x7f) << 24) |
+      ((h[offset+1] & 0xff) << 16) |
+      ((h[offset+2] & 0xff) << 8) |
+      (h[offset+3] & 0xff);
+
+    const otp = bin % 1000000;
+    return leftPad(otp, 6);
+  }
+
+  async function verifyTotp(secret, code){
+    const c = String(code || "").trim();
+    if (!/^\d{6}$/.test(c)) return false;
+
+    const now = Date.now();
+    const codes = await Promise.all([
+      totpCode(secret, now - 30000),
+      totpCode(secret, now),
+      totpCode(secret, now + 30000)
+    ]);
+    return codes.includes(c);
+  }
+
+  function buildOtpAuthUri(email, secret){
+    const issuer = "VELO NERO";
+    const label = encodeURIComponent(issuer + ":" + normEmail(email));
+    const iss = encodeURIComponent(issuer);
+    const sec = encodeURIComponent(secret);
+    return `otpauth://totp/${label}?secret=${sec}&issuer=${iss}&digits=6&period=30`;
+  }
+
+  // QR: uso servizio pubblico per immagine QR (solo rendering, non salva nulla)
+  function setQrImage(email, secret){
+    const uri = buildOtpAuthUri(email, secret);
+    const img = document.getElementById("twofaQR");
+    if (!img) return;
+    const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(uri);
+    img.src = qrUrl;
+  }
+
+  function toggleQR(){
+    const wrap = document.getElementById("qrWrap");
+    const btn = document.getElementById("btnToggleQR");
+    if (!wrap || !btn) return;
+
+    const show = wrap.style.display !== "block";
+    wrap.style.display = show ? "block" : "none";
+    btn.textContent = show ? "Nascondi QR" : "Mostra QR";
+  }
+
+  // step 1: email
+  function loginStepEmail(){
+    const email = normEmail(document.getElementById("loginEmail")?.value || "");
+    const hint = document.getElementById("emailStepHint");
+    if (hint) hint.textContent = "";
+
+    if (!email || !email.includes("@")) {
+      if (hint) hint.textContent = "Inserisci un'email valida.";
+      return;
+    }
+
+    const users = loadUsers();
+    let u = users.find(x => normEmail(x.email) === email);
+    
+
+    // se non esiste -> vai a register
+    if (!u) {
+      document.getElementById("regEmail").value = email;
+      document.getElementById("regGameName").value = "";
+      document.getElementById("regPassword").value = "";
+      document.getElementById("regPassword2").value = "";
+      document.getElementById("regStepHint").textContent = "Account non trovato .. crea il tuo profilo.";
+      showLoginStep("stepRegister");
+      document.getElementById("regGameName")?.focus();
+      return;
+    }
+
+    if (u.blocked) {
+      if (hint) hint.textContent = "Account bloccato.";
+      return;
+    }
+
+    // se passwordHash mancante -> deve impostare password (register light)
+    if (!u.passwordHash) {
+      document.getElementById("regEmail").value = email;
+      document.getElementById("regGameName").value = u.gameName || "";
+      document.getElementById("regStepHint").textContent = "Imposta la password per completare l'account.";
+      showLoginStep("stepRegister");
+      document.getElementById("regPassword")?.focus();
+      return;
+    }
+
+    // vai a password
+    document.getElementById("pwEmail").value = email;
+    document.getElementById("loginPassword").value = "";
+    document.getElementById("pwResetBox").style.display = "none";
+    document.getElementById("pwStepHint").textContent = "";
+    showLoginStep("stepPassword");
+    document.getElementById("loginPassword")?.focus();
+  }
+
+  // step 2: password
+  async function loginStepPassword(){
+    const email = normEmail(document.getElementById("pwEmail")?.value || "");
+    const pw = String(document.getElementById("loginPassword")?.value || "");
+    const hint = document.getElementById("pwStepHint");
+    if (hint) hint.textContent = "";
+
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === email);
+    if (!u) { if (hint) hint.textContent = "Utente non trovato."; backToEmail(); return; }
+    if (u.blocked) { if (hint) hint.textContent = "Account bloccato."; return; }
+
+    // password resettata -> deve impostarne una nuova
+    if (!u.passwordHash) {
+      document.getElementById("pwResetBox").style.display = "block";
+      if (hint) hint.textContent = "Password assente: devi impostarne una nuova.";
+      return;
+    }
+
+    if (!pw) { if (hint) hint.textContent = "Inserisci la password."; return; }
+
+    const salt = u.passwordSalt || "";
+    const computed = await makePasswordHash(pw, salt);
+    if (computed !== u.passwordHash) {
+      if (hint) hint.textContent = "Password errata.";
+      return;
+    }
+
+    // ok password -> step 2FA (o trusted)
+    await goTo2FA(email);
+  }
+
+  async function saveNewPassword(){
+    const email = normEmail(document.getElementById("pwEmail")?.value || "");
+    const p1 = String(document.getElementById("newPassword")?.value || "");
+    const p2 = String(document.getElementById("newPassword2")?.value || "");
+    const hint = document.getElementById("pwStepHint");
+
+    if (!p1 || p1.length < 6) { if (hint) hint.textContent = "Password troppo corta (min 6)."; return; }
+    if (p1 !== p2) { if (hint) hint.textContent = "Le password non combaciano."; return; }
+
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === email);
+    if (!u) { if (hint) hint.textContent = "Utente non trovato."; return; }
+
+    const salt = randomSalt();
+    u.passwordSalt = salt;
+    u.passwordHash = await makePasswordHash(p1, salt);
+
+    // se non ha 2FA, gliela preparo
+    if (!u.totpSecret) {
+      u.totpSecret = generateTotpSecret();
+      u.totpNeedsSetup = true;
+    }
+
+    saveUsers(users);
+    clearTrustedForEmail(email);
+
+    document.getElementById("pwResetBox").style.display = "none";
+    if (hint) hint.textContent = "Password salvata .. ora verifica 2FA.";
+    await goTo2FA(email);
+  }
+
+  // register (crea o completa)
+  async function registerAccount(){
+    const email = normEmail(document.getElementById("regEmail")?.value || "");
+    const gameName = String(document.getElementById("regGameName")?.value || "").trim();
+    const p1 = String(document.getElementById("regPassword")?.value || "");
+    const p2 = String(document.getElementById("regPassword2")?.value || "");
+    const hint = document.getElementById("regStepHint");
+    if (hint) hint.textContent = "";
+
+    if (!email || !email.includes("@")) { if (hint) hint.textContent = "Email non valida."; return; }
+    if (!gameName) { if (hint) hint.textContent = "Inserisci il nome in game."; return; }
+    if (!p1 || p1.length < 6) { if (hint) hint.textContent = "Password troppo corta (min 6)."; return; }
+    if (p1 !== p2) { if (hint) hint.textContent = "Le password non combaciano."; return; }
+
+    const users = loadUsers();
+    let u = users.find(x => normEmail(x.email) === email);
+
+    if (!u) {
+      u = {
+        id: uid(),
+        email,
+        gameName,
+        role: (email === normEmail(OWNER_EMAIL)) ? "Owner" : "",
+        blocked: false,
+        passwordHash: null,
+        passwordSalt: null,
+        totpSecret: null,
+        totpNeedsSetup: true
+      };
+      users.push(u);
 
     function clearSelectedTags() {
       selectedTagUserIds = [];
@@ -2075,6 +2981,8 @@
       return selectedTagUsers().map(u => (u.gameName || u.email || "—"));
     }
 
+    u.gameName = gameName;
+    if (email === normEmail(OWNER_EMAIL)) u.role = "Owner";
     function syncSelectedTagsUI() {
       const wrap = document.getElementById("tagSelectedWrap");
       const wrapInv = document.getElementById("tagSelectedWrapInv");
@@ -2094,6 +3002,9 @@
         if (inp) inp.value = names.length ? names.join(", ") : "—";
       });
 
+    const salt = randomSalt();
+    u.passwordSalt = salt;
+    u.passwordHash = await makePasswordHash(p1, salt);
       // aggiorna il campo tag nel modal edit azioni
       const editTag = document.getElementById("editTagName");
       if (editTag) editTag.value = names.length ? names.join(", ") : "—";
@@ -2116,29 +3027,41 @@
         });
     }
 
+    if (!u.totpSecret) u.totpSecret = generateTotpSecret();
+    u.totpNeedsSetup = true;
     function renderTagList() {
       const body = document.getElementById("tagTableBody");
       const q = (document.getElementById("tagSearch")?.value || "");
       const users = getTagSortedUsers(q);
 
+    saveUsers(users);
+    clearTrustedForEmail(email);
       if (!users.length) {
         body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
         syncSelectedTagsUI();
         return;
       }
 
+    logEvent("REGISTER_OR_SETUP", { email, gameName });
       body.innerHTML = "";
       users.forEach(u => {
         const tr = document.createElement("tr");
         const isSelected = isTagSelected(u.id);
         tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
 
+    if (hint) hint.textContent = "Account creato .. ora configura 2FA.";
+    await goTo2FA(email);
+  }
         tr.ondblclick = () => {
           toggleSelectedTag(u.id);
           renderTagList();
           renderTagListInv();
         };
 
+  async function goTo2FA(email){
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === normEmail(email));
+    if (!u) return;
         tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
         body.appendChild(tr);
       });
@@ -2184,10 +3107,20 @@
     const opsTabs = document.getElementById("opsTabs");
     const panelWrapper = document.getElementById("panelWrapper");
 
+    // trusted? entra diretto
+    if (isTrusted(email) && u.totpSecret && !u.totpNeedsSetup) {
+      saveSession({ email: normEmail(email), ts: Date.now() });
+      setHeaderUser();
+      logEvent("LOGIN_TRUSTED", { email });
+      initAfterLogin();
+      return;
     function tabIdFromName(name) {
       return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
     }
 
+    document.getElementById("twofaEmailInline").value = normEmail(email);
+    document.getElementById("login2fa").value = "";
+    document.getElementById("twofaHintInline").textContent = "";
     function fillItemSelect(selectEl) {
       selectEl.innerHTML = "";
       FIXED_ITEMS.forEach(it => {
@@ -2198,20 +3131,39 @@
       });
     }
 
+    // mostra setup se serve
+    const setupBox = document.getElementById("twofaSetupBox");
+    const secretInline = document.getElementById("twofaSecretInline");
+    const confirmAdded = document.getElementById("confirmAdded");
+    const qrWrap = document.getElementById("qrWrap");
+    const btnToggle = document.getElementById("btnToggleQR");
     const drafts = {};
     function getDraft(category) { if (!drafts[category]) drafts[category] = []; return drafts[category]; }
 
+    if (u.totpNeedsSetup) {
+      if (!u.totpSecret) u.totpSecret = generateTotpSecret();
+      saveUsers(users);
     function renderDraft(category) {
       const tid = tabIdFromName(category);
       const wrap = document.getElementById("draft_" + tid);
       if (!wrap) return;
 
+      if (setupBox) setupBox.style.display = "flex";
+      if (secretInline) secretInline.value = u.totpSecret;
+      if (confirmAdded) confirmAdded.checked = false;
+      if (qrWrap) qrWrap.style.display = "none";
+      if (btnToggle) btnToggle.textContent = "Mostra QR";
+      setQrImage(email, u.totpSecret);
       const draft = getDraft(category);
       if (draft.length === 0) {
         wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
         return;
       }
 
+      document.getElementById("twofaHintInline").textContent = "Prima aggiungi la chiave (o QR) sull'app .. poi inserisci il codice.";
+    } else {
+      if (setupBox) setupBox.style.display = "none";
+      document.getElementById("twofaHintInline").textContent = "Inserisci il codice dall'app Authenticator.";
       wrap.innerHTML = "";
       draft.forEach(it => {
         const div = document.createElement("div");
@@ -2233,6 +3185,16 @@
       });
     }
 
+    showLoginStep("step2FA");
+    document.getElementById("login2fa")?.focus();
+  }
+
+  async function loginStep2FA(){
+    const email = normEmail(document.getElementById("twofaEmailInline")?.value || "");
+    const code = String(document.getElementById("login2fa")?.value || "").trim();
+    const remember = !!document.getElementById("rememberDevice")?.checked;
+    const hint = document.getElementById("twofaHintInline");
+    if (hint) hint.textContent = "";
     function addItemToDraft(category) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
       const tid = tabIdFromName(category);
@@ -2240,24 +3202,44 @@
       let qty = parseInt(document.getElementById("qty_" + tid).value || "1", 10);
       if (!Number.isFinite(qty) || qty < 1) qty = 1;
 
+    const users = loadUsers();
+    const u = users.find(x => normEmail(x.email) === email);
+    if (!u) { if (hint) hint.textContent = "Utente non trovato."; backToEmail(); return; }
+    if (u.blocked) { if (hint) hint.textContent = "Account bloccato."; return; }
+    if (!u.totpSecret) { if (hint) hint.textContent = "2FA non configurato."; return; }
       const draft = getDraft(category);
       const existing = draft.find(x => x.name === name);
       if (existing) existing.qty += qty;
       else draft.push({ name, qty });
 
+    if (u.totpNeedsSetup) {
+      const okChecked = !!document.getElementById("confirmAdded")?.checked;
+      if (!okChecked) { if (hint) hint.textContent = "Spunta la conferma che hai aggiunto l'account nell'app."; return; }
       document.getElementById("qty_" + tid).value = "1";
       renderDraft(category);
     }
 
+    const ok = await verifyTotp(u.totpSecret, code);
+    if (!ok) { if (hint) hint.textContent = "Codice 2FA errato."; return; }
+
+    // setup completato
+    if (u.totpNeedsSetup) {
+      u.totpNeedsSetup = false;
+      saveUsers(users);
     function removeDraftItem(category, name) {
       if (!canEditOps()) return;
       drafts[category] = getDraft(category).filter(x => x.name !== name);
       renderDraft(category);
     }
 
+    if (remember) setTrusted(email);
+
+    saveSession({ email, ts: Date.now() });
+    setHeaderUser();
     function saveDraftRecord(category) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
+    logEvent("LOGIN_OK", { email, remember });
       const tid = tabIdFromName(category);
       const type = document.getElementById("type_" + tid).value;
       const moneyRaw = document.getElementById("money_" + tid).value;
@@ -2265,16 +3247,34 @@
       const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
       const items = getDraft(category);
 
+    initAfterLogin();
+    
+showOnly("dashboard");
+showLoginStep("stepEmail");
+  }
       if (money === 0 && items.length === 0 && note.trim() === "") {
         return alert("Inserisci almeno soldi, o un item, o una nota.");
       }
 
+  // =========================
+  // UTENTI TABLE
+  // =========================
+  const usersTableBody = document.getElementById("usersTableBody");
       const me = getMyUser();
       const createdByName = me?.gameName || me?.email || "—";
 
+  function renderUsersTable() {
+    if (!usersTableBody) return;
+    if (!isAdmin()) { usersTableBody.innerHTML = ""; return; }
       const tagUserIds = selectedTagUserIds.slice();
       const tagNames = selectedTagNames();
 
+    const users = loadUsers()
+      .slice()
+      .sort((a,b) => {
+        const ra = roleRank(a.role), rb = roleRank(b.role);
+        if (ra !== rb) return ra - rb;
+        return (a.email||"").localeCompare(b.email||"");
       const ops = loadOps();
       ops.push({
         id: uid(),
@@ -2293,16 +3293,26 @@
       });
       saveOps(ops);
 
+    usersTableBody.innerHTML = "";
       document.getElementById("money_" + tid).value = "";
       document.getElementById("note_" + tid).value = "";
       drafts[category] = [];
       renderDraft(category);
 
+    users.forEach(u => {
+      const tr = document.createElement("tr");
+
+      const tdGameName = document.createElement("td");
+      tdGameName.innerHTML =
+        `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span>` +
+        ` <span class="tagRole">${escapeHtml(u.role || "—")}</span>`;
       renderCategory(category);
       renderManageSummaries();
       invRenderTotals();
     }
 
+      const tdRole = document.createElement("td");
+      const sel = document.createElement("select");
     function deleteRecord(id, category) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
       saveOps(loadOps().filter(r => r.id !== id));
@@ -2332,22 +3342,45 @@
       const rec = ops.find(r => r.id === id);
       if (!rec) return;
 
+      const optEmpty = document.createElement("option");
+      optEmpty.value = "";
+      optEmpty.textContent = "—";
+      sel.appendChild(optEmpty);
       editingId = id;
       editingCategory = rec.category;
       editingItems = (rec.items || []).map(x => ({ name: x.name, qty: x.qty }));
 
+      RUOLI.filter(r => r !== "Nessuno").forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = r;
+        sel.appendChild(opt);
+      });
       editInfo.textContent = `${rec.category} — ${rec.createdByName || rec.createdByEmail} — ${new Date(rec.ts).toLocaleString()}`;
       editType.value = rec.type;
       editMoney.value = String(rec.money || 0);
       editNote.value = rec.note || "";
 
+      sel.value = u.role || "";
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
       editTagName.value = tnames.length ? tnames.join(", ") : "—";
 
+      const isOwnerEmail = (normEmail(u.email) === normEmail(OWNER_EMAIL));
+      const isOwnerRole  = (String(u.role||"") === "Owner");
+      if (isOwnerEmail || isOwnerRole) sel.disabled = true;
       renderEditItems();
       editOverlay.style.display = "block";
     }
 
+      sel.onchange = () => {
+        if (isOwnerEmail || isOwnerRole) {
+          alert("Il ruolo OWNER non può essere modificato.");
+          renderUsersTable();
+          return;
+        }
+        const all = loadUsers();
+        const ref = all.find(x => x.id === u.id);
+        if (!ref) return;
     function closeEdit() {
       editOverlay.style.display = "none";
       editingId = null;
@@ -2355,6 +3388,8 @@
       editingItems = [];
     }
 
+        ref.role = sel.value || "";
+        saveUsers(all);
     function renderEditItems() {
       if (editingItems.length === 0) {
         editItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
@@ -2381,60 +3416,238 @@
       });
     }
 
+        setHeaderUser();
+        initAfterLogin();
     function editAddItem() {
       const name = editItemSelect.value;
       let qty = parseInt(editItemQty.value || "1", 10);
       if (!Number.isFinite(qty) || qty < 1) qty = 1;
 
+        renderTagList();
+        renderTagListInv();
       const existing = editingItems.find(x => x.name === name);
       if (existing) existing.qty += qty;
       else editingItems.push({ name, qty });
 
+        logEvent("USER_ROLE_UPDATE", {
+          targetEmail: ref.email || "",
+          targetGameName: ref.gameName || "",
+          newRole: ref.role || ""
+        });
       editItemQty.value = "1";
       renderEditItems();
     }
 
+        renderUsersTable();
+      };
+      tdRole.appendChild(sel);
+
+      const tdEmail = document.createElement("td");
+      tdEmail.textContent = u.email || "—";
+
+      const tdState = document.createElement("td");
+      tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
+
+      const tdActions = document.createElement("td");
+      const wrap = document.createElement("div");
+      wrap.style.position = "relative";
+
+      const btnEdit = document.createElement("button");
+      btnEdit.className = "btn-edit";
+      btnEdit.type = "button";
+      btnEdit.textContent = "✎";
+      wrap.appendChild(btnEdit);
+
+      const menu = document.createElement("div");
+      menu.className = "action-menu";
+
+      const b4 = document.createElement("button");
+      b4.type = "button";
+      b4.textContent = "Reset 2FA";
+      b4.onclick = () => {
+        if (!canReset2FA()) return alert("Solo Owner e Boss possono resettare il 2FA");
+        if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
+
+        const ok = confirm("Confermi RESET 2FA per " + (u.email || "—") + "?\nDovrà riconfigurare Authenticator al prossimo login.");
+        if (!ok) return;
+
+        const all = loadUsers();
+        const ref = all.find(x => x.id === u.id);
+        if (!ref) return;
+
+        ref.totpSecret = generateTotpSecret();
+        ref.totpNeedsSetup = true;
+        clearTrustedForEmail(ref.email);
+        saveUsers(all);
+
+        menu.style.display = "none";
+        renderUsersTable();
+        logEvent("USER_2FA_RESET", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
+        alert("2FA resettato.");
+      };
+
+      const b5 = document.createElement("button");
+      b5.type = "button";
+      b5.textContent = "Reset Password";
+      b5.onclick = () => {
+        if (!canResetPassword()) return alert("Permesso negato");
+        if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
+
+        const ok = confirm("Confermi RESET PASSWORD per " + (u.email || "—") + "?\nDovrà impostarne una nuova al prossimo accesso.");
+        if (!ok) return;
+
+        const all = loadUsers();
+        const ref = all.find(x => x.id === u.id);
+        if (!ref) return;
+
+        ref.passwordHash = null;
+        ref.passwordSalt = null;
+        clearTrustedForEmail(ref.email);
+        saveUsers(all);
+
+        menu.style.display = "none";
+        renderUsersTable();
+
+        logEvent("USER_PASSWORD_RESET", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
+        alert("Password resettata.");
+      };
+
+      const b1 = document.createElement("button");
+      b1.type = "button";
+      b1.textContent = "Blocca";
+      b1.onclick = () => {
+        if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
+        if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
+
+        const all = loadUsers();
+        const ref = all.find(x => x.id === u.id);
+        if (!ref) return;
+
+        ref.blocked = true;
+        saveUsers(all);
+
+        menu.style.display = "none";
+        renderUsersTable();
+        logEvent("USER_BLOCK", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
+
+        const s = loadSession();
+        if (s?.email && normEmail(s.email) === normEmail(ref.email) && ref.blocked) logout();
+      };
+
+      const b2 = document.createElement("button");
+      b2.type = "button";
+      b2.textContent = "Sblocca";
+      b2.onclick = () => {
+        if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
+        if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
+
+        const all = loadUsers();
+        const ref = all.find(x => x.id === u.id);
+        if (!ref) return;
+
+        ref.blocked = false;
+        saveUsers(all);
+
+        menu.style.display = "none";
+        renderUsersTable();
+        logEvent("USER_UNBLOCK", { targetEmail: ref.email || "", targetGameName: ref.gameName || "" });
+      };
+
+      const b3 = document.createElement("button");
+      b3.type = "button";
+      b3.textContent = "Espelli";
+      b3.onclick = () => {
+        if (!canExpel()) return alert("Permesso negato");
+        if (isOwnerRole || isOwnerEmail) return alert("OWNER intoccabile.");
+
+        const ok = confirm("Confermi espulsione di " + (u.email || "—") + "?");
+        if (!ok) return;
+
+        const all = loadUsers();
+        saveUsers(all.filter(x => x.id !== u.id));
+
+        menu.style.display = "none";
+        renderUsersTable();
+        logEvent("USER_EXPEL", { targetEmail: u.email || "", targetGameName: u.gameName || "" });
+
+        const s = loadSession();
+        if (s?.email && normEmail(s.email) === normEmail(u.email)) logout();
+      };
+
+      if (myRole() === "Vice Boss") {
+        b1.style.display = "none";
+        b2.style.display = "none";
+        b4.style.display = "none";
+      }
     function editRemoveItem(name) {
       editingItems = editingItems.filter(x => x.name !== name);
       renderEditItems();
     }
 
+      menu.appendChild(b4);
+      menu.appendChild(b5);
+      menu.appendChild(b1);
+      menu.appendChild(b2);
+      menu.appendChild(b3);
     function saveEdit() {
       if (!editingId) return;
       const ops = loadOps();
       const rec = ops.find(r => r.id === editingId);
       if (!rec) return;
 
+      wrap.appendChild(menu);
       rec.type = editType.value;
       rec.money = Math.max(0, parseInt(editMoney.value || "0", 10) || 0);
       rec.note = (editNote.value || "").trim();
       rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
 
+      btnEdit.onclick = (e) => {
+        e.stopPropagation();
+        document.querySelectorAll(".action-menu").forEach(m => { if (m !== menu) m.style.display = "none"; });
+        menu.style.display = (menu.style.display === "block") ? "none" : "block";
+      };
       rec.tagUserIds = selectedTagUserIds.slice();
       rec.tagNames = selectedTagNames();
       rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
+      tdActions.appendChild(wrap);
       saveOps(ops);
       closeEdit();
       renderCategory(rec.category);
       invRenderTotals();
     }
 
+      tr.appendChild(tdGameName);
+      tr.appendChild(tdRole);
+      tr.appendChild(tdEmail);
+      tr.appendChild(tdState);
+      tr.appendChild(tdActions);
     function renderCategory(category) {
       const tid = tabIdFromName(category);
       renderDraft(category);
 
+      usersTableBody.appendChild(tr);
+    });
+  }
       const records = loadOps().filter(r => r.category === category);
       const tableBody = document.getElementById("table_" + tid);
 
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
+  });
       if (!records || records.length === 0) {
         tableBody.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
         return;
       }
 
+  // =========================
+  // TAG (multi-selezione)
+  // =========================
+  let selectedTagUserIds = [];
       const sorted = records.slice().sort((a,b) => b.ts - a.ts);
       tableBody.innerHTML = "";
 
+  function isTagSelected(id){ return selectedTagUserIds.includes(id); }
       sorted.forEach(r => {
         const when = new Date(r.ts).toLocaleString();
         const tipo = r.type === "ottenuto" ? "OTTENUTO" : "PERSO";
@@ -2442,16 +3655,27 @@
         const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
         const noteHtml = (r.note && r.note.trim()) ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>` : `<span class="muted">—</span>`;
 
+  function toggleSelectedTag(id) {
+    if (!id) return;
+    if (isTagSelected(id)) selectedTagUserIds = selectedTagUserIds.filter(x => x !== id);
+    else selectedTagUserIds.push(id);
+    syncSelectedTagsUI();
+  }
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
         const tagHtml = tnames.length
           ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
           : `<span class="muted">—</span>`;
 
+  function clearSelectedTags() { selectedTagUserIds = []; syncSelectedTagsUI(); }
         const actionsHtml = canEditOps()
           ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
              <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
           : `<span class="muted">—</span>`;
 
+  function selectedTagUsers() {
+    const users = loadUsers();
+    return selectedTagUserIds.map(id => users.find(u => u.id === id)).filter(Boolean);
+  }
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${when}</td>
@@ -2467,11 +3691,15 @@
       });
     }
 
+  function selectedTagNames() { return selectedTagUsers().map(u => (u.gameName || u.email || "—")); }
     function renderManageSummaries() {
       const managePanel = document.getElementById("managePanel");
       managePanel.style.display = canManageTotals() ? "block" : "none";
     }
 
+  function syncSelectedTagsUI() {
+    const wrap = document.getElementById("tagSelectedWrap");
+    const wrapInv = document.getElementById("tagSelectedWrapInv");
     function resetAllOps() {
       if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
       const ok = confirm("Confermi AZZERA AZIONI?");
@@ -2481,29 +3709,78 @@
       invRenderTotals();
     }
 
+    const names = selectedTagNames();
+    const html = names.length
+      ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+      : `<span class="tagPill">—</span>`;
     function renderTabsAndPanels() {
       opsTabs.innerHTML = "";
       panelWrapper.innerHTML = "";
 
+    if (wrap) wrap.innerHTML = html;
+    if (wrapInv) wrapInv.innerHTML = html;
       CATEGORIES.forEach((cat, idx) => {
         const tid = tabIdFromName(cat);
 
+    try {
+      (window.INV_CATEGORIES || []).forEach(cat => {
+        const tid = invTabId(cat);
+        const inp = document.getElementById("invTag_" + tid);
+        if (inp) inp.value = names.length ? names.join(", ") : "—";
+      });
+    } catch {}
+
+    const editTag = document.getElementById("editTagName");
+    if (editTag) editTag.value = names.length ? names.join(", ") : "—";
+  }
+
+  function getTagSortedUsers(filterQuery) {
+    const q = (filterQuery || "").trim().toLowerCase();
+    return loadUsers()
+      .slice()
+      .filter(u => !u.blocked)
+      .sort((a,b) => {
+        const ra = roleRank(a.role), rb = roleRank(b.role);
+        if (ra !== rb) return ra - rb;
+        return (a.gameName||"").localeCompare(b.gameName||"");
+      })
+      .filter(u => {
+        if (!q) return true;
+        const hay = `${u.gameName||""} ${u.role||""} ${u.email||""}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }
         const tab = document.createElement("button");
         tab.id = "tab_" + tid;
         tab.textContent = cat;
         tab.onclick = () => showCat(cat);
         opsTabs.appendChild(tab);
 
+  function renderTagList() {
+    const body = document.getElementById("tagTableBody");
+    if (!body) return;
         const panel = document.createElement("div");
         panel.className = "panel opPanel";
         panel.id = "panel_" + tid;
 
+    const q = (document.getElementById("tagSearch")?.value || "");
+    const users = getTagSortedUsers(q);
         const disabledAttr = canEditOps() ? "" : "disabled";
         const disabledCls = canEditOps() ? "" : "disabled";
 
+    if (!users.length) {
+      body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+      syncSelectedTagsUI();
+      return;
+    }
         panel.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
+    body.innerHTML = "";
+    users.forEach(u => {
+      const tr = document.createElement("tr");
+      const isSelected = isTagSelected(u.id);
+      tr.className = isSelected ? "selectedRow" : "";
           <div class="row">
             <div class="field" style="min-width:180px;">
               <label>Tipo</label>
@@ -2513,42 +3790,71 @@
               </select>
             </div>
 
+      tr.ondblclick = () => {
+        toggleSelectedTag(u.id);
+        renderTagList();
+        renderTagListInv();
+      };
             <div class="field" style="min-width:220px;">
               <label>Soldi ($)</label>
               <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
+      tr.innerHTML =
+        `<td style="font-weight:900;">` +
+          `${escapeHtml(u.gameName || u.email || "—")}` +
+          ` <span class="tagRole">${escapeHtml(u.role || "—")}</span>` +
+        `</td>`;
             <div class="field" style="flex:1; min-width:260px;">
               <label>Note</label>
               <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
             </div>
           </div>
 
+      body.appendChild(tr);
+    });
           <div class="row">
             <div class="field" style="min-width:320px;">
               <label>Item</label>
               <select id="item_${tid}" ${disabledAttr}></select>
             </div>
 
+    syncSelectedTagsUI();
+  }
             <div class="field" style="min-width:160px;">
               <label>Quantità</label>
               <input id="qty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
             </div>
 
+  function renderTagListInv() {
+    const body = document.getElementById("tagTableBodyInv");
+    if (!body) return;
             <div class="field" style="min-width:180px;">
               <button class="btn ${disabledCls}" ${disabledAttr} onclick="addItemToDraft('${cat}')">Aggiungi item</button>
             </div>
 
+    const q = (document.getElementById("tagSearchInv")?.value || "");
+    const users = getTagSortedUsers(q);
             <div class="field" style="min-width:180px;">
               <button class="btn ${disabledCls}" ${disabledAttr} onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
             </div>
           </div>
 
+    if (!users.length) {
+      body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+      syncSelectedTagsUI();
+      return;
+    }
           <div class="panel active" style="display:block; margin-top:12px;">
             <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
             <div id="draft_${tid}" style="margin-top:10px;"></div>
           </div>
 
+    body.innerHTML = "";
+    users.forEach(u => {
+      const tr = document.createElement("tr");
+      const isSelected = isTagSelected(u.id);
+      tr.className = isSelected ? "selectedRow" : "";
           <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
           <table>
             <thead>
@@ -2562,8 +3868,18 @@
           </table>
         `;
 
+      tr.ondblclick = () => {
+        toggleSelectedTag(u.id);
+        renderTagList();
+        renderTagListInv();
+      };
         panelWrapper.appendChild(panel);
 
+      tr.innerHTML =
+        `<td style="font-weight:900;">` +
+          `${escapeHtml(u.gameName || u.email || "—")}` +
+          ` <span class="tagRole">${escapeHtml(u.role || "—")}</span>` +
+        `</td>`;
         setTimeout(() => {
           const itemSel = document.getElementById("item_" + tid);
           if (itemSel) fillItemSelect(itemSel);
@@ -2571,10 +3887,35 @@
           renderCategory(cat);
         }, 0);
 
+      body.appendChild(tr);
+    });
         if (idx === 0) { tab.classList.add("active"); panel.classList.add("active"); }
       });
     }
 
+    syncSelectedTagsUI();
+  }
+
+  // =========================
+  // AZIONI (come nel tuo codice, ma con wrapper esistenti)
+  // =========================
+  const opsTabs = document.getElementById("opsTabs");
+  const panelWrapper = document.getElementById("panelWrapper");
+
+  function tabIdFromName(name) {
+    return "cat_" + String(name || "").toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+  }
+
+  function fillItemSelect(selectEl) {
+    if (!selectEl) return;
+    selectEl.innerHTML = "";
+    (window.FIXED_ITEMS || []).forEach(it => {
+      const opt = document.createElement("option");
+      opt.value = it;
+      opt.textContent = it;
+      selectEl.appendChild(opt);
+    });
+  }
     function showCat(catName) {
       const tid = tabIdFromName(catName);
       document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
@@ -2586,6 +3927,8 @@
       renderCategory(catName);
     }
 
+  const drafts = {};
+  function getDraft(category) { if (!drafts[category]) drafts[category] = []; return drafts[category]; }
     // =========================
     // GESTIONE ARMI/DROGA (con TAG + SOLDI)
     // =========================
@@ -2608,6 +3951,10 @@
       ]
     };
 
+  function renderDraft(category) {
+    const tid = tabIdFromName(category);
+    const wrap = document.getElementById("draft_" + tid);
+    if (!wrap) return;
     function invLoad() {
       try {
         const raw = localStorage.getItem(INV_KEY);
@@ -2617,37 +3964,333 @@
     }
     function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
 
+    const draft = getDraft(category);
+    if (draft.length === 0) { wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`; return; }
     function invTabId(name) {
       return "inv_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
     }
 
+    wrap.innerHTML = "";
+    draft.forEach(it => {
+      const div = document.createElement("div");
+      div.className = "row";
+      div.innerHTML = `
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Item</label>
+          <input value="${escapeHtml(it.name)}" disabled />
+        </div>
+        <div class="field" style="min-width:160px;">
+          <label>Quantità</label>
+          <input value="${Number(it.qty || 0)}" disabled />
+        </div>
+        <div class="field" style="min-width:160px;">
+          <button class="btn danger small ${canEditOps() ? "" : "disabled"}" ${canEditOps() ? "" : "disabled"}
+            type="button" onclick="removeDraftItem('${escapeHtml(category)}','${escapeHtml(it.name)}')">Rimuovi</button>
+        </div>
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  function addItemToDraft(category) {
+    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+    const tid = tabIdFromName(category);
+    const sel = document.getElementById("item_" + tid);
+    const qtyEl = document.getElementById("qty_" + tid);
+    if (!sel || !qtyEl) return;
+
+    const name = sel.value;
+    let qty = parseInt(qtyEl.value || "1", 10);
+    if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+    const draft = getDraft(category);
+    const existing = draft.find(x => x.name === name);
+    if (existing) existing.qty += qty;
+    else draft.push({ name, qty });
+
+    qtyEl.value = "1";
+    renderDraft(category);
+  }
+
+  function removeDraftItem(category, name) {
+    if (!canEditOps()) return;
+    drafts[category] = getDraft(category).filter(x => x.name !== name);
+    renderDraft(category);
+  }
+
+  function saveDraftRecord(category) {
+    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+    const tid = tabIdFromName(category);
+    const typeEl = document.getElementById("type_" + tid);
+    const moneyEl = document.getElementById("money_" + tid);
+    const noteEl = document.getElementById("note_" + tid);
+
+    if (!typeEl || !moneyEl || !noteEl) return;
+
+    const type = typeEl.value || "ottenuto";
+    const moneyRaw = moneyEl.value || "";
+    const note = (noteEl.value || "").trim();
+    const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
+    const items = getDraft(category);
+
+    if (money === 0 && items.length === 0 && note === "") {
+      return alert("Inserisci almeno soldi, o un item, o una nota.");
+    }
+
+    const createdByName = myGameNameOrEmail();
+    const tagUserIds = selectedTagUserIds.slice();
+    const tagNames = selectedTagNames();
+
+    const ops = loadOps();
+    const newRec = {
+      id: uid(),
+      ts: Date.now(),
+      createdByEmail: loadSession()?.email || "",
+      createdByName,
+      category,
+      type,
+      money,
+      note,
+      items: items.map(x => ({ name: x.name, qty: x.qty })),
+      tagUserIds,
+      tagNames,
+      tagName: tagNames.length ? tagNames[0] : null
+    };
     function invRenderTabs() {
       const tabs = document.getElementById("invTabs");
       const panels = document.getElementById("invPanels");
       if (!tabs || !panels) return;
 
+    ops.push(newRec);
+    saveOps(ops);
+
+    logEvent("AZIONI_CREATE", { id:newRec.id, category, type, money, note, items:newRec.items, tags:tagNames });
+
+    moneyEl.value = "";
+    noteEl.value = "";
+    drafts[category] = [];
+    renderDraft(category);
+
+    renderCategory(category);
+    invRenderTotals();
+  }
+
+  function deleteRecord(id, category) {
+    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+    const ok = confirm("Confermi eliminazione registrazione?");
+    if (!ok) return;
+
+    logEvent("AZIONI_DELETE", { id, category });
+    saveOps(loadOps().filter(r => r.id !== id));
+    renderCategory(category);
+    invRenderTotals();
+  }
+
+  // MODAL EDIT
+  const editOverlay = document.getElementById("editOverlay");
+  const editInfo = document.getElementById("editInfo");
+  const editType = document.getElementById("editType");
+  const editMoney = document.getElementById("editMoney");
+  const editNote = document.getElementById("editNote");
+  const editTagName = document.getElementById("editTagName");
+  const editItemSelect = document.getElementById("editItemSelect");
+  const editItemQty = document.getElementById("editItemQty");
+  const editItemsList = document.getElementById("editItemsList");
+
+  if (editItemSelect) fillItemSelect(editItemSelect);
+
+  let editingId = null;
+  let editingItems = [];
+  let editingCategory = null;
+
+  function openEdit(id) {
+    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+    const ops = loadOps();
+    const rec = ops.find(r => r.id === id);
+    if (!rec) return;
+
+    editingId = id;
+    editingCategory = rec.category;
+    editingItems = (rec.items || []).map(x => ({ name: x.name, qty: x.qty }));
+
+    if (editInfo) editInfo.textContent =
+      `${rec.category} — ${rec.createdByName || rec.createdByEmail || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+
+    if (editType) editType.value = rec.type || "ottenuto";
+    if (editMoney) editMoney.value = String(rec.money || 0);
+    if (editNote) editNote.value = rec.note || "";
+
+    const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+    if (editTagName) editTagName.value = tnames.length ? tnames.join(", ") : "—";
+
+    renderEditItems();
+    if (editOverlay) editOverlay.style.display = "flex";
+  }
+
+  function closeEdit() {
+    if (editOverlay) editOverlay.style.display = "none";
+    editingId = null;
+    editingCategory = null;
+    editingItems = [];
+  }
+
+  function renderEditItems() {
+    if (!editItemsList) return;
+    if (editingItems.length === 0) { editItemsList.innerHTML = `<div class="muted">Nessun item</div>`; return; }
+    editItemsList.innerHTML = "";
+    editingItems.forEach(it => {
+      const div = document.createElement("div");
+      div.className = "row";
+      div.innerHTML = `
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Item</label>
+          <input value="${escapeHtml(it.name)}" disabled />
+        </div>
+        <div class="field" style="min-width:160px;">
+          <label>Quantità</label>
+          <input value="${Number(it.qty || 0)}" disabled />
+        </div>
+        <div class="field" style="min-width:160px;">
+          <button class="btn danger small" type="button" onclick="editRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+        </div>
+      `;
+      editItemsList.appendChild(div);
+    });
+  }
+
+  function editAddItem() {
+    if (!editItemSelect || !editItemQty) return;
+    const name = editItemSelect.value;
+    let qty = parseInt(editItemQty.value || "1", 10);
+    if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+    const existing = editingItems.find(x => x.name === name);
+    if (existing) existing.qty += qty;
+    else editingItems.push({ name, qty });
+
+    editItemQty.value = "1";
+    renderEditItems();
+  }
+
+  function editRemoveItem(name) { editingItems = editingItems.filter(x => x.name !== name); renderEditItems(); }
+
+  function saveEdit() {
+    if (!editingId) return;
+
+    const ops = loadOps();
+    const rec = ops.find(r => r.id === editingId);
+    if (!rec) return;
+
+    rec.type = (editType?.value || "ottenuto");
+    rec.money = Math.max(0, parseInt(editMoney?.value || "0", 10) || 0);
+    rec.note = (editNote?.value || "").trim();
+    rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
+
+    rec.tagUserIds = selectedTagUserIds.slice();
+    rec.tagNames = selectedTagNames();
+    rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
+
+    saveOps(ops);
+
+    logEvent("AZIONI_UPDATE", { id: rec.id, category: rec.category, type: rec.type, money: rec.money, note: rec.note, items: rec.items, tags: rec.tagNames || [] });
+
+    closeEdit();
+    renderCategory(rec.category);
+    invRenderTotals();
+  }
+
+  function renderCategory(category) {
+    const tid = tabIdFromName(category);
+    renderDraft(category);
+
+    const records = loadOps().filter(r => r.category === category);
+    const tableBody = document.getElementById("table_" + tid);
+    if (!tableBody) return;
+
+    if (!records.length) {
+      tableBody.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
+      return;
+    }
+
+    const sorted = records.slice().sort((a,b) => (b.ts||0)-(a.ts||0));
+    tableBody.innerHTML = "";
+
+    sorted.forEach(r => {
+      const when = new Date(r.ts).toLocaleString();
+      const tipo = (r.type === "ottenuto") ? "OTTENUTO" : "PERSO";
+      const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
+      const itemsHtml = itemsText
+        ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>`
+        : `<span class="muted">—</span>`;
+
+      const noteHtml = (r.note && String(r.note).trim())
+        ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(String(r.note).trim())}</div>`
+        : `<span class="muted">—</span>`;
+
+      const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+      const tagHtml = tnames.length
+        ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+        : `<span class="muted">—</span>`;
+
+      const actionsHtml = canEditOps()
+        ? `<button class="btn small" type="button" onclick="openEdit('${r.id}')">Modifica</button>
+           <button class="btn danger small" type="button" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
+        : `<span class="muted">—</span>`;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${when}</td>
+        <td style="font-weight:900;">${escapeHtml(r.createdByName || "—")}</td>
+        <td style="font-weight:900; color:var(--red2)">${tipo}</td>
+        <td style="font-weight:900;">${formatMoney(r.money || 0)}</td>
+        <td>${tagHtml}</td>
+        <td>${noteHtml}</td>
+        <td>${itemsHtml}</td>
+        <td>${actionsHtml}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
       tabs.innerHTML = "";
       panels.innerHTML = "";
 
+  function renderTabsAndPanels() {
+    if (!opsTabs || !panelWrapper) return;
       INV_CATEGORIES.forEach((cat, idx) => {
         const tid = invTabId(cat);
 
+    opsTabs.innerHTML = "";
+    panelWrapper.innerHTML = "";
         const b = document.createElement("button");
         b.id = "invTab_" + tid;
         b.textContent = cat;
         b.onclick = () => invShowTab(cat);
         tabs.appendChild(b);
 
+    (window.CATEGORIES || []).forEach((cat, idx) => {
+      const tid = tabIdFromName(cat);
         const p = document.createElement("div");
         p.className = "panel invPanel";
         p.id = "invPanel_" + tid;
 
+      const tab = document.createElement("button");
+      tab.id = "tab_" + tid;
+      tab.textContent = cat;
+      tab.onclick = () => showCat(cat);
+      opsTabs.appendChild(tab);
         const disabledAttr = canEditOps() ? "" : "disabled";
         const disabledCls = canEditOps() ? "" : "disabled";
 
+      const panel = document.createElement("div");
+      panel.className = "panel opPanel";
+      panel.id = "panel_" + tid;
         p.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
+      const disabledAttr = canEditOps() ? "" : "disabled";
+      const disabledCls = canEditOps() ? "" : "disabled";
           <div class="row">
             <div class="field" style="min-width:180px;">
               <label>Tipo</label>
@@ -2657,26 +4300,48 @@
               </select>
             </div>
 
+      panel.innerHTML = `
+        <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
             <div class="field" style="min-width:320px; flex:1;">
               <label>Item</label>
               <select id="invItem_${tid}" ${disabledAttr}></select>
             </div>
 
+        <div class="row">
+          <div class="field" style="min-width:180px;">
+            <label>Tipo</label>
+            <select id="type_${tid}" ${disabledAttr}>
+              <option value="ottenuto">OTTENUTO</option>
+              <option value="perso">PERSO</option>
+            </select>
+          </div>
             <div class="field" style="min-width:160px;">
               <label>Quantità</label>
               <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
             </div>
 
+          <div class="field" style="min-width:220px;">
+            <label>Soldi ($)</label>
+            <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+          </div>
             <div class="field" style="min-width:220px;">
               <label>Soldi ($)</label>
               <input id="invMoney_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
+          <div class="field" style="flex:1; min-width:260px;">
+            <label>Note</label>
+            <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
             <div class="field" style="min-width:220px;">
               <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
             </div>
           </div>
+        </div>
 
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <select id="item_${tid}" ${disabledAttr}></select>
           <div class="row">
             <div class="field" style="flex:1; min-width:260px;">
               <label>Note</label>
@@ -2684,6 +4349,9 @@
             </div>
           </div>
 
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input id="qty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
           <div class="row">
             <div class="field" style="min-width:320px;">
               <label>Tag (dalla lista a destra)</label>
@@ -2692,6 +4360,9 @@
             </div>
           </div>
 
+          <div class="field" style="min-width:180px;">
+            <button class="btn ${disabledCls}" ${disabledAttr} type="button" onclick="addItemToDraft('${cat}')">Aggiungi item</button>
+          </div>
           <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
           <table>
             <thead>
@@ -2712,8 +4383,16 @@
           </table>
         `;
 
+          <div class="field" style="min-width:200px;">
+            <button class="btn ${disabledCls}" ${disabledAttr} type="button" onclick="saveDraftRecord('${cat}')">Salva registrazione</button>
+          </div>
+        </div>
         panels.appendChild(p);
 
+        <div class="panel active" style="display:block; margin-top:12px;">
+          <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
+          <div id="draft_${tid}" style="margin-top:10px;"></div>
+        </div>
         setTimeout(() => {
           const sel = document.getElementById("invItem_" + tid);
           if (!sel) return;
@@ -2728,6 +4407,20 @@
           syncSelectedTagsUI();
         }, 0);
 
+        <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table_${tid}">
+            <tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>
+          </tbody>
+        </table>
+      `;
+
+      panelWrapper.appendChild(panel);
         if (idx === 0) {
           b.classList.add("active");
           p.classList.add("active");
@@ -2735,46 +4428,168 @@
       });
     }
 
+      setTimeout(() => {
+        const itemSel = document.getElementById("item_" + tid);
+        if (itemSel) fillItemSelect(itemSel);
+        renderDraft(cat);
+        renderCategory(cat);
+      }, 0);
     function invSetActive(cat) { window.__inv_active = cat; }
     function invGetActive() { return window.__inv_active || INV_CATEGORIES[0]; }
 
+      if (idx === 0) {
+        tab.classList.add("active");
+        panel.classList.add("active");
+      }
+    });
+  }
+
+  function showCat(catName) {
+    const tid = tabIdFromName(catName);
+
+    document.querySelectorAll("#opsTabs button").forEach(b => b.classList.remove("active"));
+    document.getElementById("tab_" + tid)?.classList.add("active");
+
+    document.querySelectorAll(".opPanel").forEach(p => p.classList.remove("active"));
+    document.getElementById("panel_" + tid)?.classList.add("active");
+
+    renderCategory(catName);
+  }
+
+  // =========================
+  // GESTIONE ARMI/DROGA + TOTALI
+  // =========================
+  window.INV_CATEGORIES = ["Armi", "Droga", "Oggetti/Varie"];
+  const INV_ITEMS = {
+    "Armi": [
+      "Pistola","Pistola Pesante","Revolver",
+      "Micro SMG","SMG",
+      "Carabina","AK-47","Fucile a pompa","Fucile a pompa pesante","Cecchino",
+      "Munizioni Pistola","Munizioni SMG","Munizioni Fucile","Munizioni Pompa","Munizioni Cecchino",
+      "Giubbotto antiproiettile"
+    ],
+    "Droga": [
+      "Erba","Cocaina","Metanfetamina","Crack","Oppio",
+      "Semi","Sostanze chimiche","Buste/Confezioni","Bilancino"
+    ],
+    "Oggetti/Varie": [
+      "Radio","Grimaldello","Bende","Medikit","Telecamera",
+      "Cibo","Bevande","Altri oggetti"
+    ]
+  };
+
+  function invLoad() {
+    try {
+      const raw = localStorage.getItem(INV_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+  }
+  function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr || [])); }
+
+  function invTabId(name) {
+    return "inv_" + String(name || "").toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+  }
+
+  function invRenderTabs() {
+    const tabs = document.getElementById("invTabs");
+    const panels = document.getElementById("invPanels");
+    if (!tabs || !panels) return;
+
+    tabs.innerHTML = "";
+    panels.innerHTML = "";
+
+    window.INV_CATEGORIES.forEach((cat, idx) => {
     function invShowTab(cat) {
       invSetActive(cat);
       const tid = invTabId(cat);
 
+      const b = document.createElement("button");
+      b.id = "invTab_" + tid;
+      b.textContent = cat;
+      b.onclick = () => invShowTab(cat);
+      tabs.appendChild(b);
+
+      const p = document.createElement("div");
+      p.className = "panel invPanel";
+      p.id = "invPanel_" + tid;
       document.querySelectorAll("#invTabs button").forEach(x => x.classList.remove("active"));
       const tb = document.getElementById("invTab_" + tid);
       if (tb) tb.classList.add("active");
 
+      const disabledAttr = canEditOps() ? "" : "disabled";
+      const disabledCls = canEditOps() ? "" : "disabled";
       document.querySelectorAll(".invPanel").forEach(x => x.classList.remove("active"));
       const pn = document.getElementById("invPanel_" + tid);
       if (pn) pn.classList.add("active");
 
+      p.innerHTML = `
+        <h3 style="margin:0 0
+          0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
       invRenderTable(cat);
       invRenderTotals();
       syncSelectedTagsUI();
     }
 
+        <div class="row">
+          <div class="field" style="min-width:180px;">
+            <label>Tipo</label>
+            <select id="invType_${tid}" ${disabledAttr}>
+              <option value="add">AGGIUNTO</option>
+              <option value="rem">RIMOSSO</option>
+              <option value="sold">VENDUTO</option>
+              <option value="buy">ACQUISTATO</option>
+            </select>
+          </div>
     function invSaveRecord(cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
+          <div class="field" style="min-width:320px; flex:1;">
+            <label>Item</label>
+            <select id="invItem_${tid}" ${disabledAttr}></select>
+          </div>
       const tid = invTabId(cat);
       const type = document.getElementById("invType_" + tid)?.value || "add";
       const item = document.getElementById("invItem_" + tid)?.value || "";
       let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
       if (!Number.isFinite(qty) || qty < 1) qty = 1;
 
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+          </div>
       const moneyRaw = document.getElementById("invMoney_" + tid)?.value || "";
       const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
 
+          <div class="field" style="min-width:220px;">
+            <label>Soldi ($)</label>
+            <input id="invMoney_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+          </div>
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       if (!item && money === 0 && !note) return alert("Inserisci almeno item, o soldi, o nota.");
 
+          <div class="field" style="min-width:220px;">
+            <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
+          </div>
+        </div>
       const who = myGameNameOrEmail();
 
+        <div class="row">
+          <div class="field" style="flex:1; min-width:260px;">
+            <label>Note</label>
+            <input id="invNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+          </div>
+        </div>
       const tagUserIds = selectedTagUserIds.slice();
       const tagNames = selectedTagNames();
 
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label>Tag (dalla lista a destra)</label>
+            <input id="invTag_${tid}" disabled value="—" />
+            <div class="hint">I tag selezionati valgono anche qui.</div>
+          </div>
+        </div>
       const all = invLoad();
       all.push({
         id: uid(),
@@ -2793,25 +4608,139 @@
       });
       invSave(all);
 
+        <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:200px;">Quando</th>
+              <th style="width:220px;">Chi</th>
+              <th style="width:120px;">Tipo</th>
+              <th style="width:160px;">Tag</th>
+              <th>Item</th>
+              <th style="width:90px;">Qtà</th>
+              <th style="width:140px;">Soldi</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="invTable_${tid}">
+            <tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>
+          </tbody>
+        </table>
+      `;
+
+      panels.appendChild(p);
       document.getElementById("invQty_" + tid).value = "1";
       document.getElementById("invMoney_" + tid).value = "";
       document.getElementById("invNote_" + tid).value = "";
 
+      setTimeout(() => {
+        const sel = document.getElementById("invItem_" + tid);
+        if (!sel) return;
+
+        sel.innerHTML = "";
+        (INV_ITEMS[cat] || []).forEach(it => {
+          const o = document.createElement("option");
+          o.value = it;
+          o.textContent = it;
+          sel.appendChild(o);
+        });
       invRenderTable(cat);
       invRenderTotals();
     }
 
+        invRenderTable(cat);
+        syncSelectedTagsUI();
+      }, 0);
     function invRenderTable(cat) {
       const tid = invTabId(cat);
       const body = document.getElementById("invTable_" + tid);
       if (!body) return;
 
+      if (idx === 0) {
+        b.classList.add("active");
+        p.classList.add("active");
+        invSetActive(cat);
       const rows = invLoad().filter(r => r.category === cat).sort((a,b) => (b.ts||0)-(a.ts||0));
       if (!rows.length) {
         body.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
         return;
       }
+    });
+  }
 
+  function invSetActive(cat) { window.__inv_active = cat; }
+  function invGetActive() { return window.__inv_active || (window.INV_CATEGORIES ? window.INV_CATEGORIES[0] : "Armi"); }
+
+  function invShowTab(cat) {
+    invSetActive(cat);
+    const tid = invTabId(cat);
+
+    document.querySelectorAll("#invTabs button").forEach(x => x.classList.remove("active"));
+    const tb = document.getElementById("invTab_" + tid);
+    if (tb) tb.classList.add("active");
+
+    document.querySelectorAll(".invPanel").forEach(x => x.classList.remove("active"));
+    const pn = document.getElementById("invPanel_" + tid);
+    if (pn) pn.classList.add("active");
+
+    invRenderTable(cat);
+    invRenderTotals();
+    syncSelectedTagsUI();
+
+    // anche lista tag a destra (se esiste)
+    if (typeof renderTagListInv === "function") renderTagListInv();
+  }
+
+  function invSaveRecord(cat) {
+    if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+    const tid = invTabId(cat);
+    const type = document.getElementById("invType_" + tid)?.value || "add";
+    const item = document.getElementById("invItem_" + tid)?.value || "";
+
+    let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
+    if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+    const moneyRaw = document.getElementById("invMoney_" + tid)?.value || "";
+    const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
+
+    const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
+    if (!item && money === 0 && !note) return alert("Inserisci almeno item, o soldi, o nota.");
+
+    const who = myGameNameOrEmail();
+
+    const tagUserIds = selectedTagUserIds.slice();
+    const tagNames = selectedTagNames();
+
+    const all = invLoad();
+    const newRec = {
+      id: uid(),
+      ts: Date.now(),
+      category: cat,
+      type,
+      item,
+      qty,
+      money,
+      note,
+      who,
+      tagUserIds,
+      tagNames,
+      tagName: tagNames.length ? tagNames[0] : null
+    };
+
+    all.push(newRec);
+    invSave(all);
+
+    logEvent("GESTIONE_CREATE", {
+      id: newRec.id,
+      category: cat,
+      type,
+      item,
+      qty,
+      money,
+      note,
+      tags: tagNames
+    });
       body.innerHTML = "";
       rows.forEach(r => {
         const tr = document.createElement("tr");
@@ -2821,6 +4750,86 @@
           ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
           : `<span class="muted">—</span>`;
 
+    // reset
+    const qtyEl = document.getElementById("invQty_" + tid);
+    const moneyEl = document.getElementById("invMoney_" + tid);
+    const noteEl = document.getElementById("invNote_" + tid);
+
+    if (qtyEl) qtyEl.value = "1";
+    if (moneyEl) moneyEl.value = "";
+    if (noteEl) noteEl.value = "";
+
+    invRenderTable(cat);
+    invRenderTotals();
+  }
+
+  function invRenderTable(cat) {
+    const tid = invTabId(cat);
+    const body = document.getElementById("invTable_" + tid);
+    if (!body) return;
+
+    const rows = invLoad()
+      .filter(r => r.category === cat)
+      .sort((a,b) => (b.ts||0)-(a.ts||0));
+
+    if (!rows.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+
+      const t =
+        r.type === "add" ? "AGGIUNTO" :
+        r.type === "rem" ? "RIMOSSO" :
+        r.type === "sold" ? "VENDUTO" :
+        r.type === "buy" ? "ACQUISTATO" :
+        "—";
+
+      const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+      const tagHtml = tnames.length
+        ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+        : `<span class="muted">—</span>`;
+
+      tr.innerHTML = `
+        <td>${new Date(r.ts).toLocaleString()}</td>
+        <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+        <td style="font-weight:900; color:var(--red2)">${t}</td>
+        <td>${tagHtml}</td>
+        <td>${escapeHtml(r.item || "—")}</td>
+        <td style="font-weight:900;">${Number(r.qty || 0)}</td>
+        <td style="font-weight:900;">${formatMoney(r.money || 0)}</td>
+        <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  function normalizeTotalItemName(name) {
+    const n = String(name || "").trim();
+    if (!n) return "";
+    if (n.toLowerCase().startsWith("munizioni")) return "Munizioni";
+    return n;
+  }
+
+  // Totali: includono anche gli item delle Azioni (OPS)
+  function invComputeTotals() {
+    const totals = {};
+    let addMoney = 0, remMoney = 0;
+
+    // 1) Gestione (INV)
+    invLoad().forEach(r => {
+      const key = normalizeTotalItemName(r.item);
+      const q = Number(r.qty || 0);
+      const m = Number(r.money || 0);
+
+      if (key) {
+        if (!totals[key]) totals[key] = 0;
+        if (r.type === "add" || r.type === "buy") totals[key] += q;
+        else if (r.type === "rem" || r.type === "sold") totals[key] -= q;
+      }
         tr.innerHTML = `
           <td>${new Date(r.ts).toLocaleString()}</td>
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
@@ -2835,6 +4844,9 @@
       });
     }
 
+      if (r.type === "add" || r.type === "sold") addMoney += m;
+      else if (r.type === "rem" || r.type === "buy") remMoney += m;
+    });
     function normalizeTotalItemName(name) {
       const n = String(name || "").trim();
       if (!n) return "";
@@ -2847,6 +4859,14 @@
       const totals = {};
       let addMoney = 0, remMoney = 0;
 
+    // 2) Azioni (OPS): solo items
+    loadOps().forEach(op => {
+      (op.items || []).forEach(it => {
+        const key = normalizeTotalItemName(it.name);
+        if (!key) return;
+        if (!totals[key]) totals[key] = 0;
+        const q = Number(it.qty || 0);
+        totals[key] += (op.type === "ottenuto" ? q : -q);
       // 1) Gestione armi-droga (INV)
       invLoad().forEach(r => {
         const key = normalizeTotalItemName(r.item);
@@ -2859,7 +4879,10 @@
         if (r.type === "add") addMoney += m;
         else remMoney += m;
       });
+    });
 
+    return { totals, addMoney, remMoney };
+  }
       // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
       loadOps().forEach(op => {
         (op.items || []).forEach(it => {
@@ -2871,16 +4894,37 @@
         });
       });
 
+  function invRenderTotals() {
+    const body = document.getElementById("invTotalsBody");
+    const moneyBox = document.getElementById("invMoneySummary");
+    if (!body || !moneyBox) return;
       return { totals, addMoney, remMoney };
     }
 
+    const { totals, addMoney, remMoney } = invComputeTotals();
     function invRenderTotals() {
       const body = document.getElementById("invTotalsBody");
       const moneyBox = document.getElementById("invMoneySummary");
       if (!body || !moneyBox) return;
 
+    const entries = Object.entries(totals)
+      .map(([k,v]) => ({ item:k, qty:v }))
+      .filter(x => x.qty !== 0)
+      .sort((a,b) => Math.abs(b.qty) - Math.abs(a.qty));
       const { totals, addMoney, remMoney } = invComputeTotals();
 
+    if (!entries.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="2">Nessun dato</td></tr>`;
+    } else {
+      body.innerHTML = "";
+      entries.forEach(x => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="font-weight:900;">${escapeHtml(x.item)}</td>
+          <td style="font-weight:900;">${x.qty}</td>
+        `;
+        body.appendChild(tr);
+      });
       const entries = Object.entries(totals)
         .map(([k,v]) => ({ item:k, qty:v }))
         .filter(x => x.qty !== 0)
@@ -2904,6 +4948,210 @@
       moneyBox.textContent = `Aggiunti: ${formatMoney(addMoney)} .. Rimossi: ${formatMoney(remMoney)} .. Saldo: ${formatMoney(saldo)}`;
     }
 
+    const saldo = addMoney - remMoney;
+    moneyBox.textContent = `Aggiunti: ${formatMoney(addMoney)} .. Rimossi: ${formatMoney(remMoney)} .. Saldo: ${formatMoney(saldo)}`;
+  }
+
+  function invResetAll() {
+    const ok = confirm("Confermi AZZERA GESTIONE?");
+    if (!ok) return;
+    localStorage.removeItem(INV_KEY);
+    logEvent("GESTIONE_RESET_ALL", {});
+    (window.INV_CATEGORIES || []).forEach(c => invRenderTable(c));
+    invRenderTotals();
+  }
+
+      // =========================
+  // DIARIO (CRUD + permessi: tutti leggono, solo Owner/Boss/Vice Boss modificano note già create)
+  // =========================
+  let editingNoteId = null;
+
+  function diaryLoad(){ return load(DIARY_KEY, []); }
+  function diarySave(arr){ save(DIARY_KEY, arr || []); }
+
+  function canEditExistingDiaryNote(note) {
+    // tutti possono creare .. ma modificare note esistenti solo admin
+    return isAdmin();
+  }
+
+  function diaryRender() {
+    const body = document.getElementById("diaryTableBody");
+    if (!body) return;
+
+    const rows = diaryLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
+    if (!rows.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="6">Nessuna nota</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = "";
+    rows.forEach(n => {
+      const canEdit = canEditExistingDiaryNote(n);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${new Date(n.ts).toLocaleString()}</td>
+        <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Generale")}</td>
+        <td style="font-weight:900;">${escapeHtml(n.title || "—")}</td>
+        <td>${n.names ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(n.names)}</div>` : `<span class="muted">—</span>`}<br>
+            ${n.body ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(n.body)}</div>` : `<span class="muted">—</span>`}
+        </td>
+        <td style="font-weight:900;">${escapeHtml(n.author || "—")}</td>
+        <td>${canEdit ? `<button class="btn small" onclick="openNoteModal('${n.id}')">Modifica</button>` : `<span class="muted">—</span>`}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  function diarySearch() { diaryRender(); } // compat: nel tuo codice la chiami così
+
+  function openNoteModal(id=null) {
+    editingNoteId = id;
+
+    const ov = document.getElementById("noteOverlay");
+    const permHint = document.getElementById("notePermHint");
+    const btnDel = document.getElementById("btnDeleteNote");
+    const btnSave = document.getElementById("btnSaveNote");
+
+    const typeEl = document.getElementById("noteType");
+    const titleEl = document.getElementById("noteTitle");
+    const namesEl = document.getElementById("noteNames");
+    const bodyEl = document.getElementById("noteBody");
+
+    const me = getMyUser();
+    const author = me?.gameName || me?.email || "—";
+
+    if (!id) {
+      // nuova nota (tutti possono)
+      if (typeEl) typeEl.value = "Generale";
+      if (titleEl) titleEl.value = "";
+      if (namesEl) namesEl.value = "";
+      if (bodyEl) bodyEl.value = "";
+      if (permHint) permHint.textContent = "Crei una nuova nota .. Modifiche alle note esistenti solo admin.";
+      if (btnDel) btnDel.style.display = "none";
+      if (btnSave) btnSave.disabled = false;
+      if (ov) ov.style.display = "block";
+      return;
+    }
+
+    const note = diaryLoad().find(x => x.id === id);
+    if (!note) return;
+
+    if (!canEditExistingDiaryNote(note)) {
+      alert("Solo Owner/Boss/Vice Boss possono modificare note già create.");
+      return;
+    }
+
+    if (typeEl) typeEl.value = note.type || "Generale";
+    if (titleEl) titleEl.value = note.title || "";
+    if (namesEl) namesEl.value = note.names || "";
+    if (bodyEl) bodyEl.value = note.body || "";
+
+    if (permHint) permHint.textContent = `Stai modificando una nota .. Autore: ${note.author || author}`;
+    if (btnDel) btnDel.style.display = "inline-block";
+    if (btnSave) btnSave.disabled = false;
+
+    if (ov) ov.style.display = "block";
+  }
+
+  function closeNoteModal() {
+    const ov = document.getElementById("noteOverlay");
+    if (ov) ov.style.display = "none";
+    editingNoteId = null;
+  }
+
+  function saveNote() {
+    const typeEl = document.getElementById("noteType");
+    const titleEl = document.getElementById("noteTitle");
+    const namesEl = document.getElementById("noteNames");
+    const bodyEl = document.getElementById("noteBody");
+
+    const type = typeEl?.value || "Generale";
+    const title = (titleEl?.value || "").trim();
+    const names = (namesEl?.value || "").trim();
+    const body = (bodyEl?.value || "").trim();
+
+    if (!title && !names && !body) return alert("Inserisci almeno titolo o testo.");
+
+    const me = getMyUser();
+    const author = me?.gameName || me?.email || "—";
+
+    const all = diaryLoad();
+
+    if (!editingNoteId) {
+      const rec = { id: uid(), ts: Date.now(), type, title, names, body, author };
+      all.push(rec);
+      diarySave(all);
+      logEvent("DIARIO_CREATE", { id: rec.id, type, title });
+    } else {
+      const rec = all.find(x => x.id === editingNoteId);
+      if (!rec) return;
+      if (!canEditExistingDiaryNote(rec)) return alert("Permesso negato.");
+
+      rec.type = type;
+      rec.title = title;
+      rec.names = names;
+      rec.body = body;
+      diarySave(all);
+      logEvent("DIARIO_UPDATE", { id: rec.id, type, title });
+    }
+
+    closeNoteModal();
+    diaryRender();
+  }
+
+  function deleteNote() {
+    if (!editingNoteId) return;
+    const all = diaryLoad();
+    const rec = all.find(x => x.id === editingNoteId);
+    if (!rec) return;
+
+    if (!canEditExistingDiaryNote(rec)) return alert("Permesso negato.");
+    const ok = confirm("Confermi eliminazione nota?");
+    if (!ok) return;
+
+    diarySave(all.filter(x => x.id !== editingNoteId));
+    logEvent("DIARIO_DELETE", { id: editingNoteId });
+    closeNoteModal();
+    diaryRender();
+  }
+
+  // =========================
+  // LOG SEARCH (se hai input logQuery in futuro)
+  // =========================
+  function logSearch() { renderLogs(); }
+
+
+  // =========================
+  // DEFAULTS (se mancano)
+  // =========================
+  // categorie azioni
+  if (!window.CATEGORIES) window.CATEGORIES = ["Rapina", "Inseguimento", "Scambio", "Altro"];
+  // items azioni
+  if (!window.FIXED_ITEMS) window.FIXED_ITEMS = [
+    "Pistola","Pistola Pesante","Revolver","Micro SMG","SMG",
+    "Carabina","AK-47","Fucile a pompa","Cecchino",
+    "Munizioni Pistola","Munizioni SMG","Munizioni Fucile","Munizioni Pompa","Munizioni Cecchino",
+    "Giubbotto antiproiettile",
+    "Erba","Cocaina","Metanfetamina","Crack","Oppio",
+    "Radio","Grimaldello","Bende","Medikit"
+  ];
+
+  // per compat: in alcuni punti usi window.INV_CATEGORIES
+  if (!window.INV_CATEGORIES) window.INV_CATEGORIES = INV_CATEGORIES;
+
+  // =========================
+  // PATCH: elementi mancanti nei tuoi riferimenti (opsTabs/panelWrapper)
+  // =========================
+  // se nel DOM hai actionTabs/actionPanels (come nel tuo HTML), agganciamoli qui
+  if (!window.opsTabs && document.getElementById("actionTabs")) window.opsTabs = document.getElementById("actionTabs");
+  if (!window.panelWrapper && document.getElementById("actionPanels")) window.panelWrapper = document.getElementById("actionPanels");
+
+  // rebind alle variabili locali se erano null
+  try {
+    if (!opsTabs && window.opsTabs) opsTabs = window.opsTabs;
+    if (!panelWrapper && window.panelWrapper) panelWrapper = window.panelWrapper;
+  } catch {}
     function invResetAll() {
       const ok = confirm("Confermi AZZERA GESTIONE?");
       if (!ok) return;
@@ -2914,371 +5162,7 @@
 
     // =========================
     // CONTABILITÀ (Stipendi + Bilancio)
-    // =========================
-    const ACC_TABS = ["Stipendi", "Bilancio"];
-
-    function accLoad() {
-      try {
-        const raw = localStorage.getItem(ACC_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
-    }
-    function accSave(arr) { localStorage.setItem(ACC_KEY, JSON.stringify(arr || [])); }
-
-    function accTabId(name) {
-      return "acc_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-    }
-
-    function accRenderTabs() {
-      const tabs = document.getElementById("accTabs");
-      const panels = document.getElementById("accPanels");
-      if (!tabs || !panels) return;
-
-      tabs.innerHTML = "";
-      panels.innerHTML = "";
-
-      ACC_TABS.forEach((tname, idx) => {
-        const tid = accTabId(tname);
-
-        const b = document.createElement("button");
-        b.id = "accTab_" + tid;
-        b.textContent = tname;
-        b.onclick = () => accShowTab(tname);
-        tabs.appendChild(b);
-
-        const p = document.createElement("div");
-        p.className = "panel accPanel";
-        p.id = "accPanel_" + tid;
-
-        const disabledAttr = canEditOps() ? "" : "disabled";
-        const disabledCls = canEditOps() ? "" : "disabled";
-
-        if (tname === "Stipendi") {
-          p.innerHTML = `
-            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
-            <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
-
-            <div class="row">
-              <div class="field" style="min-width:320px; flex:1;">
-                <label>A chi</label>
-                <input id="salTo_${tid}" type="text" placeholder="Nome / reparto" ${disabledAttr} />
-              </div>
-
-              <div class="field" style="min-width:220px;">
-                <label>Importo ($)</label>
-                <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
-              </div>
-
-              <div class="field" style="min-width:320px; flex:1;">
-                <label>Note</label>
-                <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
-              </div>
-
-              <div class="field" style="min-width:220px;">
-                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddSalary()">Salva</button>
-              </div>
-            </div>
-
-            <h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:200px;">Quando</th>
-                  <th style="width:220px;">Chi</th>
-                  <th>A chi</th>
-                  <th style="width:160px;">Importo</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody id="accTable_${tid}">
-                <tr><td class="muted" colspan="5">Nessun dato</td></tr>
-              </tbody>
-            </table>
-          `;
-        } else {
-          p.innerHTML = `
-            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Bilancio (Entrate/Uscite)</h3>
-            <div class="muted">Registra entrate o uscite ..</div>
-
-            <div class="row">
-              <div class="field" style="min-width:220px;">
-                <label>Tipo</label>
-                <select id="balType_${tid}" ${disabledAttr}>
-                  <option value="in">ENTRATA</option>
-                  <option value="out">USCITA</option>
-                </select>
-              </div>
-
-              <div class="field" style="min-width:220px;">
-                <label>Importo ($)</label>
-                <input id="balAmt_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-              </div>
-
-              <div class="field" style="min-width:320px; flex:1;">
-                <label>Causale</label>
-                <input id="balReason_${tid}" type="text" placeholder="es. Vendita / Acquisto / Varie" ${disabledAttr} />
-              </div>
-
-              <div class="field" style="min-width:220px;">
-                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddBalance()">Salva</button>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field" style="flex:1; min-width:320px;">
-                <label>Note</label>
-                <input id="balNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
-              </div>
-            </div>
-
-            <h4 style="margin:16px 0 6px 0; font-weight:900;">Movimenti</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:200px;">Quando</th>
-                  <th style="width:220px;">Chi</th>
-                  <th style="width:120px;">Tipo</th>
-                  <th style="width:160px;">Importo</th>
-                  <th style="width:220px;">Causale</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody id="accTable_${tid}">
-                <tr><td class="muted" colspan="6">Nessun dato</td></tr>
-              </tbody>
-            </table>
-          `;
-        }
-
-        panels.appendChild(p);
-
-        if (idx === 0) {
-          b.classList.add("active");
-          p.classList.add("active");
-        }
-      });
-
-      setTimeout(() => {
-        accRenderTable("Stipendi");
-        accRenderTable("Bilancio");
-      }, 0);
-    }
-
-    function accShowTab(name) {
-      const tid = accTabId(name);
-      document.querySelectorAll("#accTabs button").forEach(x => x.classList.remove("active"));
-      const tb = document.getElementById("accTab_" + tid);
-      if (tb) tb.classList.add("active");
-
-      document.querySelectorAll(".accPanel").forEach(x => x.classList.remove("active"));
-      const pn = document.getElementById("accPanel_" + tid);
-      if (pn) pn.classList.add("active");
-
-      accRenderTable(name);
-      accRenderSummary();
-      accRenderAdminPanel();
-    }
-
-    function accRenderAdminPanel() {
-      const panel = document.getElementById("accAdminPanel");
-      if (!panel) return;
-      panel.style.display = canResetAccounting() ? "block" : "none";
-    }
-
-    function accAddSalary() {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-
-      const tid = accTabId("Stipendi");
-      const to = (document.getElementById("salTo_" + tid)?.value || "").trim();
-      const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
-      const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
-
-      if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
-
-      const all = accLoad();
-      all.push({
-        id: uid(),
-        ts: Date.now(),
-        kind: "salary",
-        who: myGameNameOrEmail(),
-        to,
-        amount: amt,
-        note
-      });
-      accSave(all);
-
-      document.getElementById("salTo_" + tid).value = "";
-      document.getElementById("salAmt_" + tid).value = "";
-      document.getElementById("salNote_" + tid).value = "";
-
-      accRenderTable("Stipendi");
-      accRenderSummary();
-    }
-
-    function accAddBalance() {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-
-      const tid = accTabId("Bilancio");
-      const type = document.getElementById("balType_" + tid)?.value || "in";
-      const amt = Math.max(0, parseInt(document.getElementById("balAmt_" + tid)?.value || "0", 10) || 0);
-      const reason = (document.getElementById("balReason_" + tid)?.value || "").trim();
-      const note = (document.getElementById("balNote_" + tid)?.value || "").trim();
-
-      if (amt === 0 && !reason && !note) return alert("Inserisci almeno importo o causale/note.");
-
-      const all = accLoad();
-      all.push({
-        id: uid(),
-        ts: Date.now(),
-        kind: "balance",
-        who: myGameNameOrEmail(),
-        type, // in/out
-        amount: amt,
-        reason,
-        note
-      });
-      accSave(all);
-
-      document.getElementById("balAmt_" + tid).value = "";
-      document.getElementById("balReason_" + tid).value = "";
-      document.getElementById("balNote_" + tid).value = "";
-
-      accRenderTable("Bilancio");
-      accRenderSummary();
-    }
-
-    function accRenderTable(tabName) {
-      const tid = accTabId(tabName);
-      const body = document.getElementById("accTable_" + tid);
-      if (!body) return;
-
-      const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
-      const rows = all.filter(r => (tabName === "Stipendi" ? r.kind === "salary" : r.kind === "balance")).slice(0, 50);
-
-      if (!rows.length) {
-        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 5 : 6}">Nessun dato</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = "";
-      rows.forEach(r => {
-        const tr = document.createElement("tr");
-        if (tabName === "Stipendi") {
-          tr.innerHTML = `
-            <td>${new Date(r.ts).toLocaleString()}</td>
-            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-            <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
-            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-          `;
-        } else {
-          const t = r.type === "in" ? "ENTRATA" : "USCITA";
-          tr.innerHTML = `
-            <td>${new Date(r.ts).toLocaleString()}</td>
-            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-            <td style="font-weight:900; color:var(--red2)">${t}</td>
-            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-            <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
-            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-          `;
-        }
-        body.appendChild(tr);
-      });
-    }
-
-    function accComputeSummary() {
-      const all = accLoad();
-      let income = 0, expense = 0;
-      let salaryTotal = 0, salary30 = 0;
-      const now = Date.now();
-      const days30 = 30 * 24 * 60 * 60 * 1000;
-
-      all.forEach(r => {
-        if (r.kind === "balance") {
-          const amt = Number(r.amount || 0);
-          if (r.type === "in") income += amt;
-          else expense += amt;
-        }
-        if (r.kind === "salary") {
-          const amt = Number(r.amount || 0);
-          salaryTotal += amt;
-          if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
-        }
-      });
-
-      return { income, expense, salaryTotal, salary30 };
-    }
-
-    function accRenderSummary() {
-      const b = document.getElementById("accBalanceSummary");
-      const s = document.getElementById("accSalarySummary");
-      if (!b || !s) return;
-
-      const { income, expense, salaryTotal, salary30 } = accComputeSummary();
-      const saldo = income - expense;
-
-      b.textContent = `Entrate: ${formatMoney(income)} .. Uscite: ${formatMoney(expense)} .. Saldo: ${formatMoney(saldo)}`;
-      s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
-    }
-
-    function accResetAll() {
-      if (!canResetAccounting()) return alert("Permesso negato");
-      const ok = confirm("Confermi AZZERA CONTABILITÀ?");
-      if (!ok) return;
-      localStorage.removeItem(ACC_KEY);
-      accRenderTable("Stipendi");
-      accRenderTable("Bilancio");
-      accRenderSummary();
-    }
-
-    // =========================
-    // KEYBOARD: Enter / Escape
-    // =========================
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const active = document.activeElement;
-        if (active && active.id === "diaryQuery") {
-          e.preventDefault();
-          diarySearch();
-        }
-        if (active && active.id === "logQuery") {
-          e.preventDefault();
-          logSearch();
-        }
-      }
-      if (e.key === "Escape") {
-        if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
-        if (document.getElementById("editOverlay").style.display === "block") closeEdit();
-      }
-    });
-
-    // =========================
-    // STARTUP
-    // =========================
-    function boot() {
-      ensureDemoUsersIfEmpty();
-      setHeaderUser();
-      syncSelectedTagsUI();
-
-      const s = loadSession();
-      if (!s?.email) {
-        showOnly("login");
-        showLoginStep("stepEmail");
-        return;
-      }
-
-      const u = getMyUser();
-      if (u?.blocked) {
-        alert("Account bloccato.");
-        logout();
-        return;
-      }
-
-      initAfterLogin();
-    }
-
-    boot();
+@@ -3337,4 +3282,3 @@ <h4 style="margin:16px 0 6px 0; font-weight:900;">Movimenti</h4>
   </script>
 </body>
 </html>
