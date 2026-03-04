@@ -3504,7 +3504,8 @@
         kind: "salary",
         who: myGameNameOrEmail(),
         to,
-        amount: { clean: ac, dirty: ad, drug: as },
+        amount: amt,
+        payType,
         note
       });
       accSave(all);
