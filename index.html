@@ -83,8 +83,15 @@
     .box p { font-size:16px; color:#ff6666; margin:0; text-align:center; font-weight:800; }
 
     .hint { color:var(--muted2); font-size:14px; margin-top:6px; }
-    .muted { color:var(--muted); font-size:13px; }
+.muted { color:var(--muted); font-size:13px; }
 
+/* Contabilità: riepilogo più leggibile */
+#accBalanceSummary, #accSalarySummary{
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.2px;
+  line-height:1.35;
+}
     .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .tabs button {
       background-color:var(--panel); color:#fff; border:1px solid var(--border);
@@ -227,15 +234,15 @@
       display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap;
       margin-top:8px;
     }
-    .tagPill{
+.tagPill{
       display:inline-block;
-      padding:3px 7px;
+      padding:6px 10px;
       border-radius:999px;
       border:1px solid #ff1a1a55;
       background:#111;
       box-shadow:0 0 10px #ff1a1a22 inset;
       font-weight:900;
-      font-size:12px;
+      font-size:11px;
     }
     .tagSearchRow{
       display:flex; gap:10px; align-items:center;
@@ -669,10 +676,68 @@
         <div id="invPanels"></div>
       </div>
 
-      <div class="colSideInv">
+<div class="colSideInv">
+
+        <!-- Totali -->
+        <div class="sidePanel" style="margin-top:14px;">
+          <h3 class="sideTitle">Resoconto Totali</h3>
+          <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
+
+          <div style="margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
+            <table style="margin-top:0;">
+              <thead>
+                <tr><th>Item</th><th style="width:90px;">Saldo</th></tr>
+              </thead>
+              <tbody id="invTotalsBody">
+                <tr><td class="muted" colspan="2">Nessun dato</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Soldi</h4>
+
+            <div id="invMoneySummary" style="display:flex; gap:10px; flex-wrap:wrap;">
+              <span class="pill">Aggiunti: <span id="invMoneyAdd">$0</span></span>
+              <span class="pill">Rimossi: <span id="invMoneyRem">$0</span></span>
+              <span class="pill">Saldo: <span id="invMoneySal">$0</span></span>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn danger small" onclick="invResetAll()">AZZERA GESTIONE</button>
+          </div>
+        </div>
+
         <!-- TAG anche qui -->
         <div class="sidePanel">
           <h3 class="sideTitle">Tag (Utente)</h3>
+          <div class="muted">Doppio click su un nome per selezionarlo .. vale anche per questa sezione.</div>
+
+          <div class="tagSelected">
+            <div class="muted">Selezionati:</div>
+            <div id="tagSelectedWrapInv" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv();">Pulisci</button>
+          </div>
+
+          <div class="tagSearchRow">
+            <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+            <input id="tagSearchInv" type="text" placeholder="Cerca tag.." oninput="renderTagListInv()" />
+          </div>
+
+          <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+            <table style="margin-top:0;">
+              <thead><tr><th>Nome</th></tr></thead>
+              <tbody id="tagTableBodyInv">
+                <tr><td class="muted">Nessun utente</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="hint">Il tag selezionato viene salvato nelle registrazioni di Gestione.</div>
+        </div>
+
+      </div>
           <div class="muted">Doppio click su un nome per selezionarlo .. vale anche per questa sezione.</div>
 
           <div class="tagSelected">
@@ -907,8 +972,16 @@
       return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
         .replaceAll('"',"&quot;").replaceAll("'","&#039;");
     }
-    function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString(); }
+    function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
 
+    function fmtDT(ts){
+      const d = new Date(Number(ts || 0));
+      const f = new Intl.DateTimeFormat("it-IT", {
+        year:"numeric", month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit", second:"2-digit"
+      });
+      return f.format(d);
+    }
     // =========================
     // SESSION
     // =========================
@@ -1275,18 +1348,30 @@
     }
 
     // =========================
-    // LOGIN LOGS
+    // LOGS (tutto quello che succede)
     // =========================
-    function recordLoginToLogs(email, gameName) {
+    function logEvent(action, meta = "", email = null, gameName = null) {
       try {
+        const u = getMyUser();
+        const em = (email || u?.email || loadSession()?.email || "").toLowerCase();
+        const gn = (gameName || u?.gameName || "");
         const raw = localStorage.getItem(LOGS_KEY) || "[]";
         const logs = JSON.parse(raw);
-        logs.push({ ts: Date.now(), email, gameName, action: "LOGIN" });
+
+        logs.push({
+          ts: Date.now(),
+          email: em || "—",
+          gameName: gn || "—",
+          action: String(action || "—"),
+          meta: String(meta || "")
+        });
+
         localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
       } catch (e) {
-        console.error("Errore nel registrare il login", e);
+        console.error("Errore logEvent", e);
       }
     }
+
     function loadLoginLogs() {
       try {
         const raw = localStorage.getItem(LOGS_KEY) || "[]";
@@ -1297,6 +1382,7 @@
     function saveLoginLogs(arr) {
       localStorage.setItem(LOGS_KEY, JSON.stringify(arr || []));
     }
+
     function logSearch() {
       if (!isAdmin()) {
         alert("Permesso negato: solo gli admin possono visualizzare i log");
@@ -1308,10 +1394,10 @@
       const body = document.getElementById("logTableBody");
       const all = loadLoginLogs().slice().sort((a,b)=> (b.ts||0)-(a.ts||0));
 
-      const filtered = !q ? all.slice(0, 50) : all.filter(x => {
-        const hay = [x.email, x.gameName, x.action].map(v => String(v||"").toLowerCase()).join(" | ");
+      const filtered = !q ? all.slice(0, 80) : all.filter(x => {
+        const hay = [x.email, x.gameName, x.action, x.meta].map(v => String(v||"").toLowerCase()).join(" | ");
         return hay.includes(q);
-      }).slice(0, 50);
+      }).slice(0, 80);
 
       if (!filtered.length) {
         body.innerHTML = `<tr><td class="muted" colspan="4">Nessun log</td></tr>`;
@@ -1323,14 +1409,15 @@
         const tr = document.createElement("tr");
         tr.className = "clickRow";
         tr.innerHTML = `
-          <td>${new Date(l.ts).toLocaleString()}</td>
+          <td>${fmtDT(l.ts)}</td>
           <td>${escapeHtml(l.email || "—")}</td>
           <td>${escapeHtml(l.gameName || "—")}</td>
-          <td style="font-weight:900; color:var(--red2)">${escapeHtml(l.action || "—")}</td>
+          <td style="font-weight:900; color:var(--red2)">${escapeHtml(l.action || "—")}${l.meta ? ` <span class="muted">— ${escapeHtml(l.meta)}</span>` : ""}</td>
         `;
         body.appendChild(tr);
       });
     }
+
     function logClear() {
       const q = document.getElementById("logQuery");
       if (q) q.value = "";
@@ -1526,7 +1613,7 @@
     }
 
     function finishLogin(user) {
-      recordLoginToLogs(user.email, user.gameName || "");
+      logEvent("LOGIN", "Accesso completato", user.email, user.gameName || "");
       saveSession({ email: user.email });
       setHeaderUser();
       initAfterLogin();
@@ -1823,6 +1910,7 @@
     }
 
     function logout() {
+      logEvent("LOGOUT", "Uscita");
       clearSession();
       setHeaderUser();
       showOnly("login");
@@ -2087,12 +2175,7 @@
       if (wrap) wrap.innerHTML = html;
       if (wrapInv) wrapInv.innerHTML = html;
 
-      // aggiorna i campi "Tag" dentro Gestione armi-droga (form)
-      (window.INV_CATEGORIES || []).forEach(cat => {
-        const tid = invTabId(cat);
-        const inp = document.getElementById("invTag_" + tid);
-        if (inp) inp.value = names.length ? names.join(", ") : "—";
-      });
+      // (rimosso) niente più input "Tag" dentro Gestione armi-droga: resta solo la scritta
 
       // aggiorna il campo tag nel modal edit azioni
       const editTag = document.getElementById("editTagName");
@@ -2651,9 +2734,11 @@
           <div class="row">
             <div class="field" style="min-width:180px;">
               <label>Tipo</label>
-              <select id="invType_${tid}" ${disabledAttr}>
+<select id="invType_${tid}" ${disabledAttr}>
                 <option value="add">AGGIUNTO</option>
                 <option value="rem">RIMOSSO</option>
+                <option value="sold">VENDUTO</option>
+                <option value="buy">ACQUISTATO</option>
               </select>
             </div>
 
@@ -2684,12 +2769,8 @@
             </div>
           </div>
 
-          <div class="row">
-            <div class="field" style="min-width:320px;">
-              <label>Tag (dalla lista a destra)</label>
-              <input id="invTag_${tid}" disabled value="—" />
-              <div class="hint">I tag selezionati valgono anche qui.</div>
-            </div>
+<div class="hint" style="margin-top:8px;">
+            Tag (dalla lista a destra)
           </div>
 
           <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
@@ -2815,7 +2896,11 @@
       body.innerHTML = "";
       rows.forEach(r => {
         const tr = document.createElement("tr");
-        const t = r.type === "add" ? "AGGIUNTO" : "RIMOSSO";
+        const t =
+          r.type === "add" ? "AGGIUNTO" :
+          r.type === "rem" ? "RIMOSSO" :
+          r.type === "sold" ? "VENDUTO" :
+          r.type === "buy" ? "ACQUISTATO" : "—";
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
         const tagHtml = tnames.length
           ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
@@ -2853,10 +2938,17 @@
         if (key) {
           if (!totals[key]) totals[key] = 0;
           const q = Number(r.qty || 0);
-          totals[key] += (r.type === "add" ? q : -q);
+
+          // Item: add/buy aumentano, rem/sold diminuiscono
+          const signItem = (r.type === "add" || r.type === "buy") ? 1 : -1;
+          totals[key] += signItem * q;
         }
+
         const m = Number(r.money || 0);
-        if (r.type === "add") addMoney += m;
+
+        // Soldi: add/sold aumentano, rem/buy diminuiscono
+        const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
+        if (signMoney > 0) addMoney += m;
         else remMoney += m;
       });
 
@@ -2901,7 +2993,14 @@
       }
 
       const saldo = addMoney - remMoney;
-      moneyBox.textContent = `Aggiunti: ${formatMoney(addMoney)} .. Rimossi: ${formatMoney(remMoney)} .. Saldo: ${formatMoney(saldo)}`;
+
+      const elAdd = document.getElementById("invMoneyAdd");
+      const elRem = document.getElementById("invMoneyRem");
+      const elSal = document.getElementById("invMoneySal");
+
+      if (elAdd) elAdd.textContent = formatMoney(addMoney);
+      if (elRem) elRem.textContent = formatMoney(remMoney);
+      if (elSal) elSal.textContent = formatMoney(saldo);
     }
 
     function invResetAll() {
