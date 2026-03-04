@@ -3377,7 +3377,8 @@
                   <th style="width:200px;">Quando</th>
                   <th style="width:220px;">Chi</th>
                   <th>A chi</th>
-                  <th style="width:220px;">Importo (P/S/SP)</th>
+                  <th style="width:160px;">Importo</th>
+                  <th style="width:160px;">Pagamento</th>
                   <th>Note</th>
                 </tr>
               </thead>
@@ -3580,14 +3581,17 @@
           const pt = (r.payType || "clean");
           const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
 
-          tr.innerHTML = `
-            <td>${new Date(r.ts).toLocaleString()}</td>
-            <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-            <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
-            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-            <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-          `;
+const pt = (r.payType || "clean");
+const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
+
+tr.innerHTML = `
+  <td>${new Date(r.ts).toLocaleString()}</td>
+  <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+  <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
+  <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+  <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
+  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+`;
         } else {
           const t = r.type === "in" ? "ENTRATA" : "USCITA";
           tr.innerHTML = `
