@@ -697,12 +697,25 @@
           <div class="panel active" style="display:block; margin-top:12px;">
             <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Soldi</h4>
 
-            <div id="invMoneySummary" style="display:flex; gap:10px; flex-wrap:wrap;">
-              <span class="pill">Aggiunti: <span id="invMoneyAdd">$0</span></span>
-              <span class="pill">Rimossi: <span id="invMoneyRem">$0</span></span>
-              <span class="pill">Saldo: <span id="invMoneySal">$0</span></span>
+            <div id="invMoneySummary" style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Puliti +: <span id="invMoneyCleanAdd">$0</span></span>
+                <span class="pill">Puliti -: <span id="invMoneyCleanRem">$0</span></span>
+                <span class="pill">Puliti =: <span id="invMoneyCleanSal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Sporchi +: <span id="invMoneyDirtyAdd">$0</span></span>
+                <span class="pill">Sporchi -: <span id="invMoneyDirtyRem">$0</span></span>
+                <span class="pill">Sporchi =: <span id="invMoneyDirtySal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Spaccio +: <span id="invMoneyDrugAdd">$0</span></span>
+                <span class="pill">Spaccio -: <span id="invMoneyDrugRem">$0</span></span>
+                <span class="pill">Spaccio =: <span id="invMoneyDrugSal">$0</span></span>
+              </div>
             </div>
-          </div>
 
           <div class="row" style="margin-top:10px;">
             <button class="btn danger small" onclick="invResetAll()">AZZERA GESTIONE</button>
@@ -2697,6 +2710,8 @@
         // Fucili d'assalto
         "Fucile d'assalto",
         "Fucile d'assalto speciale",
+        "AK47",
+        "AK47 corta",
         "Carabina",
         "Carabina speciale",
         "Carabina da combattimento",
@@ -2705,6 +2720,7 @@
         "Fucile a pompa",
         "Fucile a pompa da combattimento",
         "Bullpup Shotgun",
+        "Pompa a canne mozze",
 
         // Cecchini
         "Fucile di precisione",
@@ -2813,8 +2829,18 @@
             </div>
 
             <div class="field" style="min-width:220px;">
-              <label>Soldi ($)</label>
-              <input id="invMoney_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+              <label>Soldi puliti ($)</label>
+              <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:220px;">
+              <label>Soldi sporchi ($)</label>
+              <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:220px;">
+              <label>Soldi spaccio ($)</label>
+              <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
             <div class="field" style="min-width:220px;">
@@ -2905,11 +2931,18 @@
       let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
       if (!Number.isFinite(qty) || qty < 1) qty = 1;
 
-      const moneyRaw = document.getElementById("invMoney_" + tid)?.value || "";
-      const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
+      const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
+      const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
+      const msRaw = document.getElementById("invMoneyDrug_" + tid)?.value || "";
+
+      const moneyClean = Math.max(0, parseInt(mcRaw || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(mdRaw || "0", 10) || 0);
+      const moneyDrug  = Math.max(0, parseInt(msRaw || "0", 10) || 0);
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
-      if (!item && money === 0 && !note) return alert("Inserisci almeno item, o soldi, o nota.");
+      if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
 
       const who = myGameNameOrEmail();
 
@@ -2924,7 +2957,7 @@
         type,
         item,
         qty,
-        money,
+        money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
         note,
         who,
         tagUserIds,
@@ -2935,7 +2968,9 @@
       invSave(all);
 
       document.getElementById("invQty_" + tid).value = "1";
-      document.getElementById("invMoney_" + tid).value = "";
+      document.getElementById("invMoneyClean_" + tid).value = "";
+      document.getElementById("invMoneyDirty_" + tid).value = "";
+      document.getElementById("invMoneyDrug_" + tid).value = "";
       document.getElementById("invNote_" + tid).value = "";
 
       invRenderTable(cat);
@@ -2973,7 +3008,20 @@
           <td>${tagHtml}</td>
           <td>${escapeHtml(r.item || "—")}</td>
           <td style="font-weight:900;">${Number(r.qty||0)}</td>
-          <td style="font-weight:900;">${formatMoney(r.money || 0)}</td>
+          <td style="font-weight:900;">
+            ${(() => {
+              const m = r.money;
+              const clean = (typeof m === "number") ? m : Number(m?.clean || 0);
+              const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+              const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
+
+              const parts = [];
+              if (clean) parts.push("P: " + formatMoney(clean));
+              if (dirty) parts.push("S: " + formatMoney(dirty));
+              if (drug)  parts.push("SP: " + formatMoney(drug));
+              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+            })()}
+          </td>
           <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
         `;
         body.appendChild(tr);
@@ -2990,8 +3038,9 @@
     // ✅ Totali: includono anche gli item delle Azioni
     function invComputeTotals() {
       const totals = {};
-      let addMoney = 0, remMoney = 0;
-
+      let addMoney = { clean:0, dirty:0, drug:0 };
+      let remMoney = { clean:0, dirty:0, drug:0 };
+      
       // 1) Gestione armi-droga (INV)
       invLoad().forEach(r => {
         const key = normalizeTotalItemName(r.item);
@@ -3004,13 +3053,18 @@
           totals[key] += signItem * q;
         }
 
-        const m = Number(r.money || 0);
-
-        // Soldi: add/sold aumentano, rem/buy diminuiscono
         const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
-        if (signMoney > 0) addMoney += m;
-        else remMoney += m;
-      });
+
+        const mm = r.money;
+        const mClean = (typeof mm === "number") ? Number(mm || 0) : Number(mm?.clean || 0);
+        const mDirty = (typeof mm === "number") ? 0 : Number(mm?.dirty || 0);
+        const mDrug  = (typeof mm === "number") ? 0 : Number(mm?.drug  || 0);
+
+        if (signMoney > 0) {
+          addMoney.clean += mClean; addMoney.dirty += mDirty; addMoney.drug += mDrug;
+        } else {
+          remMoney.clean += mClean; remMoney.dirty += mDirty; remMoney.drug += mDrug;
+        }
 
       // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
       loadOps().forEach(op => {
@@ -3052,15 +3106,35 @@
         });
       }
 
-      const saldo = addMoney - remMoney;
+      const sal = {
+        clean: addMoney.clean - remMoney.clean,
+        dirty: addMoney.dirty - remMoney.dirty,
+        drug:  addMoney.drug  - remMoney.drug
+      };
 
-      const elAdd = document.getElementById("invMoneyAdd");
-      const elRem = document.getElementById("invMoneyRem");
-      const elSal = document.getElementById("invMoneySal");
+      const cA = document.getElementById("invMoneyCleanAdd");
+      const cR = document.getElementById("invMoneyCleanRem");
+      const cS = document.getElementById("invMoneyCleanSal");
 
-      if (elAdd) elAdd.textContent = formatMoney(addMoney);
-      if (elRem) elRem.textContent = formatMoney(remMoney);
-      if (elSal) elSal.textContent = formatMoney(saldo);
+      const dA = document.getElementById("invMoneyDirtyAdd");
+      const dR = document.getElementById("invMoneyDirtyRem");
+      const dS = document.getElementById("invMoneyDirtySal");
+
+      const sA = document.getElementById("invMoneyDrugAdd");
+      const sR = document.getElementById("invMoneyDrugRem");
+      const sS = document.getElementById("invMoneyDrugSal");
+
+      if (cA) cA.textContent = formatMoney(addMoney.clean);
+      if (cR) cR.textContent = formatMoney(remMoney.clean);
+      if (cS) cS.textContent = formatMoney(sal.clean);
+
+      if (dA) dA.textContent = formatMoney(addMoney.dirty);
+      if (dR) dR.textContent = formatMoney(remMoney.dirty);
+      if (dS) dS.textContent = formatMoney(sal.dirty);
+
+      if (sA) sA.textContent = formatMoney(addMoney.drug);
+      if (sR) sR.textContent = formatMoney(remMoney.drug);
+      if (sS) sS.textContent = formatMoney(sal.drug);
     }
 
     function invResetAll() {
