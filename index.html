@@ -557,10 +557,34 @@
           </div>
 
           <div class="hint">I tag vengono salvati dentro le registrazioni (Azioni e Gestione).</div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Resoconto Soldi (Azioni)</h4>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
+                <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
+                <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
+                <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
+                <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
+                <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
+                <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
+              </div>
+            </div>
+
+            <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- DIARIO -->
   <div id="diario" class="section">
@@ -821,8 +845,18 @@
         </div>
 
         <div class="field" style="min-width:220px;">
-          <label>Soldi ($)</label>
-          <input id="editMoney" type="number" min="0" step="1" />
+          <label>Soldi puliti ($)</label>
+          <input id="editMoneyClean" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="min-width:220px;">
+          <label>Soldi sporchi ($)</label>
+          <input id="editMoneyDirty" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="min-width:220px;">
+          <label>Soldi spaccio ($)</label>
+          <input id="editMoneyDrug" type="number" min="0" step="1" />
         </div>
 
         <div class="field" style="flex:1; min-width:260px;">
@@ -1894,6 +1928,7 @@
         renderTabsAndPanels();
         showCat(CATEGORIES[0]);
         renderManageSummaries();
+        renderOpsMoneySummary();
       }
 
       if (id === "diario") {
@@ -2280,6 +2315,69 @@
     const opsTabs = document.getElementById("opsTabs");
     const panelWrapper = document.getElementById("panelWrapper");
 
+    function opsMoneyObj(m){
+      // compat: vecchi record avevano money: number -> puliti
+      if (typeof m === "number") return { clean: Number(m||0), dirty: 0, drug: 0 };
+      return {
+        clean: Number(m?.clean || 0),
+        dirty: Number(m?.dirty || 0),
+        drug:  Number(m?.drug  || 0)
+      };
+    }
+
+    function opsComputeMoneySummary(){
+      const add = { clean:0, dirty:0, drug:0 };
+      const rem = { clean:0, dirty:0, drug:0 };
+
+      loadOps().forEach(r => {
+        const mm = opsMoneyObj(r.money);
+        const isAdd = r.type === "ottenuto"; // ott -> +, perso -> -
+        if (isAdd) {
+          add.clean += mm.clean; add.dirty += mm.dirty; add.drug += mm.drug;
+        } else {
+          rem.clean += mm.clean; rem.dirty += mm.dirty; rem.drug += mm.drug;
+        }
+      });
+
+      return {
+        add,
+        rem,
+        sal: {
+          clean: add.clean - rem.clean,
+          dirty: add.dirty - rem.dirty,
+          drug:  add.drug  - rem.drug
+        }
+      };
+    }
+
+    function renderOpsMoneySummary(){
+      const { add, rem, sal } = opsComputeMoneySummary();
+
+      const cA = document.getElementById("opsMoneyCleanAdd");
+      const cR = document.getElementById("opsMoneyCleanRem");
+      const cS = document.getElementById("opsMoneyCleanSal");
+
+      const dA = document.getElementById("opsMoneyDirtyAdd");
+      const dR = document.getElementById("opsMoneyDirtyRem");
+      const dS = document.getElementById("opsMoneyDirtySal");
+
+      const sA = document.getElementById("opsMoneyDrugAdd");
+      const sR = document.getElementById("opsMoneyDrugRem");
+      const sS = document.getElementById("opsMoneyDrugSal");
+
+      if (cA) cA.textContent = formatMoney(add.clean);
+      if (cR) cR.textContent = formatMoney(rem.clean);
+      if (cS) cS.textContent = formatMoney(sal.clean);
+
+      if (dA) dA.textContent = formatMoney(add.dirty);
+      if (dR) dR.textContent = formatMoney(rem.dirty);
+      if (dS) dS.textContent = formatMoney(sal.dirty);
+
+      if (sA) sA.textContent = formatMoney(add.drug);
+      if (sR) sR.textContent = formatMoney(rem.drug);
+      if (sS) sS.textContent = formatMoney(sal.drug);
+    }
+
     function tabIdFromName(name) {
       return "cat_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
     }
@@ -2356,13 +2454,20 @@
 
       const tid = tabIdFromName(category);
       const type = document.getElementById("type_" + tid).value;
-      const moneyRaw = document.getElementById("money_" + tid).value;
+      const mcRaw = document.getElementById("moneyClean_" + tid).value;
+      const mdRaw = document.getElementById("moneyDirty_" + tid).value;
+      const msRaw = document.getElementById("moneyDrug_" + tid).value;
+
       const note = document.getElementById("note_" + tid).value || "";
-      const money = Math.max(0, parseInt(moneyRaw || "0", 10) || 0);
+
+      const moneyClean = Math.max(0, parseInt(mcRaw || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(mdRaw || "0", 10) || 0);
+      const moneyDrug  = Math.max(0, parseInt(msRaw || "0", 10) || 0);
+
       const items = getDraft(category);
 
-      if (money === 0 && items.length === 0 && note.trim() === "") {
-        return alert("Inserisci almeno soldi, o un item, o una nota.");
+      if (moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && items.length === 0 && note.trim() === "") {
+        return alert("Inserisci almeno soldi (puliti/sporchi/spaccio), o un item, o una nota.");
       }
 
       const me = getMyUser();
@@ -2379,7 +2484,7 @@
         createdByName,
         category,
         type,
-        money,
+        money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
         note: note.trim(),
         items: items.map(x => ({ name: x.name, qty: x.qty })),
         tagUserIds,
@@ -2389,13 +2494,16 @@
       });
       saveOps(ops);
 
-      document.getElementById("money_" + tid).value = "";
+      document.getElementById("moneyClean_" + tid).value = "";
+      document.getElementById("moneyDirty_" + tid).value = "";
+      document.getElementById("moneyDrug_" + tid).value = "";
       document.getElementById("note_" + tid).value = "";
       drafts[category] = [];
       renderDraft(category);
 
       renderCategory(category);
       renderManageSummaries();
+      renderOpsMoneySummary();
       invRenderTotals();
     }
 
@@ -2404,13 +2512,16 @@
       saveOps(loadOps().filter(r => r.id !== id));
       renderCategory(category);
       renderManageSummaries();
+      renderOpsMoneySummary();
       invRenderTotals();
     }
 
     const editOverlay = document.getElementById("editOverlay");
     const editInfo = document.getElementById("editInfo");
     const editType = document.getElementById("editType");
-    const editMoney = document.getElementById("editMoney");
+    const editMoneyClean = document.getElementById("editMoneyClean");
+    const editMoneyDirty = document.getElementById("editMoneyDirty");
+    const editMoneyDrug  = document.getElementById("editMoneyDrug");
     const editNote = document.getElementById("editNote");
     const editTagName = document.getElementById("editTagName");
     const editItemSelect = document.getElementById("editItemSelect");
@@ -2434,7 +2545,14 @@
 
       editInfo.textContent = `${rec.category} — ${rec.createdByName || rec.createdByEmail} — ${new Date(rec.ts).toLocaleString()}`;
       editType.value = rec.type;
-      editMoney.value = String(rec.money || 0);
+      const m = rec.money;
+      const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+      const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+      const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
+
+      editMoneyClean.value = String(clean || 0);
+      editMoneyDirty.value = String(dirty || 0);
+      editMoneyDrug.value  = String(drug || 0);
       editNote.value = rec.note || "";
 
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
@@ -2502,7 +2620,10 @@
       if (!rec) return;
 
       rec.type = editType.value;
-      rec.money = Math.max(0, parseInt(editMoney.value || "0", 10) || 0);
+      const mc = Math.max(0, parseInt(editMoneyClean.value || "0", 10) || 0);
+      const md = Math.max(0, parseInt(editMoneyDirty.value || "0", 10) || 0);
+      const ms = Math.max(0, parseInt(editMoneyDrug.value  || "0", 10) || 0);
+      rec.money = { clean: mc, dirty: md, drug: ms };
       rec.note = (editNote.value || "").trim();
       rec.items = editingItems.map(x => ({ name: x.name, qty: x.qty }));
 
@@ -2513,6 +2634,7 @@
       saveOps(ops);
       closeEdit();
       renderCategory(rec.category);
+      renderOpsMoneySummary();
       invRenderTotals();
     }
 
@@ -2553,7 +2675,22 @@
           <td>${when}</td>
           <td style="font-weight:900;">${escapeHtml(r.createdByName || "—")}</td>
           <td>${tipo}</td>
-          <td>${formatMoney(r.money || 0)}</td>
+          <td style="font-weight:900;">
+            ${(() => {
+              const m = r.money;
+
+              // compat: vecchi record avevano money: number -> consideralo puliti
+              const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+              const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+              const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
+
+              const parts = [];
+              if (clean) parts.push("P: " + formatMoney(clean));
+              if (dirty) parts.push("S: " + formatMoney(dirty));
+              if (drug)  parts.push("SP: " + formatMoney(drug));
+              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+            })()}
+          </td>
           <td>${tagHtml}</td>
           <td>${noteHtml}</td>
           <td>${itemsHtml}</td>
@@ -2574,6 +2711,7 @@
       if (!ok) return;
       localStorage.removeItem(OPS_KEY);
       CATEGORIES.forEach(c => renderCategory(c));
+      renderOpsMoneySummary();
       invRenderTotals();
     }
 
@@ -2610,8 +2748,18 @@
             </div>
 
             <div class="field" style="min-width:220px;">
-              <label>Soldi ($)</label>
-              <input id="money_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+              <label>Soldi puliti ($)</label>
+              <input id="moneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:220px;">
+              <label>Soldi sporchi ($)</label>
+              <input id="moneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:220px;">
+              <label>Soldi spaccio ($)</label>
+              <input id="moneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
             <div class="field" style="flex:1; min-width:260px;">
@@ -2649,8 +2797,8 @@
           <table>
             <thead>
               <tr>
-                <th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
-              </tr>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
+</tr>
             </thead>
             <tbody id="table_${tid}">
               <tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>
@@ -3203,6 +3351,15 @@
                 <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
               </div>
 
+              <div class="field" style="min-width:220px;">
+                <label>Tipo pagamento</label>
+                <select id="salPayType_${tid}" ${disabledAttr}>
+                  <option value="clean">PULITI</option>
+                  <option value="dirty">SPORCHI</option>
+                  <option value="drug">SPACCIO</option>
+                </select>
+              </div>
+
               <div class="field" style="min-width:320px; flex:1;">
                 <label>Note</label>
                 <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
@@ -3220,7 +3377,7 @@
                   <th style="width:200px;">Quando</th>
                   <th style="width:220px;">Chi</th>
                   <th>A chi</th>
-                  <th style="width:160px;">Importo</th>
+                  <th style="width:220px;">Importo (P/S/SP)</th>
                   <th>Note</th>
                 </tr>
               </thead>
@@ -3244,8 +3401,18 @@
               </div>
 
               <div class="field" style="min-width:220px;">
-                <label>Importo ($)</label>
-                <input id="balAmt_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+                <label>Importo puliti ($)</label>
+                <input id="balAmtClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <label>Importo sporchi ($)</label>
+                <input id="balAmtDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+              </div>
+
+              <div class="field" style="min-width:220px;">
+                <label>Importo spaccio ($)</label>
+                <input id="balAmtDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
               </div>
 
               <div class="field" style="min-width:320px; flex:1;">
@@ -3272,7 +3439,7 @@
                   <th style="width:200px;">Quando</th>
                   <th style="width:220px;">Chi</th>
                   <th style="width:120px;">Tipo</th>
-                  <th style="width:160px;">Importo</th>
+                  <th style="width:220px;">Importo (P/S/SP)</th>
                   <th style="width:220px;">Causale</th>
                   <th>Note</th>
                 </tr>
@@ -3323,8 +3490,9 @@
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
       const tid = accTabId("Stipendi");
-      const to = (document.getElementById("salTo_" + tid)?.value || "").trim();
+      const to = ((document.getElementById("salTo_" + tid)?.value || accSalarySelected) || "").trim();
       const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
+      const payType = (document.getElementById("salPayType_" + tid)?.value || "clean"); // clean/dirty/drug
       const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
 
       if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
@@ -3336,13 +3504,15 @@
         kind: "salary",
         who: myGameNameOrEmail(),
         to,
-        amount: amt,
+        amount: { clean: ac, dirty: ad, drug: as },
         note
       });
       accSave(all);
 
       document.getElementById("salTo_" + tid).value = "";
       document.getElementById("salAmt_" + tid).value = "";
+      const sel = document.getElementById("salPayType_" + tid);
+      if (sel) sel.value = "clean";
       document.getElementById("salNote_" + tid).value = "";
 
       accRenderTable("Stipendi");
@@ -3354,11 +3524,17 @@
 
       const tid = accTabId("Bilancio");
       const type = document.getElementById("balType_" + tid)?.value || "in";
-      const amt = Math.max(0, parseInt(document.getElementById("balAmt_" + tid)?.value || "0", 10) || 0);
+
+      const ac = Math.max(0, parseInt(document.getElementById("balAmtClean_" + tid)?.value || "0", 10) || 0);
+      const ad = Math.max(0, parseInt(document.getElementById("balAmtDirty_" + tid)?.value || "0", 10) || 0);
+      const as = Math.max(0, parseInt(document.getElementById("balAmtDrug_" + tid)?.value  || "0", 10) || 0);
+
       const reason = (document.getElementById("balReason_" + tid)?.value || "").trim();
       const note = (document.getElementById("balNote_" + tid)?.value || "").trim();
 
-      if (amt === 0 && !reason && !note) return alert("Inserisci almeno importo o causale/note.");
+      if (ac === 0 && ad === 0 && as === 0 && !reason && !note) {
+        return alert("Inserisci almeno importo (puliti/sporchi/spaccio) o causale/note.");
+      }
 
       const all = accLoad();
       all.push({
@@ -3367,13 +3543,15 @@
         kind: "balance",
         who: myGameNameOrEmail(),
         type, // in/out
-        amount: amt,
+        amount: { clean: ac, dirty: ad, drug: as },
         reason,
         note
       });
       accSave(all);
 
-      document.getElementById("balAmt_" + tid).value = "";
+      document.getElementById("balAmtClean_" + tid).value = "";
+      document.getElementById("balAmtDirty_" + tid).value = "";
+      document.getElementById("balAmtDrug_" + tid).value = "";
       document.getElementById("balReason_" + tid).value = "";
       document.getElementById("balNote_" + tid).value = "";
 
@@ -3390,7 +3568,7 @@
       const rows = all.filter(r => (tabName === "Stipendi" ? r.kind === "salary" : r.kind === "balance")).slice(0, 50);
 
       if (!rows.length) {
-        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 5 : 6}">Nessun dato</td></tr>`;
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 6 : 6}">Nessun dato</td></tr>`;
         return;
       }
 
@@ -3398,11 +3576,15 @@
       rows.forEach(r => {
         const tr = document.createElement("tr");
         if (tabName === "Stipendi") {
+          const pt = (r.payType || "clean");
+          const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
+
           tr.innerHTML = `
             <td>${new Date(r.ts).toLocaleString()}</td>
             <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
             <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
             <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+            <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
             <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
           `;
         } else {
@@ -3411,7 +3593,21 @@
             <td>${new Date(r.ts).toLocaleString()}</td>
             <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
             <td style="font-weight:900; color:var(--red2)">${t}</td>
-            <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+            <td style="font-weight:900;">
+              ${(() => {
+                const a = r.amount;
+                // compat: vecchi record amount: number -> puliti
+                const clean = (typeof a === "number") ? Number(a || 0) : Number(a?.clean || 0);
+                const dirty = (typeof a === "number") ? 0 : Number(a?.dirty || 0);
+                const drug  = (typeof a === "number") ? 0 : Number(a?.drug  || 0);
+
+                const parts = [];
+                if (clean) parts.push("P: " + formatMoney(clean));
+                if (dirty) parts.push("S: " + formatMoney(dirty));
+                if (drug)  parts.push("SP: " + formatMoney(drug));
+                return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              })()}
+            </td>
             <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
             <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
           `;
@@ -3422,16 +3618,24 @@
 
     function accComputeSummary() {
       const all = accLoad();
-      let income = 0, expense = 0;
+      let income = { clean:0, dirty:0, drug:0 };
+      let expense = { clean:0, dirty:0, drug:0 };
       let salaryTotal = 0, salary30 = 0;
       const now = Date.now();
       const days30 = 30 * 24 * 60 * 60 * 1000;
 
       all.forEach(r => {
         if (r.kind === "balance") {
-          const amt = Number(r.amount || 0);
-          if (r.type === "in") income += amt;
-          else expense += amt;
+          const a = r.amount;
+          const clean = (typeof a === "number") ? Number(a || 0) : Number(a?.clean || 0);
+          const dirty = (typeof a === "number") ? 0 : Number(a?.dirty || 0);
+          const drug  = (typeof a === "number") ? 0 : Number(a?.drug  || 0);
+
+          if (r.type === "in") {
+            income.clean += clean; income.dirty += dirty; income.drug += drug;
+          } else {
+            expense.clean += clean; expense.dirty += dirty; expense.drug += drug;
+          }
         }
         if (r.kind === "salary") {
           const amt = Number(r.amount || 0);
@@ -3449,9 +3653,18 @@
       if (!b || !s) return;
 
       const { income, expense, salaryTotal, salary30 } = accComputeSummary();
-      const saldo = income - expense;
 
-      b.textContent = `Entrate: ${formatMoney(income)} .. Uscite: ${formatMoney(expense)} .. Saldo: ${formatMoney(saldo)}`;
+      const sal = {
+        clean: income.clean - expense.clean,
+        dirty: income.dirty - expense.dirty,
+        drug:  income.drug  - expense.drug
+      };
+
+      b.textContent =
+        `Puliti: +${formatMoney(income.clean)} .. -${formatMoney(expense.clean)} .. =${formatMoney(sal.clean)} | ` +
+        `Sporchi: +${formatMoney(income.dirty)} .. -${formatMoney(expense.dirty)} .. =${formatMoney(sal.dirty)} | ` +
+        `Spaccio: +${formatMoney(income.drug)} .. -${formatMoney(expense.drug)} .. =${formatMoney(sal.drug)}`;
+
       s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
     }
 
