@@ -137,9 +137,21 @@
     .small { padding:7px 10px; font-size:13px; border-radius:9px; }
     .disabled { opacity:.5; cursor:not-allowed; }
 
-    table { width:100%; border-collapse:collapse; margin-top:12px; }
-    th, td { padding:10px 12px; border:1px solid #ff1a1a33; text-align:left; background-color:#1e1e1e; vertical-align:top; }
-    th { color:var(--red2); font-weight:900; letter-spacing:.3px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; table-layout:fixed; }
+    th, td {
+      padding:8px 10px;
+      border:1px solid #ff1a1a33;
+      text-align:left;
+      background-color:#1e1e1e;
+      vertical-align:top;
+
+      /* ✅ evita che il contenuto "sfondi" */
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      white-space:normal;
+    }
+    th { color:var(--red2); font-weight:900; letter-spacing:.2px; font-size:12px; }
+    td { font-size:12px; line-height:1.25; font-weight:800; }
     tr:hover td { background-color:#3a0000; }
 
     tr.selectedRow td { background-color:#5a0000 !important; }
@@ -2876,8 +2888,13 @@ logEvent(
       sorted.forEach(r => {
         const when = new Date(r.ts).toLocaleString();
         const tipo = r.type === "ottenuto" ? "OTTENUTO" : "PERSO";
-        const itemsText = (r.items || []).map(it => `${it.name} x${it.qty}`).join("\n");
-        const itemsHtml = itemsText ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>` : `<span class="muted">—</span>`;
+const itemsHtml = itemsText
+  ? `<div class="cellClamp" style="white-space:pre-wrap;">${escapeHtml(itemsText)}</div>`
+  : `<span class="muted">—</span>`;
+
+const noteHtml = (r.note && r.note.trim())
+  ? `<div class="cellClamp" style="white-space:pre-wrap;">${escapeHtml(r.note.trim())}</div>`
+  : `<span class="muted">—</span>`;
         const noteHtml = (r.note && r.note.trim()) ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>` : `<span class="muted">—</span>`;
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
