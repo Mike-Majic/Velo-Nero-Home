@@ -1195,10 +1195,6 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
   accSave(after);
 }
-    const u = getMyUser();
-      if (u?.gameName) return u.gameName;
-      return loadSession()?.email || "—";
-    }
 
     // =========================
     // PASSWORD EYE
