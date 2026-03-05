@@ -697,7 +697,6 @@
     <div class="hint">Inserisci armi/droga/oggetti + soldi .. salva anche Tag utente .. Totali includono anche gli item delle Azioni.</div>
 
     <div class="twoColInv">
-
       <div class="colMainInv">
         <div class="tabs" id="invTabs"></div>
         <div id="invPanels"></div>
@@ -713,15 +712,10 @@
           <div style="margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
             <table style="margin-top:0;">
               <thead>
-                <tr>
-                  <th>Item</th>
-                  <th style="width:90px;">Saldo</th>
-                </tr>
+                <tr><th>Item</th><th style="width:90px;">Saldo</th></tr>
               </thead>
               <tbody id="invTotalsBody">
-                <tr>
-                  <td class="muted" colspan="2">Nessun dato</td>
-                </tr>
+                <tr><td class="muted" colspan="2">Nessun dato</td></tr>
               </tbody>
             </table>
           </div>
@@ -730,25 +724,23 @@
             <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Soldi</h4>
 
             <div id="invMoneySummary" style="display:flex; flex-direction:column; gap:10px;">
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                 <span class="pill">Puliti +: <span id="invMoneyCleanAdd">$0</span></span>
                 <span class="pill">Puliti -: <span id="invMoneyCleanRem">$0</span></span>
                 <span class="pill">Puliti =: <span id="invMoneyCleanSal">$0</span></span>
               </div>
 
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                 <span class="pill">Sporchi +: <span id="invMoneyDirtyAdd">$0</span></span>
                 <span class="pill">Sporchi -: <span id="invMoneyDirtyRem">$0</span></span>
                 <span class="pill">Sporchi =: <span id="invMoneyDirtySal">$0</span></span>
               </div>
 
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                 <span class="pill">Spaccio +: <span id="invMoneyDrugAdd">$0</span></span>
                 <span class="pill">Spaccio -: <span id="invMoneyDrugRem">$0</span></span>
                 <span class="pill">Spaccio =: <span id="invMoneyDrugSal">$0</span></span>
               </div>
-
             </div>
 
             <div class="row" style="margin-top:10px;">
@@ -757,10 +749,10 @@
           </div>
         </div>
 
-        <!-- TAG -->
-        <div class="sidePanel">
+        <!-- TAG anche qui -->
+        <div class="sidePanel" style="margin-top:14px;">
           <h3 class="sideTitle">Tag (Utente)</h3>
-          <div class="muted">Doppio click su un nome per selezionarlo.</div>
+          <div class="muted">Doppio click su un nome per selezionarlo .. vale anche per questa sezione.</div>
 
           <div class="tagSelected">
             <div class="muted">Selezionati:</div>
@@ -775,15 +767,9 @@
 
           <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
             <table style="margin-top:0;">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Nome</th></tr></thead>
               <tbody id="tagTableBodyInv">
-                <tr>
-                  <td class="muted">Nessun utente</td>
-                </tr>
+                <tr><td class="muted">Nessun utente</td></tr>
               </tbody>
             </table>
           </div>
@@ -792,7 +778,6 @@
         </div>
 
       </div>
-
     </div>
   </div>
 
