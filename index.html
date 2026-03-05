@@ -2451,7 +2451,6 @@ if (s?.email === u.email) logout();
     function syncSelectedTagsUI() {
       const wrap = document.getElementById("tagSelectedWrap");
       const wrapInv = document.getElementById("tagSelectedWrapInv");
-      const wrapAcc = document.getElementById("tagSelectedWrapAcc");
 
       const names = selectedTagNames();
       const html = names.length
@@ -2460,7 +2459,6 @@ if (s?.email === u.email) logout();
 
       if (wrap) wrap.innerHTML = html;
       if (wrapInv) wrapInv.innerHTML = html;
-      if (wrapAcc) wrapAcc.innerHTML = html;
 
       // (rimosso) niente più input "Tag" dentro Gestione armi-droga: resta solo la scritta
 
@@ -3737,10 +3735,6 @@ p.innerHTML = `
     </div>
   </div>
 
-  <!-- TAG (come Azioni/Gestione) -->
-  <div class="hint" style="margin-top:8px;">Tag (dalla lista a destra)</div>
-  <div id="tagSelectedWrapAcc" style="margin:8px 0 10px 0;"></div>
-
   <h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
   <div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
 
@@ -3768,15 +3762,14 @@ p.innerHTML = `
   <div class="tableWrap">
     <table>
       <thead>
-<tr>
-  <th style="width:200px;">Quando</th>
-  <th style="width:220px;">Chi</th>
-  <th>A chi</th>
-  <th style="width:160px;">Importo</th>
-  <th style="width:160px;">Pagamento</th>
-  <th style="width:220px;">Tag</th>
-  <th>Note</th>
-</tr>
+        <tr>
+          <th style="width:200px;">Quando</th>
+          <th style="width:220px;">Chi</th>
+          <th>A chi</th>
+          <th style="width:160px;">Importo</th>
+          <th style="width:160px;">Pagamento</th>
+          <th>Note</th>
+        </tr>
       </thead>
       <tbody id="accTable_${tid}">
         <tr><td class="muted" colspan="6">Nessun dato</td></tr>
@@ -3897,9 +3890,6 @@ accRenderDueTable();
       if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
 
       const all = accLoad();
-const tagUserIds = selectedTagUserIds.slice();
-const tagNames = selectedTagNames();
-
 all.push({
   id: uid(),
   ts: Date.now(),
@@ -3909,11 +3899,7 @@ all.push({
   to,
   amount: amt,
   payType,
-  note,
-  tagUserIds,
-  tagNames,
-  // compat vecchio
-  tagName: tagNames.length ? tagNames[0] : null
+  note
 });
 accSave(all);
 
@@ -3929,9 +3915,8 @@ logEvent(
       if (sel) sel.value = "clean";
       document.getElementById("salNote_" + tid).value = "";
 
-accRenderTable("Stipendi");
-accRenderSummary();
-clearSelectedTags();
+      accRenderTable("Stipendi");
+      accRenderSummary();
     }
 
     function accAddBalance() {
@@ -4008,18 +3993,12 @@ const rows = all
           const pt = (r.payType || "clean");
           const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
 
-const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-const tagHtml = tnames.length
-  ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-  : `<span class="muted">—</span>`;
-
 tr.innerHTML = `
   <td>${new Date(r.ts).toLocaleString()}</td>
   <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
   <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
   <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
   <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-  <td>${tagHtml}</td>
   <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 `;
         } else {
