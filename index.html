@@ -3621,36 +3621,86 @@ tr.innerHTML = `
       });
     }
 
-    function accComputeSummary() {
-      const all = accLoad();
-      let income = { clean:0, dirty:0, drug:0 };
-      let expense = { clean:0, dirty:0, drug:0 };
-      let salaryTotal = 0, salary30 = 0;
-      const now = Date.now();
-      const days30 = 30 * 24 * 60 * 60 * 1000;
+function accComputeSummary() {
+  const all = accLoad();
+  let income = { clean:0, dirty:0, drug:0 };
+  let expense = { clean:0, dirty:0, drug:0 };
+  let salaryTotal = 0, salary30 = 0;
+  const now = Date.now();
+  const days30 = 30 * 24 * 60 * 60 * 1000;
 
-      all.forEach(r => {
-        if (r.kind === "balance") {
-          const a = r.amount;
-          const clean = (typeof a === "number") ? Number(a || 0) : Number(a?.clean || 0);
-          const dirty = (typeof a === "number") ? 0 : Number(a?.dirty || 0);
-          const drug  = (typeof a === "number") ? 0 : Number(a?.drug  || 0);
+  // compat: alcuni record potrebbero avere money come number (puliti)
+  function invMoneyObj(m){
+    if (typeof m === "number") return { clean: Number(m||0), dirty: 0, drug: 0 };
+    return {
+      clean: Number(m?.clean || 0),
+      dirty: Number(m?.dirty || 0),
+      drug:  Number(m?.drug  || 0)
+    };
+  }
 
-          if (r.type === "in") {
-            income.clean += clean; income.dirty += dirty; income.drug += drug;
-          } else {
-            expense.clean += clean; expense.dirty += dirty; expense.drug += drug;
-          }
-        }
-        if (r.kind === "salary") {
-          const amt = Number(r.amount || 0);
-          salaryTotal += amt;
-          if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
-        }
-      });
+  // 1) Contabilità (ACC_KEY)
+  all.forEach(r => {
+    if (r.kind === "balance") {
+      const a = r.amount;
+      const clean = (typeof a === "number") ? Number(a || 0) : Number(a?.clean || 0);
+      const dirty = (typeof a === "number") ? 0 : Number(a?.dirty || 0);
+      const drug  = (typeof a === "number") ? 0 : Number(a?.drug  || 0);
 
-      return { income, expense, salaryTotal, salary30 };
+      if (r.type === "in") {
+        income.clean += clean; income.dirty += dirty; income.drug += drug;
+      } else {
+        expense.clean += clean; expense.dirty += dirty; expense.drug += drug;
+      }
     }
+
+    if (r.kind === "salary") {
+      const amt = Number(r.amount || 0);
+      salaryTotal += amt;
+      if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
+    }
+  });
+
+  // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
+  loadOps().forEach(op => {
+    const mm = opsMoneyObj(op.money);
+    if (op.type === "ottenuto") {
+      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
+    } else {
+      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
+    }
+  });
+
+  // 3) Gestione armi-droga (INV_KEY)
+  // regola soldi (come già fai nei totali Gestione):
+  // add/sold = Entrata .. rem/buy = Uscita
+  invLoad().forEach(r => {
+    const mm = invMoneyObj(r.money);
+    const isIncome = (r.type === "add" || r.type === "sold");
+
+    if (isIncome) {
+      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
+    } else {
+      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
+    }
+  });
+
+  return { income, expense, salaryTotal, salary30 };
+}
+  });
+
+  // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
+  loadOps().forEach(op => {
+    const mm = opsMoneyObj(op.money);
+    if (op.type === "ottenuto") {
+      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
+    } else {
+      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
+    }
+  });
+
+  return { income, expense, salaryTotal, salary30 };
+}
 
     function accRenderSummary() {
       const b = document.getElementById("accBalanceSummary");
