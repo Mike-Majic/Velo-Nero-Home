@@ -3701,77 +3701,82 @@ invRenderTotals();
         const disabledCls = canEditOps() ? "" : "disabled";
 
         if (tname === "Stipendi") {
-          p.innerHTML = `
-            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
-            <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
+p.innerHTML = `
+  <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
+  <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
 
-            <div class="row">
-              <div class="field" style="min-width:320px; flex:1;">
-                <label>A chi</label>
-                <input id="salTo_${tid}" type="text" placeholder="Nome / reparto" ${disabledAttr} />
-              </div>
+  <div class="row">
+    <div class="field" style="min-width:320px; flex:1;">
+      <label>A chi</label>
+      <input id="salTo_${tid}" type="text" placeholder="Nome / reparto" ${disabledAttr} />
+    </div>
 
-              <div class="field" style="min-width:220px;">
-                <label>Importo ($)</label>
-                <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
-              </div>
+    <div class="field" style="min-width:220px;">
+      <label>Importo ($)</label>
+      <input id="salAmt_${tid}" type="number" min="0" step="1" placeholder="es. 5000" ${disabledAttr} />
+    </div>
 
-              <div class="field" style="min-width:220px;">
-                <label>Tipo pagamento</label>
-                <select id="salPayType_${tid}" ${disabledAttr}>
-                  <option value="clean">PULITI</option>
-                  <option value="dirty">SPORCHI</option>
-                  <option value="drug">SPACCIO</option>
-                </select>
-              </div>
+    <div class="field" style="min-width:220px;">
+      <label>Tipo pagamento</label>
+      <select id="salPayType_${tid}" ${disabledAttr}>
+        <option value="clean">PULITI</option>
+        <option value="dirty">SPORCHI</option>
+        <option value="drug">SPACCIO</option>
+      </select>
+    </div>
 
-              <div class="field" style="min-width:320px; flex:1;">
-                <label>Note</label>
-                <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
-              </div>
+    <div class="field" style="min-width:320px; flex:1;">
+      <label>Note</label>
+      <input id="salNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+    </div>
 
-              <div class="field" style="min-width:220px;">
-                <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddSalary()">Salva</button>
-              </div>
-            </div>
+    <div class="field" style="min-width:220px;">
+      <button class="btn ${disabledCls}" ${disabledAttr} onclick="accAddSalary()">Salva</button>
+    </div>
+  </div>
 
-<h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
-<div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
+  <h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
+  <div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
 
-<table>
-  <thead>
-    <tr>
-      <th style="width:200px;">Quando</th>
-      <th style="width:220px;">Generato da</th>
-      <th>A chi</th>
-      <th style="width:160px;">Importo</th>
-      <th style="width:160px;">Pagamento</th>
-      <th>Note</th>
-      <th style="width:220px;">Stato</th>
-    </tr>
-  </thead>
-  <tbody id="accDueTable_${tid}">
-    <tr><td class="muted" colspan="7">Nessun dato</td></tr>
-  </tbody>
-</table>
+  <div class="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:200px;">Quando</th>
+          <th style="width:220px;">Generato da</th>
+          <th>A chi</th>
+          <th style="width:160px;">Importo</th>
+          <th style="width:160px;">Pagamento</th>
+          <th>Note</th>
+          <th style="width:220px;">Stato</th>
+        </tr>
+      </thead>
+      <tbody id="accDueTable_${tid}">
+        <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-<h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi (pagati)</h4>
-<table>
-  <thead>
-    <tr>
-      <th style="width:200px;">Quando</th>
-      <th style="width:220px;">Chi</th>
-      <th>A chi</th>
-      <th style="width:160px;">Importo</th>
-      <th style="width:160px;">Pagamento</th>
-      <th>Note</th>
-    </tr>
-  </thead>
-  <tbody id="accTable_${tid}">
-    <tr><td class="muted" colspan="6">Nessun dato</td></tr>
-  </tbody>
-</table>
-          `;
+  <h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi (pagati)</h4>
+
+  <div class="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:200px;">Quando</th>
+          <th style="width:220px;">Chi</th>
+          <th>A chi</th>
+          <th style="width:160px;">Importo</th>
+          <th style="width:160px;">Pagamento</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody id="accTable_${tid}">
+        <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+      </tbody>
+    </table>
+  </div>
+`;
         } else {
           p.innerHTML = `
             <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Bilancio (Entrate/Uscite)</h3>
