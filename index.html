@@ -3629,8 +3629,8 @@ function accComputeSummary() {
   const now = Date.now();
   const days30 = 30 * 24 * 60 * 60 * 1000;
 
-  // compat: alcuni record potrebbero avere money come number (puliti)
-  function invMoneyObj(m){
+  // helper: compat money come number -> puliti
+  function moneyObj(m){
     if (typeof m === "number") return { clean: Number(m||0), dirty: 0, drug: 0 };
     return {
       clean: Number(m?.clean || 0),
@@ -3643,14 +3643,12 @@ function accComputeSummary() {
   all.forEach(r => {
     if (r.kind === "balance") {
       const a = r.amount;
-      const clean = (typeof a === "number") ? Number(a || 0) : Number(a?.clean || 0);
-      const dirty = (typeof a === "number") ? 0 : Number(a?.dirty || 0);
-      const drug  = (typeof a === "number") ? 0 : Number(a?.drug  || 0);
+      const mm = moneyObj(a);
 
       if (r.type === "in") {
-        income.clean += clean; income.dirty += dirty; income.drug += drug;
+        income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
       } else {
-        expense.clean += clean; expense.dirty += dirty; expense.drug += drug;
+        expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
       }
     }
 
@@ -3660,6 +3658,31 @@ function accComputeSummary() {
       if (Number(r.ts || 0) >= (now - days30)) salary30 += amt;
     }
   });
+
+  // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
+  loadOps().forEach(op => {
+    const mm = moneyObj(op.money);
+    if (op.type === "ottenuto") {
+      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
+    } else {
+      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
+    }
+  });
+
+  // 3) Gestione armi-droga (INV_KEY)
+  // soldi: add/sold = Entrata .. rem/buy = Uscita
+  invLoad().forEach(r => {
+    const mm = moneyObj(r.money);
+    const isIncome = (r.type === "add" || r.type === "sold");
+    if (isIncome) {
+      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
+    } else {
+      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
+    }
+  });
+
+  return { income, expense, salaryTotal, salary30 };
+}
 
   // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
   loadOps().forEach(op => {
