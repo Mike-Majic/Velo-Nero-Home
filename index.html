@@ -3311,6 +3311,30 @@ invRenderTotals();
 
           <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
 <table class="invTable">
+/* FIX tabella Gestione Armi/Droga */
+table.invTable{
+  table-layout:fixed;
+  width:100%;
+}
+
+table.invTable th,
+table.invTable td{
+  overflow:hidden;
+  text-overflow:ellipsis;
+
+  /* blocca il testo verticale */
+  overflow-wrap:normal;
+  word-break:normal;
+  white-space:nowrap;
+}
+
+/* solo NOTE può andare a capo */
+table.invTable th:last-child,
+table.invTable td:last-child{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
   <thead>
     <tr>
       <th style="width:200px;">Quando</th>
