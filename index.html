@@ -23,6 +23,9 @@
       text-align:center; padding:60px 20px; margin:0;
     }
 
+    /* quando una modale è aperta: niente scroll e niente "sfarfallii" */
+    body.modalOpen { overflow:hidden; }
+
     h1 {
       font-size:60px; letter-spacing:8px; color:var(--red);
       text-shadow:0 0 16px #ff0000aa, 0 0 32px #ff000055;
@@ -2674,6 +2677,43 @@ accRenderDueTable();
 
     const editOverlay = document.getElementById("editOverlay");
     const editInfo = document.getElementById("editInfo");
+
+    // =========================
+    // MODALS: anti-sovrapposizione + chiusure rapide
+    // =========================
+    function hideAllActionMenus(){
+      document.querySelectorAll(".action-menu").forEach(m => m.style.display = "none");
+    }
+
+    function setModalOpen(isOpen){
+      document.body.classList.toggle("modalOpen", !!isOpen);
+    }
+
+    function closeAllOverlays(){
+      // chiude tutto quello che può rimanere "appeso"
+      try { hideAllActionMenus(); } catch {}
+      try { closeEdit(); } catch {}
+      try { closeNoteModal(); } catch {}
+      setModalOpen(false);
+    }
+
+    // click fuori dal contenuto = chiudi
+    if (editOverlay) {
+      editOverlay.addEventListener("click", (e) => {
+        if (e.target === editOverlay) closeEdit();
+      });
+    }
+
+    if (typeof noteOverlay !== "undefined" && noteOverlay) {
+      noteOverlay.addEventListener("click", (e) => {
+        if (e.target === noteOverlay) closeNoteModal();
+      });
+    }
+
+    // ESC = chiudi tutto
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeAllOverlays();
+    });
     const editType = document.getElementById("editType");
     const editMoneyClean = document.getElementById("editMoneyClean");
     const editMoneyDirty = document.getElementById("editMoneyDirty");
@@ -2691,6 +2731,12 @@ accRenderDueTable();
 
     function openEdit(id) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+      // ✅ evita sovrapposizioni (menu ✎ + altre finestre)
+      hideAllActionMenus();
+      try { closeNoteModal(); } catch {}
+      setModalOpen(true);
+
       const ops = loadOps();
       const rec = ops.find(r => r.id === id);
       if (!rec) return;
@@ -2701,6 +2747,7 @@ accRenderDueTable();
 
       editInfo.textContent = `${rec.category} — ${rec.createdByName || rec.createdByEmail} — ${new Date(rec.ts).toLocaleString()}`;
       editType.value = rec.type;
+
       const m = rec.money;
       const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
       const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
@@ -2719,10 +2766,14 @@ accRenderDueTable();
     }
 
     function closeEdit() {
+      if (!editOverlay) return;
       editOverlay.style.display = "none";
       editingId = null;
       editingCategory = null;
       editingItems = [];
+
+      // se non ci sono altre modali aperte, sblocca scroll
+      setModalOpen(false);
     }
 
     function renderEditItems() {
