@@ -3626,6 +3626,7 @@ function accComputeSummary() {
   let income = { clean:0, dirty:0, drug:0 };
   let expense = { clean:0, dirty:0, drug:0 };
   let salaryTotal = 0, salary30 = 0;
+
   const now = Date.now();
   const days30 = 30 * 24 * 60 * 60 * 1000;
 
@@ -3642,8 +3643,7 @@ function accComputeSummary() {
   // 1) Contabilità (ACC_KEY)
   all.forEach(r => {
     if (r.kind === "balance") {
-      const a = r.amount;
-      const mm = moneyObj(a);
+      const mm = moneyObj(r.amount);
 
       if (r.type === "in") {
         income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
@@ -3674,32 +3674,6 @@ function accComputeSummary() {
   invLoad().forEach(r => {
     const mm = moneyObj(r.money);
     const isIncome = (r.type === "add" || r.type === "sold");
-    if (isIncome) {
-      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
-    } else {
-      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
-    }
-  });
-
-  return { income, expense, salaryTotal, salary30 };
-}
-
-  // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
-  loadOps().forEach(op => {
-    const mm = opsMoneyObj(op.money);
-    if (op.type === "ottenuto") {
-      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
-    } else {
-      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
-    }
-  });
-
-  // 3) Gestione armi-droga (INV_KEY)
-  // regola soldi (come già fai nei totali Gestione):
-  // add/sold = Entrata .. rem/buy = Uscita
-  invLoad().forEach(r => {
-    const mm = invMoneyObj(r.money);
-    const isIncome = (r.type === "add" || r.type === "sold");
 
     if (isIncome) {
       income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
@@ -3710,22 +3684,8 @@ function accComputeSummary() {
 
   return { income, expense, salaryTotal, salary30 };
 }
-  });
 
-  // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
-  loadOps().forEach(op => {
-    const mm = opsMoneyObj(op.money);
-    if (op.type === "ottenuto") {
-      income.clean += mm.clean; income.dirty += mm.dirty; income.drug += mm.drug;
-    } else {
-      expense.clean += mm.clean; expense.dirty += mm.dirty; expense.drug += mm.drug;
-    }
-  });
-
-  return { income, expense, salaryTotal, salary30 };
-}
-
-    function accRenderSummary() {
+function accRenderSummary() {
       const b = document.getElementById("accBalanceSummary");
       const s = document.getElementById("accSalarySummary");
       if (!b || !s) return;
