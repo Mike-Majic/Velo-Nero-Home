@@ -3703,48 +3703,6 @@ invRenderTotals();
         if (tname === "Stipendi") {
 p.innerHTML = `
   <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Stipendi</h3>
-
-  <!-- ✅ MINI RIEPILOGO (come foto) -->
-  <div style="margin:10px 0 14px 0;">
-    <div style="color:var(--red2); font-weight:900; font-size:22px; margin-bottom:6px;">Bilancio</div>
-
-    <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900; margin-bottom:6px;">
-      <span>Entrata</span><span>Uscita</span><span>Saldo</span>
-    </div>
-
-    <div style="display:grid; grid-template-columns: 160px 1fr; row-gap:6px;">
-      <div style="font-weight:900;">Puliti</div>
-      <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900;">
-        <span id="accBalIn_clean">€0</span>
-        <span id="accBalOut_clean">€0</span>
-        <span id="accBalSal_clean">€0</span>
-      </div>
-
-      <div style="font-weight:900;">Sporchi</div>
-      <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900;">
-        <span id="accBalIn_dirty">€0</span>
-        <span id="accBalOut_dirty">€0</span>
-        <span id="accBalSal_dirty">€0</span>
-      </div>
-
-      <div style="font-weight:900;">Spaccio</div>
-      <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900;">
-        <span id="accBalIn_drug">€0</span>
-        <span id="accBalOut_drug">€0</span>
-        <span id="accBalSal_drug">€0</span>
-      </div>
-    </div>
-
-    <div style="margin-top:10px; font-weight:900;">
-      Saldo totale: <span id="accBalSal_total">€0</span>
-    </div>
-
-    <div style="margin-top:16px; color:var(--red2); font-weight:900; font-size:22px;">Stipendi</div>
-    <div style="margin-top:6px; font-weight:900;">
-      Totale stipendi: <span id="accSal_total">€0</span> Ultimi 30gg: <span id="accSal_30">€0</span>
-    </div>
-  </div>
-
   <div class="muted">Registra uno stipendio pagato (o nota stipendio) ..</div>
 
   <div class="row">
@@ -3820,50 +3778,8 @@ p.innerHTML = `
   </div>
 `;
         } else {
-p.innerHTML = `
+          p.innerHTML = `
             <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Bilancio (Entrate/Uscite)</h3>
-
-            <!-- ✅ MINI RIEPILOGO (come foto) -->
-            <div style="margin:10px 0 14px 0;">
-              <div style="color:var(--red2); font-weight:900; font-size:22px; margin-bottom:6px;">Bilancio</div>
-
-              <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900; margin-bottom:6px;">
-                <span>Entrata</span><span>Uscita</span><span>Saldo</span>
-              </div>
-
-              <div style="display:grid; grid-template-columns: 160px 1fr; row-gap:6px;">
-                <div style="font-weight:900;">Puliti</div>
-                <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900;">
-                  <span id="accBalIn_clean">€0</span>
-                  <span id="accBalOut_clean">€0</span>
-                  <span id="accBalSal_clean">€0</span>
-                </div>
-
-                <div style="font-weight:900;">Sporchi</div>
-                <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900;">
-                  <span id="accBalIn_dirty">€0</span>
-                  <span id="accBalOut_dirty">€0</span>
-                  <span id="accBalSal_dirty">€0</span>
-                </div>
-
-                <div style="font-weight:900;">Spaccio</div>
-                <div style="display:flex; justify-content:flex-end; gap:24px; font-weight:900;">
-                  <span id="accBalIn_drug">€0</span>
-                  <span id="accBalOut_drug">€0</span>
-                  <span id="accBalSal_drug">€0</span>
-                </div>
-              </div>
-
-              <div style="margin-top:10px; font-weight:900;">
-                Saldo totale: <span id="accBalSal_total">€0</span>
-              </div>
-
-              <div style="margin-top:16px; color:var(--red2); font-weight:900; font-size:22px;">Stipendi</div>
-              <div style="margin-top:6px; font-weight:900;">
-                Totale stipendi: <span id="accSal_total">€0</span> Ultimi 30gg: <span id="accSal_30">€0</span>
-              </div>
-            </div>
-
             <div class="muted">Registra entrate o uscite ..</div>
 
             <div class="row">
@@ -4237,62 +4153,25 @@ function accComputeSummary() {
 }
 
 function accRenderSummary() {
-  const { income, expense, salaryTotal, salary30 } = accComputeSummary();
+      const b = document.getElementById("accBalanceSummary");
+      const s = document.getElementById("accSalarySummary");
+      if (!b || !s) return;
 
-  const sal = {
-    clean: income.clean - expense.clean,
-    dirty: income.dirty - expense.dirty,
-    drug:  income.drug  - expense.drug
-  };
+      const { income, expense, salaryTotal, salary30 } = accComputeSummary();
 
-  // ✅ Widget stile “foto”
-  const inC  = document.getElementById("accBalIn_clean");
-  const outC = document.getElementById("accBalOut_clean");
-  const salC = document.getElementById("accBalSal_clean");
+      const sal = {
+        clean: income.clean - expense.clean,
+        dirty: income.dirty - expense.dirty,
+        drug:  income.drug  - expense.drug
+      };
 
-  const inD  = document.getElementById("accBalIn_dirty");
-  const outD = document.getElementById("accBalOut_dirty");
-  const salD = document.getElementById("accBalSal_dirty");
+      b.textContent =
+        `Puliti: +${formatMoney(income.clean)} .. -${formatMoney(expense.clean)} .. =${formatMoney(sal.clean)} | ` +
+        `Sporchi: +${formatMoney(income.dirty)} .. -${formatMoney(expense.dirty)} .. =${formatMoney(sal.dirty)} | ` +
+        `Spaccio: +${formatMoney(income.drug)} .. -${formatMoney(expense.drug)} .. =${formatMoney(sal.drug)}`;
 
-  const inS  = document.getElementById("accBalIn_drug");
-  const outS = document.getElementById("accBalOut_drug");
-  const salS = document.getElementById("accBalSal_drug");
-
-  const salT = document.getElementById("accBalSal_total");
-
-  if (inC)  inC.textContent  = formatMoney(income.clean);
-  if (outC) outC.textContent = formatMoney(expense.clean);
-  if (salC) salC.textContent = formatMoney(sal.clean);
-
-  if (inD)  inD.textContent  = formatMoney(income.dirty);
-  if (outD) outD.textContent = formatMoney(expense.dirty);
-  if (salD) salD.textContent = formatMoney(sal.dirty);
-
-  if (inS)  inS.textContent  = formatMoney(income.drug);
-  if (outS) outS.textContent = formatMoney(expense.drug);
-  if (salS) salS.textContent = formatMoney(sal.drug);
-
-  const totalSaldo = (Number(sal.clean||0) + Number(sal.dirty||0) + Number(sal.drug||0));
-  if (salT) salT.textContent = formatMoney(totalSaldo);
-
-  const sTot = document.getElementById("accSal_total");
-  const s30  = document.getElementById("accSal_30");
-  if (sTot) sTot.textContent = formatMoney(salaryTotal);
-  if (s30)  s30.textContent  = formatMoney(salary30);
-
-  // ✅ Compat: se hai ancora i vecchi box testuali, li aggiorno comunque
-  const b = document.getElementById("accBalanceSummary");
-  const s = document.getElementById("accSalarySummary");
-  if (b) {
-    b.textContent =
-      `Puliti: +${formatMoney(income.clean)} .. -${formatMoney(expense.clean)} .. =${formatMoney(sal.clean)} | ` +
-      `Sporchi: +${formatMoney(income.dirty)} .. -${formatMoney(expense.dirty)} .. =${formatMoney(sal.dirty)} | ` +
-      `Spaccio: +${formatMoney(income.drug)} .. -${formatMoney(expense.drug)} .. =${formatMoney(sal.drug)}`;
-  }
-  if (s) {
-    s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
-  }
-}
+      s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
+    }
 
     function accResetAll() {
       if (!canResetAccounting()) return alert("Permesso negato");
