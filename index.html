@@ -1369,87 +1369,132 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
       editingNoteId = null;
     }
 
-    function saveNote() {
-      const isExisting = !!editingNoteId;
-      if (isExisting && !canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono modificare.");
-      if (!isExisting && !canAddDiaryNote()) return alert("Sei in attesa di ruolo: non puoi inserire note.");
+function saveNote() {
+  const isExisting = !!editingNoteId;
+  if (isExisting && !canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono modificare.");
+  if (!isExisting && !canAddDiaryNote()) return alert("Sei in attesa di ruolo: non puoi inserire note.");
 
-      const t = (noteType.value || "Nota").trim();
-      const title = (noteTitle.value || "").trim();
-      const names = (noteNames.value || "").trim();
-      const agreements = (noteAgreements.value || "").trim();
-      const body = (noteBody.value || "").trim();
+  const t = (noteType.value || "Nota").trim();
+  const title = (noteTitle.value || "").trim();
+  const names = (noteNames.value || "").trim();
+  const agreements = (noteAgreements.value || "").trim();
+  const body = (noteBody.value || "").trim();
 
-      if (!title && !names && !agreements && !body) {
-        return alert("Scrivi almeno qualcosa (titolo, nomi, accordi o note).");
-      }
+  if (!title && !names && !agreements && !body) {
+    return alert("Scrivi almeno qualcosa (titolo, nomi, accordi o note).");
+  }
 
-      const all = loadDiary();
-      const me = myGameNameOrEmail();
+  const all = loadDiary();
+  const me = myGameNameOrEmail();
 
-      if (editingNoteId) {
-        const n = all.find(x => x.id === editingNoteId);
-        if (!n) return;
-        n.type = t;
-        n.title = title;
-        n.names = names;
-        n.agreements = agreements;
-        n.body = body;
-        n.updatedAt = Date.now();
-      } else {
-        all.push({
-          id: uid(),
-          ts: Date.now(),
-          type: t,
-          title,
-          names,
-          agreements,
-          body,
-          createdBy: me
-        });
-      }
+  if (editingNoteId) {
+    const n = all.find(x => x.id === editingNoteId);
+    if (!n) return;
 
-      saveDiary(all);
-      closeNoteModal();
-      diarySearch();
+    n.type = t;
+    n.title = title;
+    n.names = names;
+    n.agreements = agreements;
+    n.body = body;
+    n.updatedAt = Date.now();
+
+    // LOG
+    logEvent(
+      "DIARY_EDIT",
+      `Tipo(${t || "—"}) .. Titolo(${(title || "—").slice(0,80)}) .. Nomi(${(names || "—").slice(0,80)})`
+    );
+  } else {
+    const newId = uid();
+    all.push({
+      id: newId,
+      ts: Date.now(),
+      type: t,
+      title,
+      names,
+      agreements,
+      body,
+      createdBy: me
+    });
+
+    // LOG
+    logEvent(
+      "DIARY_ADD",
+      `Tipo(${t || "—"}) .. Titolo(${(title || "—").slice(0,80)}) .. Nomi(${(names || "—").slice(0,80)})`
+    );
+  }
+
+  saveDiary(all);
+  closeNoteModal();
+  diarySearch();
+}
+
+function deleteNote() {
+  if (!canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono eliminare.");
+  if (!editingNoteId) return;
+
+  const ok = confirm("Confermi eliminazione nota?");
+  if (!ok) return;
+
+  // LOG (prima di eliminare)
+  try {
+    const n = loadDiary().find(x => x.id === editingNoteId);
+    if (n) {
+      logEvent(
+        "DIARY_DELETE",
+        `Tipo(${n.type || "—"}) .. Titolo(${(n.title || "—").slice(0,80)}) .. CreatoDa(${n.createdBy || "—"})`
+      );
+    } else {
+      logEvent("DIARY_DELETE", `id:${editingNoteId}`);
     }
+  } catch {}
 
-    function deleteNote() {
-      if (!canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono eliminare.");
-      if (!editingNoteId) return;
-
-      const ok = confirm("Confermi eliminazione nota?");
-      if (!ok) return;
-
-      saveDiary(loadDiary().filter(x => x.id !== editingNoteId));
-      closeNoteModal();
-      diarySearch();
-    }
+  saveDiary(loadDiary().filter(x => x.id !== editingNoteId));
+  closeNoteModal();
+  diarySearch();
+}
 
     // =========================
     // LOGS (tutto quello che succede)
     // =========================
-    function logEvent(action, meta = "", email = null, gameName = null) {
-      try {
-        const u = getMyUser();
-        const em = (email || u?.email || loadSession()?.email || "").toLowerCase();
-        const gn = (gameName || u?.gameName || "");
-        const raw = localStorage.getItem(LOGS_KEY) || "[]";
-        const logs = JSON.parse(raw);
+function logEvent(action, meta = "", email = null, gameName = null) {
+  try {
+    const u = getMyUser();
+    const em = (email || u?.email || loadSession()?.email || "").toLowerCase();
+    const gn = (gameName || u?.gameName || "");
+    const raw = localStorage.getItem(LOGS_KEY) || "[]";
+    const logs = JSON.parse(raw);
 
-        logs.push({
-          ts: Date.now(),
-          email: em || "—",
-          gameName: gn || "—",
-          action: String(action || "—"),
-          meta: String(meta || "")
-        });
+    logs.push({
+      ts: Date.now(),
+      email: em || "—",
+      gameName: gn || "—",
+      action: String(action || "—"),
+      meta: String(meta || "")
+    });
 
-        localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
-      } catch (e) {
-        console.error("Errore logEvent", e);
-      }
-    }
+    localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+  } catch (e) {
+    console.error("Errore logEvent", e);
+  }
+}
+
+// helper per meta log
+function logMoneyParts(m) {
+  const mm = (typeof m === "number")
+    ? { clean: Number(m || 0), dirty: 0, drug: 0 }
+    : { clean: Number(m?.clean || 0), dirty: Number(m?.dirty || 0), drug: Number(m?.drug || 0) };
+
+  const parts = [];
+  if (mm.clean) parts.push("P:" + mm.clean.toLocaleString("it-IT"));
+  if (mm.dirty) parts.push("S:" + mm.dirty.toLocaleString("it-IT"));
+  if (mm.drug)  parts.push("SP:" + mm.drug.toLocaleString("it-IT"));
+  return parts.length ? parts.join(" .. ") : "—";
+}
+
+function logTagsLine(tagNames) {
+  const arr = Array.isArray(tagNames) ? tagNames : [];
+  return arr.length ? arr.join(", ") : "—";
+}
 
     function loadLoginLogs() {
       try {
@@ -2073,19 +2118,30 @@ if (id === "contabilita") {
 
         if ((u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) sel.disabled = true;
 
-        sel.onchange = () => {
-          if ((u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) {
-            alert("Il ruolo OWNER non può essere modificato.");
-            renderUsersTable();
-            return;
-          }
-          u.role = sel.value || "";
-          saveUsers(users);
-          setHeaderUser();
-          initAfterLogin();
-          renderTagList();
-          renderTagListInv();
-        };
+sel.onchange = () => {
+  if ((u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) {
+    alert("Il ruolo OWNER non può essere modificato.");
+    renderUsersTable();
+    return;
+  }
+
+  const oldRole = u.role || "—";
+  const newRole = sel.value || "—";
+  u.role = sel.value || "";
+
+  saveUsers(users);
+
+  // LOG
+  logEvent(
+    "USER_ROLE_SET",
+    `Utente(${u.gameName || "—"} .. ${u.email || "—"}) .. Da(${oldRole}) -> A(${newRole})`
+  );
+
+  setHeaderUser();
+  initAfterLogin();
+  renderTagList();
+  renderTagListInv();
+};
         tdRole.appendChild(sel);
 
         const tdEmail = document.createElement("td");
@@ -2116,10 +2172,17 @@ if (id === "contabilita") {
           u.totpSecret = generateTotpSecret();
           u.totpNeedsSetup = true;
           clearTrustedForEmail(u.email);
-          saveUsers(users);
-          menu.style.display = "none";
-          renderUsersTable();
-          alert("2FA resettato.");
+saveUsers(users);
+
+// LOG
+logEvent(
+  "USER_2FA_RESET",
+  `Utente(${u.gameName || "—"} .. ${u.email || "—"})`
+);
+
+menu.style.display = "none";
+renderUsersTable();
+alert("2FA resettato.");
         };
 
         const b5 = document.createElement("button");
@@ -2131,10 +2194,17 @@ if (id === "contabilita") {
           if (!ok) return;
           u.passwordHash = null;
           clearTrustedForEmail(u.email);
-          saveUsers(users);
-          menu.style.display = "none";
-          renderUsersTable();
-          alert("Password resettata.");
+saveUsers(users);
+
+// LOG
+logEvent(
+  "USER_PW_RESET",
+  `Utente(${u.gameName || "—"} .. ${u.email || "—"})`
+);
+
+menu.style.display = "none";
+renderUsersTable();
+alert("Password resettata.");
         };
 
         const b1 = document.createElement("button");
@@ -2142,12 +2212,19 @@ if (id === "contabilita") {
         b1.onclick = () => {
           if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
           if ((u.role || "") === "Owner") return alert("OWNER intoccabile.");
-          u.blocked = true;
-          saveUsers(users);
-          menu.style.display = "none";
-          renderUsersTable();
-          const me = getMyUser();
-          if (me?.email === u.email && u.blocked) logout();
+u.blocked = true;
+saveUsers(users);
+
+// LOG
+logEvent(
+  "USER_BLOCK",
+  `Utente(${u.gameName || "—"} .. ${u.email || "—"})`
+);
+
+menu.style.display = "none";
+renderUsersTable();
+const me = getMyUser();
+if (me?.email === u.email && u.blocked) logout();
         };
 
         const b2 = document.createElement("button");
@@ -2155,10 +2232,17 @@ if (id === "contabilita") {
         b2.onclick = () => {
           if (!canBlockUnblock()) return alert("Solo Owner e Boss possono bloccare/sbloccare");
           if ((u.role || "") === "Owner") return alert("OWNER intoccabile.");
-          u.blocked = false;
-          saveUsers(users);
-          menu.style.display = "none";
-          renderUsersTable();
+u.blocked = false;
+saveUsers(users);
+
+// LOG
+logEvent(
+  "USER_UNBLOCK",
+  `Utente(${u.gameName || "—"} .. ${u.email || "—"})`
+);
+
+menu.style.display = "none";
+renderUsersTable();
         };
 
         const b3 = document.createElement("button");
@@ -2168,12 +2252,18 @@ if (id === "contabilita") {
           if ((u.role || "") === "Owner") return alert("OWNER intoccabile.");
           const ok = confirm("Confermi espulsione di " + u.email + "?");
           if (!ok) return;
-          const filtered = users.filter(x => x.id !== u.id);
-          saveUsers(filtered);
-          menu.style.display = "none";
-          renderUsersTable();
-          const s = loadSession();
-          if (s?.email === u.email) logout();
+// LOG (prima di espellere)
+logEvent(
+  "USER_EXPEL",
+  `Utente(${u.gameName || "—"} .. ${u.email || "—"}) .. Ruolo(${u.role || "—"})`
+);
+
+const filtered = users.filter(x => x.id !== u.id);
+saveUsers(filtered);
+menu.style.display = "none";
+renderUsersTable();
+const s = loadSession();
+if (s?.email === u.email) logout();
         };
 
         if (myRole() === "Vice Boss") {
@@ -2525,7 +2615,14 @@ if (id === "contabilita") {
         // compat vecchio
         tagName: tagNames.length ? tagNames[0] : null
       });
-      saveOps(ops);
+saveOps(ops);
+
+// LOG
+logEvent(
+  "OPS_ADD",
+  `${category} .. ${type === "ottenuto" ? "OTTENUTO" : "PERSO"} .. Soldi(${logMoneyParts({ clean: moneyClean, dirty: moneyDirty, drug: moneyDrug })}) .. Tag(${logTagsLine(tagNames)})` +
+  (note.trim() ? ` .. Note(${note.trim()})` : "")
+);
 
       // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
       const last = ops[ops.length - 1];
@@ -2550,6 +2647,19 @@ if (id === "contabilita") {
 
     function deleteRecord(id, category) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+// LOG (prima di cancellare, per avere contesto)
+try {
+  const rec = loadOps().find(r => r.id === id);
+  if (rec) {
+    logEvent(
+      "OPS_DELETE",
+      `${rec.category} .. ${rec.type === "ottenuto" ? "OTTENUTO" : "PERSO"} .. Soldi(${logMoneyParts(rec.money)}) .. Tag(${logTagsLine(rec.tagNames || [])})`
+    );
+  } else {
+    logEvent("OPS_DELETE", `id:${id}`);
+  }
+} catch {}
+
 saveOps(loadOps().filter(r => r.id !== id));
 
 // AUTO: elimina stipendi DA PAGARE collegati a questa registrazione
@@ -2677,7 +2787,14 @@ accRenderDueTable();
       rec.tagNames = selectedTagNames();
       rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
-      saveOps(ops);
+saveOps(ops);
+
+// LOG
+logEvent(
+  "OPS_EDIT",
+  `${rec.category} .. ${rec.type === "ottenuto" ? "OTTENUTO" : "PERSO"} .. Soldi(${logMoneyParts(rec.money)}) .. Tag(${logTagsLine(rec.tagNames || [])})` +
+  (rec.note ? ` .. Note(${rec.note})` : "")
+);
 
       // AUTO: aggiorna stipendi DA PAGARE collegati (se già pagati non li tocca)
       const noteBase = `Auto da Azioni (modifica): ${rec.category} .. ${rec.type === "ottenuto" ? "OTTENUTO" : "PERSO"}`;
@@ -2761,10 +2878,11 @@ accRenderDueTable();
       if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
       const ok = confirm("Confermi AZZERA AZIONI?");
       if (!ok) return;
-      localStorage.removeItem(OPS_KEY);
-      CATEGORIES.forEach(c => renderCategory(c));
-      renderOpsMoneySummary();
-      invRenderTotals();
+logEvent("OPS_RESET", "Azzera Azioni");
+localStorage.removeItem(OPS_KEY);
+CATEGORIES.forEach(c => renderCategory(c));
+renderOpsMoneySummary();
+invRenderTotals();
     }
 
     function renderTabsAndPanels() {
@@ -3167,6 +3285,13 @@ accRenderDueTable();
       });
 invSave(all);
 
+// LOG
+logEvent(
+  "INV_ADD",
+  `${cat} .. ${type} .. Item(${item} x${qty}) .. Soldi(${logMoneyParts({ clean: moneyClean, dirty: moneyDirty, drug: moneyDrug })}) .. Tag(${logTagsLine(tagNames)})` +
+  (note ? ` .. Note(${note})` : "")
+);
+
 // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
 const last = all[all.length - 1];
 if (last) {
@@ -3348,9 +3473,10 @@ function invComputeTotals() {
     function invResetAll() {
       const ok = confirm("Confermi AZZERA GESTIONE?");
       if (!ok) return;
-      localStorage.removeItem(INV_KEY);
-      INV_CATEGORIES.forEach(c => invRenderTable(c));
-      invRenderTotals();
+logEvent("INV_RESET", "Azzera Gestione armi-droga");
+localStorage.removeItem(INV_KEY);
+INV_CATEGORIES.forEach(c => invRenderTable(c));
+invRenderTotals();
     }
 
     // =========================
@@ -3591,7 +3717,13 @@ all.push({
   payType,
   note
 });
-      accSave(all);
+accSave(all);
+
+// LOG
+logEvent(
+  "ACC_SALARY_ADD",
+  `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` + (note ? ` .. Note(${note})` : "")
+);
 
       document.getElementById("salTo_" + tid).value = "";
       document.getElementById("salAmt_" + tid).value = "";
@@ -3632,6 +3764,16 @@ all.push({
         note
       });
       accSave(all);
+
+accSave(all);
+
+// LOG
+logEvent(
+  "ACC_BALANCE_ADD",
+  `${type === "in" ? "ENTRATA" : "USCITA"} .. Importi(${logMoneyParts({ clean: ac, dirty: ad, drug: as })})` +
+  (reason ? ` .. Causale(${reason})` : "") +
+  (note ? ` .. Note(${note})` : "")
+);
 
       document.getElementById("balAmtClean_" + tid).value = "";
       document.getElementById("balAmtDirty_" + tid).value = "";
@@ -3750,6 +3892,13 @@ function accSetSalaryStatus(id, status) {
   else r.paidAt = null;
 
   accSave(all);
+
+  // LOG
+  logEvent(
+    "ACC_SALARY_STATUS",
+    `A(${r.to || "—"}) .. Importo(${Number(r.amount || 0).toLocaleString("it-IT")}) .. Stato(${s}) .. Tipo(${r.payType || "clean"})`
+  );
+
   accRenderDueTable();
   accRenderTable("Stipendi");
   accRenderSummary();
@@ -3844,10 +3993,11 @@ function accRenderSummary() {
       if (!canResetAccounting()) return alert("Permesso negato");
       const ok = confirm("Confermi AZZERA CONTABILITÀ?");
       if (!ok) return;
-      localStorage.removeItem(ACC_KEY);
-      accRenderTable("Stipendi");
-      accRenderTable("Bilancio");
-      accRenderSummary();
+logEvent("ACC_RESET", "Azzera Contabilità");
+localStorage.removeItem(ACC_KEY);
+accRenderTable("Stipendi");
+accRenderTable("Bilancio");
+accRenderSummary();
     }
 
     // =========================
