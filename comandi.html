@@ -1,285 +1,334 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-    <title>Traffico organizzato - VELO NERO</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        body {
-            background-color: #121212;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px 18px;
-            margin: 0;
-        }
+  <title>Traffico organizzato - VELO NERO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px 18px;
+      margin: 0;
+    }
 
-        .topbar{
-          max-width:1200px; margin:0 auto 10px auto;
-          display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
-        }
-        .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
-        .pill {
-          display:inline-block; padding:6px 10px; border-radius:999px;
-          border:1px solid #ff1a1a55; background:#1a1a1a; color:#fff; font-size:13px;
-          box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-        }
-        .linkbtn{
-          background:none; border:1px solid #ff1a1a55; color:#fff; cursor:pointer;
-          padding:8px 12px; border-radius:10px;
-          box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-          text-decoration:none;
-          display:inline-block;
-        }
-        .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
+    .topbar{
+      max-width:1200px; margin:0 auto 10px auto;
+      display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .userpill { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
+    .pill {
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      border:1px solid #ff1a1a55; background:#1a1a1a; color:#fff; font-size:13px;
+      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
+      font-weight:800;
+    }
+    .linkbtn{
+      background:none; border:1px solid #ff1a1a55; color:#fff; cursor:pointer;
+      padding:8px 12px; border-radius:10px;
+      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
+      text-decoration:none;
+      display:inline-block;
+      font-weight:900;
+    }
+    .linkbtn:hover { background:#2b0000; border-color:#ff1a1aaa; }
 
-        h1 {
-            color: #ff3b3b;
-            font-size: 50px;
-            margin: 12px 0 10px 0;
-            text-shadow: 0 0 12px #ff3b3b80;
-        }
-        p.subtitle {
-            color: #ff7b7b;
-            font-size: 18px;
-            margin-bottom: 22px;
-        }
+    h1 {
+      color: #ff3b3b;
+      font-size: 50px;
+      margin: 12px 0 10px 0;
+      text-shadow: 0 0 12px #ff3b3b80;
+      font-weight:900;
+    }
+    p.subtitle {
+      color: #ff7b7b;
+      font-size: 18px;
+      margin-bottom: 22px;
+      font-weight:800;
+    }
 
-        .grid {
-          max-width: 1100px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 18px;
-        }
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
 
-        .command-box {
-            background: linear-gradient(145deg, #1a1a1a, #2b0000);
-            padding: 22px 22px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            text-align: left;
-        }
-        .command-box:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px #ff1a1a99, 0 0 25px #ff0000cc inset;
-        }
+    .command-box {
+      background: linear-gradient(145deg, #1a1a1a, #2b0000);
+      padding: 22px 22px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #ff1a1a66, 0 0 16px #ff000099 inset;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-align: left;
+    }
+    .command-box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px #ff1a1a99, 0 0 25px #ff0000cc inset;
+    }
 
-        .boxhead{
-          display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
-          margin-bottom: 10px;
-        }
-        .boxhead h2{ margin:0; color:#fff; font-size:20px; }
-        .muted{ color:#ffb3b3; font-size:14px; margin:6px 0 0 0; }
+    .boxhead{
+      display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+    .boxhead h2{ margin:0; color:#fff; font-size:20px; font-weight:900; }
+    .muted{ color:#ffb3b3; font-size:14px; margin:6px 0 0 0; font-weight:800; }
 
-        label { display:block; font-size:13px; color:#ffb3b3; margin:12px 0 6px 0; }
-        input, select, textarea{
-          width:100%;
-          padding:10px 12px;
-          border-radius:10px;
-          border:1px solid #ff1a1a55;
-          background:#141414;
-          color:#fff;
-          outline:none;
-          box-sizing:border-box;
-        }
-        textarea{ min-height: 90px; resize: vertical; }
+    label { display:block; font-size:13px; color:#ffb3b3; margin:12px 0 6px 0; font-weight:800; }
+    input, select, textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #ff1a1a55;
+      background:#141414;
+      color:#fff;
+      outline:none;
+      box-sizing:border-box;
+      font-weight:800;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
 
-        .row{ display:flex; gap:10px; }
-        .row > *{ flex:1; }
+    .row{ display:flex; gap:10px; }
+    .row > *{ flex:1; }
 
-        .btn{
-          margin-top: 12px;
-          width: 100%;
-          padding: 10px 12px;
-          border-radius: 10px;
-          border: 1px solid #ff1a1a55;
-          background: #1a1a1a;
-          color:#fff;
-          cursor:pointer;
-          box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
-        }
-        .btn:hover{ background:#2b0000; border-color:#ff1a1aaa; }
+    .btn{
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ff1a1a55;
+      background: #1a1a1a;
+      color:#fff;
+      cursor:pointer;
+      box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
+      font-weight:900;
+    }
+    .btn:hover{ background:#2b0000; border-color:#ff1a1aaa; }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-        .hint { color:#ff7b7b; font-size:14px; margin-top:14px; }
-        .ok { color:#7bffb5; font-size:13px; margin-top:10px; }
-        .err { color:#ff7b7b; font-size:13px; margin-top:10px; }
+    .hint { color:#ff7b7b; font-size:14px; margin-top:14px; font-weight:800; }
+    .ok { color:#7bffb5; font-size:13px; margin-top:10px; font-weight:900; }
+    .err { color:#ff7b7b; font-size:13px; margin-top:10px; font-weight:900; }
 
-        a.back {
-            display: inline-block;
-            margin-top: 22px;
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #ff3b3b;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-        a.back:hover { background-color: #cc0000; }
-    </style>
+    a.back {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 10px 20px;
+      color: #fff;
+      background-color: #ff3b3b;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight:900;
+    }
+    a.back:hover { background-color: #cc0000; }
+  </style>
 </head>
+
 <body>
 
-<div class="topbar">
-  <a href="index.html" class="linkbtn">⬅ Dashboard</a>
-  <div class="userpill">
-    <span class="pill" id="pillEmail">Non autenticato</span>
-    <span class="pill" id="pillRole">Ruolo: —</span>
-    <button class="linkbtn" id="btnLogout" onclick="logout()">Esci</button>
-  </div>
-</div>
-
-<h1>Traffico organizzato</h1>
-<p class="subtitle">Armi / Droga</p>
-
-<div class="grid">
-
-  <div class="command-box">
-    <div class="boxhead">
-      <h2>Armi</h2>
-      <span class="pill" id="pillArmi">—</span>
+  <div class="topbar">
+    <a href="index.html" class="linkbtn">⬅ Dashboard</a>
+    <div class="userpill">
+      <span class="pill" id="pillEmail">Non autenticato</span>
+      <span class="pill" id="pillRole">Ruolo: —</span>
+      <button class="linkbtn" id="btnLogout" onclick="logout()" style="display:none;">Esci</button>
     </div>
-
-    <label>Tipo operazione</label>
-    <select id="armiType">
-      <option value="acquisto">Acquisto</option>
-      <option value="vendita">Vendita</option>
-      <option value="movimento">Movimento</option>
-    </select>
-
-    <div class="row">
-      <div>
-        <label>Articolo</label>
-        <input id="armiItem" placeholder="Es. Pistola, munizioni, ecc" />
-      </div>
-      <div>
-        <label>Quantità</label>
-        <input id="armiQty" type="number" min="1" step="1" placeholder="Es. 5" />
-      </div>
-    </div>
-
-    <label>Note</label>
-    <textarea id="armiNotes" placeholder="Dettagli, contatti, prezzo, luogo .."></textarea>
-
-    <button class="btn" onclick="submitTraffic('armi')">Salva Armi</button>
-    <div id="armiMsg"></div>
   </div>
 
-  <div class="command-box">
-    <div class="boxhead">
-      <h2>Droga</h2>
-      <span class="pill" id="pillDroga">—</span>
+  <h1>Traffico organizzato</h1>
+  <p class="subtitle">Armi / Droga</p>
+
+  <div class="grid">
+
+    <div class="command-box">
+      <div class="boxhead">
+        <h2>Armi</h2>
+        <span class="pill" id="pillArmi">—</span>
+      </div>
+
+      <label>Tipo operazione</label>
+      <select id="armiType">
+        <option value="acquisto">Acquisto</option>
+        <option value="vendita">Vendita</option>
+        <option value="movimento">Movimento</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label>Articolo</label>
+          <input id="armiItem" placeholder="Es. Pistola, munizioni, ecc" />
+        </div>
+        <div>
+          <label>Quantità</label>
+          <input id="armiQty" type="number" min="1" step="1" placeholder="Es. 5" />
+        </div>
+      </div>
+
+      <label>Note</label>
+      <textarea id="armiNotes" placeholder="Dettagli, contatti, prezzo, luogo .."></textarea>
+
+      <button class="btn" id="btnSaveArmi" onclick="submitTraffic('armi')">Salva Armi</button>
+      <div id="armiMsg"></div>
     </div>
 
-    <label>Tipo operazione</label>
-    <select id="drogaType">
-      <option value="acquisto">Acquisto</option>
-      <option value="vendita">Vendita</option>
-      <option value="movimento">Movimento</option>
-    </select>
+    <div class="command-box">
+      <div class="boxhead">
+        <h2>Droga</h2>
+        <span class="pill" id="pillDroga">—</span>
+      </div>
 
-    <div class="row">
-      <div>
-        <label>Prodotto</label>
-        <input id="drogaItem" placeholder="Es. Erba, coca, ecc" />
+      <label>Tipo operazione</label>
+      <select id="drogaType">
+        <option value="acquisto">Acquisto</option>
+        <option value="vendita">Vendita</option>
+        <option value="movimento">Movimento</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label>Prodotto</label>
+          <input id="drogaItem" placeholder="Es. Erba, coca, ecc" />
+        </div>
+        <div>
+          <label>Quantità</label>
+          <input id="drogaQty" type="number" min="1" step="1" placeholder="Es. 10" />
+        </div>
       </div>
-      <div>
-        <label>Quantità</label>
-        <input id="drogaQty" type="number" min="1" step="1" placeholder="Es. 10" />
-      </div>
+
+      <label>Note</label>
+      <textarea id="drogaNotes" placeholder="Dettagli, tagli, consegna .."></textarea>
+
+      <button class="btn" id="btnSaveDroga" onclick="submitTraffic('droga')">Salva Droga</button>
+      <div id="drogaMsg"></div>
     </div>
 
-    <label>Note</label>
-    <textarea id="drogaNotes" placeholder="Dettagli, tagli, consegna .."></textarea>
-
-    <button class="btn" onclick="submitTraffic('droga')">Salva Droga</button>
-    <div id="drogaMsg"></div>
   </div>
 
-</div>
+  <div class="hint">Accesso consentito solo agli utenti con ruolo assegnato (non “none”).</div>
 
-<div class="hint">Accesso consentito solo agli utenti con ruolo assegnato (non “none”).</div>
+  <a href="index.html" class="back">Torna alla Dashboard</a>
 
-<a href="index.html" class="back">Torna alla Dashboard</a>
+  <script>
+    const pillEmail = document.getElementById("pillEmail");
+    const pillRole  = document.getElementById("pillRole");
+    const btnLogout = document.getElementById("btnLogout");
 
-<script>
-  const pillEmail = document.getElementById("pillEmail");
-  const pillRole  = document.getElementById("pillRole");
+    async function safeJson(r){
+      try { return await r.json(); } catch { return null; }
+    }
 
-  async function apiGet(url){
-    const r = await fetch(url, { method:"GET", credentials:"include" });
-    return r.json();
-  }
-  async function apiPost(url, data){
-    const r = await fetch(url, {
-      method:"POST",
-      credentials:"include",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(data || {})
-    });
-    return r.json();
-  }
+    async function apiGet(url){
+      try{
+        const r = await fetch(url, { method:"GET", credentials:"include" });
+        const j = await safeJson(r);
+        if (!r.ok) return { ok:false, error:(j && (j.error || j.message)) || ("HTTP " + r.status) };
+        return j || { ok:false, error:"Risposta non valida" };
+      } catch (e){
+        return { ok:false, error:"Errore di rete" };
+      }
+    }
 
-  async function logout(){
-    try { await apiPost("/api/auth/logout", {}); } catch {}
-    window.location.href = "index.html";
-  }
+    async function apiPost(url, data){
+      try{
+        const r = await fetch(url, {
+          method:"POST",
+          credentials:"include",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(data || {})
+        });
+        const j = await safeJson(r);
+        if (!r.ok) return { ok:false, error:(j && (j.error || j.message)) || ("HTTP " + r.status) };
+        return j || { ok:false, error:"Risposta non valida" };
+      } catch (e){
+        return { ok:false, error:"Errore di rete" };
+      }
+    }
 
-  function setMsg(el, ok, text){
-    el.innerHTML = "";
-    const d = document.createElement("div");
-    d.className = ok ? "ok" : "err";
-    d.textContent = text;
-    el.appendChild(d);
-  }
-
-  async function guard(){
-    const me = await apiGet("/api/auth/me");
-    if (!me?.authenticated) {
+    async function logout(){
+      try { await apiPost("/api/auth/logout", {}); } catch {}
       window.location.href = "index.html";
-      return;
     }
 
-    const role = (me.user?.role || "none").toLowerCase();
-    if (role === "none") {
-      alert("Sei in attesa di ruolo: accesso non consentito.");
-      window.location.href = "index.html";
-      return;
+    function setMsg(el, ok, text){
+      el.innerHTML = "";
+      const d = document.createElement("div");
+      d.className = ok ? "ok" : "err";
+      d.textContent = text;
+      el.appendChild(d);
     }
 
-    pillEmail.textContent = me.user.email || "—";
-    pillRole.textContent  = "Ruolo: " + role;
-
-    // piccola info (facoltativa)
-    document.getElementById("pillArmi").textContent = "OK";
-    document.getElementById("pillDroga").textContent = "OK";
-  }
-
-  async function submitTraffic(area){
-    const type  = document.getElementById(area + "Type").value;
-    const item  = (document.getElementById(area + "Item").value || "").trim();
-    const qty   = Number(document.getElementById(area + "Qty").value);
-    const notes = (document.getElementById(area + "Notes").value || "").trim();
-
-    const msgEl = document.getElementById(area + "Msg");
-
-    if (!item) return setMsg(msgEl, false, "Inserisci un nome/prodotto.");
-    if (!Number.isFinite(qty) || qty <= 0) return setMsg(msgEl, false, "Quantità non valida.");
-
-    const out = await apiPost("/api/traffic/create", { area, type, item, qty, notes });
-
-    if (!out?.ok) {
-      return setMsg(msgEl, false, out?.error || "Errore");
+    function prettyRole(role){
+      const r = String(role || "").trim();
+      if (!r) return "—";
+      return r;
     }
 
-    setMsg(msgEl, true, "Salvato ✅");
-    document.getElementById(area + "Item").value = "";
-    document.getElementById(area + "Qty").value = "";
-    document.getElementById(area + "Notes").value = "";
-  }
+    async function guard(){
+      const me = await apiGet("/api/auth/me");
 
-  guard();
-</script>
+      if (!me || me.ok === false || !me.authenticated) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const roleRaw = (me.user?.role || "none");
+      const role = String(roleRaw).toLowerCase();
+
+      if (role === "none") {
+        alert("Sei in attesa di ruolo: accesso non consentito.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      pillEmail.textContent = me.user?.email || "—";
+      pillRole.textContent  = "Ruolo: " + prettyRole(roleRaw);
+
+      if (btnLogout) btnLogout.style.display = "inline-block";
+
+      document.getElementById("pillArmi").textContent = "OK";
+      document.getElementById("pillDroga").textContent = "OK";
+    }
+
+    function setSaving(area, saving){
+      const btn = document.getElementById(area === "armi" ? "btnSaveArmi" : "btnSaveDroga");
+      if (!btn) return;
+      btn.disabled = !!saving;
+      btn.textContent = saving ? "Salvataggio.." : (area === "armi" ? "Salva Armi" : "Salva Droga");
+    }
+
+    async function submitTraffic(area){
+      const type  = document.getElementById(area + "Type").value;
+      const item  = (document.getElementById(area + "Item").value || "").trim();
+      const qty   = Number(document.getElementById(area + "Qty").value);
+      const notes = (document.getElementById(area + "Notes").value || "").trim();
+
+      const msgEl = document.getElementById(area + "Msg");
+
+      if (!item) return setMsg(msgEl, false, "Inserisci un nome/prodotto.");
+      if (!Number.isFinite(qty) || qty <= 0) return setMsg(msgEl, false, "Quantità non valida.");
+
+      setSaving(area, true);
+
+      const out = await apiPost("/api/traffic/create", { area, type, item, qty, notes });
+
+      if (!out || out.ok === false) {
+        setSaving(area, false);
+        return setMsg(msgEl, false, (out && out.error) ? out.error : "Errore");
+      }
+
+      setMsg(msgEl, true, "Salvato ✅");
+      document.getElementById(area + "Item").value = "";
+      document.getElementById(area + "Qty").value = "";
+      document.getElementById(area + "Notes").value = "";
+
+      setSaving(area, false);
+    }
+
+    guard();
+  </script>
 
 </body>
 </html>
