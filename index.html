@@ -88,7 +88,56 @@
     .hint { color:var(--muted2); font-size:14px; margin-top:6px; }
 .muted { color:var(--muted); font-size:13px; }
 
+/* Contabilità: riepilogo più leggibile */
 #accBalanceSummary, #accSalarySummary{
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.2px;
+  line-height:1.35;
+}
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .tabs button {
+      background-color:var(--panel); color:#fff; border:1px solid var(--border);
+      padding:8px 12px; border-radius:10px; cursor:pointer;
+      box-shadow:0 0 8px #ff1a1a33 inset, 0 0 10px #ff000055;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+      font-size:13px;
+      font-weight:900;
+    }
+    .tabs button:hover { transform:scale(1.02); box-shadow:0 0 12px #ff1a1a55 inset, 0 0 12px #ff000077; }
+    .tabs button.active { background-color:#2b0000; border-color:#ff1a1aaa; }
+
+    .panel {
+      display:none; margin-top:14px; padding:18px 18px;
+      background:linear-gradient(145deg,var(--panel),#2b0000);
+      border-radius:12px; box-shadow:0 0 12px #ff1a1a55, 0 0 14px #ff000077 inset;
+    }
+    .panel.active { display:block; }
+
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
+    label { color:var(--muted2); font-size:13px; font-weight:800; letter-spacing:.2px; }
+    input, select, textarea {
+      background:var(--panel2); border:1px solid var(--border); color:#fff; border-radius:10px;
+      padding:10px 12px; outline:none;
+      font-weight:800;
+    }
+    textarea { min-height:90px; resize:vertical; }
+
+    .btn {
+      background:var(--panel); border:1px solid #ff1a1a99; color:#fff; border-radius:10px;
+      padding:10px 14px; cursor:pointer;
+      box-shadow:var(--shadowIn);
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .btn:hover { transform:scale(1.02); box-shadow:0 0 16px #ff1a1a66 inset, 0 0 16px #ff000088; }
+    .danger { background:#2b0000; border-color:#ff1a1aaa; }
+    .small { padding:7px 10px; font-size:13px; border-radius:9px; }
+    .disabled { opacity:.5; cursor:not-allowed; }
+
+    table { width:100%; border-collapse:collapse; margin-top:12px; table-layout:fixed; }
     /* =========================
    FIX TABELLE DASHBOARD
    evita che le righe escano
@@ -710,56 +759,15 @@ table.invTable td:last-child{
           <h3 class="sideTitle">Riepilogo</h3>
           <div class="muted">Totali aggiornati.</div>
 
-<div class="panel active" style="display:block; margin-top:12px;">
-  <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bilancio</h4>
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bilancio</h4>
+            <div class="muted" id="accBalanceSummary">Entrate: $0 .. Uscite: $0 .. Saldo: $0</div>
+          </div>
 
-  <table class="summaryTable">
-    <thead>
-      <tr>
-        <th style="width:120px;"></th>
-        <th>Entrata</th>
-        <th>Uscita</th>
-        <th>Saldo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Puliti</td>
-        <td id="accBalInClean">€0</td>
-        <td id="accBalOutClean">€0</td>
-        <td id="accBalSalClean">€0</td>
-      </tr>
-      <tr>
-        <td>Sporchi</td>
-        <td id="accBalInDirty">€0</td>
-        <td id="accBalOutDirty">€0</td>
-        <td id="accBalSalDirty">€0</td>
-      </tr>
-      <tr>
-        <td>Spaccio</td>
-        <td id="accBalInDrug">€0</td>
-        <td id="accBalOutDrug">€0</td>
-        <td id="accBalSalDrug">€0</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="summaryRow" style="margin-top:10px;">
-    <span class="summaryBadge">Saldo totale: <span id="accBalSalTotal">€0</span></span>
-  </div>
-</div>
-
-<div class="panel active" style="display:block; margin-top:12px;">
-  <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Stipendi</h4>
-
-  <div class="summaryRow">
-    <span class="summaryBadge">Totale stipendi: <span id="accSalTotal">€0</span></span>
-    <span class="summaryBadge">Ultimi 30gg: <span id="accSal30">€0</span></span>
-  </div>
-
-  <div class="muted" id="accSalarySummary" style="margin-top:8px; display:none;"></div>
-  <div class="muted" id="accBalanceSummary" style="display:none;"></div>
-</div>
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Stipendi</h4>
+            <div class="muted" id="accSalarySummary">Totale stipendi: $0 .. Ultimi 30gg: $0</div>
+          </div>
         </div>
       </div>
     </div>
@@ -2730,21 +2738,13 @@ logEvent(
   (note.trim() ? ` .. Note(${note.trim()})` : "")
 );
 
-// AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
-// prende l’ultima registrazione INV salvata
-const invAllNow = invLoad();
-const last = invAllNow[invAllNow.length - 1];
-
-if (last) {
-  const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
-  const tags = Array.isArray(last.tagUserIds) ? last.tagUserIds : [];
-
-  // evita crash se funzione non esiste o se non ci sono partecipanti
-  if (typeof accUpsertDueSalariesFromSource === "function" && tags.length) {
-    accUpsertDueSalariesFromSource("inv", last.id, last.money, tags, noteBase);
-    accRenderDueTable();
-  }
-}
+      // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
+      const last = ops[ops.length - 1];
+      if (last) {
+        const noteBase = `Auto da Azioni: ${last.category} .. ${last.type === "ottenuto" ? "OTTENUTO" : "PERSO"}`;
+        accUpsertDueSalariesFromSource("ops", last.id, last.money, last.tagUserIds, noteBase);
+        accRenderDueTable();
+      }
 
       document.getElementById("moneyClean_" + tid).value = "";
       document.getElementById("moneyDirty_" + tid).value = "";
@@ -3472,19 +3472,11 @@ logEvent(
 );
 
 // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
-// prende l’ultima registrazione INV salvata
-const invAllNow = invLoad();
-const last = invAllNow[invAllNow.length - 1];
-
+const last = all[all.length - 1];
 if (last) {
   const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
-  const tags = Array.isArray(last.tagUserIds) ? last.tagUserIds : [];
-
-  // evita crash se funzione non esiste o se non ci sono partecipanti
-  if (typeof accUpsertDueSalariesFromSource === "function" && tags.length) {
-    accUpsertDueSalariesFromSource("inv", last.id, last.money, tags, noteBase);
-    accRenderDueTable();
-  }
+  accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
+  accRenderDueTable();
 }
       document.getElementById("invQty_" + tid).value = "1";
       document.getElementById("invMoneyClean_" + tid).value = "";
@@ -3957,6 +3949,8 @@ logEvent(
       });
       accSave(all);
 
+accSave(all);
+
 // LOG
 logEvent(
   "ACC_BALANCE_ADD",
@@ -4158,80 +4152,37 @@ function accComputeSummary() {
   return { income, expense, salaryTotal, salary30 };
 }
 
-function accMoneyObj(m){
-  if (typeof m === "number") return { clean: Number(m||0), dirty: 0, drug: 0 };
-  return {
-    clean: Number(m?.clean || 0),
-    dirty: Number(m?.dirty || 0),
-    drug:  Number(m?.drug  || 0)
-  };
-}
+function accRenderSummary() {
+      const b = document.getElementById("accBalanceSummary");
+      const s = document.getElementById("accSalarySummary");
+      if (!b || !s) return;
 
-function accRenderSummary(){
-  const all = accLoad();
+      const { income, expense, salaryTotal, salary30 } = accComputeSummary();
 
-  // ---- BILANCIO ----
-  const bal = all.filter(r => r.kind === "balance");
+      const sal = {
+        clean: income.clean - expense.clean,
+        dirty: income.dirty - expense.dirty,
+        drug:  income.drug  - expense.drug
+      };
 
-  const inM  = { clean:0, dirty:0, drug:0 };
-  const outM = { clean:0, dirty:0, drug:0 };
+      b.textContent =
+        `Puliti: +${formatMoney(income.clean)} .. -${formatMoney(expense.clean)} .. =${formatMoney(sal.clean)} | ` +
+        `Sporchi: +${formatMoney(income.dirty)} .. -${formatMoney(expense.dirty)} .. =${formatMoney(sal.dirty)} | ` +
+        `Spaccio: +${formatMoney(income.drug)} .. -${formatMoney(expense.drug)} .. =${formatMoney(sal.drug)}`;
 
-  bal.forEach(r => {
-    const a = accMoneyObj(r.amount);
-    if (r.type === "in") {
-      inM.clean += a.clean; inM.dirty += a.dirty; inM.drug += a.drug;
-    } else {
-      outM.clean += a.clean; outM.dirty += a.dirty; outM.drug += a.drug;
+      s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
     }
-  });
 
-  const salM = {
-    clean: inM.clean - outM.clean,
-    dirty: inM.dirty - outM.dirty,
-    drug:  inM.drug  - outM.drug
-  };
-
-  const totalSal = salM.clean + salM.dirty + salM.drug;
-
-  // helper set
-  function setTxt(id, val){
-    const el = document.getElementById(id);
-    if (el) el.textContent = formatMoney(val).replace("$","€");
-  }
-
-  setTxt("accBalInClean",  inM.clean);
-  setTxt("accBalOutClean", outM.clean);
-  setTxt("accBalSalClean", salM.clean);
-
-  setTxt("accBalInDirty",  inM.dirty);
-  setTxt("accBalOutDirty", outM.dirty);
-  setTxt("accBalSalDirty", salM.dirty);
-
-  setTxt("accBalInDrug",  inM.drug);
-  setTxt("accBalOutDrug", outM.drug);
-  setTxt("accBalSalDrug", salM.drug);
-
-  setTxt("accBalSalTotal", totalSal);
-
-  // ---- STIPENDI ----
-  const sal = all.filter(r => r.kind === "salary" && (r.status || "paid") === "paid");
-  const totalPaid = sal.reduce((s,r)=> s + Number(r.amount||0), 0);
-
-  const now = Date.now();
-  const last30 = sal
-    .filter(r => Number(r.ts||0) >= (now - 30*24*60*60*1000))
-    .reduce((s,r)=> s + Number(r.amount||0), 0);
-
-  setTxt("accSalTotal", totalPaid);
-  setTxt("accSal30", last30);
-
-  // fallback vecchi testi (nascosti)
-  const bOld = document.getElementById("accBalanceSummary");
-  if (bOld) bOld.textContent = `Puliti: +${formatMoney(inM.clean)} .. -${formatMoney(outM.clean)} .. =${formatMoney(salM.clean)} | Sporchi: +${formatMoney(inM.dirty)} .. -${formatMoney(outM.dirty)} .. =${formatMoney(salM.dirty)} | Spaccio: +${formatMoney(inM.drug)} .. -${formatMoney(outM.drug)} .. =${formatMoney(salM.drug)}`;
-
-  const sOld = document.getElementById("accSalarySummary");
-  if (sOld) sOld.textContent = `Totale stipendi: ${formatMoney(totalPaid)} .. Ultimi 30gg: ${formatMoney(last30)}`;
-}
+    function accResetAll() {
+      if (!canResetAccounting()) return alert("Permesso negato");
+      const ok = confirm("Confermi AZZERA CONTABILITÀ?");
+      if (!ok) return;
+logEvent("ACC_RESET", "Azzera Contabilità");
+localStorage.removeItem(ACC_KEY);
+accRenderTable("Stipendi");
+accRenderTable("Bilancio");
+accRenderSummary();
+    }
 
     // =========================
     // KEYBOARD: Enter / Escape
