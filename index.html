@@ -2730,13 +2730,21 @@ logEvent(
   (note.trim() ? ` .. Note(${note.trim()})` : "")
 );
 
-      // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
-      const last = ops[ops.length - 1];
-      if (last) {
-        const noteBase = `Auto da Azioni: ${last.category} .. ${last.type === "ottenuto" ? "OTTENUTO" : "PERSO"}`;
-        accUpsertDueSalariesFromSource("ops", last.id, last.money, last.tagUserIds, noteBase);
-        accRenderDueTable();
-      }
+// AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
+// prende l’ultima registrazione INV salvata
+const invAllNow = invLoad();
+const last = invAllNow[invAllNow.length - 1];
+
+if (last) {
+  const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
+  const tags = Array.isArray(last.tagUserIds) ? last.tagUserIds : [];
+
+  // evita crash se funzione non esiste o se non ci sono partecipanti
+  if (typeof accUpsertDueSalariesFromSource === "function" && tags.length) {
+    accUpsertDueSalariesFromSource("inv", last.id, last.money, tags, noteBase);
+    accRenderDueTable();
+  }
+}
 
       document.getElementById("moneyClean_" + tid).value = "";
       document.getElementById("moneyDirty_" + tid).value = "";
@@ -3464,11 +3472,19 @@ logEvent(
 );
 
 // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
-const last = all[all.length - 1];
+// prende l’ultima registrazione INV salvata
+const invAllNow = invLoad();
+const last = invAllNow[invAllNow.length - 1];
+
 if (last) {
   const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
-  accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
-  accRenderDueTable();
+  const tags = Array.isArray(last.tagUserIds) ? last.tagUserIds : [];
+
+  // evita crash se funzione non esiste o se non ci sono partecipanti
+  if (typeof accUpsertDueSalariesFromSource === "function" && tags.length) {
+    accUpsertDueSalariesFromSource("inv", last.id, last.money, tags, noteBase);
+    accRenderDueTable();
+  }
 }
       document.getElementById("invQty_" + tid).value = "1";
       document.getElementById("invMoneyClean_" + tid).value = "";
@@ -3941,8 +3957,6 @@ logEvent(
       });
       accSave(all);
 
-accSave(all);
-
 // LOG
 logEvent(
   "ACC_BALANCE_ADD",
@@ -4142,6 +4156,15 @@ function accComputeSummary() {
   });
 
   return { income, expense, salaryTotal, salary30 };
+}
+
+function accMoneyObj(m){
+  if (typeof m === "number") return { clean: Number(m||0), dirty: 0, drug: 0 };
+  return {
+    clean: Number(m?.clean || 0),
+    dirty: Number(m?.dirty || 0),
+    drug:  Number(m?.drug  || 0)
+  };
 }
 
 function accRenderSummary(){
