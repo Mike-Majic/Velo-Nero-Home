@@ -1110,8 +1110,92 @@
     function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canResetAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
-    function myGameNameOrEmail() {
-      const u = getMyUser();
+function myGameNameOrEmail() {
+  const u = getMyUser();
+  if (u?.gameName) return u.gameName;
+  return loadSession()?.email || "—";
+}
+
+// =========================
+// AUTO STIPENDI (50% diviso partecipanti)
+// =========================
+function accMoneyObj(m){
+  if (typeof m === "number") return { clean: Number(m||0), dirty: 0, drug: 0 };
+  return {
+    clean: Number(m?.clean || 0),
+    dirty: Number(m?.dirty || 0),
+    drug:  Number(m?.drug  || 0)
+  };
+}
+
+function getParticipantsForSalary(tagUserIds) {
+  const users = loadUsers();
+  const me = getMyUser();
+
+  const ids = [];
+  if (me?.id) ids.push(me.id);
+  (tagUserIds || []).forEach(x => { if (x) ids.push(x); });
+
+  // unique
+  const uniq = Array.from(new Set(ids));
+  const parts = uniq
+    .map(id => users.find(u => u.id === id))
+    .filter(Boolean);
+
+  // se per qualche motivo non trova utenti, fallback sul "me"
+  if (!parts.length && me) return [me];
+  return parts;
+}
+
+function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, noteBase) {
+  const mm = accMoneyObj(money);
+  const parts = getParticipantsForSalary(tagUserIds);
+
+  if (!parts.length) return;
+
+  // elimina SOLO eventuali "due" precedenti di questa sorgente (se già pagati non li tocchiamo)
+  const all = accLoad();
+  const filtered = all.filter(r => !(r.kind === "salary" && (r.status || "paid") === "due" && r.source === source && r.sourceId === sourceId));
+  accSave(filtered);
+
+  const after = accLoad();
+  const tsNow = Date.now();
+
+  function addForType(payType, amount){
+    const pool = Math.floor(Number(amount || 0) * 0.5);
+    if (pool <= 0) return;
+
+    const base = Math.floor(pool / parts.length);
+    let rem = pool - (base * parts.length);
+
+    parts.forEach((u, idx) => {
+      const add = base + (rem > 0 ? 1 : 0);
+      if (rem > 0) rem--;
+
+      after.push({
+        id: uid(),
+        ts: tsNow,
+        kind: "salary",
+        status: "due",
+        who: myGameNameOrEmail(),         // chi ha generato (chi ha registrato)
+        to: (u.gameName || u.email || "—"),
+        toUserId: u.id,
+        amount: add,
+        payType,
+        note: (noteBase || "").trim(),
+        source,
+        sourceId
+      });
+    });
+  }
+
+  addForType("clean", mm.clean);
+  addForType("dirty", mm.dirty);
+  addForType("drug",  mm.drug);
+
+  accSave(after);
+}
+    const u = getMyUser();
       if (u?.gameName) return u.gameName;
       return loadSession()?.email || "—";
     }
@@ -1951,12 +2035,13 @@
         invRenderTotals();
       }
 
-      if (id === "contabilita") {
-        accRenderTabs();
-        accShowTab(ACC_TABS[0]);
-        accRenderSummary();
-        accRenderAdminPanel();
-      }
+if (id === "contabilita") {
+  accRenderTabs();
+  accShowTab(ACC_TABS[0]);
+  accRenderSummary();
+  accRenderAdminPanel();
+  accRenderDueTable();
+}
     }
 
     function logout() {
@@ -2496,6 +2581,14 @@
       });
       saveOps(ops);
 
+      // AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
+      const last = ops[ops.length - 1];
+      if (last) {
+        const noteBase = `Auto da Azioni: ${last.category} .. ${last.type === "ottenuto" ? "OTTENUTO" : "PERSO"}`;
+        accUpsertDueSalariesFromSource("ops", last.id, last.money, last.tagUserIds, noteBase);
+        accRenderDueTable();
+      }
+
       document.getElementById("moneyClean_" + tid).value = "";
       document.getElementById("moneyDirty_" + tid).value = "";
       document.getElementById("moneyDrug_" + tid).value = "";
@@ -2511,7 +2604,12 @@
 
     function deleteRecord(id, category) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-      saveOps(loadOps().filter(r => r.id !== id));
+saveOps(loadOps().filter(r => r.id !== id));
+
+// AUTO: elimina stipendi DA PAGARE collegati a questa registrazione
+const all = accLoad();
+accSave(all.filter(r => !(r.kind === "salary" && (r.status || "paid") === "due" && r.source === "ops" && r.sourceId === id)));
+accRenderDueTable();
       renderCategory(category);
       renderManageSummaries();
       renderOpsMoneySummary();
@@ -2634,6 +2732,12 @@
       rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
       saveOps(ops);
+
+      // AUTO: aggiorna stipendi DA PAGARE collegati (se già pagati non li tocca)
+      const noteBase = `Auto da Azioni (modifica): ${rec.category} .. ${rec.type === "ottenuto" ? "OTTENUTO" : "PERSO"}`;
+      accUpsertDueSalariesFromSource("ops", rec.id, rec.money, rec.tagUserIds, noteBase);
+      accRenderDueTable();
+
       closeEdit();
       renderCategory(rec.category);
       renderOpsMoneySummary();
@@ -3115,8 +3219,15 @@
         // compat vecchio
         tagName: tagNames.length ? tagNames[0] : null
       });
-      invSave(all);
+invSave(all);
 
+// AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
+const last = all[all.length - 1];
+if (last) {
+  const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
+  accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
+  accRenderDueTable();
+}
       document.getElementById("invQty_" + tid).value = "1";
       document.getElementById("invMoneyClean_" + tid).value = "";
       document.getElementById("invMoneyDirty_" + tid).value = "";
@@ -3373,22 +3484,42 @@ function invComputeTotals() {
               </div>
             </div>
 
-            <h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:200px;">Quando</th>
-                  <th style="width:220px;">Chi</th>
-                  <th>A chi</th>
-                  <th style="width:160px;">Importo</th>
-                  <th style="width:160px;">Pagamento</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody id="accTable_${tid}">
-                <tr><td class="muted" colspan="5">Nessun dato</td></tr>
-              </tbody>
-            </table>
+<h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
+<div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:200px;">Quando</th>
+      <th style="width:220px;">Generato da</th>
+      <th>A chi</th>
+      <th style="width:160px;">Importo</th>
+      <th style="width:160px;">Pagamento</th>
+      <th>Note</th>
+      <th style="width:220px;">Stato</th>
+    </tr>
+  </thead>
+  <tbody id="accDueTable_${tid}">
+    <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+  </tbody>
+</table>
+
+<h4 style="margin:16px 0 6px 0; font-weight:900;">Ultimi stipendi (pagati)</h4>
+<table>
+  <thead>
+    <tr>
+      <th style="width:200px;">Quando</th>
+      <th style="width:220px;">Chi</th>
+      <th>A chi</th>
+      <th style="width:160px;">Importo</th>
+      <th style="width:160px;">Pagamento</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody id="accTable_${tid}">
+    <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+  </tbody>
+</table>
           `;
         } else {
           p.innerHTML = `
@@ -3479,9 +3610,10 @@ function invComputeTotals() {
       const pn = document.getElementById("accPanel_" + tid);
       if (pn) pn.classList.add("active");
 
-      accRenderTable(name);
-      accRenderSummary();
-      accRenderAdminPanel();
+accRenderTable(name);
+accRenderSummary();
+accRenderAdminPanel();
+accRenderDueTable();
     }
 
     function accRenderAdminPanel() {
@@ -3502,16 +3634,17 @@ function invComputeTotals() {
       if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
 
       const all = accLoad();
-      all.push({
-        id: uid(),
-        ts: Date.now(),
-        kind: "salary",
-        who: myGameNameOrEmail(),
-        to,
-        amount: amt,
-        payType,
-        note
-      });
+all.push({
+  id: uid(),
+  ts: Date.now(),
+  kind: "salary",
+  status: "paid",            // manuale = già pagato
+  who: myGameNameOrEmail(),
+  to,
+  amount: amt,
+  payType,
+  note
+});
       accSave(all);
 
       document.getElementById("salTo_" + tid).value = "";
@@ -3570,8 +3703,12 @@ function invComputeTotals() {
       if (!body) return;
 
       const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
-      const rows = all.filter(r => (tabName === "Stipendi" ? r.kind === "salary" : r.kind === "balance")).slice(0, 50);
-
+const rows = all
+  .filter(r => {
+    if (tabName === "Stipendi") return r.kind === "salary" && (r.status || "paid") === "paid";
+    return r.kind === "balance";
+  })
+  .slice(0, 50);
       if (!rows.length) {
         body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 6 : 6}">Nessun dato</td></tr>`;
         return;
@@ -3620,6 +3757,57 @@ tr.innerHTML = `
         body.appendChild(tr);
       });
     }
+
+function accRenderDueTable() {
+  const tid = accTabId("Stipendi");
+  const body = document.getElementById("accDueTable_" + tid);
+  if (!body) return;
+
+  const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
+  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
+
+  if (!rows.length) {
+    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = "";
+  rows.forEach(r => {
+    const pt = (r.payType || "clean");
+    const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(r.ts).toLocaleString()}</td>
+      <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+      <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
+      <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
+      <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
+      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+      <td>
+        <button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>
+        <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function accSetSalaryStatus(id, status) {
+  const all = accLoad();
+  const r = all.find(x => x.id === id);
+  if (!r || r.kind !== "salary") return;
+
+  const s = (status === "paid") ? "paid" : "due";
+  r.status = s;
+  if (s === "paid") r.paidAt = Date.now();
+  else r.paidAt = null;
+
+  accSave(all);
+  accRenderDueTable();
+  accRenderTable("Stipendi");
+  accRenderSummary();
+}
 
 function accComputeSummary() {
   const all = accLoad();
