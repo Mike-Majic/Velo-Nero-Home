@@ -283,15 +283,54 @@
       white-space:nowrap;
     }
 
-    /* GESTIONE ARMI/DROGA: 2 colonne */
-    .twoColInv{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
-    .colMainInv{ flex:1; min-width:520px; }
-    .colSideInv{ width:360px; min-width:280px; position:sticky; top:16px; }
+    /* GESTIONE ARMI/DROGA: 2 colonne (ANTI SOVRAPPOSIZIONE) */
+    .twoColInv{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
 
-    /* Contabilità: layout 2 colonne */
-    .twoColAcc{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
-    .colMainAcc{ flex:1; min-width:520px; }
-    .colSideAcc{ width:360px; min-width:280px; position:sticky; top:16px; }
+    /* IMPORTANTISSIMO: permette al flex di restringere senza "spingere sotto" o sovrapporre */
+    .colMainInv{ flex:1; min-width:0; }
+    .colSideInv{ width:360px; min-width:280px; align-self:flex-start; }
+
+    /* Sticky SOLO su schermi abbastanza larghi */
+    @media (min-width: 1100px){
+      .colSideInv{ position:sticky; top:16px; }
+    }
+
+    /* Su schermi medi/piccoli: niente sticky e colonna a tutta larghezza */
+    @media (max-width: 1099px){
+      .colSideInv{
+        position:static;
+        width:100%;
+        min-width:0;
+      }
+    }
+
+/* Contabilità: layout 2 colonne - ANTI SOVRAPPOSIZIONE */
+.twoColAcc{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.colMainAcc{ flex:1; min-width:0; }
+.colSideAcc{ width:360px; min-width:280px; align-self:flex-start; }
+
+@media (min-width:1100px){
+  .colSideAcc{ position:sticky; top:16px; }
+}
+
+@media (max-width:1099px){
+  .colSideAcc{
+    position:static;
+    width:100%;
+    min-width:0;
+  }
+}
   </style>
 </head>
 
