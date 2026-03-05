@@ -3184,49 +3184,50 @@
     }
 
     // ✅ Totali: includono anche gli item delle Azioni
-    function invComputeTotals() {
-      const totals = {};
-      let addMoney = { clean:0, dirty:0, drug:0 };
-      let remMoney = { clean:0, dirty:0, drug:0 };
-      
-      // 1) Gestione armi-droga (INV)
-      invLoad().forEach(r => {
-        const key = normalizeTotalItemName(r.item);
-        if (key) {
-          if (!totals[key]) totals[key] = 0;
-          const q = Number(r.qty || 0);
+function invComputeTotals() {
+  const totals = {};
+  let addMoney = { clean:0, dirty:0, drug:0 };
+  let remMoney = { clean:0, dirty:0, drug:0 };
+  
+  // 1) Gestione armi-droga (INV)
+  invLoad().forEach(r => {
+    const key = normalizeTotalItemName(r.item);
+    if (key) {
+      if (!totals[key]) totals[key] = 0;
+      const q = Number(r.qty || 0);
 
-          // Item: add/buy aumentano, rem/sold diminuiscono
-          const signItem = (r.type === "add" || r.type === "buy") ? 1 : -1;
-          totals[key] += signItem * q;
-        }
-
-        const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
-
-        const mm = r.money;
-        const mClean = (typeof mm === "number") ? Number(mm || 0) : Number(mm?.clean || 0);
-        const mDirty = (typeof mm === "number") ? 0 : Number(mm?.dirty || 0);
-        const mDrug  = (typeof mm === "number") ? 0 : Number(mm?.drug  || 0);
-
-        if (signMoney > 0) {
-          addMoney.clean += mClean; addMoney.dirty += mDirty; addMoney.drug += mDrug;
-        } else {
-          remMoney.clean += mClean; remMoney.dirty += mDirty; remMoney.drug += mDrug;
-        }
-
-      // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
-      loadOps().forEach(op => {
-        (op.items || []).forEach(it => {
-          const key = normalizeTotalItemName(it.name);
-          if (!key) return;
-          if (!totals[key]) totals[key] = 0;
-          const q = Number(it.qty || 0);
-          totals[key] += (op.type === "ottenuto" ? q : -q);
-        });
-      });
-
-      return { totals, addMoney, remMoney };
+      // Item: add/buy aumentano, rem/sold diminuiscono
+      const signItem = (r.type === "add" || r.type === "buy") ? 1 : -1;
+      totals[key] += signItem * q;
     }
+
+    const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
+
+    const mm = r.money;
+    const mClean = (typeof mm === "number") ? Number(mm || 0) : Number(mm?.clean || 0);
+    const mDirty = (typeof mm === "number") ? 0 : Number(mm?.dirty || 0);
+    const mDrug  = (typeof mm === "number") ? 0 : Number(mm?.drug  || 0);
+
+    if (signMoney > 0) {
+      addMoney.clean += mClean; addMoney.dirty += mDirty; addMoney.drug += mDrug;
+    } else {
+      remMoney.clean += mClean; remMoney.dirty += mDirty; remMoney.drug += mDrug;
+    }
+  });
+
+  // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
+  loadOps().forEach(op => {
+    (op.items || []).forEach(it => {
+      const key = normalizeTotalItemName(it.name);
+      if (!key) return;
+      if (!totals[key]) totals[key] = 0;
+      const q = Number(it.qty || 0);
+      totals[key] += (op.type === "ottenuto" ? q : -q);
+    });
+  });
+
+  return { totals, addMoney, remMoney };
+}
 
     function invRenderTotals() {
       const body = document.getElementById("invTotalsBody");
@@ -3580,9 +3581,6 @@
         if (tabName === "Stipendi") {
           const pt = (r.payType || "clean");
           const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
-
-const pt = (r.payType || "clean");
-const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
 
 tr.innerHTML = `
   <td>${new Date(r.ts).toLocaleString()}</td>
