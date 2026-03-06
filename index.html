@@ -116,7 +116,7 @@
 
     .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
     .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
-    label { color:var(--muted2); font-size:13px; font-weight:800; letter-spacing:.2px; }
+    label { color:var(--muted2); font-size:14px; font-weight:800; letter-spacing:.2px; }
     input, select, textarea {
       background:var(--panel2); border:1px solid var(--border); color:#fff; border-radius:10px;
       padding:10px 12px; outline:none;
@@ -257,7 +257,10 @@ table.invTable td:last-child{
       border:none; outline:none; background:transparent; padding:0;
       width:100%;
       font-weight:900;
+      font-size:14px;
     }
+    .diaryTableWrap td{ font-size:13px; }
+    #noteModal input, #noteModal textarea, #noteModal select{ font-size:14px; }
     .diaryTableWrap{
       margin-top:14px;
       border-radius:12px;
@@ -323,6 +326,15 @@ table.invTable td:last-child{
       color:#ffd0d0;
       margin-left:8px;
       white-space:nowrap;
+    }
+    .userRoleBadge{
+      display:inline-block;
+      margin-top:4px;
+      margin-left:0;
+      white-space:normal;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      max-width:100%;
     }
 
 /* GESTIONE ARMI/DROGA: 2 colonne (ANTI SOVRAPPOSIZIONE - FORZATO) */
@@ -641,7 +653,33 @@ table.invTable td:last-child{
       <!-- TAG A DESTRA -->
       <div class="colSide">
         <div class="sidePanel">
-          <h3 class="sideTitle">Tag (Utente)</h3>
+          <div class="panel active" style="display:block; margin-top:0;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Resoconto Soldi (Azioni)</h4>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
+                <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
+                <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
+                <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
+                <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
+                <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
+                <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
+              </div>
+            </div>
+
+            <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
+          </div>
+
+          <h3 class="sideTitle" style="margin-top:12px;">Tag (Utente)</h3>
           <div class="muted">Doppio click su un nome per selezionarlo .. ordinati per ruolo.</div>
 
           <div class="tagSelected">
@@ -667,32 +705,6 @@ table.invTable td:last-child{
           </div>
 
           <div class="hint">I tag vengono salvati dentro le registrazioni (Azioni e Gestione).</div>
-
-          <div class="panel active" style="display:block; margin-top:12px;">
-            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Resoconto Soldi (Azioni)</h4>
-
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
-                <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
-                <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
-              </div>
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
-                <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
-                <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
-              </div>
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
-                <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
-                <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
-              </div>
-            </div>
-
-            <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
-          </div>
         </div>
       </div>
     </div>
@@ -990,6 +1002,24 @@ table.invTable td:last-child{
         <div class="field" style="flex:1; min-width:260px;">
           <label>Nomi</label>
           <input id="noteNames" type="text" placeholder="Nomi coinvolti.." />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1; min-width:260px;">
+          <label>Tag utenti (multi)</label>
+          <div id="noteTagSelected" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;"></div>
+          <div class="tagSearchRow" style="margin-top:0;">
+            <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+            <input id="noteTagSearch" type="text" placeholder="Cerca utente da taggare.." oninput="renderNoteTagList()" />
+          </div>
+          <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+            <table style="margin-top:0;">
+              <tbody id="noteTagTableBody">
+                <tr><td class="muted">Nessun utente</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1367,7 +1397,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
           tr.innerHTML = `
             <td>${new Date(n.ts).toLocaleString()}</td>
             <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Nota")}</td>
-            <td><div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
+            <td><div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
           `;
           body.appendChild(tr);
         });
@@ -1376,7 +1406,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       const filtered = all.filter(n => {
         const hay = [
-          n.type, n.title, n.names, n.agreements, n.body, n.createdBy
+          n.type, n.title, n.names, n.agreements, n.body, n.createdBy, ...(n.tagNames || [])
         ].map(x => String(x||"").toLowerCase()).join(" | ");
         return hay.includes(q);
       });
@@ -1394,7 +1424,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         tr.innerHTML = `
           <td>${new Date(n.ts).toLocaleString()}</td>
           <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Nota")}</td>
-          <td><div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
+          <td><div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
         `;
         body.appendChild(tr);
       });
@@ -1417,8 +1447,57 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
     const btnDeleteNote = document.getElementById("btnDeleteNote");
     const notePermHint = document.getElementById("notePermHint");
     const btnSaveNote = document.getElementById("btnSaveNote");
+    const noteTagSearch = document.getElementById("noteTagSearch");
+    const noteTagSelected = document.getElementById("noteTagSelected");
 
     let editingNoteId = null;
+    let selectedNoteTagUserIds = [];
+
+    function selectedNoteTagUsers() {
+      const users = loadUsers();
+      return selectedNoteTagUserIds.map(id => users.find(u => u.id === id)).filter(Boolean);
+    }
+
+    function selectedNoteTagNames() {
+      return selectedNoteTagUsers().map(u => (u.gameName || u.email || "—"));
+    }
+
+    function syncNoteTagsUI() {
+      if (!noteTagSelected) return;
+      const names = selectedNoteTagNames();
+      noteTagSelected.innerHTML = names.length
+        ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+        : `<span class="tagPill">—</span>`;
+    }
+
+    function toggleNoteTag(id) {
+      if (!id) return;
+      if (selectedNoteTagUserIds.includes(id)) selectedNoteTagUserIds = selectedNoteTagUserIds.filter(x => x !== id);
+      else selectedNoteTagUserIds.push(id);
+      renderNoteTagList();
+    }
+
+    function renderNoteTagList() {
+      const body = document.getElementById("noteTagTableBody");
+      if (!body) return;
+      const q = (noteTagSearch?.value || "");
+      const users = getTagSortedUsers(q);
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncNoteTagsUI();
+        return;
+      }
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSel = selectedNoteTagUserIds.includes(u.id);
+        tr.className = "clickRow" + (isSel ? " selectedRow" : "");
+        tr.ondblclick = () => toggleNoteTag(u.id);
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+      syncNoteTagsUI();
+    }
 
     function openNoteModal(id) {
       editingNoteId = id;
@@ -1429,6 +1508,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       const fields = [noteType, noteTitle, noteNames, noteAgreements, noteBody];
       fields.forEach(f => { if (f) f.disabled = isExisting ? !canEdit : !canAdd; });
+      if (noteTagSearch) noteTagSearch.disabled = isExisting ? !canEdit : !canAdd;
 
       btnSaveNote.disabled = isExisting ? !canEdit : !canAdd;
       btnSaveNote.classList.toggle("disabled", btnSaveNote.disabled);
@@ -1458,6 +1538,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         noteNames.value = n.names || "";
         noteAgreements.value = n.agreements || "";
         noteBody.value = n.body || "";
+        selectedNoteTagUserIds = Array.isArray(n.tagUserIds) ? n.tagUserIds.slice() : [];
+        renderNoteTagList();
 
         btnDeleteNote.style.display = canEdit ? "inline-block" : "none";
       } else {
@@ -1469,6 +1551,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         noteNames.value = "";
         noteAgreements.value = "";
         noteBody.value = "";
+        selectedNoteTagUserIds = [];
+        renderNoteTagList();
         btnDeleteNote.style.display = "none";
       }
 
@@ -1487,7 +1571,8 @@ function saveNote() {
 
   const t = (noteType.value || "Nota").trim();
   const title = (noteTitle.value || "").trim();
-  const names = (noteNames.value || "").trim();
+  const taggedNames = selectedNoteTagNames();
+  const names = (noteNames.value || "").trim() || taggedNames.join(", ");
   const agreements = (noteAgreements.value || "").trim();
   const body = (noteBody.value || "").trim();
 
@@ -1508,6 +1593,8 @@ function saveNote() {
     n.agreements = agreements;
     n.body = body;
     n.updatedAt = Date.now();
+    n.tagUserIds = selectedNoteTagUserIds.slice();
+    n.tagNames = taggedNames;
 
     // LOG
     logEvent(
@@ -1524,7 +1611,9 @@ function saveNote() {
       names,
       agreements,
       body,
-      createdBy: me
+      createdBy: me,
+      tagUserIds: selectedNoteTagUserIds.slice(),
+      tagNames: taggedNames
     });
 
     // LOG
@@ -2224,7 +2313,7 @@ if (id === "contabilita") {
         const tr = document.createElement("tr");
 
         const tdGameName = document.createElement("td");
-        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span> <span class="tagRole">${escapeHtml(u.role || "—")}</span>`;
+        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span><br><span class="tagRole userRoleBadge">${escapeHtml(u.role || "—")}</span>`;
 
         const tdRole = document.createElement("td");
         const sel = document.createElement("select");
@@ -2635,6 +2724,10 @@ if (s?.email === u.email) logout();
 
     function fillItemSelect(selectEl) {
       selectEl.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      selectEl.appendChild(empty);
       FIXED_ITEMS.forEach(it => {
         const opt = document.createElement("option");
         opt.value = it;
@@ -2682,15 +2775,18 @@ if (s?.email === u.email) logout();
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
       const tid = tabIdFromName(category);
       const name = document.getElementById("item_" + tid).value;
-      let qty = parseInt(document.getElementById("qty_" + tid).value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      let qty = parseInt(document.getElementById("qty_" + tid).value || "0", 10);
+      if (!Number.isFinite(qty) || qty < 0) qty = 0;
+      if (!name) return alert("Seleziona un item.");
+      if (qty < 1) return alert("Inserisci una quantità valida (> 0).");
 
       const draft = getDraft(category);
       const existing = draft.find(x => x.name === name);
       if (existing) existing.qty += qty;
       else draft.push({ name, qty });
 
-      document.getElementById("qty_" + tid).value = "1";
+      document.getElementById("item_" + tid).value = "";
+      document.getElementById("qty_" + tid).value = "0";
       renderDraft(category);
     }
 
@@ -3008,11 +3104,11 @@ logEvent(
           : "";
 
         const itemsHtml = itemsText
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>`
+          ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(itemsText)}</div>`
           : `<span class="muted">—</span>`;
 
         const noteHtml = (r.note && r.note.trim())
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>`
+          ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note.trim())}</div>`
           : `<span class="muted">—</span>`;
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
@@ -3132,7 +3228,7 @@ invRenderTotals();
 
             <div class="field" style="min-width:160px;">
               <label>Quantità</label>
-              <input id="qty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="qty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
             </div>
 
             <div class="field" style="min-width:180px;">
@@ -3587,7 +3683,7 @@ if (last) {
               return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
             })()}
           </td>
-          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
         `;
         body.appendChild(tr);
       });
@@ -4189,7 +4285,7 @@ tr.innerHTML = `
               })()}
             </td>
             <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
-            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
           `;
         }
         body.appendChild(tr);
