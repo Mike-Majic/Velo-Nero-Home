@@ -283,7 +283,9 @@
   </div>
 
 <script>
-const API = "/api/diario";
+const API_LIST = "/api/diary/list";
+const API_CREATE = "/api/diary/create";
+const API_SEARCH = "/api/search";
 
 function getSession(){
   try{
@@ -304,24 +306,28 @@ function boot(){
 }
 
 async function loadDiary(){
-  const q = document.getElementById("searchInput").value || "";
-  const res = await fetch(API + "?q=" + encodeURIComponent(q));
+  const q = (document.getElementById("searchInput").value || "").trim();
+  const url = q ? (API_SEARCH + "?q=" + encodeURIComponent(q)) : (API_LIST + "?limit=100");
+
+  const res = await fetch(url, { credentials:"include" });
   const data = await res.json();
+
+  const rows = data?.results || data?.items || [];
 
   const tb = document.getElementById("diaryTable");
   tb.innerHTML = "";
 
-  if(!data.length){
+  if(!rows.length){
     tb.innerHTML = `<tr><td colspan="3" class="muted">Nessuna nota</td></tr>`;
     return;
   }
 
-  data.forEach(n=>{
+  rows.forEach(n=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${new Date(n.ts).toLocaleString()}</td>
-      <td>${n.type}</td>
-      <td>${n.title}</td>
+      <td>${new Date(n.at || n.ts || Date.now()).toLocaleString()}</td>
+      <td>${n.type || "diary"}</td>
+      <td>${n.title || "Diario"}</td>
     `;
     tr.onclick = ()=>openView(n);
     tb.appendChild(tr);
@@ -359,8 +365,9 @@ async function saveNote(){
     type:noteType.value
   };
 
-  await fetch(API,{
+  await fetch(API_CREATE,{
     method:"POST",
+    credentials:"include",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify(payload)
   });
