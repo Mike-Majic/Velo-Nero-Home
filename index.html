@@ -4261,7 +4261,7 @@ tr.innerHTML = `
   <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
   <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
   <td>${tagHtml}</td>
-  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 `;
         } else {
           const t = r.type === "in" ? "ENTRATA" : "USCITA";
@@ -4323,7 +4323,7 @@ function accRenderDueTable() {
       <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
       <td>${tagHtml}</td>
-      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
       <td>
         <button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>
         <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
