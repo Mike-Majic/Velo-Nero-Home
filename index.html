@@ -632,6 +632,7 @@ table.invTable td:last-child{
 
           <div class="row" style="margin-top:14px;">
             <button class="btn danger" onclick="resetAllOps()">AZZERA AZIONI</button>
+            <button class="btn danger" onclick="invResetAll()">AZZERA GESTIONE</button>
             <div class="muted">Cancella tutte le registrazioni.</div>
           </div>
         </div>
@@ -3326,9 +3327,13 @@ invRenderTotals();
               <select id="invItem_${tid}" ${disabledAttr}></select>
             </div>
 
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
+            </div>
+
             <div class="field" style="min-width:160px;">
               <label>Quantità</label>
-              <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
             </div>
 
             <div class="field" style="min-width:220px;">
@@ -3393,15 +3398,7 @@ invRenderTotals();
         panels.appendChild(p);
 
         setTimeout(() => {
-          const sel = document.getElementById("invItem_" + tid);
-          if (!sel) return;
-          sel.innerHTML = "";
-          (INV_ITEMS[cat] || []).forEach(it => {
-            const o = document.createElement("option");
-            o.value = it;
-            o.textContent = it;
-            sel.appendChild(o);
-          });
+          invFillItemSelect(cat);
           invRenderTable(cat);
           syncSelectedTagsUI();
         }, 0);
@@ -3433,14 +3430,53 @@ invRenderTotals();
       syncSelectedTagsUI();
     }
 
+    function invFillItemSelect(cat) {
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (!sel) return;
+
+      sel.innerHTML = "";
+
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = "-";
+      sel.appendChild(emptyOpt);
+
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        sel.appendChild(o);
+      });
+
+      sel.value = "";
+    }
+
+    function invAddItem(cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const name = prompt("Nuovo item per " + cat + ":");
+      const v = String(name || "").trim();
+      if (!v) return;
+
+      const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
+      if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
+        arr.push(v);
+      }
+
+      invFillItemSelect(cat);
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (sel) sel.value = v;
+    }
+
     function invSaveRecord(cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
       const tid = invTabId(cat);
       const type = document.getElementById("invType_" + tid)?.value || "add";
       const item = document.getElementById("invItem_" + tid)?.value || "";
-      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
+      if (!Number.isFinite(qty) || qty < 0) qty = 0;
 
       const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
       const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
@@ -3453,6 +3489,9 @@ invRenderTotals();
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+      if (item && qty < 1) {
+        return alert("Inserisci una quantità valida (> 0) quando selezioni un item.");
       }
 
       const who = myGameNameOrEmail();
@@ -3492,7 +3531,8 @@ if (last) {
   accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
   accRenderDueTable();
 }
-      document.getElementById("invQty_" + tid).value = "1";
+      document.getElementById("invItem_" + tid).value = "";
+      document.getElementById("invQty_" + tid).value = "0";
       document.getElementById("invMoneyClean_" + tid).value = "";
       document.getElementById("invMoneyDirty_" + tid).value = "";
       document.getElementById("invMoneyDrug_" + tid).value = "";
