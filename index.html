@@ -583,14 +583,9 @@ table.invTable td:last-child{
         <p>Funzioni</p>
       </div>
 
-      <div class="box" onclick="showSection('contabilita')">
+      <div class="box" id="cardContabilita" onclick="showSection('contabilita')">
         <h2>Contabilità</h2>
         <p>Stipendi</p>
-      </div>
-
-      <div class="box" onclick="showSection('diario')">
-        <h2>Diario</h2>
-        <p>Note</p>
       </div>
 
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
@@ -1172,6 +1167,7 @@ table.invTable td:last-child{
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canReset2FA() { return ["Owner","Boss"].includes(myRole()); }
     function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+    function canAccessAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canResetAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
 function myGameNameOrEmail() {
@@ -2061,7 +2057,7 @@ function logTagsLine(tagNames) {
         return;
       }
 
-      pillEmail.textContent = s.email;
+      pillEmail.textContent = u?.gameName || s.email;
       pillRole.textContent = "Ruolo: " + (u?.role || "—");
       btnLogout.style.display = "inline-block";
     }
@@ -2107,6 +2103,10 @@ function logTagsLine(tagNames) {
       if (!requireAuthOrShowLogin()) return;
 
       if ((id === "utenti" || id === "log") && !isAdmin()) {
+        return showOnly("dashboard");
+      }
+
+      if (id === "contabilita" && !canAccessAccounting()) {
         return showOnly("dashboard");
       }
 
@@ -2164,6 +2164,8 @@ if (id === "contabilita") {
       const btnUtenti = document.getElementById("btnUtenti");
       const cardUtenti = document.getElementById("cardUtenti");
       const btnLog = document.getElementById("btnLog");
+      const btnContabilita = document.getElementById("btnContabilita");
+      const cardContabilita = document.getElementById("cardContabilita");
       const dashHint = document.getElementById("dashHint");
       const actionsHint = document.getElementById("actionsHint");
 
@@ -2177,9 +2179,20 @@ if (id === "contabilita") {
         btnLog.style.display = "inline-block";
       }
 
+      if (!canAccessAccounting()) {
+        if (btnContabilita) btnContabilita.style.display = "none";
+        if (cardContabilita) cardContabilita.style.display = "none";
+      } else {
+        if (btnContabilita) btnContabilita.style.display = "inline-block";
+        if (cardContabilita) cardContabilita.style.display = "inline-block";
+      }
+
       if (!canEditOps()) {
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni, diario e contabilità.";
+        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni e diario.";
         actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+      } else if (!canAccessAccounting()) {
+        dashHint.textContent = "Contabilità visibile solo a Owner / Boss / Vice Boss.";
+        actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
       } else {
         dashHint.textContent = "";
         actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
