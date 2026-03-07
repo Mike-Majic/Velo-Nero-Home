@@ -17,7 +17,18 @@ export default async function handler(req, res) {
     const route = parts[1] || "index";     // "search" (default "index")
 
     // prova import: lib/<area>/<route>.js
-    const mod = await import(`../lib/${area}/${route}.js`);
+    // fallback per endpoint a un solo segmento: /api/<area> -> lib/<area>.js
+    let mod;
+    try {
+      mod = await import(`../lib/${area}/${route}.js`);
+    } catch (err) {
+      if (route === "index") {
+        mod = await import(`../lib/${area}.js`);
+      } else {
+        throw err;
+      }
+    }
+
     const fn = mod.default || mod.handler;
 
     if (typeof fn !== "function") {
