@@ -2295,14 +2295,6 @@ if (id === "contabilita") {
         if (cardContabilita) cardContabilita.style.display = "inline-block";
       }
 
-      if (!canAccessAccounting()) {
-        if (btnContabilita) btnContabilita.style.display = "none";
-        if (cardContabilita) cardContabilita.style.display = "none";
-      } else {
-        if (btnContabilita) btnContabilita.style.display = "inline-block";
-        if (cardContabilita) cardContabilita.style.display = "inline-block";
-      }
-
       if (!canEditOps()) {
         dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni e diario.";
         actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
@@ -3143,8 +3135,8 @@ logEvent(
           : `<span class="muted">—</span>`;
 
         const actionsHtml = canEditOps()
-          ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
-             <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
+          ? `<button class="btn small" style="white-space:nowrap; min-width:96px;" onclick="openEdit('${r.id}')">Modifica</button>
+             <button class="btn danger small" style="white-space:nowrap; min-width:96px;" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
           : `<span class="muted">—</span>`;
 
         const tr = document.createElement("tr");
@@ -3454,23 +3446,27 @@ invRenderTotals();
             <div class="field" style="min-width:180px;">
               <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
             </div>
+          </div>
 
-            <div class="field" style="min-width:160px;">
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:160px; flex:0.9;">
               <label>Quantità</label>
               <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:220px;">
+            <div class="field" style="min-width:190px; flex:1;">
               <label>Soldi puliti ($)</label>
               <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:220px;">
+            <div class="field" style="min-width:190px; flex:1;">
               <label>Soldi sporchi ($)</label>
               <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
+          </div>
 
-            <div class="field" style="min-width:220px;">
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:190px; flex:1;">
               <label>Soldi spaccio ($)</label>
               <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
@@ -3481,7 +3477,7 @@ invRenderTotals();
           </div>
 
           <div class="row">
-            <div class="field" style="flex:1; min-width:260px;">
+            <div class="field" style="width:100%; min-width:0;">
               <label>Note</label>
               <input id="invNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
             </div>
@@ -3498,14 +3494,7 @@ invRenderTotals();
 
 <thead>
 <tr>
-<th style="width:200px;">Quando</th>
-<th style="width:220px;">Chi</th>
-<th style="width:120px;">Tipo</th>
-<th style="width:160px;">Tag</th>
-<th>Item</th>
-<th style="width:90px;">Qtà</th>
-<th style="width:140px;">Soldi</th>
-<th>Note</th>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
 </tr>
 </thead>
 
@@ -3666,6 +3655,25 @@ if (last) {
       invRenderTotals();
     }
 
+    function invDeleteRecord(id, cat) {
+      if (!canEditOps()) return;
+      const ok = confirm("Confermi eliminazione registrazione?");
+      if (!ok) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      const next = all.filter(x => x.id !== id);
+      invSave(next);
+      if (rec) {
+        logEvent("INV_DELETE", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      } else {
+        logEvent("INV_DELETE", `${cat} .. id:${id}`);
+      }
+      invRenderTable(cat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
     function invRenderTable(cat) {
       const tid = invTabId(cat);
       const body = document.getElementById("invTable_" + tid);
@@ -3694,9 +3702,6 @@ if (last) {
           <td>${new Date(r.ts).toLocaleString()}</td>
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
           <td style="font-weight:900; color:var(--red2)">${t}</td>
-          <td>${tagHtml}</td>
-          <td>${escapeHtml(r.item || "—")}</td>
-          <td style="font-weight:900;">${Number(r.qty||0)}</td>
           <td style="font-weight:900;">
             ${(() => {
               const m = r.money;
@@ -3711,7 +3716,10 @@ if (last) {
               return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
             })()}
           </td>
+          <td>${tagHtml}</td>
           <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${r.item ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.item)} x${Number(r.qty || 0)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${canEditOps() ? `<button class="btn danger small" style="white-space:nowrap; min-width:96px;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>` : `<span class="muted">—</span>`}</td>
         `;
         body.appendChild(tr);
       });
