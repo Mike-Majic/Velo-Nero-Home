@@ -423,10 +423,10 @@ table.invTable td:last-child{
   <div class="nav">
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
-    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
     <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
-    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
+    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
     <button id="btnContabilita" onclick="showSection('contabilita')">Contabilità</button>
+    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
   </div>
 
@@ -585,6 +585,11 @@ table.invTable td:last-child{
   <!-- DASHBOARD (layout aggiornato) -->
   <div id="dashboard" class="section">
     <div class="cards">
+      <div class="box" onclick="showSection('dashboard')">
+        <h2>Dashboard</h2>
+        <p>Home</p>
+      </div>
+
       <div class="box" onclick="showSection('azioni')">
         <h2>Azioni</h2>
         <p>Azioni</p>
@@ -595,6 +600,11 @@ table.invTable td:last-child{
         <p>Funzioni</p>
       </div>
 
+      <div class="box" onclick="showSection('diario')">
+        <h2>Diario</h2>
+        <p>Note</p>
+      </div>
+
       <div class="box" id="cardContabilita" onclick="showSection('contabilita')">
         <h2>Contabilità</h2>
         <p>Stipendi</p>
@@ -603,6 +613,11 @@ table.invTable td:last-child{
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
         <h2>Utenti</h2>
         <p>Gestione</p>
+      </div>
+
+      <div class="box" id="cardLog" onclick="showSection('log')" style="display:none;">
+        <h2>Log</h2>
+        <p>Registro</p>
       </div>
     </div>
 
@@ -2254,6 +2269,7 @@ if (id === "contabilita") {
       const btnUtenti = document.getElementById("btnUtenti");
       const cardUtenti = document.getElementById("cardUtenti");
       const btnLog = document.getElementById("btnLog");
+      const cardLog = document.getElementById("cardLog");
       const btnContabilita = document.getElementById("btnContabilita");
       const cardContabilita = document.getElementById("cardContabilita");
       const dashHint = document.getElementById("dashHint");
@@ -2263,10 +2279,20 @@ if (id === "contabilita") {
         btnUtenti.style.display = "none";
         cardUtenti.style.display = "none";
         btnLog.style.display = "none";
+        if (cardLog) cardLog.style.display = "none";
       } else {
         btnUtenti.style.display = "inline-block";
         cardUtenti.style.display = "inline-block";
         btnLog.style.display = "inline-block";
+        if (cardLog) cardLog.style.display = "inline-block";
+      }
+
+      if (!canAccessAccounting()) {
+        if (btnContabilita) btnContabilita.style.display = "none";
+        if (cardContabilita) cardContabilita.style.display = "none";
+      } else {
+        if (btnContabilita) btnContabilita.style.display = "inline-block";
+        if (cardContabilita) cardContabilita.style.display = "inline-block";
       }
 
       if (!canAccessAccounting()) {
