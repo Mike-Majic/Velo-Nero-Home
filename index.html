@@ -188,12 +188,17 @@ table.invTable td{
   white-space:nowrap;
 }
 
-/* solo NOTE può andare a capo */
-table.invTable th:last-child,
-table.invTable td:last-child{
+/* invTable: NOTE può andare a capo, Azioni resta compatta */
+table.invTable th:nth-child(6),
+table.invTable td:nth-child(6){
   white-space:normal;
   overflow-wrap:anywhere;
   word-break:break-word;
+}
+table.invTable th:nth-child(8),
+table.invTable td:nth-child(8){
+  white-space:nowrap;
+  width:120px;
 }
     th, td {
       padding:8px 10px;
@@ -3514,7 +3519,7 @@ invRenderTotals();
 
 <thead>
 <tr>
-<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th style="width:120px;">Azioni</th>
 </tr>
 </thead>
 
@@ -3675,6 +3680,70 @@ if (last) {
       invRenderTotals();
     }
 
+    function invEditRecord(id, cat) {
+      if (!canEditOps()) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      if (!rec) return;
+
+      const rawType = prompt("Tipo (add/rem/sold/buy):", String(rec.type || "add"));
+      if (rawType === null) return;
+      const type = String(rawType || "").trim().toLowerCase();
+      if (!["add","rem","sold","buy"].includes(type)) {
+        return alert("Tipo non valido. Usa: add, rem, sold, buy.");
+      }
+
+      const rawItem = prompt("Item:", String(rec.item || ""));
+      if (rawItem === null) return;
+      const item = String(rawItem || "").trim();
+
+      const rawQty = prompt("Quantità:", String(Number(rec.qty || 0)));
+      if (rawQty === null) return;
+      let qty = parseInt(rawQty, 10);
+      if (!Number.isFinite(qty) || qty < 0) qty = 0;
+
+      const prevM = rec.money;
+      const prevClean = (typeof prevM === "number") ? Number(prevM || 0) : Number(prevM?.clean || 0);
+      const prevDirty = (typeof prevM === "number") ? 0 : Number(prevM?.dirty || 0);
+      const prevDrug  = (typeof prevM === "number") ? 0 : Number(prevM?.drug  || 0);
+
+      const rawClean = prompt("Soldi puliti:", String(prevClean));
+      if (rawClean === null) return;
+      const rawDirty = prompt("Soldi sporchi:", String(prevDirty));
+      if (rawDirty === null) return;
+      const rawDrug = prompt("Soldi spaccio:", String(prevDrug));
+      if (rawDrug === null) return;
+
+      const moneyClean = Math.max(0, parseInt(rawClean || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(rawDirty || "0", 10) || 0);
+      const moneyDrug  = Math.max(0, parseInt(rawDrug  || "0", 10) || 0);
+
+      const rawNote = prompt("Note:", String(rec.note || ""));
+      if (rawNote === null) return;
+      const note = String(rawNote || "").trim();
+
+      if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+      if (item && qty < 1) {
+        return alert("Inserisci una quantità valida (> 0) quando inserisci un item.");
+      }
+
+      rec.type = type;
+      rec.item = item;
+      rec.qty = qty;
+      rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
+      rec.note = note;
+      rec.updatedAt = Date.now();
+      invSave(all);
+
+      logEvent("INV_EDIT", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      invRenderTable(cat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
     function invDeleteRecord(id, cat) {
       if (!canEditOps()) return;
       const ok = confirm("Confermi eliminazione registrazione?");
@@ -3739,7 +3808,10 @@ if (last) {
           <td>${tagHtml}</td>
           <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
           <td>${r.item ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.item)} x${Number(r.qty || 0)}</div>` : `<span class="muted">—</span>`}</td>
-          <td>${canEditOps() ? `<button class="btn danger small" style="white-space:nowrap; min-width:96px;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>` : `<span class="muted">—</span>`}</td>
+          <td>${canEditOps() ? `<div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+            <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invEditRecord('${r.id}','${escapeHtml(r.category)}')">Modifica</button>
+            <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+          </div>` : `<span class="muted">—</span>`}</td>
         `;
         body.appendChild(tr);
       });
