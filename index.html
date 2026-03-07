@@ -231,14 +231,14 @@ table.invTable td:nth-child(8){
     }
     .action-menu button:hover { background-color:#3a0000; }
 
-    #editOverlay, #noteOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
-    #editModal, #noteModal {
+    #editOverlay, #noteOverlay, #invEditOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
+    #editModal, #noteModal, #invEditModal {
       max-width:900px; margin:0 auto; background:var(--panel2);
       border:1px solid #ff1a1a77; border-radius:14px;
       box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset;
       padding:18px; text-align:left;
     }
-    #editModal h3, #noteModal h3 { margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900; }
+    #editModal h3, #noteModal h3, #invEditModal h3 { margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900; }
 
     .itemRow {
       display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
@@ -1008,6 +1008,81 @@ table.invTable td:nth-child(8){
         </div>
 
         <div id="editItemsList"></div>
+        <div class="hint">Se aggiungi lo stesso item, somma le quantità.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL (GESTIONE ARMI/DROGA) -->
+  <div id="invEditOverlay">
+    <div id="invEditModal">
+      <h3>Modifica registrazione</h3>
+      <div class="muted" id="invEditInfo"></div>
+
+      <div class="row" style="align-items:flex-end;">
+        <div class="field" style="min-width:170px; flex:0.9;">
+          <label>Tipo</label>
+          <select id="invEditType">
+            <option value="add">AGGIUNTO</option>
+            <option value="rem">RIMOSSO</option>
+            <option value="sold">VENDUTO</option>
+            <option value="buy">ACQUISTATO</option>
+          </select>
+        </div>
+
+        <div class="field" style="min-width:140px; flex:1;">
+          <label>Soldi puliti ($)</label>
+          <input id="invEditMoneyClean" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="min-width:140px; flex:1;">
+          <label>Soldi sporchi ($)</label>
+          <input id="invEditMoneyDirty" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="min-width:140px; flex:1;">
+          <label>Soldi spaccio ($)</label>
+          <input id="invEditMoneyDrug" type="number" min="0" step="1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1; min-width:260px;">
+          <label>Note (visibili a tutti)</label>
+          <input id="invEditNote" type="text" placeholder="Motivo / dettaglio..." />
+        </div>
+        <div class="right">
+          <button class="btn small" onclick="closeInvEdit()">Chiudi</button>
+          <button class="btn small" onclick="invSaveEdit()">Salva</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div class="field" style="min-width:320px;">
+          <label>Tag (Nome in game)</label>
+          <input id="invEditTagName" disabled />
+          <div class="hint">Per cambiare tag: seleziona uno o più nomi nella lista a destra e poi salva.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items (lista fissa + quantità)</h4>
+
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <select id="invEditItemSelect"></select>
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input id="invEditItemQty" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field" style="min-width:180px;">
+            <button class="btn" onclick="invEditAddItem()">Aggiungi item</button>
+          </div>
+        </div>
+
+        <div id="invEditItemsList"></div>
         <div class="hint">Se aggiungi lo stesso item, somma le quantità.</div>
       </div>
     </div>
@@ -2940,6 +3015,7 @@ accRenderDueTable();
 
     const editOverlay = document.getElementById("editOverlay");
     const editInfo = document.getElementById("editInfo");
+    const invEditOverlay = document.getElementById("invEditOverlay");
 
     // =========================
     // MODALS: anti-sovrapposizione + chiusure rapide
@@ -2956,6 +3032,7 @@ accRenderDueTable();
       // chiude tutto quello che può rimanere "appeso"
       try { hideAllActionMenus(); } catch {}
       try { closeEdit(); } catch {}
+      try { closeInvEdit(); } catch {}
       try { closeNoteModal(); } catch {}
       setModalOpen(false);
     }
@@ -2964,6 +3041,12 @@ accRenderDueTable();
     if (editOverlay) {
       editOverlay.addEventListener("click", (e) => {
         if (e.target === editOverlay) closeEdit();
+      });
+    }
+
+    if (invEditOverlay) {
+      invEditOverlay.addEventListener("click", (e) => {
+        if (e.target === invEditOverlay) closeInvEdit();
       });
     }
 
@@ -3686,47 +3769,145 @@ if (last) {
       invRenderTotals();
     }
 
+    const invEditInfo = document.getElementById("invEditInfo");
+    const invEditType = document.getElementById("invEditType");
+    const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+    const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+    const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+    const invEditNote = document.getElementById("invEditNote");
+    const invEditTagName = document.getElementById("invEditTagName");
+    const invEditItemSelect = document.getElementById("invEditItemSelect");
+    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemsList = document.getElementById("invEditItemsList");
+
+    let invEditingId = null;
+    let invEditingCategory = null;
+    let invEditingItems = [];
+
+    function invFillEditItemSelect(cat) {
+      if (!invEditItemSelect) return;
+      invEditItemSelect.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      invEditItemSelect.appendChild(empty);
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        invEditItemSelect.appendChild(o);
+      });
+      invEditItemSelect.value = "";
+    }
+
+    function invRenderEditItems() {
+      if (!invEditItemsList) return;
+      if (!invEditingItems.length) {
+        invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      invEditItemsList.innerHTML = "";
+      invEditingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${Number(it.qty || 0)}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="invEditRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        invEditItemsList.appendChild(div);
+      });
+    }
+
+    function invEditAddItem() {
+      const name = String(invEditItemSelect?.value || "").trim();
+      let qty = parseInt(invEditItemQty?.value || "1", 10);
+      if (!name) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = invEditingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else invEditingItems.push({ name, qty });
+
+      if (invEditItemQty) invEditItemQty.value = "1";
+      invFillEditItemSelect(invEditingCategory || "Armi");
+      invRenderEditItems();
+    }
+
+    function invEditRemoveItem(name) {
+      invEditingItems = invEditingItems.filter(x => x.name !== name);
+      invRenderEditItems();
+    }
+
     function invEditRecord(id, cat) {
       if (!canEditOps()) return;
       const all = invLoad();
       const rec = all.find(x => x.id === id);
       if (!rec) return;
 
-      const rawType = prompt("Tipo (add/rem/sold/buy):", String(rec.type || "add"));
-      if (rawType === null) return;
-      const type = String(rawType || "").trim().toLowerCase();
-      if (!["add","rem","sold","buy"].includes(type)) {
-        return alert("Tipo non valido. Usa: add, rem, sold, buy.");
-      }
+      hideAllActionMenus();
+      try { closeEdit(); } catch {}
+      try { closeNoteModal(); } catch {}
+      setModalOpen(true);
 
-      const rawItem = prompt("Item:", String(rec.item || ""));
-      if (rawItem === null) return;
-      const item = String(rawItem || "").trim();
+      invEditingId = id;
+      invEditingCategory = cat;
+      invEditingItems = rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : [];
 
-      const rawQty = prompt("Quantità:", String(Number(rec.qty || 0)));
-      if (rawQty === null) return;
-      let qty = parseInt(rawQty, 10);
-      if (!Number.isFinite(qty) || qty < 0) qty = 0;
+      invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+      invEditType.value = rec.type || "add";
 
-      const prevM = rec.money;
-      const prevClean = (typeof prevM === "number") ? Number(prevM || 0) : Number(prevM?.clean || 0);
-      const prevDirty = (typeof prevM === "number") ? 0 : Number(prevM?.dirty || 0);
-      const prevDrug  = (typeof prevM === "number") ? 0 : Number(prevM?.drug  || 0);
+      const m = rec.money;
+      const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+      const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+      const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+      invEditMoneyClean.value = String(clean || 0);
+      invEditMoneyDirty.value = String(dirty || 0);
+      invEditMoneyDrug.value = String(drug || 0);
+      invEditNote.value = rec.note || "";
 
-      const rawClean = prompt("Soldi puliti:", String(prevClean));
-      if (rawClean === null) return;
-      const rawDirty = prompt("Soldi sporchi:", String(prevDirty));
-      if (rawDirty === null) return;
-      const rawDrug = prompt("Soldi spaccio:", String(prevDrug));
-      if (rawDrug === null) return;
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      invEditTagName.value = tnames.length ? tnames.join(", ") : "—";
 
-      const moneyClean = Math.max(0, parseInt(rawClean || "0", 10) || 0);
-      const moneyDirty = Math.max(0, parseInt(rawDirty || "0", 10) || 0);
-      const moneyDrug  = Math.max(0, parseInt(rawDrug  || "0", 10) || 0);
+      invFillEditItemSelect(cat);
+      invRenderEditItems();
+      if (invEditOverlay) invEditOverlay.style.display = "block";
+    }
 
-      const rawNote = prompt("Note:", String(rec.note || ""));
-      if (rawNote === null) return;
-      const note = String(rawNote || "").trim();
+    function closeInvEdit() {
+      if (!invEditOverlay) return;
+      invEditOverlay.style.display = "none";
+      invEditingId = null;
+      invEditingCategory = null;
+      invEditingItems = [];
+      setModalOpen(false);
+    }
+
+    function invSaveEdit() {
+      if (!invEditingId || !invEditingCategory) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === invEditingId);
+      if (!rec) return;
+
+      const type = String(invEditType?.value || "add").trim().toLowerCase();
+      if (!["add","rem","sold","buy"].includes(type)) return alert("Tipo non valido.");
+
+      const moneyClean = Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0);
+      const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
+      const note = String(invEditNote?.value || "").trim();
+
+      const firstItem = invEditingItems[0] || { name: "", qty: 0 };
+      const item = String(firstItem.name || "").trim();
+      const qty = Math.max(0, parseInt(firstItem.qty || 0, 10) || 0);
 
       if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
@@ -3744,7 +3925,9 @@ if (last) {
       invSave(all);
 
       logEvent("INV_EDIT", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
-      invRenderTable(cat);
+      const currentCat = invEditingCategory || rec.category;
+      closeInvEdit();
+      invRenderTable(currentCat);
       invRenderTotals();
       accRenderDueTable();
       accRenderSummary();
