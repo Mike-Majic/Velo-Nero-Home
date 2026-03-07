@@ -3535,8 +3535,8 @@ invRenderTotals();
         p.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
-          <div class="row" style="align-items:flex-end;">
-            <div class="field" style="min-width:170px; flex:0.9;">
+          <div class="row" style="align-items:flex-end; flex-wrap:nowrap;">
+            <div class="field" style="min-width:120px; flex:0 0 20%;">
               <label>Tipo</label>
 <select id="invType_${tid}" ${disabledAttr}>
                 <option value="add">AGGIUNTO</option>
@@ -3546,18 +3546,18 @@ invRenderTotals();
               </select>
             </div>
 
-            <div class="field" style="min-width:140px; flex:1;">
+            <div class="field" style="min-width:0; flex:1 1 0;">
               <label>Soldi puliti ($)</label>
               <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:140px; flex:1;">
+            <div class="field" style="min-width:0; flex:1 1 0;">
               <label>Soldi sporchi ($)</label>
               <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
           </div>
 
-            <div class="field" style="min-width:140px; flex:1;">
+            <div class="field" style="min-width:0; flex:1 1 0;">
               <label>Soldi spaccio ($)</label>
               <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
