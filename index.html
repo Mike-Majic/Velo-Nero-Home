@@ -3190,8 +3190,8 @@ invRenderTotals();
         panel.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
-          <div class="row">
-            <div class="field" style="min-width:170px; max-width:220px;">
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:130px; flex:0.9;">
               <label>Tipo</label>
               <select id="type_${tid}" ${disabledAttr}>
                 <option value="ottenuto">OTTENUTO</option>
@@ -3199,24 +3199,24 @@ invRenderTotals();
               </select>
             </div>
 
-            <div class="field" style="min-width:190px; flex:1;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi puliti ($)</label>
               <input id="moneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:190px; flex:1;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi sporchi ($)</label>
               <input id="moneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:190px; flex:1;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi spaccio ($)</label>
               <input id="moneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
           </div>
 
           <div class="row">
-            <div class="field" style="flex:2; min-width:420px;">
+            <div class="field" style="width:100%; min-width:0;">
               <label>Note</label>
               <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
             </div>
@@ -4263,7 +4263,7 @@ tr.innerHTML = `
   <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
   <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
   <td>${tagHtml}</td>
-  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 `;
         } else {
           const t = r.type === "in" ? "ENTRATA" : "USCITA";
@@ -4325,7 +4325,7 @@ function accRenderDueTable() {
       <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
       <td>${tagHtml}</td>
-      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
       <td>
         <button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>
         <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
