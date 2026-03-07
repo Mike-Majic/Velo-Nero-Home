@@ -3452,8 +3452,8 @@ invRenderTotals();
         p.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
-          <div class="row">
-            <div class="field" style="min-width:180px;">
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:170px; flex:0.9;">
               <label>Tipo</label>
 <select id="invType_${tid}" ${disabledAttr}>
                 <option value="add">AGGIUNTO</option>
@@ -3463,41 +3463,20 @@ invRenderTotals();
               </select>
             </div>
 
-            <div class="field" style="min-width:320px; flex:1;">
-              <label>Item</label>
-              <select id="invItem_${tid}" ${disabledAttr}></select>
-            </div>
-
-            <div class="field" style="min-width:180px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
-            </div>
-          </div>
-
-          <div class="row" style="align-items:flex-end;">
-            <div class="field" style="min-width:160px; flex:0.9;">
-              <label>Quantità</label>
-              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:190px; flex:1;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi puliti ($)</label>
               <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:190px; flex:1;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi sporchi ($)</label>
               <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
           </div>
 
-          <div class="row" style="align-items:flex-end;">
-            <div class="field" style="min-width:190px; flex:1;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi spaccio ($)</label>
               <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
             </div>
           </div>
 
@@ -3506,6 +3485,33 @@ invRenderTotals();
               <label>Note</label>
               <input id="invNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
             </div>
+          </div>
+
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:320px; flex:1;">
+              <label>Item</label>
+              <select id="invItem_${tid}" ${disabledAttr}></select>
+            </div>
+
+            <div class="field" style="min-width:160px; flex:0.8;">
+              <label>Quantità</label>
+              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field" style="min-width:220px; max-width:260px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
+            </div>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
+            <div class="muted">Nessun item in bozza</div>
           </div>
 
 <div class="hint" style="margin-top:8px;">
