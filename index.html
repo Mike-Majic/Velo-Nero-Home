@@ -75,11 +75,29 @@
     .section { display:none; max-width:1200px; margin:0 auto; text-align:left; }
     .section.active { display:block; }
 
-    .cards { text-align:center; }
+    .cards {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:24px;
+      text-align:center;
+    }
     .box {
-      display:inline-block; background-color:var(--panel); padding:40px 60px; margin:12px;
-      border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
-      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      background-color:var(--panel);
+      padding:38px 30px;
+      margin:0;
+      width:380px;
+      max-width:100%;
+      min-height:150px;
+      border-radius:12px;
+      box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
+      transition:transform .3s ease, box-shadow .3s ease;
+      cursor:pointer;
+      color:#fff;
+      box-sizing:border-box;
     }
     .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
     .box h2 { font-size:28px; margin:0 0 10px 0; color:var(--red); text-align:center; font-weight:900; text-shadow:0 0 10px #ff000066; }
