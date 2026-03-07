@@ -3251,7 +3251,7 @@ logEvent(
         tr.innerHTML = `
           <td>${when}</td>
           <td style="font-weight:900;">${escapeHtml(r.createdByName || "—")}</td>
-          <td>${tipo}</td>
+          <td style="font-weight:900; color:${tipo === "PERSO" ? "var(--red2)" : "#fff"};">${tipo}</td>
           <td style="font-weight:900;">
             ${(() => {
               const m = r.money;
@@ -3984,7 +3984,7 @@ if (last) {
         tr.innerHTML = `
           <td>${new Date(r.ts).toLocaleString()}</td>
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-          <td style="font-weight:900; color:var(--red2)">${t}</td>
+          <td style="font-weight:900; color:${(r.type === "sold" || r.type === "rem") ? "var(--red2)" : "#fff"};">${t}</td>
           <td style="font-weight:900;">
             ${(() => {
               const m = r.money;
@@ -4009,7 +4009,7 @@ if (last) {
               : (r.item ? [{ name: r.item, qty: Number(r.qty || 0) }] : []);
             if (!items.length) return '<span class="muted">—</span>';
             const lines = items
-              .map(it => `${escapeHtml(it.name || "—")} x${Number(it.qty || 0)}`)
+              .map(it => `${Number(it.qty || 0)}x ${escapeHtml(it.name || "—")}`)
               .join("<br>");
             return `<div style="white-space:pre-wrap; font-size:14px; font-weight:800; line-height:1.25;">${lines}</div>`;
           })()}</td>
