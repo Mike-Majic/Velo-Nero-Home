@@ -3153,8 +3153,10 @@ logEvent(
           : `<span class="muted">—</span>`;
 
         const actionsHtml = canEditOps()
-          ? `<button class="btn small" style="white-space:nowrap; min-width:96px;" onclick="openEdit('${r.id}')">Modifica</button>
-             <button class="btn danger small" style="white-space:nowrap; min-width:96px;" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
+          ? `<div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+               <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="openEdit('${r.id}')">Modifica</button>
+               <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+             </div>`
           : `<span class="muted">—</span>`;
 
         const tr = document.createElement("tr");
@@ -3287,7 +3289,7 @@ invRenderTotals();
           <table>
             <thead>
               <tr>
-<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th style="width:120px;">Azioni</th>
 </tr>
             </thead>
             <tbody id="table_${tid}">
