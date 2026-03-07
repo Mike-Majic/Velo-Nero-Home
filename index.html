@@ -2295,6 +2295,14 @@ if (id === "contabilita") {
         if (cardContabilita) cardContabilita.style.display = "inline-block";
       }
 
+      if (!canAccessAccounting()) {
+        if (btnContabilita) btnContabilita.style.display = "none";
+        if (cardContabilita) cardContabilita.style.display = "none";
+      } else {
+        if (btnContabilita) btnContabilita.style.display = "inline-block";
+        if (cardContabilita) cardContabilita.style.display = "inline-block";
+      }
+
       if (!canEditOps()) {
         dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni e diario.";
         actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
