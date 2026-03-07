@@ -3734,6 +3734,7 @@ invRenderTotals();
         type,
         item,
         qty,
+        items: item ? [{ name: item, qty }] : [],
         money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
         note,
         who,
@@ -3860,7 +3861,9 @@ if (last) {
 
       invEditingId = id;
       invEditingCategory = cat;
-      invEditingItems = rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : [];
+      invEditingItems = Array.isArray(rec.items) && rec.items.length
+        ? rec.items.map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) })).filter(x => x.name)
+        : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : []);
 
       invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
       invEditType.value = rec.type || "add";
@@ -3905,20 +3908,22 @@ if (last) {
       const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
       const note = String(invEditNote?.value || "").trim();
 
-      const firstItem = invEditingItems[0] || { name: "", qty: 0 };
-      const item = String(firstItem.name || "").trim();
-      const qty = Math.max(0, parseInt(firstItem.qty || 0, 10) || 0);
+      const normalizedItems = (invEditingItems || [])
+        .map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) }))
+        .filter(x => x.name);
 
-      if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+      const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+      const item = firstItem.name;
+      const qty = firstItem.qty;
+
+      if (!normalizedItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
-      }
-      if (item && qty < 1) {
-        return alert("Inserisci una quantità valida (> 0) quando inserisci un item.");
       }
 
       rec.type = type;
       rec.item = item;
       rec.qty = qty;
+      rec.items = normalizedItems;
       rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
       rec.note = note;
       rec.updatedAt = Date.now();
@@ -3991,12 +3996,23 @@ if (last) {
               if (clean) parts.push("P: " + formatMoney(clean));
               if (dirty) parts.push("S: " + formatMoney(dirty));
               if (drug)  parts.push("SP: " + formatMoney(drug));
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              return parts.length
+                ? `<div style="white-space:pre-wrap; line-height:1.25;">${parts.join("<br>")}</div>`
+                : '<span class="muted">—</span>';
             })()}
           </td>
           <td>${tagHtml}</td>
           <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-          <td>${r.item ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.item)} x${Number(r.qty || 0)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${(() => {
+            const items = Array.isArray(r.items) && r.items.length
+              ? r.items
+              : (r.item ? [{ name: r.item, qty: Number(r.qty || 0) }] : []);
+            if (!items.length) return '<span class="muted">—</span>';
+            const lines = items
+              .map(it => `${escapeHtml(it.name || "—")} x${Number(it.qty || 0)}`)
+              .join("<br>");
+            return `<div style="white-space:pre-wrap; font-size:14px; font-weight:800; line-height:1.25;">${lines}</div>`;
+          })()}</td>
           <td>${canEditOps() ? `<div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
             <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invEditRecord('${r.id}','${escapeHtml(r.category)}')">Modifica</button>
             <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
