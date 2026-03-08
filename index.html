@@ -3602,14 +3602,20 @@ invRenderTotals();
       ]
     };
 
-    function invLoad() {
-      try {
-        const raw = localStorage.getItem(INV_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
-    }
-    function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
+function invLoad() {
+  try {
+    const raw = localStorage.getItem(INV_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
+
+const invDrafts = {};
+function invGetDraft(category) {
+  if (!invDrafts[category]) invDrafts[category] = [];
+  return invDrafts[category];
+}
 
     function invTabId(name) {
       return "inv_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
@@ -3677,32 +3683,36 @@ invRenderTotals();
             </div>
           </div>
 
-          <div class="row" style="align-items:flex-end;">
-            <div class="field" style="min-width:320px; flex:1;">
-              <label>Item</label>
-              <select id="invItem_${tid}" ${disabledAttr}></select>
-            </div>
+<div class="row" style="align-items:flex-end;">
+  <div class="field" style="min-width:320px; flex:1;">
+    <label>Item</label>
+    <select id="invItem_${tid}" ${disabledAttr}></select>
+  </div>
 
-            <div class="field" style="min-width:160px; flex:0.8;">
-              <label>Quantità</label>
-              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
-            </div>
+  <div class="field" style="min-width:160px; flex:0.8;">
+    <label>Quantità</label>
+    <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+  </div>
 
-            <div class="field" style="min-width:180px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
-            </div>
-          </div>
+  <div class="field" style="min-width:180px;">
+    <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
+  </div>
 
-          <div class="row">
-            <div class="field" style="min-width:220px; max-width:260px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
-            </div>
-          </div>
+  <div class="field" style="min-width:180px;">
+    <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddCustomItem('${escapeHtml(cat)}')">Nuovo item lista</button>
+  </div>
+</div>
 
-          <div class="panel active" style="display:block; margin-top:12px;">
-            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
-            <div class="muted">Nessun item in bozza</div>
-          </div>
+<div class="row">
+  <div class="field" style="min-width:220px; max-width:260px;">
+    <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
+  </div>
+</div>
+
+<div class="panel active" style="display:block; margin-top:12px;">
+  <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
+  <div id="invDraft_${tid}" style="margin-top:10px;"></div>
+</div>
 
 <div class="hint" style="margin-top:8px;">
             Tag (dalla lista a destra)
@@ -3731,11 +3741,12 @@ invRenderTotals();
 
         panels.appendChild(p);
 
-        setTimeout(() => {
-          invFillItemSelect(cat);
-          invRenderTable(cat);
-          syncSelectedTagsUI();
-        }, 0);
+setTimeout(() => {
+  invFillItemSelect(cat);
+  invRenderDraft(cat);
+  invRenderTable(cat);
+  syncSelectedTagsUI();
+}, 0);
 
         if (idx === 0) {
           b.classList.add("active");
@@ -3744,8 +3755,26 @@ invRenderTotals();
       });
     }
 
-    function invSetActive(cat) { window.__inv_active = cat; }
-    function invGetActive() { return window.__inv_active || INV_CATEGORIES[0]; }
+function invSetActive(cat) { window.__inv_active = cat; }
+function invGetActive() { return window.__inv_active || INV_CATEGORIES[0]; }
+
+function invAddCustomItem(cat) {
+  if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+  const name = prompt("Nuovo item per " + cat + ":");
+  const v = String(name || "").trim();
+  if (!v) return;
+
+  const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
+  if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
+    arr.push(v);
+  }
+
+  invFillItemSelect(cat);
+  const tid = invTabId(cat);
+  const sel = document.getElementById("invItem_" + tid);
+  if (sel) sel.value = v;
+}
 
     function invShowTab(cat) {
       invSetActive(cat);
@@ -3764,10 +3793,47 @@ invRenderTotals();
       syncSelectedTagsUI();
     }
 
-    function invFillItemSelect(cat) {
-      const tid = invTabId(cat);
-      const sel = document.getElementById("invItem_" + tid);
-      if (!sel) return;
+function invRenderDraft(cat) {
+  const tid = invTabId(cat);
+  const wrap = document.getElementById("invDraft_" + tid);
+  if (!wrap) return;
+
+  const draft = invGetDraft(cat);
+  if (!draft.length) {
+    wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
+    return;
+  }
+
+  wrap.innerHTML = "";
+  draft.forEach(it => {
+    const div = document.createElement("div");
+    div.className = "itemRow";
+    div.innerHTML = `
+      <div class="field" style="min-width:320px;">
+        <label>Item</label>
+        <input value="${escapeHtml(it.name)}" disabled />
+      </div>
+      <div class="field" style="min-width:160px;">
+        <label>Quantità</label>
+        <input value="${it.qty}" disabled />
+      </div>
+      <div class="right">
+        <button class="btn danger small" onclick="invRemoveDraftItem('${escapeHtml(cat)}','${escapeHtml(it.name)}')">Rimuovi</button>
+      </div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+function invRemoveDraftItem(cat, name) {
+  invDrafts[cat] = invGetDraft(cat).filter(x => x.name !== name);
+  invRenderDraft(cat);
+}
+
+function invFillItemSelect(cat) {
+  const tid = invTabId(cat);
+  const sel = document.getElementById("invItem_" + tid);
+  if (!sel) return;
 
       sel.innerHTML = "";
 
@@ -3786,47 +3852,47 @@ invRenderTotals();
       sel.value = "";
     }
 
-    function invAddItem(cat) {
-      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
-      const name = prompt("Nuovo item per " + cat + ":");
-      const v = String(name || "").trim();
-      if (!v) return;
+function invAddItem(cat) {
+  if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
-      const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
-      if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
-        arr.push(v);
-      }
+  const tid = invTabId(cat);
+  const item = document.getElementById("invItem_" + tid)?.value || "";
+  let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
 
-      invFillItemSelect(cat);
-      const tid = invTabId(cat);
-      const sel = document.getElementById("invItem_" + tid);
-      if (sel) sel.value = v;
-    }
+  if (!item) return alert("Seleziona un item.");
+  if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+  const draft = invGetDraft(cat);
+  const existing = draft.find(x => x.name === item);
+
+  if (existing) existing.qty += qty;
+  else draft.push({ name: item, qty });
+
+  document.getElementById("invItem_" + tid).value = "";
+  document.getElementById("invQty_" + tid).value = "1";
+
+  invRenderDraft(cat);
+}
 
     function invSaveRecord(cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
       const tid = invTabId(cat);
       const type = document.getElementById("invType_" + tid)?.value || "add";
-      const item = document.getElementById("invItem_" + tid)?.value || "";
-      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
-      if (!Number.isFinite(qty) || qty < 0) qty = 0;
+const draftItems = invGetDraft(cat);
 
-      const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
-      const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
-      const msRaw = document.getElementById("invMoneyDrug_" + tid)?.value || "";
+const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
+const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
+const msRaw = document.getElementById("invMoneyDrug_" + tid)?.value || "";
 
-      const moneyClean = Math.max(0, parseInt(mcRaw || "0", 10) || 0);
-      const moneyDirty = Math.max(0, parseInt(mdRaw || "0", 10) || 0);
-      const moneyDrug  = Math.max(0, parseInt(msRaw || "0", 10) || 0);
+const moneyClean = Math.max(0, parseInt(mcRaw || "0", 10) || 0);
+const moneyDirty = Math.max(0, parseInt(mdRaw || "0", 10) || 0);
+const moneyDrug  = Math.max(0, parseInt(msRaw || "0", 10) || 0);
 
-      const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
-      if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
-        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
-      }
-      if (item && qty < 1) {
-        return alert("Inserisci una quantità valida (> 0) quando selezioni un item.");
-      }
+const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
+if (!draftItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+  return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+}
 
       const who = myGameNameOrEmail();
 
@@ -3834,22 +3900,29 @@ invRenderTotals();
       const tagNames = selectedTagNames();
 
       const all = invLoad();
-      all.push({
-        id: uid(),
-        ts: Date.now(),
-        category: cat,
-        type,
-        item,
-        qty,
-        items: item ? [{ name: item, qty }] : [],
-        money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
-        note,
-        who,
-        tagUserIds,
-        tagNames,
-        // compat vecchio
-        tagName: tagNames.length ? tagNames[0] : null
-      });
+const normalizedItems = draftItems.map(x => ({
+  name: String(x.name || "").trim(),
+  qty: Math.max(1, parseInt(x.qty || 1, 10) || 1)
+})).filter(x => x.name);
+
+const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+
+all.push({
+  id: uid(),
+  ts: Date.now(),
+  category: cat,
+  type,
+  item: firstItem.name,
+  qty: firstItem.qty,
+  items: normalizedItems,
+  money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
+  note,
+  who,
+  tagUserIds,
+  tagNames,
+  // compat vecchio
+  tagName: tagNames.length ? tagNames[0] : null
+});
 invSave(all);
 
 // LOG
@@ -3866,15 +3939,17 @@ if (last) {
   accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
   accRenderDueTable();
 }
-      document.getElementById("invItem_" + tid).value = "";
-      document.getElementById("invQty_" + tid).value = "0";
-      document.getElementById("invMoneyClean_" + tid).value = "";
-      document.getElementById("invMoneyDirty_" + tid).value = "";
-      document.getElementById("invMoneyDrug_" + tid).value = "";
-      document.getElementById("invNote_" + tid).value = "";
+document.getElementById("invItem_" + tid).value = "";
+document.getElementById("invQty_" + tid).value = "1";
+document.getElementById("invMoneyClean_" + tid).value = "";
+document.getElementById("invMoneyDirty_" + tid).value = "";
+document.getElementById("invMoneyDrug_" + tid).value = "";
+document.getElementById("invNote_" + tid).value = "";
 
-      invRenderTable(cat);
-      invRenderTotals();
+invDrafts[cat] = [];
+invRenderDraft(cat);
+invRenderTable(cat);
+invRenderTotals();
     }
 
     const invEditInfo = document.getElementById("invEditInfo");
