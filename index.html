@@ -1178,6 +1178,34 @@ table.invTable td:nth-child(8){
     </div>
   </div>
 
+  <!-- REMOVE ITEM LIST MODAL -->
+  <div id="invRemoveOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px;">
+    <div id="invRemoveModal" style="max-width:700px; margin:0 auto; background:var(--panel2); border:1px solid #ff1a1a77; border-radius:14px; box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset; padding:18px; text-align:left;">
+      <h3 style="margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Togli item lista</h3>
+      <div class="muted" id="invRemoveInfo">Seleziona un item dalla lista e conferma la cancellazione.</div>
+
+      <div class="row" style="margin-top:12px;">
+        <div class="field" style="min-width:280px; flex:1;">
+          <label>Categoria</label>
+          <input id="invRemoveCategory" type="text" disabled />
+        </div>
+
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Item da rimuovere</label>
+          <select id="invRemoveSelect"></select>
+        </div>
+      </div>
+
+      <div class="row" style="align-items:center; margin-top:14px;">
+        <div class="muted">L'item verrà tolto dalla lista selezionabile della categoria corrente.</div>
+        <div class="right">
+          <button class="btn small" onclick="closeInvRemoveModal()">Chiudi</button>
+          <button class="btn danger small" onclick="confirmInvRemoveCustomItem()">Conferma cancellamento</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =========================
     // CONFIG (OWNER EMAIL)
@@ -3135,14 +3163,15 @@ accRenderDueTable();
       document.body.classList.toggle("modalOpen", !!isOpen);
     }
 
-    function closeAllOverlays(){
-      // chiude tutto quello che può rimanere "appeso"
-      try { hideAllActionMenus(); } catch {}
-      try { closeEdit(); } catch {}
-      try { closeInvEdit(); } catch {}
-      try { closeNoteModal(); } catch {}
-      setModalOpen(false);
-    }
+function closeAllOverlays(){
+  // chiude tutto quello che può rimanere "appeso"
+  try { hideAllActionMenus(); } catch {}
+  try { closeEdit(); } catch {}
+  try { closeInvEdit(); } catch {}
+  try { closeNoteModal(); } catch {}
+  try { closeInvRemoveModal(); } catch {}
+  setModalOpen(false);
+}
 
     // click fuori dal contenuto = chiudi
     if (editOverlay) {
@@ -3157,11 +3186,18 @@ accRenderDueTable();
       });
     }
 
-    if (typeof noteOverlay !== "undefined" && noteOverlay) {
-      noteOverlay.addEventListener("click", (e) => {
-        if (e.target === noteOverlay) closeNoteModal();
-      });
-    }
+if (typeof noteOverlay !== "undefined" && noteOverlay) {
+  noteOverlay.addEventListener("click", (e) => {
+    if (e.target === noteOverlay) closeNoteModal();
+  });
+}
+
+const invRemoveOverlay = document.getElementById("invRemoveOverlay");
+if (invRemoveOverlay) {
+  invRemoveOverlay.addEventListener("click", (e) => {
+    if (e.target === invRemoveOverlay) closeInvRemoveModal();
+  });
+}
 
     // ESC = chiudi tutto
     document.addEventListener("keydown", (e) => {
@@ -3698,9 +3734,13 @@ function invGetDraft(category) {
     <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
   </div>
 
-  <div class="field" style="min-width:180px;">
-    <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddCustomItem('${escapeHtml(cat)}')">Nuovo item lista</button>
-  </div>
+<div class="field" style="min-width:180px;">
+  <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddCustomItem('${escapeHtml(cat)}')">Nuovo item lista</button>
+</div>
+
+<div class="field" style="min-width:180px;">
+  <button class="btn danger ${disabledCls}" ${disabledAttr} onclick="invRemoveCustomItem('${escapeHtml(cat)}')">Togli item lista</button>
+</div>
 
   <div class="field" style="min-width:180px;">
     <button class="btn danger ${disabledCls}" ${disabledAttr} onclick="invRemoveCustomItem('${escapeHtml(cat)}')">Togli item lista</button>
@@ -3845,24 +3885,62 @@ function invAddItem(cat) {
   invRenderDraft(cat);
 }
 
+let invRemoveCurrentCategory = null;
+
 function invRemoveCustomItem(cat) {
   if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
   const arr = INV_ITEMS[cat] || [];
   if (!arr.length) return alert("Nessun item presente nella lista di " + cat);
 
-  const current = prompt(
-    "Scrivi ESATTAMENTE il nome dell'item da rimuovere da " + cat + ":\n\n" +
-    arr.join("\n")
-  );
+  invRemoveCurrentCategory = cat;
 
-  const v = String(current || "").trim();
-  if (!v) return;
+  const catInput = document.getElementById("invRemoveCategory");
+  const sel = document.getElementById("invRemoveSelect");
 
-  const idx = arr.findIndex(x => String(x).toLowerCase() === v.toLowerCase());
+  if (catInput) catInput.value = cat;
+  if (sel) {
+    sel.innerHTML = "";
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Seleziona item";
+    sel.appendChild(empty);
+
+    arr.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item;
+      opt.textContent = item;
+      sel.appendChild(opt);
+    });
+
+    sel.value = "";
+  }
+
+  if (invRemoveOverlay) invRemoveOverlay.style.display = "block";
+  setModalOpen(true);
+}
+
+function closeInvRemoveModal() {
+  if (invRemoveOverlay) invRemoveOverlay.style.display = "none";
+  invRemoveCurrentCategory = null;
+  setModalOpen(false);
+}
+
+function confirmInvRemoveCustomItem() {
+  if (!invRemoveCurrentCategory) return;
+
+  const cat = invRemoveCurrentCategory;
+  const arr = INV_ITEMS[cat] || [];
+  const sel = document.getElementById("invRemoveSelect");
+  const value = String(sel?.value || "").trim();
+
+  if (!value) return alert("Seleziona un item da rimuovere.");
+
+  const idx = arr.findIndex(x => String(x).toLowerCase() === value.toLowerCase());
   if (idx === -1) return alert("Item non trovato nella lista.");
 
-  const ok = confirm(`Confermi la rimozione di "${arr[idx]}" dalla lista ${cat}?`);
+  const itemName = arr[idx];
+  const ok = confirm(`Confermi la rimozione di "${itemName}" dalla lista ${cat}?`);
   if (!ok) return;
 
   arr.splice(idx, 1);
@@ -3871,9 +3949,23 @@ function invRemoveCustomItem(cat) {
   invFillEditItemSelect(cat);
 
   const tid = invTabId(cat);
-  const sel = document.getElementById("invItem_" + tid);
-  if (sel) sel.value = "";
+  const mainSel = document.getElementById("invItem_" + tid);
+  if (mainSel) mainSel.value = "";
 
+  // pulizia bozza se presente lo stesso item
+  invDrafts[cat] = invGetDraft(cat).filter(x => String(x.name || "").toLowerCase() !== itemName.toLowerCase());
+  invRenderDraft(cat);
+
+  // pulizia editor modale se aperto sulla stessa categoria
+  if (invEditingCategory === cat) {
+    invEditingItems = (invEditingItems || []).filter(x => String(x.name || "").toLowerCase() !== itemName.toLowerCase());
+    invRenderEditItems();
+  }
+
+  // LOG
+  logEvent("INV_LIST_REMOVE", `${cat} .. Item(${itemName})`);
+
+  closeInvRemoveModal();
   alert("Item rimosso dalla lista.");
 }
 
@@ -5106,10 +5198,12 @@ accRenderSummary();
           logSearch();
         }
       }
-      if (e.key === "Escape") {
-        if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
-        if (document.getElementById("editOverlay").style.display === "block") closeEdit();
-      }
+if (e.key === "Escape") {
+  if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
+  if (document.getElementById("editOverlay").style.display === "block") closeEdit();
+  if (document.getElementById("invEditOverlay").style.display === "block") closeInvEdit();
+  if (document.getElementById("invRemoveOverlay").style.display === "block") closeInvRemoveModal();
+}
     });
 
     // =========================
