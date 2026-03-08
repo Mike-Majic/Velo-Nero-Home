@@ -75,11 +75,29 @@
     .section { display:none; max-width:1200px; margin:0 auto; text-align:left; }
     .section.active { display:block; }
 
-    .cards { text-align:center; }
+    .cards {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:24px;
+      text-align:center;
+    }
     .box {
-      display:inline-block; background-color:var(--panel); padding:40px 60px; margin:12px;
-      border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
-      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      background-color:var(--panel);
+      padding:38px 30px;
+      margin:0;
+      width:380px;
+      max-width:100%;
+      min-height:150px;
+      border-radius:12px;
+      box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
+      transition:transform .3s ease, box-shadow .3s ease;
+      cursor:pointer;
+      color:#fff;
+      box-sizing:border-box;
     }
     .box:hover { transform:scale(1.03); box-shadow:0 0 20px #ff1a1a99 inset, 0 0 25px #ff0000cc; }
     .box h2 { font-size:28px; margin:0 0 10px 0; color:var(--red); text-align:center; font-weight:900; text-shadow:0 0 10px #ff000066; }
@@ -116,7 +134,7 @@
 
     .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px; }
     .field { display:flex; flex-direction:column; gap:6px; min-width:220px; }
-    label { color:var(--muted2); font-size:13px; font-weight:800; letter-spacing:.2px; }
+    label { color:var(--muted2); font-size:14px; font-weight:800; letter-spacing:.2px; }
     input, select, textarea {
       background:var(--panel2); border:1px solid var(--border); color:#fff; border-radius:10px;
       padding:10px 12px; outline:none;
@@ -170,12 +188,17 @@ table.invTable td{
   white-space:nowrap;
 }
 
-/* solo NOTE può andare a capo */
-table.invTable th:last-child,
-table.invTable td:last-child{
+/* invTable: NOTE può andare a capo, Azioni resta compatta */
+table.invTable th:nth-child(6),
+table.invTable td:nth-child(6){
   white-space:normal;
   overflow-wrap:anywhere;
   word-break:break-word;
+}
+table.invTable th:nth-child(8),
+table.invTable td:nth-child(8){
+  white-space:nowrap;
+  width:120px;
 }
     th, td {
       padding:8px 10px;
@@ -208,14 +231,14 @@ table.invTable td:last-child{
     }
     .action-menu button:hover { background-color:#3a0000; }
 
-    #editOverlay, #noteOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
-    #editModal, #noteModal {
+    #editOverlay, #noteOverlay, #invEditOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
+    #editModal, #noteModal, #invEditModal {
       max-width:900px; margin:0 auto; background:var(--panel2);
       border:1px solid #ff1a1a77; border-radius:14px;
       box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset;
       padding:18px; text-align:left;
     }
-    #editModal h3, #noteModal h3 { margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900; }
+    #editModal h3, #noteModal h3, #invEditModal h3 { margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900; }
 
     .itemRow {
       display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
@@ -257,7 +280,10 @@ table.invTable td:last-child{
       border:none; outline:none; background:transparent; padding:0;
       width:100%;
       font-weight:900;
+      font-size:14px;
     }
+    .diaryTableWrap td{ font-size:13px; }
+    #noteModal input, #noteModal textarea, #noteModal select{ font-size:14px; }
     .diaryTableWrap{
       margin-top:14px;
       border-radius:12px;
@@ -323,6 +349,15 @@ table.invTable td:last-child{
       color:#ffd0d0;
       margin-left:8px;
       white-space:nowrap;
+    }
+    .userRoleBadge{
+      display:inline-block;
+      margin-top:4px;
+      margin-left:0;
+      white-space:normal;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      max-width:100%;
     }
 
 /* GESTIONE ARMI/DROGA: 2 colonne (ANTI SOVRAPPOSIZIONE - FORZATO) */
@@ -411,10 +446,10 @@ table.invTable td:last-child{
   <div class="nav">
     <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
-    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
     <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
-    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
+    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
     <button id="btnContabilita" onclick="showSection('contabilita')">Contabilità</button>
+    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
     <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
   </div>
 
@@ -447,7 +482,7 @@ table.invTable td:last-child{
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
-            <input id="loginPassword" type="password" placeholder="Password" />
+            <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('loginPassword', this)">👁</button>
           </div>
         </div>
@@ -463,13 +498,13 @@ table.invTable td:last-child{
 
           <label>Nuova password</label>
           <div class="pwbox">
-            <input id="newPassword" type="password" placeholder="Nuova password" />
+            <input id="newPassword" type="password" placeholder="Nuova password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('newPassword', this)">👁</button>
           </div>
 
           <label>Conferma nuova password</label>
           <div class="pwbox">
-            <input id="newPassword2" type="password" placeholder="Conferma" />
+            <input id="newPassword2" type="password" placeholder="Conferma" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('newPassword2', this)">👁</button>
           </div>
         </div>
@@ -495,12 +530,12 @@ table.invTable td:last-child{
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
-            <input id="regPassword" type="password" placeholder="Password" />
+            <input id="regPassword" type="password" placeholder="Password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('regPassword', this)">👁</button>
           </div>
           <label>Conferma password</label>
           <div class="pwbox">
-            <input id="regPassword2" type="password" placeholder="Conferma password" />
+            <input id="regPassword2" type="password" placeholder="Conferma password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('regPassword2', this)">👁</button>
           </div>
         </div>
@@ -573,6 +608,11 @@ table.invTable td:last-child{
   <!-- DASHBOARD (layout aggiornato) -->
   <div id="dashboard" class="section">
     <div class="cards">
+      <div class="box" onclick="showSection('dashboard')">
+        <h2>Dashboard</h2>
+        <p>Home</p>
+      </div>
+
       <div class="box" onclick="showSection('azioni')">
         <h2>Azioni</h2>
         <p>Azioni</p>
@@ -583,19 +623,24 @@ table.invTable td:last-child{
         <p>Funzioni</p>
       </div>
 
-      <div class="box" onclick="showSection('contabilita')">
-        <h2>Contabilità</h2>
-        <p>Stipendi</p>
-      </div>
-
       <div class="box" onclick="showSection('diario')">
         <h2>Diario</h2>
         <p>Note</p>
       </div>
 
+      <div class="box" id="cardContabilita" onclick="showSection('contabilita')">
+        <h2>Contabilità</h2>
+        <p>Stipendi</p>
+      </div>
+
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
         <h2>Utenti</h2>
         <p>Gestione</p>
+      </div>
+
+      <div class="box" id="cardLog" onclick="showSection('log')" style="display:none;">
+        <h2>Log</h2>
+        <p>Registro</p>
       </div>
     </div>
 
@@ -637,6 +682,7 @@ table.invTable td:last-child{
 
           <div class="row" style="margin-top:14px;">
             <button class="btn danger" onclick="resetAllOps()">AZZERA AZIONI</button>
+            <button class="btn danger" onclick="invResetAll()">AZZERA GESTIONE</button>
             <div class="muted">Cancella tutte le registrazioni.</div>
           </div>
         </div>
@@ -645,7 +691,33 @@ table.invTable td:last-child{
       <!-- TAG A DESTRA -->
       <div class="colSide">
         <div class="sidePanel">
-          <h3 class="sideTitle">Tag (Utente)</h3>
+          <div class="panel active" style="display:block; margin-top:0;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Resoconto Soldi (Azioni)</h4>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
+                <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
+                <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
+                <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
+                <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
+                <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
+                <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
+              </div>
+            </div>
+
+            <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
+          </div>
+
+          <h3 class="sideTitle" style="margin-top:12px;">Tag (Utente)</h3>
           <div class="muted">Doppio click su un nome per selezionarlo .. ordinati per ruolo.</div>
 
           <div class="tagSelected">
@@ -671,32 +743,6 @@ table.invTable td:last-child{
           </div>
 
           <div class="hint">I tag vengono salvati dentro le registrazioni (Azioni e Gestione).</div>
-
-          <div class="panel active" style="display:block; margin-top:12px;">
-            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Resoconto Soldi (Azioni)</h4>
-
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
-                <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
-                <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
-              </div>
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
-                <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
-                <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
-              </div>
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
-                <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
-                <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
-              </div>
-            </div>
-
-            <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
-          </div>
         </div>
       </div>
     </div>
@@ -967,6 +1013,81 @@ table.invTable td:last-child{
     </div>
   </div>
 
+  <!-- EDIT MODAL (GESTIONE ARMI/DROGA) -->
+  <div id="invEditOverlay">
+    <div id="invEditModal">
+      <h3>Modifica registrazione</h3>
+      <div class="muted" id="invEditInfo"></div>
+
+      <div class="row" style="align-items:flex-end;">
+        <div class="field" style="min-width:170px; flex:0.9;">
+          <label>Tipo</label>
+          <select id="invEditType">
+            <option value="add">AGGIUNTO</option>
+            <option value="rem">RIMOSSO</option>
+            <option value="sold">VENDUTO</option>
+            <option value="buy">ACQUISTATO</option>
+          </select>
+        </div>
+
+        <div class="field" style="min-width:140px; flex:1;">
+          <label>Soldi puliti ($)</label>
+          <input id="invEditMoneyClean" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="min-width:140px; flex:1;">
+          <label>Soldi sporchi ($)</label>
+          <input id="invEditMoneyDirty" type="number" min="0" step="1" />
+        </div>
+
+        <div class="field" style="min-width:140px; flex:1;">
+          <label>Soldi spaccio ($)</label>
+          <input id="invEditMoneyDrug" type="number" min="0" step="1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1; min-width:260px;">
+          <label>Note (visibili a tutti)</label>
+          <input id="invEditNote" type="text" placeholder="Motivo / dettaglio..." />
+        </div>
+        <div class="right">
+          <button class="btn small" onclick="closeInvEdit()">Chiudi</button>
+          <button class="btn small" onclick="invSaveEdit()">Salva</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div class="field" style="min-width:320px;">
+          <label>Tag (Nome in game)</label>
+          <input id="invEditTagName" disabled />
+          <div class="hint">Per cambiare tag: seleziona uno o più nomi nella lista a destra e poi salva.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items (lista fissa + quantità)</h4>
+
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <select id="invEditItemSelect"></select>
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input id="invEditItemQty" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field" style="min-width:180px;">
+            <button class="btn" onclick="invEditAddItem()">Aggiungi item</button>
+          </div>
+        </div>
+
+        <div id="invEditItemsList"></div>
+        <div class="hint">Se aggiungi lo stesso item, somma le quantità.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- NOTE MODAL (DIARIO) -->
   <div id="noteOverlay">
     <div id="noteModal">
@@ -994,6 +1115,24 @@ table.invTable td:last-child{
         <div class="field" style="flex:1; min-width:260px;">
           <label>Nomi</label>
           <input id="noteNames" type="text" placeholder="Nomi coinvolti.." />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1; min-width:260px;">
+          <label>Tag utenti (multi)</label>
+          <div id="noteTagSelected" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;"></div>
+          <div class="tagSearchRow" style="margin-top:0;">
+            <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+            <input id="noteTagSearch" type="text" placeholder="Cerca utente da taggare.." oninput="renderNoteTagList()" />
+          </div>
+          <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+            <table style="margin-top:0;">
+              <tbody id="noteTagTableBody">
+                <tr><td class="muted">Nessun utente</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1063,6 +1202,8 @@ table.invTable td:last-child{
     // STORAGE
     // =========================
     const USERS_KEY = "vn_users_v2";
+    const USERS_BACKUP_KEY = "vn_users_backup_v1";
+    const LEGACY_USERS_KEYS = ["vn_users_v1", "vn_users"];
     const OPS_KEY = "vn_ops_v6";
     const SESSION_KEY = "vn_session_v1";
     const LOGS_KEY = "vn_login_logs";
@@ -1111,10 +1252,38 @@ table.invTable td:last-child{
       try {
         const raw = localStorage.getItem(USERS_KEY);
         const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
+        if (Array.isArray(arr) && arr.length) return arr;
+      } catch {}
+
+      // fallback: prova ripristino da backup locale
+      try {
+        const rawBk = localStorage.getItem(USERS_BACKUP_KEY);
+        const bk = rawBk ? JSON.parse(rawBk) : [];
+        if (Array.isArray(bk) && bk.length) {
+          localStorage.setItem(USERS_KEY, JSON.stringify(bk));
+          return bk;
+        }
+      } catch {}
+
+      // fallback: migrazione automatica da vecchie chiavi localStorage
+      for (const legacyKey of LEGACY_USERS_KEYS) {
+        try {
+          const rawLegacy = localStorage.getItem(legacyKey);
+          const legacyUsers = rawLegacy ? JSON.parse(rawLegacy) : [];
+          if (Array.isArray(legacyUsers) && legacyUsers.length) {
+            saveUsers(legacyUsers);
+            return legacyUsers;
+          }
+        } catch {}
+      }
+
+      return [];
     }
-    function saveUsers(arr) { localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
+    function saveUsers(arr) {
+      const payload = JSON.stringify(arr || []);
+      localStorage.setItem(USERS_KEY, payload);
+      localStorage.setItem(USERS_BACKUP_KEY, payload);
+    }
 
     function ensureDemoUsersIfEmpty() {
       const users = loadUsers();
@@ -1172,6 +1341,7 @@ table.invTable td:last-child{
     function canExpel() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canReset2FA() { return ["Owner","Boss"].includes(myRole()); }
     function canResetPassword() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+    function canAccessAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
     function canResetAccounting() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
 function myGameNameOrEmail() {
@@ -1274,15 +1444,29 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
     // =========================
     // HASH
     // =========================
+    function normalizePasswordInput(str) {
+      return String(str || "")
+        .replace(/ /g, " ")
+        .normalize("NFKC")
+        .trim();
+    }
+
     function simpleHash(str) {
+      const input = String(str || "");
       let hash = 0;
-      if (str.length === 0) return String(hash);
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
+      if (input.length === 0) return String(hash);
+      for (let i = 0; i < input.length; i++) {
+        const char = input.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash;
       }
       return Math.abs(hash).toString(16);
+    }
+
+    function passwordMatches(rawInput, storedHash) {
+      const raw = String(rawInput || "");
+      const norm = normalizePasswordInput(raw);
+      return simpleHash(raw) === storedHash || simpleHash(norm) === storedHash;
     }
 
     function upsertUser(email, password = null, gameName = null) {
@@ -1297,14 +1481,14 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
           email: e,
           role: "",
           blocked: false,
-          passwordHash: password ? simpleHash(password) : null,
+          passwordHash: password ? simpleHash(normalizePasswordInput(password)) : null,
           gameName: gameName || "",
           totpSecret: null,
           totpNeedsSetup: false
         };
         users.push(u);
       } else if (password) {
-        u.passwordHash = simpleHash(password);
+        u.passwordHash = simpleHash(normalizePasswordInput(password));
       }
 
       if (gameName) u.gameName = gameName;
@@ -1370,7 +1554,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
           tr.innerHTML = `
             <td>${new Date(n.ts).toLocaleString()}</td>
             <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Nota")}</td>
-            <td><div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
+            <td><div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
           `;
           body.appendChild(tr);
         });
@@ -1379,7 +1563,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       const filtered = all.filter(n => {
         const hay = [
-          n.type, n.title, n.names, n.agreements, n.body, n.createdBy
+          n.type, n.title, n.names, n.agreements, n.body, n.createdBy, ...(n.tagNames || [])
         ].map(x => String(x||"").toLowerCase()).join(" | ");
         return hay.includes(q);
       });
@@ -1397,7 +1581,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         tr.innerHTML = `
           <td>${new Date(n.ts).toLocaleString()}</td>
           <td style="font-weight:900; color:var(--red2)">${escapeHtml(n.type || "Nota")}</td>
-          <td><div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
+          <td><div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(diarySnippet(n))}</div></td>
         `;
         body.appendChild(tr);
       });
@@ -1420,8 +1604,57 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
     const btnDeleteNote = document.getElementById("btnDeleteNote");
     const notePermHint = document.getElementById("notePermHint");
     const btnSaveNote = document.getElementById("btnSaveNote");
+    const noteTagSearch = document.getElementById("noteTagSearch");
+    const noteTagSelected = document.getElementById("noteTagSelected");
 
     let editingNoteId = null;
+    let selectedNoteTagUserIds = [];
+
+    function selectedNoteTagUsers() {
+      const users = loadUsers();
+      return selectedNoteTagUserIds.map(id => users.find(u => u.id === id)).filter(Boolean);
+    }
+
+    function selectedNoteTagNames() {
+      return selectedNoteTagUsers().map(u => (u.gameName || u.email || "—"));
+    }
+
+    function syncNoteTagsUI() {
+      if (!noteTagSelected) return;
+      const names = selectedNoteTagNames();
+      noteTagSelected.innerHTML = names.length
+        ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+        : `<span class="tagPill">—</span>`;
+    }
+
+    function toggleNoteTag(id) {
+      if (!id) return;
+      if (selectedNoteTagUserIds.includes(id)) selectedNoteTagUserIds = selectedNoteTagUserIds.filter(x => x !== id);
+      else selectedNoteTagUserIds.push(id);
+      renderNoteTagList();
+    }
+
+    function renderNoteTagList() {
+      const body = document.getElementById("noteTagTableBody");
+      if (!body) return;
+      const q = (noteTagSearch?.value || "");
+      const users = getTagSortedUsers(q);
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncNoteTagsUI();
+        return;
+      }
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSel = selectedNoteTagUserIds.includes(u.id);
+        tr.className = "clickRow" + (isSel ? " selectedRow" : "");
+        tr.ondblclick = () => toggleNoteTag(u.id);
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+      syncNoteTagsUI();
+    }
 
     function openNoteModal(id) {
       editingNoteId = id;
@@ -1432,6 +1665,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       const fields = [noteType, noteTitle, noteNames, noteAgreements, noteBody];
       fields.forEach(f => { if (f) f.disabled = isExisting ? !canEdit : !canAdd; });
+      if (noteTagSearch) noteTagSearch.disabled = isExisting ? !canEdit : !canAdd;
 
       btnSaveNote.disabled = isExisting ? !canEdit : !canAdd;
       btnSaveNote.classList.toggle("disabled", btnSaveNote.disabled);
@@ -1461,6 +1695,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         noteNames.value = n.names || "";
         noteAgreements.value = n.agreements || "";
         noteBody.value = n.body || "";
+        selectedNoteTagUserIds = Array.isArray(n.tagUserIds) ? n.tagUserIds.slice() : [];
+        renderNoteTagList();
 
         btnDeleteNote.style.display = canEdit ? "inline-block" : "none";
       } else {
@@ -1472,6 +1708,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         noteNames.value = "";
         noteAgreements.value = "";
         noteBody.value = "";
+        selectedNoteTagUserIds = [];
+        renderNoteTagList();
         btnDeleteNote.style.display = "none";
       }
 
@@ -1490,7 +1728,8 @@ function saveNote() {
 
   const t = (noteType.value || "Nota").trim();
   const title = (noteTitle.value || "").trim();
-  const names = (noteNames.value || "").trim();
+  const taggedNames = selectedNoteTagNames();
+  const names = (noteNames.value || "").trim() || taggedNames.join(", ");
   const agreements = (noteAgreements.value || "").trim();
   const body = (noteBody.value || "").trim();
 
@@ -1511,6 +1750,8 @@ function saveNote() {
     n.agreements = agreements;
     n.body = body;
     n.updatedAt = Date.now();
+    n.tagUserIds = selectedNoteTagUserIds.slice();
+    n.tagNames = taggedNames;
 
     // LOG
     logEvent(
@@ -1527,7 +1768,9 @@ function saveNote() {
       names,
       agreements,
       body,
-      createdBy: me
+      createdBy: me,
+      tagUserIds: selectedNoteTagUserIds.slice(),
+      tagNames: taggedNames
     });
 
     // LOG
@@ -1865,7 +2108,18 @@ function logTagsLine(tagNames) {
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
       pendingEmail = email;
 
-      const existing = findUserByEmail(email);
+      let existing = findUserByEmail(email);
+      if (!existing) {
+        // fallback extra: se storage principale era vuoto/corrotto, prova backup e ripeti lookup
+        try {
+          const rawBk = localStorage.getItem(USERS_BACKUP_KEY);
+          const bk = rawBk ? JSON.parse(rawBk) : [];
+          if (Array.isArray(bk) && bk.length) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(bk));
+            existing = bk.find(u => (u.email || "").toLowerCase() === email) || null;
+          }
+        } catch {}
+      }
       if (!existing) {
         document.getElementById("regEmail").value = email;
         document.getElementById("regGameName").value = "";
@@ -1926,7 +2180,7 @@ function logTagsLine(tagNames) {
 
       const pw = document.getElementById("loginPassword").value || "";
       if (!pw) return alert("Inserisci la password");
-      if (simpleHash(pw) !== existing.passwordHash) return alert("Email o password errata");
+      if (!passwordMatches(pw, existing.passwordHash)) return alert("Email o password errata");
 
       pendingUser = existing;
 
@@ -1973,7 +2227,7 @@ function logTagsLine(tagNames) {
       if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
       if (p1 !== p2) return alert("Le password non coincidono");
 
-      u.passwordHash = simpleHash(p1);
+      u.passwordHash = simpleHash(normalizePasswordInput(p1));
       saveUsers(users);
 
       document.getElementById("newPassword").value = "";
@@ -2054,16 +2308,42 @@ function logTagsLine(tagNames) {
       const s = loadSession();
       const u = getMyUser();
 
+      const btnDashboard = document.getElementById("btnDashboard");
+      const btnAzioni = document.getElementById("btnAzioni");
+      const btnComandi = document.getElementById("btnComandi");
+      const btnDiario = document.getElementById("btnDiario");
+      const btnContabilita = document.getElementById("btnContabilita");
+      const btnUtenti = document.getElementById("btnUtenti");
+      const btnLog = document.getElementById("btnLog");
+
       if (!s?.email) {
         pillEmail.textContent = "Non autenticato";
         pillRole.textContent = "Ruolo: —";
         btnLogout.style.display = "none";
+
+        // In login: mostra solo Dashboard nella nav
+        if (btnDashboard) btnDashboard.style.display = "inline-block";
+        if (btnAzioni) btnAzioni.style.display = "none";
+        if (btnComandi) btnComandi.style.display = "none";
+        if (btnDiario) btnDiario.style.display = "none";
+        if (btnContabilita) btnContabilita.style.display = "none";
+        if (btnUtenti) btnUtenti.style.display = "none";
+        if (btnLog) btnLog.style.display = "none";
         return;
       }
 
-      pillEmail.textContent = s.email;
+      pillEmail.textContent = u?.gameName || s.email;
       pillRole.textContent = "Ruolo: " + (u?.role || "—");
       btnLogout.style.display = "inline-block";
+
+      // Dopo login: ripristina nav base (poi initAfterLogin applica i permessi avanzati)
+      if (btnDashboard) btnDashboard.style.display = "inline-block";
+      if (btnAzioni) btnAzioni.style.display = "inline-block";
+      if (btnComandi) btnComandi.style.display = "inline-block";
+      if (btnDiario) btnDiario.style.display = "inline-block";
+      if (btnContabilita) btnContabilita.style.display = "inline-block";
+      if (btnUtenti) btnUtenti.style.display = "inline-block";
+      if (btnLog) btnLog.style.display = "inline-block";
     }
 
     function requireAuthOrShowLogin() {
@@ -2107,6 +2387,10 @@ function logTagsLine(tagNames) {
       if (!requireAuthOrShowLogin()) return;
 
       if ((id === "utenti" || id === "log") && !isAdmin()) {
+        return showOnly("dashboard");
+      }
+
+      if (id === "contabilita" && !canAccessAccounting()) {
         return showOnly("dashboard");
       }
 
@@ -2164,6 +2448,9 @@ if (id === "contabilita") {
       const btnUtenti = document.getElementById("btnUtenti");
       const cardUtenti = document.getElementById("cardUtenti");
       const btnLog = document.getElementById("btnLog");
+      const cardLog = document.getElementById("cardLog");
+      const btnContabilita = document.getElementById("btnContabilita");
+      const cardContabilita = document.getElementById("cardContabilita");
       const dashHint = document.getElementById("dashHint");
       const actionsHint = document.getElementById("actionsHint");
 
@@ -2171,15 +2458,28 @@ if (id === "contabilita") {
         btnUtenti.style.display = "none";
         cardUtenti.style.display = "none";
         btnLog.style.display = "none";
+        if (cardLog) cardLog.style.display = "none";
       } else {
         btnUtenti.style.display = "inline-block";
         cardUtenti.style.display = "inline-block";
         btnLog.style.display = "inline-block";
+        if (cardLog) cardLog.style.display = "inline-block";
+      }
+
+      if (!canAccessAccounting()) {
+        if (btnContabilita) btnContabilita.style.display = "none";
+        if (cardContabilita) cardContabilita.style.display = "none";
+      } else {
+        if (btnContabilita) btnContabilita.style.display = "inline-block";
+        if (cardContabilita) cardContabilita.style.display = "inline-block";
       }
 
       if (!canEditOps()) {
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni, diario e contabilità.";
+        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni e diario.";
         actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+      } else if (!canAccessAccounting()) {
+        dashHint.textContent = "Contabilità visibile solo a Owner / Boss / Vice Boss.";
+        actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
       } else {
         dashHint.textContent = "";
         actionsHint.textContent = "Note visibili a tutti .. Tag selezionabile a destra.";
@@ -2210,7 +2510,7 @@ if (id === "contabilita") {
         const tr = document.createElement("tr");
 
         const tdGameName = document.createElement("td");
-        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span> <span class="tagRole">${escapeHtml(u.role || "—")}</span>`;
+        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span><br><span class="tagRole userRoleBadge">${escapeHtml(u.role || "—")}</span>`;
 
         const tdRole = document.createElement("td");
         const sel = document.createElement("select");
@@ -2621,6 +2921,10 @@ if (s?.email === u.email) logout();
 
     function fillItemSelect(selectEl) {
       selectEl.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      selectEl.appendChild(empty);
       FIXED_ITEMS.forEach(it => {
         const opt = document.createElement("option");
         opt.value = it;
@@ -2668,15 +2972,18 @@ if (s?.email === u.email) logout();
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
       const tid = tabIdFromName(category);
       const name = document.getElementById("item_" + tid).value;
-      let qty = parseInt(document.getElementById("qty_" + tid).value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      let qty = parseInt(document.getElementById("qty_" + tid).value || "0", 10);
+      if (!Number.isFinite(qty) || qty < 0) qty = 0;
+      if (!name) return alert("Seleziona un item.");
+      if (qty < 1) return alert("Inserisci una quantità valida (> 0).");
 
       const draft = getDraft(category);
       const existing = draft.find(x => x.name === name);
       if (existing) existing.qty += qty;
       else draft.push({ name, qty });
 
-      document.getElementById("qty_" + tid).value = "1";
+      document.getElementById("item_" + tid).value = "";
+      document.getElementById("qty_" + tid).value = "0";
       renderDraft(category);
     }
 
@@ -2744,6 +3051,7 @@ logEvent(
         const noteBase = `Auto da Azioni: ${last.category} .. ${last.type === "ottenuto" ? "OTTENUTO" : "PERSO"}`;
         accUpsertDueSalariesFromSource("ops", last.id, last.money, last.tagUserIds, noteBase);
         accRenderDueTable();
+      accRenderSalaryTagList();
       }
 
       document.getElementById("moneyClean_" + tid).value = "";
@@ -2788,6 +3096,7 @@ accRenderDueTable();
 
     const editOverlay = document.getElementById("editOverlay");
     const editInfo = document.getElementById("editInfo");
+    const invEditOverlay = document.getElementById("invEditOverlay");
 
     // =========================
     // MODALS: anti-sovrapposizione + chiusure rapide
@@ -2804,6 +3113,7 @@ accRenderDueTable();
       // chiude tutto quello che può rimanere "appeso"
       try { hideAllActionMenus(); } catch {}
       try { closeEdit(); } catch {}
+      try { closeInvEdit(); } catch {}
       try { closeNoteModal(); } catch {}
       setModalOpen(false);
     }
@@ -2812,6 +3122,12 @@ accRenderDueTable();
     if (editOverlay) {
       editOverlay.addEventListener("click", (e) => {
         if (e.target === editOverlay) closeEdit();
+      });
+    }
+
+    if (invEditOverlay) {
+      invEditOverlay.addEventListener("click", (e) => {
+        if (e.target === invEditOverlay) closeInvEdit();
       });
     }
 
@@ -2993,11 +3309,11 @@ logEvent(
           : "";
 
         const itemsHtml = itemsText
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>`
+          ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(itemsText)}</div>`
           : `<span class="muted">—</span>`;
 
         const noteHtml = (r.note && r.note.trim())
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>`
+          ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note.trim())}</div>`
           : `<span class="muted">—</span>`;
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
@@ -3006,15 +3322,17 @@ logEvent(
           : `<span class="muted">—</span>`;
 
         const actionsHtml = canEditOps()
-          ? `<button class="btn small" onclick="openEdit('${r.id}')">Modifica</button>
-             <button class="btn danger small" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>`
+          ? `<div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+               <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="openEdit('${r.id}')">Modifica</button>
+               <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+             </div>`
           : `<span class="muted">—</span>`;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${when}</td>
           <td style="font-weight:900;">${escapeHtml(r.createdByName || "—")}</td>
-          <td>${tipo}</td>
+          <td style="font-weight:900; color:${tipo === "PERSO" ? "var(--red2)" : "#fff"};">${tipo}</td>
           <td style="font-weight:900;">
             ${(() => {
               const m = r.money;
@@ -3079,8 +3397,8 @@ invRenderTotals();
         panel.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
-          <div class="row">
-            <div class="field" style="min-width:180px;">
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:130px; flex:0.9;">
               <label>Tipo</label>
               <select id="type_${tid}" ${disabledAttr}>
                 <option value="ottenuto">OTTENUTO</option>
@@ -3088,22 +3406,24 @@ invRenderTotals();
               </select>
             </div>
 
-            <div class="field" style="min-width:220px;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi puliti ($)</label>
               <input id="moneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:220px;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi sporchi ($)</label>
               <input id="moneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:220px;">
+            <div class="field" style="min-width:140px; flex:1;">
               <label>Soldi spaccio ($)</label>
               <input id="moneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
             </div>
+          </div>
 
-            <div class="field" style="flex:1; min-width:260px;">
+          <div class="row">
+            <div class="field" style="width:100%; min-width:0;">
               <label>Note</label>
               <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
             </div>
@@ -3117,7 +3437,7 @@ invRenderTotals();
 
             <div class="field" style="min-width:160px;">
               <label>Quantità</label>
-              <input id="qty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="qty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
             </div>
 
             <div class="field" style="min-width:180px;">
@@ -3138,7 +3458,7 @@ invRenderTotals();
           <table>
             <thead>
               <tr>
-<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th>Azioni</th>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th style="width:120px;">Azioni</th>
 </tr>
             </thead>
             <tbody id="table_${tid}">
@@ -3296,8 +3616,8 @@ invRenderTotals();
         p.innerHTML = `
           <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
 
-          <div class="row">
-            <div class="field" style="min-width:180px;">
+          <div class="row" style="align-items:flex-end; flex-wrap:nowrap;">
+            <div class="field" style="min-width:120px; flex:0 0 20%;">
               <label>Tipo</label>
 <select id="invType_${tid}" ${disabledAttr}>
                 <option value="add">AGGIUNTO</option>
@@ -3307,41 +3627,54 @@ invRenderTotals();
               </select>
             </div>
 
+            <div class="field" style="min-width:0; flex:1 1 0;">
+              <label>Soldi puliti ($)</label>
+              <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:0; flex:1 1 0;">
+              <label>Soldi sporchi ($)</label>
+              <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+
+            <div class="field" style="min-width:0; flex:1 1 0;">
+              <label>Soldi spaccio ($)</label>
+              <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field" style="width:100%; min-width:0;">
+              <label>Note</label>
+              <input id="invNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+            </div>
+          </div>
+
+          <div class="row" style="align-items:flex-end;">
             <div class="field" style="min-width:320px; flex:1;">
               <label>Item</label>
               <select id="invItem_${tid}" ${disabledAttr}></select>
             </div>
 
-            <div class="field" style="min-width:160px;">
+            <div class="field" style="min-width:160px; flex:0.8;">
               <label>Quantità</label>
-              <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
             </div>
 
-            <div class="field" style="min-width:220px;">
-              <label>Soldi puliti ($)</label>
-              <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <label>Soldi sporchi ($)</label>
-              <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <label>Soldi spaccio ($)</label>
-              <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-            </div>
-
-            <div class="field" style="min-width:220px;">
-              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
             </div>
           </div>
 
           <div class="row">
-            <div class="field" style="flex:1; min-width:260px;">
-              <label>Note</label>
-              <input id="invNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+            <div class="field" style="min-width:220px; max-width:260px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
             </div>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
+            <div class="muted">Nessun item in bozza</div>
           </div>
 
 <div class="hint" style="margin-top:8px;">
@@ -3355,14 +3688,7 @@ invRenderTotals();
 
 <thead>
 <tr>
-<th style="width:200px;">Quando</th>
-<th style="width:220px;">Chi</th>
-<th style="width:120px;">Tipo</th>
-<th style="width:160px;">Tag</th>
-<th>Item</th>
-<th style="width:90px;">Qtà</th>
-<th style="width:140px;">Soldi</th>
-<th>Note</th>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th style="width:120px;">Azioni</th>
 </tr>
 </thead>
 
@@ -3379,15 +3705,7 @@ invRenderTotals();
         panels.appendChild(p);
 
         setTimeout(() => {
-          const sel = document.getElementById("invItem_" + tid);
-          if (!sel) return;
-          sel.innerHTML = "";
-          (INV_ITEMS[cat] || []).forEach(it => {
-            const o = document.createElement("option");
-            o.value = it;
-            o.textContent = it;
-            sel.appendChild(o);
-          });
+          invFillItemSelect(cat);
           invRenderTable(cat);
           syncSelectedTagsUI();
         }, 0);
@@ -3419,14 +3737,53 @@ invRenderTotals();
       syncSelectedTagsUI();
     }
 
+    function invFillItemSelect(cat) {
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (!sel) return;
+
+      sel.innerHTML = "";
+
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = "-";
+      sel.appendChild(emptyOpt);
+
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        sel.appendChild(o);
+      });
+
+      sel.value = "";
+    }
+
+    function invAddItem(cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const name = prompt("Nuovo item per " + cat + ":");
+      const v = String(name || "").trim();
+      if (!v) return;
+
+      const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
+      if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
+        arr.push(v);
+      }
+
+      invFillItemSelect(cat);
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (sel) sel.value = v;
+    }
+
     function invSaveRecord(cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
       const tid = invTabId(cat);
       const type = document.getElementById("invType_" + tid)?.value || "add";
       const item = document.getElementById("invItem_" + tid)?.value || "";
-      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
+      if (!Number.isFinite(qty) || qty < 0) qty = 0;
 
       const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
       const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
@@ -3439,6 +3796,9 @@ invRenderTotals();
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+      if (item && qty < 1) {
+        return alert("Inserisci una quantità valida (> 0) quando selezioni un item.");
       }
 
       const who = myGameNameOrEmail();
@@ -3454,6 +3814,7 @@ invRenderTotals();
         type,
         item,
         qty,
+        items: item ? [{ name: item, qty }] : [],
         money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
         note,
         who,
@@ -3478,7 +3839,8 @@ if (last) {
   accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
   accRenderDueTable();
 }
-      document.getElementById("invQty_" + tid).value = "1";
+      document.getElementById("invItem_" + tid).value = "";
+      document.getElementById("invQty_" + tid).value = "0";
       document.getElementById("invMoneyClean_" + tid).value = "";
       document.getElementById("invMoneyDirty_" + tid).value = "";
       document.getElementById("invMoneyDrug_" + tid).value = "";
@@ -3486,6 +3848,193 @@ if (last) {
 
       invRenderTable(cat);
       invRenderTotals();
+    }
+
+    const invEditInfo = document.getElementById("invEditInfo");
+    const invEditType = document.getElementById("invEditType");
+    const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+    const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+    const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+    const invEditNote = document.getElementById("invEditNote");
+    const invEditTagName = document.getElementById("invEditTagName");
+    const invEditItemSelect = document.getElementById("invEditItemSelect");
+    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemsList = document.getElementById("invEditItemsList");
+
+    let invEditingId = null;
+    let invEditingCategory = null;
+    let invEditingItems = [];
+
+    function invFillEditItemSelect(cat) {
+      if (!invEditItemSelect) return;
+      invEditItemSelect.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      invEditItemSelect.appendChild(empty);
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        invEditItemSelect.appendChild(o);
+      });
+      invEditItemSelect.value = "";
+    }
+
+    function invRenderEditItems() {
+      if (!invEditItemsList) return;
+      if (!invEditingItems.length) {
+        invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      invEditItemsList.innerHTML = "";
+      invEditingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${Number(it.qty || 0)}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="invEditRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        invEditItemsList.appendChild(div);
+      });
+    }
+
+    function invEditAddItem() {
+      const name = String(invEditItemSelect?.value || "").trim();
+      let qty = parseInt(invEditItemQty?.value || "1", 10);
+      if (!name) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = invEditingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else invEditingItems.push({ name, qty });
+
+      if (invEditItemQty) invEditItemQty.value = "1";
+      invFillEditItemSelect(invEditingCategory || "Armi");
+      invRenderEditItems();
+    }
+
+    function invEditRemoveItem(name) {
+      invEditingItems = invEditingItems.filter(x => x.name !== name);
+      invRenderEditItems();
+    }
+
+    function invEditRecord(id, cat) {
+      if (!canEditOps()) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      if (!rec) return;
+
+      hideAllActionMenus();
+      try { closeEdit(); } catch {}
+      try { closeNoteModal(); } catch {}
+      setModalOpen(true);
+
+      invEditingId = id;
+      invEditingCategory = cat;
+      invEditingItems = Array.isArray(rec.items) && rec.items.length
+        ? rec.items.map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) })).filter(x => x.name)
+        : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : []);
+
+      invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+      invEditType.value = rec.type || "add";
+
+      const m = rec.money;
+      const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+      const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+      const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+      invEditMoneyClean.value = String(clean || 0);
+      invEditMoneyDirty.value = String(dirty || 0);
+      invEditMoneyDrug.value = String(drug || 0);
+      invEditNote.value = rec.note || "";
+
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      invEditTagName.value = tnames.length ? tnames.join(", ") : "—";
+
+      invFillEditItemSelect(cat);
+      invRenderEditItems();
+      if (invEditOverlay) invEditOverlay.style.display = "block";
+    }
+
+    function closeInvEdit() {
+      if (!invEditOverlay) return;
+      invEditOverlay.style.display = "none";
+      invEditingId = null;
+      invEditingCategory = null;
+      invEditingItems = [];
+      setModalOpen(false);
+    }
+
+    function invSaveEdit() {
+      if (!invEditingId || !invEditingCategory) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === invEditingId);
+      if (!rec) return;
+
+      const type = String(invEditType?.value || "add").trim().toLowerCase();
+      if (!["add","rem","sold","buy"].includes(type)) return alert("Tipo non valido.");
+
+      const moneyClean = Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0);
+      const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
+      const note = String(invEditNote?.value || "").trim();
+
+      const normalizedItems = (invEditingItems || [])
+        .map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) }))
+        .filter(x => x.name);
+
+      const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+      const item = firstItem.name;
+      const qty = firstItem.qty;
+
+      if (!normalizedItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+
+      rec.type = type;
+      rec.item = item;
+      rec.qty = qty;
+      rec.items = normalizedItems;
+      rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
+      rec.note = note;
+      rec.updatedAt = Date.now();
+      invSave(all);
+
+      logEvent("INV_EDIT", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      const currentCat = invEditingCategory || rec.category;
+      closeInvEdit();
+      invRenderTable(currentCat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
+    function invDeleteRecord(id, cat) {
+      if (!canEditOps()) return;
+      const ok = confirm("Confermi eliminazione registrazione?");
+      if (!ok) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      const next = all.filter(x => x.id !== id);
+      invSave(next);
+      if (rec) {
+        logEvent("INV_DELETE", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      } else {
+        logEvent("INV_DELETE", `${cat} .. id:${id}`);
+      }
+      invRenderTable(cat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
     }
 
     function invRenderTable(cat) {
@@ -3515,10 +4064,7 @@ if (last) {
         tr.innerHTML = `
           <td>${new Date(r.ts).toLocaleString()}</td>
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-          <td style="font-weight:900; color:var(--red2)">${t}</td>
-          <td>${tagHtml}</td>
-          <td>${escapeHtml(r.item || "—")}</td>
-          <td style="font-weight:900;">${Number(r.qty||0)}</td>
+          <td style="font-weight:900; color:${(r.type === "sold" || r.type === "rem") ? "var(--red2)" : "#fff"};">${t}</td>
           <td style="font-weight:900;">
             ${(() => {
               const m = r.money;
@@ -3530,10 +4076,27 @@ if (last) {
               if (clean) parts.push("P: " + formatMoney(clean));
               if (dirty) parts.push("S: " + formatMoney(dirty));
               if (drug)  parts.push("SP: " + formatMoney(drug));
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              return parts.length
+                ? `<div style="white-space:pre-wrap; line-height:1.25;">${parts.join("<br>")}</div>`
+                : '<span class="muted">—</span>';
             })()}
           </td>
-          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${tagHtml}</td>
+          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${(() => {
+            const items = Array.isArray(r.items) && r.items.length
+              ? r.items
+              : (r.item ? [{ name: r.item, qty: Number(r.qty || 0) }] : []);
+            if (!items.length) return '<span class="muted">—</span>';
+            const lines = items
+              .map(it => `${Number(it.qty || 0)}x ${escapeHtml(it.name || "—")}`)
+              .join("<br>");
+            return `<div style="white-space:pre-wrap; font-size:14px; font-weight:800; line-height:1.25;">${lines}</div>`;
+          })()}</td>
+          <td>${canEditOps() ? `<div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+            <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invEditRecord('${r.id}','${escapeHtml(r.category)}')">Modifica</button>
+            <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+          </div>` : `<span class="muted">—</span>`}</td>
         `;
         body.appendChild(tr);
       });
@@ -3662,6 +4225,7 @@ invRenderTotals();
     // CONTABILITÀ (Stipendi + Bilancio)
     // =========================
     const ACC_TABS = ["Stipendi", "Bilancio"];
+    let selectedAccSalaryUserIds = [];
 
     function accLoad() {
       try {
@@ -3735,6 +4299,25 @@ p.innerHTML = `
     </div>
   </div>
 
+  <div class="row" style="margin-top:8px;">
+    <div class="field" style="min-width:320px; flex:1;">
+      <label>Tag utenti (multi)</label>
+      <div id="accSalaryTagSelected_${tid}" style="display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 8px 0;"></div>
+      <input id="accSalaryTagSearch_${tid}" type="text" placeholder="Cerca utente per tag.." ${disabledAttr} oninput="accRenderSalaryTagList()" />
+      <div class="tableWrap" style="max-height:180px; margin-top:8px; overflow:auto;">
+        <table>
+          <tbody id="accSalaryTagTable_${tid}">
+            <tr><td class="muted">Nessun utente</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <button class="btn ${disabledCls}" ${disabledAttr} onclick="accSelectAllSalaryTags()">Seleziona tutti</button>
+        <button class="btn ${disabledCls}" ${disabledAttr} onclick="accClearSalaryTags()">Pulisci tag</button>
+      </div>
+    </div>
+  </div>
+
   <h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
   <div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
 
@@ -3747,12 +4330,13 @@ p.innerHTML = `
           <th>A chi</th>
           <th style="width:160px;">Importo</th>
           <th style="width:160px;">Pagamento</th>
+          <th style="width:220px;">Tag utenti</th>
           <th>Note</th>
           <th style="width:220px;">Stato</th>
         </tr>
       </thead>
       <tbody id="accDueTable_${tid}">
-        <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+        <tr><td class="muted" colspan="8">Nessun dato</td></tr>
       </tbody>
     </table>
   </div>
@@ -3768,11 +4352,12 @@ p.innerHTML = `
           <th>A chi</th>
           <th style="width:160px;">Importo</th>
           <th style="width:160px;">Pagamento</th>
+          <th style="width:220px;">Tag utenti</th>
           <th>Note</th>
         </tr>
       </thead>
       <tbody id="accTable_${tid}">
-        <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+        <tr><td class="muted" colspan="7">Nessun dato</td></tr>
       </tbody>
     </table>
   </div>
@@ -3836,7 +4421,7 @@ p.innerHTML = `
                 </tr>
               </thead>
               <tbody id="accTable_${tid}">
-                <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+                <tr><td class="muted" colspan="7">Nessun dato</td></tr>
               </tbody>
             </table>
           `;
@@ -3853,6 +4438,8 @@ p.innerHTML = `
       setTimeout(() => {
         accRenderTable("Stipendi");
         accRenderTable("Bilancio");
+        accRenderDueTable();
+        accRenderSalaryTagList();
       }, 0);
     }
 
@@ -3870,6 +4457,7 @@ accRenderTable(name);
 accRenderSummary();
 accRenderAdminPanel();
 accRenderDueTable();
+if (name === "Stipendi") accRenderSalaryTagList();
     }
 
     function accRenderAdminPanel() {
@@ -3878,11 +4466,87 @@ accRenderDueTable();
       panel.style.display = canResetAccounting() ? "block" : "none";
     }
 
+    function accSalaryTaggedUsers() {
+      const users = loadUsers();
+      return selectedAccSalaryUserIds
+        .map(id => users.find(u => u.id === id))
+        .filter(Boolean);
+    }
+
+    function accSalaryTaggedNames() {
+      return accSalaryTaggedUsers().map(u => (u.gameName || u.email || "—"));
+    }
+
+    function accSyncSalaryTagUI() {
+      const tid = accTabId("Stipendi");
+      const wrap = document.getElementById("accSalaryTagSelected_" + tid);
+      if (!wrap) return;
+      const names = accSalaryTaggedNames();
+      wrap.innerHTML = names.length
+        ? names.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+        : `<span class="tagPill">—</span>`;
+
+      const toInput = document.getElementById("salTo_" + tid);
+      if (toInput && !toInput.value.trim()) {
+        toInput.value = names.join(", ");
+      }
+    }
+
+    function accToggleSalaryTag(id) {
+      if (!id || !canEditOps()) return;
+      if (selectedAccSalaryUserIds.includes(id)) {
+        selectedAccSalaryUserIds = selectedAccSalaryUserIds.filter(x => x !== id);
+      } else {
+        selectedAccSalaryUserIds.push(id);
+      }
+      accRenderSalaryTagList();
+    }
+
+    function accClearSalaryTags() {
+      selectedAccSalaryUserIds = [];
+      accRenderSalaryTagList();
+    }
+
+    function accSelectAllSalaryTags() {
+      if (!canEditOps()) return;
+      const tid = accTabId("Stipendi");
+      const q = (document.getElementById("accSalaryTagSearch_" + tid)?.value || "");
+      selectedAccSalaryUserIds = getTagSortedUsers(q).map(u => u.id);
+      accRenderSalaryTagList();
+    }
+
+    function accRenderSalaryTagList() {
+      const tid = accTabId("Stipendi");
+      const body = document.getElementById("accSalaryTagTable_" + tid);
+      if (!body) return;
+
+      const q = (document.getElementById("accSalaryTagSearch_" + tid)?.value || "");
+      const users = getTagSortedUsers(q);
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        accSyncSalaryTagUI();
+        return;
+      }
+
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSelected = selectedAccSalaryUserIds.includes(u.id);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+        tr.ondblclick = () => accToggleSalaryTag(u.id);
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+
+      accSyncSalaryTagUI();
+    }
+
     function accAddSalary() {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
       const tid = accTabId("Stipendi");
-      const to = ((document.getElementById("salTo_" + tid)?.value || accSalarySelected) || "").trim();
+      const tagNames = accSalaryTaggedNames();
+      const to = (document.getElementById("salTo_" + tid)?.value || "").trim() || tagNames.join(", ");
       const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
       const payType = (document.getElementById("salPayType_" + tid)?.value || "clean"); // clean/dirty/drug
       const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
@@ -3899,14 +4563,18 @@ all.push({
   to,
   amount: amt,
   payType,
-  note
+  note,
+  tagUserIds: selectedAccSalaryUserIds.slice(),
+  tagNames
 });
 accSave(all);
 
 // LOG
 logEvent(
   "ACC_SALARY_ADD",
-  `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` + (note ? ` .. Note(${note})` : "")
+  `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` +
+  (tagNames.length ? ` .. Tag(${tagNames.join(", ")})` : "") +
+  (note ? ` .. Note(${note})` : "")
 );
 
       document.getElementById("salTo_" + tid).value = "";
@@ -3914,6 +4582,7 @@ logEvent(
       const sel = document.getElementById("salPayType_" + tid);
       if (sel) sel.value = "clean";
       document.getElementById("salNote_" + tid).value = "";
+      accClearSalaryTags();
 
       accRenderTable("Stipendi");
       accRenderSummary();
@@ -3982,7 +4651,7 @@ const rows = all
   })
   .slice(0, 50);
       if (!rows.length) {
-        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 6 : 6}">Nessun dato</td></tr>`;
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 7 : 6}">Nessun dato</td></tr>`;
         return;
       }
 
@@ -3993,13 +4662,19 @@ const rows = all
           const pt = (r.payType || "clean");
           const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
 
+const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : [];
+const tagHtml = tnames.length
+  ? tnames.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+  : `<span class="muted">—</span>`;
+
 tr.innerHTML = `
   <td>${new Date(r.ts).toLocaleString()}</td>
   <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
   <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
   <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
   <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+  <td>${tagHtml}</td>
+  <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 `;
         } else {
           const t = r.type === "in" ? "ENTRATA" : "USCITA";
@@ -4023,7 +4698,7 @@ tr.innerHTML = `
               })()}
             </td>
             <td style="font-weight:900;">${escapeHtml(r.reason || "—")}</td>
-            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+            <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
           `;
         }
         body.appendChild(tr);
@@ -4039,7 +4714,7 @@ function accRenderDueTable() {
   const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
 
   if (!rows.length) {
-    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    body.innerHTML = `<tr><td class="muted" colspan="8">Nessun dato</td></tr>`;
     return;
   }
 
@@ -4048,6 +4723,11 @@ function accRenderDueTable() {
     const pt = (r.payType || "clean");
     const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
 
+    const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : [];
+    const tagHtml = tnames.length
+      ? tnames.map(n => `<span class="tagPill">${escapeHtml(n)}</span>`).join("")
+      : `<span class="muted">—</span>`;
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${new Date(r.ts).toLocaleString()}</td>
@@ -4055,7 +4735,8 @@ function accRenderDueTable() {
       <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
       <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+      <td>${tagHtml}</td>
+      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
       <td>
         <button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>
         <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>

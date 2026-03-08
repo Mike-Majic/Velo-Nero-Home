@@ -9,5 +9,8 @@
   "dependencies": {
     "@upstash/redis": "^1.34.0",
     "jose": "^5.9.6"
+  },
+  "scripts": {
+    "lint": "node scripts/lint.mjs"
   }
 }
