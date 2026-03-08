@@ -2295,16 +2295,42 @@ function logTagsLine(tagNames) {
       const s = loadSession();
       const u = getMyUser();
 
+      const btnDashboard = document.getElementById("btnDashboard");
+      const btnAzioni = document.getElementById("btnAzioni");
+      const btnComandi = document.getElementById("btnComandi");
+      const btnDiario = document.getElementById("btnDiario");
+      const btnContabilita = document.getElementById("btnContabilita");
+      const btnUtenti = document.getElementById("btnUtenti");
+      const btnLog = document.getElementById("btnLog");
+
       if (!s?.email) {
         pillEmail.textContent = "Non autenticato";
         pillRole.textContent = "Ruolo: —";
         btnLogout.style.display = "none";
+
+        // In login: mostra solo Dashboard nella nav
+        if (btnDashboard) btnDashboard.style.display = "inline-block";
+        if (btnAzioni) btnAzioni.style.display = "none";
+        if (btnComandi) btnComandi.style.display = "none";
+        if (btnDiario) btnDiario.style.display = "none";
+        if (btnContabilita) btnContabilita.style.display = "none";
+        if (btnUtenti) btnUtenti.style.display = "none";
+        if (btnLog) btnLog.style.display = "none";
         return;
       }
 
       pillEmail.textContent = u?.gameName || s.email;
       pillRole.textContent = "Ruolo: " + (u?.role || "—");
       btnLogout.style.display = "inline-block";
+
+      // Dopo login: ripristina nav base (poi initAfterLogin applica i permessi avanzati)
+      if (btnDashboard) btnDashboard.style.display = "inline-block";
+      if (btnAzioni) btnAzioni.style.display = "inline-block";
+      if (btnComandi) btnComandi.style.display = "inline-block";
+      if (btnDiario) btnDiario.style.display = "inline-block";
+      if (btnContabilita) btnContabilita.style.display = "inline-block";
+      if (btnUtenti) btnUtenti.style.display = "inline-block";
+      if (btnLog) btnLog.style.display = "inline-block";
     }
 
     function requireAuthOrShowLogin() {
