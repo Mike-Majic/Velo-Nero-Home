@@ -444,7 +444,7 @@ table.invTable td:nth-child(8){
 
   <!-- NAV (riordinata) -->
   <div class="nav">
-    <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
+    <button id="btnDashboard" onclick="showOnly('dashboard')">Dashboard</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
     <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
     <button id="btnDiario" onclick="showSection('diario')">Diario</button>
@@ -654,13 +654,13 @@ table.invTable td:nth-child(8){
 
     <table>
       <thead>
-        <tr>
-          <th>Nome in Game</th>
-          <th>Ruolo</th>
-          <th>Email</th>
-          <th>Stato</th>
-          <th>Azioni</th>
-        </tr>
+<tr>
+  <th style="width:20%;">Nome in Game</th>
+  <th style="width:20%;">Ruolo</th>
+  <th style="width:30%;">Email</th>
+  <th style="width:20%;">Stato</th>
+  <th style="width:10%;">Azioni</th>
+</tr>
       </thead>
       <tbody id="usersTableBody"></tbody>
     </table>
@@ -1156,6 +1156,34 @@ table.invTable td:nth-child(8){
           <button class="btn small" onclick="closeNoteModal()">Chiudi</button>
           <button class="btn danger small" id="btnDeleteNote" onclick="deleteNote()" style="display:none;">Elimina</button>
           <button class="btn small" id="btnSaveNote" onclick="saveNote()">Salva</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMOVE ITEM LIST MODAL -->
+  <div id="invRemoveOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px;">
+    <div id="invRemoveModal" style="max-width:700px; margin:0 auto; background:var(--panel2); border:1px solid #ff1a1a77; border-radius:14px; box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset; padding:18px; text-align:left;">
+      <h3 style="margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Togli item lista</h3>
+      <div class="muted" id="invRemoveInfo">Seleziona un item dalla lista e conferma la cancellazione.</div>
+
+      <div class="row" style="margin-top:12px;">
+        <div class="field" style="min-width:280px; flex:1;">
+          <label>Categoria</label>
+          <input id="invRemoveCategory" type="text" disabled />
+        </div>
+
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Item da rimuovere</label>
+          <select id="invRemoveSelect"></select>
+        </div>
+      </div>
+
+      <div class="row" style="align-items:center; margin-top:14px;">
+        <div class="muted">L'item verrà tolto dalla lista selezionabile della categoria corrente.</div>
+        <div class="right">
+          <button class="btn small" onclick="closeInvRemoveModal()">Chiudi</button>
+          <button class="btn danger small" onclick="confirmInvRemoveCustomItem()">Conferma cancellamento</button>
         </div>
       </div>
     </div>
@@ -2561,8 +2589,10 @@ sel.onchange = () => {
         const tdEmail = document.createElement("td");
         tdEmail.textContent = u.email || "—";
 
-        const tdState = document.createElement("td");
-        tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
+const tdState = document.createElement("td");
+tdState.innerHTML = u.blocked
+  ? `<span style="color:var(--red2); font-weight:900;">BLOCCATO</span>`
+  : `<span style="font-weight:900;">ATTIVO</span>`;
 
         const tdActions = document.createElement("td");
         const wrap = document.createElement("div");
@@ -3137,6 +3167,51 @@ accRenderDueTable();
       });
     }
 
+if (typeof noteOverlay !== "undefined" && noteOverlay) {
+  noteOverlay.addEventListener("click", (e) => {
+    if (e.target === noteOverlay) closeNoteModal();
+  });
+}
+
+const invRemoveOverlay = document.getElementById("invRemoveOverlay");
+if (invRemoveOverlay) {
+  invRemoveOverlay.addEventListener("click", (e) => {
+    if (e.target === invRemoveOverlay) closeInvRemoveModal();
+  });
+}
+
+const invAddOverlay = document.getElementById("invAddOverlay");
+if (invAddOverlay) {
+  invAddOverlay.addEventListener("click", (e) => {
+    if (e.target === invAddOverlay) closeInvAddModal();
+  });
+}
+
+    <div id="invAddOverlay" class="overlay" style="display:none;">
+  <div class="modalBox">
+    <h3 style="margin-top:0; color:var(--red2);">Nuovo item lista</h3>
+
+    <div class="row">
+      <div class="field" style="width:100%;">
+        <label>Categoria</label>
+        <input id="invAddCategory" type="text" disabled />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field" style="width:100%;">
+        <label>Nome nuovo item</label>
+        <input id="invAddItemName" type="text" placeholder="Scrivi il nome dell'item.." />
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:flex-end; margin-top:14px;">
+      <button class="btn danger" onclick="closeInvAddModal()">Annulla</button>
+      <button class="btn" onclick="confirmInvAddCustomItem()">Conferma</button>
+    </div>
+  </div>
+</div>
+    
     // ESC = chiudi tutto
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeAllOverlays();
@@ -3491,130 +3566,119 @@ invRenderTotals();
       renderCategory(catName);
     }
 
-    // =========================
-    // GESTIONE ARMI/DROGA (con TAG + SOLDI)
-    // =========================
-    const INV_CATEGORIES = ["Armi", "Droga", "Oggetti/Varie"];
-    const INV_ITEMS = {
-      "Armi": [
-        // Pistole
-        "Pistola",
-        "Pistola da combattimento",
-        "Pistola AP",
-        "Pistola pesante",
-        "Pistola .50",
-        "SNS Pistol",
-        "Vintage Pistol",
+// =========================
+// GESTIONE ARMI/DROGA (con TAG + SOLDI)
+// =========================
+const INV_CATEGORIES = ["Armi", "Droga", "Oggetti/Varie"];
+const INV_ITEMS = {
+  "Armi": [
+    "Pistola",
+    "Pistola da combattimento",
+    "Pistola AP",
+    "Pistola pesante",
+    "Pistola .50",
+    "SNS Pistol",
+    "Vintage Pistol",
+    "Revolver",
+    "Revolver pesante",
+    "Micro SMG",
+    "SMG",
+    "SMG da combattimento",
+    "Mini SMG",
+    "Fucile d'assalto",
+    "Fucile d'assalto speciale",
+    "AK47",
+    "AK47 corta",
+    "Carabina",
+    "Carabina speciale",
+    "Carabina da combattimento",
+    "Fucile a pompa",
+    "Fucile a pompa da combattimento",
+    "Bullpup Shotgun",
+    "Pompa a canne mozze",
+    "Fucile di precisione",
+    "Cecchino pesante",
+    "MG",
+    "Combat MG",
+    "Munizioni Pistola",
+    "Munizioni SMG",
+    "Munizioni Fucile d'assalto",
+    "Munizioni Pompa",
+    "Munizioni Cecchino",
+    "Giubbotto antiproiettile"
+  ],
+  "Droga": [
+    "Marijuana / Erba",
+    "Cocaina",
+    "Metanfetamina",
+    "Crack",
+    "Eroina",
+    "Oppio",
+    "LSD",
+    "MDMA / Ecstasy",
+    "Funghi",
+    "Speed / Anfetamine",
+    "Ketamina",
+    "Fentanyl",
+    "Hashish",
+    "Semi",
+    "Sostanze chimiche",
+    "Confezioni / Buste",
+    "Bilancino",
+    "Taglierino / Lametta",
+    "Acetone",
+    "Ammoniaca"
+  ],
+  "Oggetti/Varie": [
+    "Radio","Grimaldello","Bende","Medikit","Telecamera",
+    "Cibo","Bevande","Altri oggetti"
+  ]
+};
 
-        // Revolver
-        "Revolver",
-        "Revolver pesante",
+function invLoad() {
+  try {
+    const raw = localStorage.getItem(INV_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+function invSave(arr) {
+  localStorage.setItem(INV_KEY, JSON.stringify(arr));
+}
 
-        // SMG
-        "Micro SMG",
-        "SMG",
-        "SMG da combattimento",
-        "Mini SMG",
+let invDrafts = {};
+function invGetDraft(category) {
+  if (!invDrafts[category]) invDrafts[category] = [];
+  return invDrafts[category];
+}
 
-        // Fucili d'assalto
-        "Fucile d'assalto",
-        "Fucile d'assalto speciale",
-        "AK47",
-        "AK47 corta",
-        "Carabina",
-        "Carabina speciale",
-        "Carabina da combattimento",
+function invTabId(name) {
+  return "inv_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+}
 
-        // Pompa (NO esplosive)
-        "Fucile a pompa",
-        "Fucile a pompa da combattimento",
-        "Bullpup Shotgun",
-        "Pompa a canne mozze",
+function invSetActive(cat) {
+  window.__inv_active = cat;
+}
+function invGetActive() {
+  return window.__inv_active || INV_CATEGORIES[0];
+}
 
-        // Cecchini
-        "Fucile di precisione",
-        "Cecchino pesante",
+function canManageInvItemList() {
+  return ["Owner", "Boss", "Vice Boss"].includes(myRole());
+}
 
-        // Mitragliette
-        "MG",
-        "Combat MG",
+function invRenderTabs() {
+  const tabs = document.getElementById("invTabs");
+  const panels = document.getElementById("invPanels");
+  if (!tabs || !panels) return;
 
-        // Munizioni (poi vengono normalizzate a “Munizioni” nei totali)
-        "Munizioni Pistola",
-        "Munizioni SMG",
-        "Munizioni Fucile d'assalto",
-        "Munizioni Pompa",
-        "Munizioni Cecchino",
+  tabs.innerHTML = "";
+  panels.innerHTML = "";
 
-        "Giubbotto antiproiettile"
-      ],
-      "Droga": [
-        "Marijuana / Erba",
-        "Cocaina",
-        "Metanfetamina",
-        "Crack",
-        "Eroina",
-        "Oppio",
-        "LSD",
-        "MDMA / Ecstasy",
-        "Funghi",
-        "Speed / Anfetamine",
-        "Ketamina",
-        "Fentanyl",
-        "Hashish",
-        "Semi",
-        "Sostanze chimiche",
-        "Confezioni / Buste",
-        "Bilancino",
-        "Taglierino / Lametta",
-        "Acetone",
-        "Ammoniaca"
-      ],
-      "Oggetti/Varie": [
-        "Radio","Grimaldello","Bende","Medikit","Telecamera",
-        "Cibo","Bevande","Altri oggetti"
-      ]
-    };
-
-    function invLoad() {
-      try {
-        const raw = localStorage.getItem(INV_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
-    }
-    function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
-
-    function invTabId(name) {
-      return "inv_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-    }
-
-    function invRenderTabs() {
-      const tabs = document.getElementById("invTabs");
-      const panels = document.getElementById("invPanels");
-      if (!tabs || !panels) return;
-
-      tabs.innerHTML = "";
-      panels.innerHTML = "";
-
-      INV_CATEGORIES.forEach((cat, idx) => {
-        const tid = invTabId(cat);
-
-        const b = document.createElement("button");
-        b.id = "invTab_" + tid;
-        b.textContent = cat;
-        b.onclick = () => invShowTab(cat);
-        tabs.appendChild(b);
-
-        const p = document.createElement("div");
-        p.className = "panel invPanel";
-        p.id = "invPanel_" + tid;
-
-        const disabledAttr = canEditOps() ? "" : "disabled";
-        const disabledCls = canEditOps() ? "" : "disabled";
-
-        p.innerHTML = `
-          <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${cat}</h3>
+  INV_CATEGORIES.forEach((cat, idx) => {
+    const tid = invTabId(cat);
 
           <div class="row" style="align-items:flex-end; flex-wrap:nowrap;">
             <div class="field" style="min-width:120px; flex:0 0 20%;">
@@ -3681,10 +3745,16 @@ invRenderTotals();
             Tag (dalla lista a destra)
           </div>
 
-<h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
+      <div class="row" style="align-items:flex-end;">
+        <div class="field" style="min-width:320px; flex:1;">
+          <label>Item</label>
+          <select id="invItem_${tid}" ${disabledAttr}></select>
+        </div>
 
-<div class="tableWrap">
-<table class="invTable">
+        <div class="field" style="min-width:160px; flex:0.8;">
+          <label>Quantità</label>
+          <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+        </div>
 
 <thead>
 <tr>
@@ -3692,17 +3762,20 @@ invRenderTotals();
 </tr>
 </thead>
 
-<tbody id="invTable_${tid}">
-<tr>
-<td class="muted" colspan="8">Nessuna registrazione</td>
-</tr>
-</tbody>
+        <div class="field" style="min-width:180px;" ${invListBtnStyle}>
+          <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddCustomItem('${escapeHtml(cat)}')">Nuovo item lista</button>
+        </div>
 
-</table>
-</div>
-        `;
+        <div class="field" style="min-width:180px;" ${invListBtnStyle}>
+          <button class="btn danger ${disabledCls}" ${disabledAttr} onclick="invRemoveCustomItem('${escapeHtml(cat)}')">Togli item lista</button>
+        </div>
+      </div>
 
-        panels.appendChild(p);
+      <div class="row">
+        <div class="field" style="min-width:220px; max-width:260px;">
+          <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
+        </div>
+      </div>
 
         setTimeout(() => {
           invFillItemSelect(cat);
@@ -3710,31 +3783,119 @@ invRenderTotals();
           syncSelectedTagsUI();
         }, 0);
 
-        if (idx === 0) {
-          b.classList.add("active");
-          p.classList.add("active");
-        }
+      <h4 style="margin:16px 0 6px 0; font-weight:900;">Registrazioni ${cat}</h4>
+
+      <div class="tableWrap">
+        <table class="invTable">
+          <thead>
+            <tr>
+              <th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th style="width:120px;">Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="invTable_${tid}">
+            <tr>
+              <td class="muted" colspan="8">Nessuna registrazione</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    panels.appendChild(p);
+
+    setTimeout(() => {
+      invFillItemSelect(cat);
+      invRenderDraft(cat);
+      invRenderTable(cat);
+      syncSelectedTagsUI();
+    }, 0);
+
+    if (idx === 0) {
+      b.classList.add("active");
+      p.classList.add("active");
+    }
+  });
+}
+
+function invRenderDraft(cat) {
+  const tid = invTabId(cat);
+  const wrap = document.getElementById("invDraft_" + tid);
+  if (!wrap) return;
+
+  const draft = invGetDraft(cat);
+  if (!draft.length) {
+    wrap.innerHTML = `<div class="muted">Nessun item in bozza</div>`;
+    return;
+  }
+
+  wrap.innerHTML = "";
+  draft.forEach(it => {
+    const div = document.createElement("div");
+    div.className = "itemRow";
+    div.innerHTML = `
+      <div class="field" style="min-width:320px;">
+        <label>Item</label>
+        <input value="${escapeHtml(it.name)}" disabled />
+      </div>
+      <div class="field" style="min-width:160px;">
+        <label>Quantità</label>
+        <input value="${it.qty}" disabled />
+      </div>
+      <div class="right">
+        <button class="btn danger small" onclick="invRemoveDraftItem('${escapeHtml(cat)}','${escapeHtml(it.name)}')">Rimuovi</button>
+      </div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+function invRemoveDraftItem(cat, name) {
+  invDrafts[cat] = invGetDraft(cat).filter(x => x.name !== name);
+  invRenderDraft(cat);
+}
+
+function invFillItemSelect(cat) {
+  const tid = invTabId(cat);
+  const sel = document.getElementById("invItem_" + tid);
+  if (!sel) return;
+
+    function invFillItemSelect(cat) {
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (!sel) return;
+
+      sel.innerHTML = "";
+
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = "-";
+      sel.appendChild(emptyOpt);
+
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        sel.appendChild(o);
       });
+
+      sel.value = "";
     }
 
-    function invSetActive(cat) { window.__inv_active = cat; }
-    function invGetActive() { return window.__inv_active || INV_CATEGORIES[0]; }
+    function invAddItem(cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const name = prompt("Nuovo item per " + cat + ":");
+      const v = String(name || "").trim();
+      if (!v) return;
 
-    function invShowTab(cat) {
-      invSetActive(cat);
+      const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
+      if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
+        arr.push(v);
+      }
+
+      invFillItemSelect(cat);
       const tid = invTabId(cat);
-
-      document.querySelectorAll("#invTabs button").forEach(x => x.classList.remove("active"));
-      const tb = document.getElementById("invTab_" + tid);
-      if (tb) tb.classList.add("active");
-
-      document.querySelectorAll(".invPanel").forEach(x => x.classList.remove("active"));
-      const pn = document.getElementById("invPanel_" + tid);
-      if (pn) pn.classList.add("active");
-
-      invRenderTable(cat);
-      invRenderTotals();
-      syncSelectedTagsUI();
+      const sel = document.getElementById("invItem_" + tid);
+      if (sel) sel.value = v;
     }
 
     function invFillItemSelect(cat) {
@@ -3789,9 +3950,8 @@ invRenderTotals();
       const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
       const msRaw = document.getElementById("invMoneyDrug_" + tid)?.value || "";
 
-      const moneyClean = Math.max(0, parseInt(mcRaw || "0", 10) || 0);
-      const moneyDirty = Math.max(0, parseInt(mdRaw || "0", 10) || 0);
-      const moneyDrug  = Math.max(0, parseInt(msRaw || "0", 10) || 0);
+  sel.value = "";
+}
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
@@ -3801,10 +3961,12 @@ invRenderTotals();
         return alert("Inserisci una quantità valida (> 0) quando selezioni un item.");
       }
 
-      const who = myGameNameOrEmail();
+  const tid = invTabId(cat);
+  const item = document.getElementById("invItem_" + tid)?.value || "";
+  let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
 
-      const tagUserIds = selectedTagUserIds.slice();
-      const tagNames = selectedTagNames();
+  if (!item) return alert("Seleziona un item.");
+  if (!Number.isFinite(qty) || qty < 1) qty = 1;
 
       const all = invLoad();
       all.push({
@@ -3825,19 +3987,443 @@ invRenderTotals();
       });
 invSave(all);
 
-// LOG
-logEvent(
-  "INV_ADD",
-  `${cat} .. ${type} .. Item(${item} x${qty}) .. Soldi(${logMoneyParts({ clean: moneyClean, dirty: moneyDirty, drug: moneyDrug })}) .. Tag(${logTagsLine(tagNames)})` +
-  (note ? ` .. Note(${note})` : "")
-);
+  if (existing) existing.qty += qty;
+  else draft.push({ name: item, qty });
 
-// AUTO: genera stipendi DA PAGARE (50% diviso partecipanti)
-const last = all[all.length - 1];
-if (last) {
-  const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
-  accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
+  document.getElementById("invItem_" + tid).value = "";
+  document.getElementById("invQty_" + tid).value = "1";
+
+  invRenderDraft(cat);
+}
+
+let invRemoveCurrentCategory = null;
+let invAddCurrentCategory = null;
+
+function invAddCustomItem(cat) {
+  if (!canManageInvItemList()) {
+    return alert("Solo Owner, Boss e Vice Boss possono modificare la lista item.");
+  }
+
+  invAddCurrentCategory = cat;
+
+  const catInput = document.getElementById("invAddCategory");
+  const itemInput = document.getElementById("invAddItemName");
+
+  if (catInput) catInput.value = cat;
+  if (itemInput) itemInput.value = "";
+
+  if (invAddOverlay) invAddOverlay.style.display = "block";
+  setModalOpen(true);
+
+  setTimeout(() => {
+    if (itemInput) itemInput.focus();
+  }, 0);
+}
+
+function closeInvAddModal() {
+  if (invAddOverlay) invAddOverlay.style.display = "none";
+  invAddCurrentCategory = null;
+
+  const itemInput = document.getElementById("invAddItemName");
+  const catInput = document.getElementById("invAddCategory");
+  if (itemInput) itemInput.value = "";
+  if (catInput) catInput.value = "";
+
+  setModalOpen(false);
+}
+
+function confirmInvAddCustomItem() {
+  if (!invAddCurrentCategory) return;
+
+  const cat = invAddCurrentCategory;
+  const input = document.getElementById("invAddItemName");
+  const value = String(input?.value || "").trim();
+
+  if (!value) return alert("Scrivi il nome dell'item.");
+
+  const arr = INV_ITEMS[cat] || [];
+  const exists = arr.some(x => String(x).toLowerCase() === value.toLowerCase());
+
+  if (exists) return alert("Questo item è già presente nella lista.");
+
+  arr.push(value);
+  arr.sort((a, b) => String(a).localeCompare(String(b), "it"));
+
+  invFillItemSelect(cat);
+  invFillEditItemSelect(cat);
+
+  const tid = invTabId(cat);
+  const mainSel = document.getElementById("invItem_" + tid);
+  if (mainSel) mainSel.value = value;
+
+  logEvent("INV_LIST_ADD", `${cat} .. Item(${value})`);
+
+  closeInvAddModal();
+  alert("Item aggiunto alla lista.");
+}
+
+function invRemoveCustomItem(cat) {
+  if (!canManageInvItemList()) {
+    return alert("Solo Owner, Boss e Vice Boss possono modificare la lista item.");
+  }
+
+  const arr = INV_ITEMS[cat] || [];
+  if (!arr.length) return alert("Nessun item presente nella lista di " + cat);
+
+  invRemoveCurrentCategory = cat;
+
+  const catInput = document.getElementById("invRemoveCategory");
+  const sel = document.getElementById("invRemoveSelect");
+
+  if (catInput) catInput.value = cat;
+  if (sel) {
+    sel.innerHTML = "";
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Seleziona item";
+    sel.appendChild(empty);
+
+    arr.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item;
+      opt.textContent = item;
+      sel.appendChild(opt);
+    });
+
+    sel.value = "";
+  }
+
+  if (invRemoveOverlay) invRemoveOverlay.style.display = "block";
+  setModalOpen(true);
+}
+
+function closeInvRemoveModal() {
+  if (invRemoveOverlay) invRemoveOverlay.style.display = "none";
+  invRemoveCurrentCategory = null;
+  setModalOpen(false);
+}
+
+function confirmInvRemoveCustomItem() {
+  if (!invRemoveCurrentCategory) return;
+
+  const cat = invRemoveCurrentCategory;
+  const arr = INV_ITEMS[cat] || [];
+  const sel = document.getElementById("invRemoveSelect");
+  const value = String(sel?.value || "").trim();
+
+  if (!value) return alert("Seleziona un item da rimuovere.");
+
+  const idx = arr.findIndex(x => String(x).toLowerCase() === value.toLowerCase());
+  if (idx === -1) return alert("Item non trovato nella lista.");
+
+  const itemName = arr[idx];
+  const ok = confirm(`Confermi la rimozione di "${itemName}" dalla lista ${cat}?`);
+  if (!ok) return;
+
+  arr.splice(idx, 1);
+
+  invFillItemSelect(cat);
+  invFillEditItemSelect(cat);
+
+  const tid = invTabId(cat);
+  const mainSel = document.getElementById("invItem_" + tid);
+  if (mainSel) mainSel.value = "";
+
+  invDrafts[cat] = invGetDraft(cat).filter(x => String(x.name || "").toLowerCase() !== itemName.toLowerCase());
+  invRenderDraft(cat);
+
+  if (invEditingCategory === cat) {
+    invEditingItems = (invEditingItems || []).filter(x => String(x.name || "").toLowerCase() !== itemName.toLowerCase());
+    invRenderEditItems();
+  }
+
+  logEvent("INV_LIST_REMOVE", `${cat} .. Item(${itemName})`);
+
+  closeInvRemoveModal();
+  alert("Item rimosso dalla lista.");
+}
+
+function invShowTab(cat) {
+  invSetActive(cat);
+  const tid = invTabId(cat);
+
+  document.querySelectorAll("#invTabs button").forEach(x => x.classList.remove("active"));
+  const tb = document.getElementById("invTab_" + tid);
+  if (tb) tb.classList.add("active");
+
+  document.querySelectorAll(".invPanel").forEach(x => x.classList.remove("active"));
+  const pn = document.getElementById("invPanel_" + tid);
+  if (pn) pn.classList.add("active");
+
+  invRenderTable(cat);
+  invRenderTotals();
+  syncSelectedTagsUI();
+}
+
+function invSaveRecord(cat) {
+  if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+  const tid = invTabId(cat);
+  const type = document.getElementById("invType_" + tid)?.value || "add";
+  const draftItems = invGetDraft(cat);
+
+  const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
+  const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
+  const msRaw = document.getElementById("invMoneyDrug_" + tid)?.value || "";
+
+  const moneyClean = Math.max(0, parseInt(mcRaw || "0", 10) || 0);
+  const moneyDirty = Math.max(0, parseInt(mdRaw || "0", 10) || 0);
+  const moneyDrug = Math.max(0, parseInt(msRaw || "0", 10) || 0);
+
+  const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
+
+  if (!draftItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+    return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+  }
+
+  const normalizedItems = draftItems.map(x => ({
+    name: String(x.name || "").trim(),
+    qty: Math.max(1, parseInt(x.qty || 1, 10) || 1)
+  })).filter(x => x.name);
+
+  const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+  const who = myGameNameOrEmail();
+
+  const tagUserIds = selectedTagUserIds.slice();
+  const tagNames = selectedTagNames();
+
+  const all = invLoad();
+  all.push({
+    id: uid(),
+    ts: Date.now(),
+    category: cat,
+    type,
+    item: firstItem.name,
+    qty: firstItem.qty,
+    items: normalizedItems,
+    money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
+    note,
+    who,
+    tagUserIds,
+    tagNames,
+    tagName: tagNames.length ? tagNames[0] : null
+  });
+  invSave(all);
+
+  logEvent(
+    "INV_ADD",
+    `${cat} .. ${type} .. Item(${normalizedItems.map(x => `${x.name} x${x.qty}`).join(", ") || "—"}) .. Soldi(${logMoneyParts({ clean: moneyClean, dirty: moneyDirty, drug: moneyDrug })}) .. Tag(${logTagsLine(tagNames)})` +
+    (note ? ` .. Note(${note})` : "")
+  );
+
+  const last = all[all.length - 1];
+  if (last) {
+    const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
+    accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
+    accRenderDueTable();
+  }
+
+  document.getElementById("invItem_" + tid).value = "";
+  document.getElementById("invQty_" + tid).value = "1";
+  document.getElementById("invMoneyClean_" + tid).value = "";
+  document.getElementById("invMoneyDirty_" + tid).value = "";
+  document.getElementById("invMoneyDrug_" + tid).value = "";
+  document.getElementById("invNote_" + tid).value = "";
+
+  invDrafts[cat] = [];
+  invRenderDraft(cat);
+  invRenderTable(cat);
+  invRenderTotals();
+}
+
+const invEditInfo = document.getElementById("invEditInfo");
+const invEditType = document.getElementById("invEditType");
+const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+const invEditNote = document.getElementById("invEditNote");
+const invEditTagName = document.getElementById("invEditTagName");
+const invEditItemSelect = document.getElementById("invEditItemSelect");
+const invEditItemQty = document.getElementById("invEditItemQty");
+const invEditItemsList = document.getElementById("invEditItemsList");
+
+let invEditingId = null;
+let invEditingCategory = null;
+let invEditingItems = [];
+
+function invFillEditItemSelect(cat) {
+  if (!invEditItemSelect) return;
+  invEditItemSelect.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "-";
+  invEditItemSelect.appendChild(empty);
+
+  (INV_ITEMS[cat] || []).forEach(it => {
+    const o = document.createElement("option");
+    o.value = it;
+    o.textContent = it;
+    invEditItemSelect.appendChild(o);
+  });
+
+  invEditItemSelect.value = "";
+}
+
+function invRenderEditItems() {
+  if (!invEditItemsList) return;
+
+  if (!invEditingItems.length) {
+    invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+    return;
+  }
+
+  invEditItemsList.innerHTML = "";
+  invEditingItems.forEach(it => {
+    const div = document.createElement("div");
+    div.className = "itemRow";
+    div.innerHTML = `
+      <div class="field" style="min-width:320px;">
+        <label>Item</label>
+        <input value="${escapeHtml(it.name)}" disabled />
+      </div>
+      <div class="field" style="min-width:160px;">
+        <label>Quantità</label>
+        <input value="${Number(it.qty || 0)}" disabled />
+      </div>
+      <div class="right">
+        <button class="btn danger small" onclick="invEditRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+      </div>
+    `;
+    invEditItemsList.appendChild(div);
+  });
+}
+
+function invEditAddItem() {
+  const name = String(invEditItemSelect?.value || "").trim();
+  let qty = parseInt(invEditItemQty?.value || "1", 10);
+
+  if (!name) return alert("Seleziona un item.");
+  if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+  const existing = invEditingItems.find(x => x.name === name);
+  if (existing) existing.qty += qty;
+  else invEditingItems.push({ name, qty });
+
+  if (invEditItemQty) invEditItemQty.value = "1";
+  invFillEditItemSelect(invEditingCategory || "Armi");
+  invRenderEditItems();
+}
+
+function invEditRemoveItem(name) {
+  invEditingItems = invEditingItems.filter(x => x.name !== name);
+  invRenderEditItems();
+}
+
+function invEditRecord(id, cat) {
+  if (!canEditOps()) return;
+
+  const all = invLoad();
+  const rec = all.find(x => x.id === id);
+  if (!rec) return;
+
+  hideAllActionMenus();
+  try { closeEdit(); } catch {}
+  try { closeNoteModal(); } catch {}
+  setModalOpen(true);
+
+  invEditingId = id;
+  invEditingCategory = cat;
+  invEditingItems = Array.isArray(rec.items) && rec.items.length
+    ? rec.items.map(x => ({
+        name: String(x.name || "").trim(),
+        qty: Math.max(1, parseInt(x.qty || 1, 10) || 1)
+      })).filter(x => x.name)
+    : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : []);
+
+  invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+  invEditType.value = rec.type || "add";
+
+  const m = rec.money;
+  const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+  const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+  const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+
+  invEditMoneyClean.value = String(clean || 0);
+  invEditMoneyDirty.value = String(dirty || 0);
+  invEditMoneyDrug.value = String(drug || 0);
+  invEditNote.value = rec.note || "";
+
+  const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+  invEditTagName.value = tnames.length ? tnames.join(", ") : "—";
+
+  invFillEditItemSelect(cat);
+  invRenderEditItems();
+
+  if (invEditOverlay) invEditOverlay.style.display = "block";
+}
+
+function closeInvEdit() {
+  if (!invEditOverlay) return;
+  invEditOverlay.style.display = "none";
+  invEditingId = null;
+  invEditingCategory = null;
+  invEditingItems = [];
+  setModalOpen(false);
+}
+
+function invSaveEdit() {
+  if (!invEditingId || !invEditingCategory) return;
+
+  const all = invLoad();
+  const rec = all.find(x => x.id === invEditingId);
+  if (!rec) return;
+
+  const type = String(invEditType?.value || "add").trim().toLowerCase();
+  if (!["add","rem","sold","buy"].includes(type)) return alert("Tipo non valido.");
+
+  const moneyClean = Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0);
+  const moneyDirty = Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0);
+  const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
+  const note = String(invEditNote?.value || "").trim();
+
+  const normalizedItems = (invEditingItems || [])
+    .map(x => ({
+      name: String(x.name || "").trim(),
+      qty: Math.max(1, parseInt(x.qty || 1, 10) || 1)
+    }))
+    .filter(x => x.name);
+
+  const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+
+  if (!normalizedItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+    return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+  }
+
+  rec.type = type;
+  rec.item = firstItem.name;
+  rec.qty = firstItem.qty;
+  rec.items = normalizedItems;
+  rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
+  rec.note = note;
+  rec.updatedAt = Date.now();
+
+  invSave(all);
+
+  logEvent(
+    "INV_EDIT",
+    `${rec.category} .. ${rec.type} .. Item(${normalizedItems.map(x => `${x.name} x${x.qty}`).join(", ") || "—"}) .. Soldi(${logMoneyParts(rec.money)})`
+  );
+
+  const noteBase = `Auto da Gestione (modifica): ${rec.category} .. ${rec.type}`;
+  accUpsertDueSalariesFromSource("inv", rec.id, rec.money, rec.tagUserIds || [], noteBase);
+
+  const currentCat = invEditingCategory || rec.category;
+  closeInvEdit();
+  invRenderTable(currentCat);
+  invRenderTotals();
   accRenderDueTable();
+  accRenderSummary();
 }
       document.getElementById("invItem_" + tid).value = "";
       document.getElementById("invQty_" + tid).value = "0";
@@ -3846,8 +4432,194 @@ if (last) {
       document.getElementById("invMoneyDrug_" + tid).value = "";
       document.getElementById("invNote_" + tid).value = "";
 
+function invDeleteRecord(id, cat) {
+  if (!canEditOps()) return;
+
+    const invEditInfo = document.getElementById("invEditInfo");
+    const invEditType = document.getElementById("invEditType");
+    const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+    const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+    const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+    const invEditNote = document.getElementById("invEditNote");
+    const invEditTagName = document.getElementById("invEditTagName");
+    const invEditItemSelect = document.getElementById("invEditItemSelect");
+    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemsList = document.getElementById("invEditItemsList");
+
+    let invEditingId = null;
+    let invEditingCategory = null;
+    let invEditingItems = [];
+
+    function invFillEditItemSelect(cat) {
+      if (!invEditItemSelect) return;
+      invEditItemSelect.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      invEditItemSelect.appendChild(empty);
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        invEditItemSelect.appendChild(o);
+      });
+      invEditItemSelect.value = "";
+    }
+
+    function invRenderEditItems() {
+      if (!invEditItemsList) return;
+      if (!invEditingItems.length) {
+        invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      invEditItemsList.innerHTML = "";
+      invEditingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${Number(it.qty || 0)}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="invEditRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        invEditItemsList.appendChild(div);
+      });
+    }
+
+    function invEditAddItem() {
+      const name = String(invEditItemSelect?.value || "").trim();
+      let qty = parseInt(invEditItemQty?.value || "1", 10);
+      if (!name) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = invEditingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else invEditingItems.push({ name, qty });
+
+      if (invEditItemQty) invEditItemQty.value = "1";
+      invFillEditItemSelect(invEditingCategory || "Armi");
+      invRenderEditItems();
+    }
+
+    function invEditRemoveItem(name) {
+      invEditingItems = invEditingItems.filter(x => x.name !== name);
+      invRenderEditItems();
+    }
+
+    function invEditRecord(id, cat) {
+      if (!canEditOps()) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      if (!rec) return;
+
+      hideAllActionMenus();
+      try { closeEdit(); } catch {}
+      try { closeNoteModal(); } catch {}
+      setModalOpen(true);
+
+      invEditingId = id;
+      invEditingCategory = cat;
+      invEditingItems = Array.isArray(rec.items) && rec.items.length
+        ? rec.items.map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) })).filter(x => x.name)
+        : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : []);
+
+      invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+      invEditType.value = rec.type || "add";
+
+      const m = rec.money;
+      const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+      const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+      const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+      invEditMoneyClean.value = String(clean || 0);
+      invEditMoneyDirty.value = String(dirty || 0);
+      invEditMoneyDrug.value = String(drug || 0);
+      invEditNote.value = rec.note || "";
+
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      invEditTagName.value = tnames.length ? tnames.join(", ") : "—";
+
+      invFillEditItemSelect(cat);
+      invRenderEditItems();
+      if (invEditOverlay) invEditOverlay.style.display = "block";
+    }
+
+    function closeInvEdit() {
+      if (!invEditOverlay) return;
+      invEditOverlay.style.display = "none";
+      invEditingId = null;
+      invEditingCategory = null;
+      invEditingItems = [];
+      setModalOpen(false);
+    }
+
+    function invSaveEdit() {
+      if (!invEditingId || !invEditingCategory) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === invEditingId);
+      if (!rec) return;
+
+      const type = String(invEditType?.value || "add").trim().toLowerCase();
+      if (!["add","rem","sold","buy"].includes(type)) return alert("Tipo non valido.");
+
+      const moneyClean = Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0);
+      const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
+      const note = String(invEditNote?.value || "").trim();
+
+      const normalizedItems = (invEditingItems || [])
+        .map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) }))
+        .filter(x => x.name);
+
+      const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+      const item = firstItem.name;
+      const qty = firstItem.qty;
+
+      if (!normalizedItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+
+      rec.type = type;
+      rec.item = item;
+      rec.qty = qty;
+      rec.items = normalizedItems;
+      rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
+      rec.note = note;
+      rec.updatedAt = Date.now();
+      invSave(all);
+
+      logEvent("INV_EDIT", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      const currentCat = invEditingCategory || rec.category;
+      closeInvEdit();
+      invRenderTable(currentCat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
+    function invDeleteRecord(id, cat) {
+      if (!canEditOps()) return;
+      const ok = confirm("Confermi eliminazione registrazione?");
+      if (!ok) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      const next = all.filter(x => x.id !== id);
+      invSave(next);
+      if (rec) {
+        logEvent("INV_DELETE", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      } else {
+        logEvent("INV_DELETE", `${cat} .. id:${id}`);
+      }
       invRenderTable(cat);
       invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
     }
 
     const invEditInfo = document.getElementById("invEditInfo");
@@ -4042,24 +4814,19 @@ if (last) {
       const body = document.getElementById("invTable_" + tid);
       if (!body) return;
 
-      const rows = invLoad().filter(r => r.category === cat).sort((a,b) => (b.ts||0)-(a.ts||0));
-      if (!rows.length) {
-        body.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
-        return;
-      }
+  const all = invLoad();
+  const rec = all.find(x => x.id === id);
+  const next = all.filter(x => x.id !== id);
+  invSave(next);
 
-      body.innerHTML = "";
-      rows.forEach(r => {
-        const tr = document.createElement("tr");
-        const t =
-          r.type === "add" ? "AGGIUNTO" :
-          r.type === "rem" ? "RIMOSSO" :
-          r.type === "sold" ? "VENDUTO" :
-          r.type === "buy" ? "ACQUISTATO" : "—";
-        const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-        const tagHtml = tnames.length
-          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-          : `<span class="muted">—</span>`;
+  if (rec) {
+    logEvent(
+      "INV_DELETE",
+      `${rec.category} .. ${rec.type} .. Item(${(rec.items || []).map(x => `${x.name} x${x.qty}`).join(", ") || (rec.item ? `${rec.item} x${Number(rec.qty || 0)}` : "—")})`
+    );
+  } else {
+    logEvent("INV_DELETE", `${cat} .. id:${id}`);
+  }
 
         tr.innerHTML = `
           <td>${new Date(r.ts).toLocaleString()}</td>
@@ -4102,46 +4869,123 @@ if (last) {
       });
     }
 
-    function normalizeTotalItemName(name) {
-      const n = String(name || "").trim();
-      if (!n) return "";
-      if (n.toLowerCase().startsWith("munizioni")) return "Munizioni";
-      return n;
-    }
+function invRenderTable(cat) {
+  const tid = invTabId(cat);
+  const body = document.getElementById("invTable_" + tid);
+  if (!body) return;
 
-    // ✅ Totali: includono anche gli item delle Azioni
+  const rows = invLoad().filter(r => r.category === cat).sort((a,b) => (b.ts||0)-(a.ts||0));
+  if (!rows.length) {
+    body.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = "";
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    const t =
+      r.type === "add" ? "AGGIUNTO" :
+      r.type === "rem" ? "RIMOSSO" :
+      r.type === "sold" ? "VENDUTO" :
+      r.type === "buy" ? "ACQUISTATO" : "—";
+
+    const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
+    const tagHtml = tnames.length
+      ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
+      : `<span class="muted">—</span>`;
+
+    tr.innerHTML = `
+      <td>${new Date(r.ts).toLocaleString()}</td>
+      <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+      <td style="font-weight:900; color:${(r.type === "sold" || r.type === "rem") ? "var(--red2)" : "#fff"};">${t}</td>
+      <td style="font-weight:900;">
+        ${(() => {
+          const m = r.money;
+          const clean = (typeof m === "number") ? m : Number(m?.clean || 0);
+          const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+          const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+
+          const parts = [];
+          if (clean) parts.push("P: " + formatMoney(clean));
+          if (dirty) parts.push("S: " + formatMoney(dirty));
+          if (drug) parts.push("SP: " + formatMoney(drug));
+
+          return parts.length
+            ? `<div style="white-space:pre-wrap; line-height:1.25;">${parts.join("<br>")}</div>`
+            : '<span class="muted">—</span>';
+        })()}
+      </td>
+      <td>${tagHtml}</td>
+      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+      <td>${(() => {
+        const items = Array.isArray(r.items) && r.items.length
+          ? r.items
+          : (r.item ? [{ name: r.item, qty: Number(r.qty || 0) }] : []);
+
+        if (!items.length) return '<span class="muted">—</span>';
+
+        const lines = items
+          .map(it => `${Number(it.qty || 0)}x ${escapeHtml(it.name || "—")}`)
+          .join("<br>");
+
+        return `<div style="white-space:pre-wrap; font-size:14px; font-weight:800; line-height:1.25;">${lines}</div>`;
+      })()}</td>
+      <td>${canEditOps() ? `
+        <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+          <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invEditRecord('${r.id}','${escapeHtml(r.category)}')">Modifica</button>
+          <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+        </div>
+      ` : `<span class="muted">—</span>`}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function normalizeTotalItemName(name) {
+  const n = String(name || "").trim();
+  if (!n) return "";
+  if (n.toLowerCase().startsWith("munizioni")) return "Munizioni";
+  return n;
+}
+
 function invComputeTotals() {
   const totals = {};
   let addMoney = { clean:0, dirty:0, drug:0 };
   let remMoney = { clean:0, dirty:0, drug:0 };
-  
-  // 1) Gestione armi-droga (INV)
-  invLoad().forEach(r => {
-    const key = normalizeTotalItemName(r.item);
-    if (key) {
-      if (!totals[key]) totals[key] = 0;
-      const q = Number(r.qty || 0);
 
-      // Item: add/buy aumentano, rem/sold diminuiscono
+  invLoad().forEach(r => {
+    const items = Array.isArray(r.items) && r.items.length
+      ? r.items
+      : (r.item ? [{ name: r.item, qty: Number(r.qty || 0) }] : []);
+
+    items.forEach(it => {
+      const key = normalizeTotalItemName(it.name);
+      if (!key) return;
+      if (!totals[key]) totals[key] = 0;
+
+      const q = Number(it.qty || 0);
       const signItem = (r.type === "add" || r.type === "buy") ? 1 : -1;
       totals[key] += signItem * q;
-    }
+    });
 
     const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
 
     const mm = r.money;
     const mClean = (typeof mm === "number") ? Number(mm || 0) : Number(mm?.clean || 0);
     const mDirty = (typeof mm === "number") ? 0 : Number(mm?.dirty || 0);
-    const mDrug  = (typeof mm === "number") ? 0 : Number(mm?.drug  || 0);
+    const mDrug = (typeof mm === "number") ? 0 : Number(mm?.drug || 0);
 
     if (signMoney > 0) {
-      addMoney.clean += mClean; addMoney.dirty += mDirty; addMoney.drug += mDrug;
+      addMoney.clean += mClean;
+      addMoney.dirty += mDirty;
+      addMoney.drug += mDrug;
     } else {
-      remMoney.clean += mClean; remMoney.dirty += mDirty; remMoney.drug += mDrug;
+      remMoney.clean += mClean;
+      remMoney.dirty += mDirty;
+      remMoney.drug += mDrug;
     }
   });
 
-  // 2) Azioni (OPS) -> SOLO items (soldi restano separati)
   loadOps().forEach(op => {
     (op.items || []).forEach(it => {
       const key = normalizeTotalItemName(it.name);
@@ -4155,71 +4999,73 @@ function invComputeTotals() {
   return { totals, addMoney, remMoney };
 }
 
-    function invRenderTotals() {
-      const body = document.getElementById("invTotalsBody");
-      const moneyBox = document.getElementById("invMoneySummary");
-      if (!body || !moneyBox) return;
+function invRenderTotals() {
+  const body = document.getElementById("invTotalsBody");
+  const moneyBox = document.getElementById("invMoneySummary");
+  if (!body || !moneyBox) return;
 
-      const { totals, addMoney, remMoney } = invComputeTotals();
+  const { totals, addMoney, remMoney } = invComputeTotals();
 
-      const entries = Object.entries(totals)
-        .map(([k,v]) => ({ item:k, qty:v }))
-        .filter(x => x.qty !== 0)
-        .sort((a,b) => Math.abs(b.qty) - Math.abs(a.qty));
+  const entries = Object.entries(totals)
+    .map(([k,v]) => ({ item:k, qty:v }))
+    .filter(x => x.qty !== 0)
+    .sort((a,b) => Math.abs(b.qty) - Math.abs(a.qty));
 
-      if (!entries.length) {
-        body.innerHTML = `<tr><td class="muted" colspan="2">Nessun dato</td></tr>`;
-      } else {
-        body.innerHTML = "";
-        entries.forEach(x => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td style="font-weight:900;">${escapeHtml(x.item)}</td>
-            <td style="font-weight:900;">${x.qty}</td>
-          `;
-          body.appendChild(tr);
-        });
-      }
+  if (!entries.length) {
+    body.innerHTML = `<tr><td class="muted" colspan="2">Nessun dato</td></tr>`;
+  } else {
+    body.innerHTML = "";
+    entries.forEach(x => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight:900;">${escapeHtml(x.item)}</td>
+        <td style="font-weight:900;">${x.qty}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
 
-      const sal = {
-        clean: addMoney.clean - remMoney.clean,
-        dirty: addMoney.dirty - remMoney.dirty,
-        drug:  addMoney.drug  - remMoney.drug
-      };
+  const sal = {
+    clean: addMoney.clean - remMoney.clean,
+    dirty: addMoney.dirty - remMoney.dirty,
+    drug: addMoney.drug - remMoney.drug
+  };
 
-      const cA = document.getElementById("invMoneyCleanAdd");
-      const cR = document.getElementById("invMoneyCleanRem");
-      const cS = document.getElementById("invMoneyCleanSal");
+  const cA = document.getElementById("invMoneyCleanAdd");
+  const cR = document.getElementById("invMoneyCleanRem");
+  const cS = document.getElementById("invMoneyCleanSal");
 
-      const dA = document.getElementById("invMoneyDirtyAdd");
-      const dR = document.getElementById("invMoneyDirtyRem");
-      const dS = document.getElementById("invMoneyDirtySal");
+  const dA = document.getElementById("invMoneyDirtyAdd");
+  const dR = document.getElementById("invMoneyDirtyRem");
+  const dS = document.getElementById("invMoneyDirtySal");
 
-      const sA = document.getElementById("invMoneyDrugAdd");
-      const sR = document.getElementById("invMoneyDrugRem");
-      const sS = document.getElementById("invMoneyDrugSal");
+  const sA = document.getElementById("invMoneyDrugAdd");
+  const sR = document.getElementById("invMoneyDrugRem");
+  const sS = document.getElementById("invMoneyDrugSal");
 
-      if (cA) cA.textContent = formatMoney(addMoney.clean);
-      if (cR) cR.textContent = formatMoney(remMoney.clean);
-      if (cS) cS.textContent = formatMoney(sal.clean);
+  if (cA) cA.textContent = formatMoney(addMoney.clean);
+  if (cR) cR.textContent = formatMoney(remMoney.clean);
+  if (cS) cS.textContent = formatMoney(sal.clean);
 
-      if (dA) dA.textContent = formatMoney(addMoney.dirty);
-      if (dR) dR.textContent = formatMoney(remMoney.dirty);
-      if (dS) dS.textContent = formatMoney(sal.dirty);
+  if (dA) dA.textContent = formatMoney(addMoney.dirty);
+  if (dR) dR.textContent = formatMoney(remMoney.dirty);
+  if (dS) dS.textContent = formatMoney(sal.dirty);
 
-      if (sA) sA.textContent = formatMoney(addMoney.drug);
-      if (sR) sR.textContent = formatMoney(remMoney.drug);
-      if (sS) sS.textContent = formatMoney(sal.drug);
-    }
+  if (sA) sA.textContent = formatMoney(addMoney.drug);
+  if (sR) sR.textContent = formatMoney(remMoney.drug);
+  if (sS) sS.textContent = formatMoney(sal.drug);
+}
 
-    function invResetAll() {
-      const ok = confirm("Confermi AZZERA GESTIONE?");
-      if (!ok) return;
-logEvent("INV_RESET", "Azzera Gestione armi-droga");
-localStorage.removeItem(INV_KEY);
-INV_CATEGORIES.forEach(c => invRenderTable(c));
-invRenderTotals();
-    }
+function invResetAll() {
+  const ok = confirm("Confermi AZZERA GESTIONE?");
+  if (!ok) return;
+
+  logEvent("INV_RESET", "Azzera Gestione armi-droga");
+  localStorage.removeItem(INV_KEY);
+
+  INV_CATEGORIES.forEach(c => invRenderTable(c));
+  invRenderTotals();
+}
 
     // =========================
     // CONTABILITÀ (Stipendi + Bilancio)
@@ -4618,7 +5464,6 @@ logEvent(
       });
       accSave(all);
 
-accSave(all);
 
 // LOG
 logEvent(
@@ -4880,10 +5725,19 @@ accRenderSummary();
           logSearch();
         }
       }
-      if (e.key === "Escape") {
-        if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
-        if (document.getElementById("editOverlay").style.display === "block") closeEdit();
-      }
+if (e.key === "Escape") {
+  const noteOverlay = document.getElementById("noteOverlay");
+  const editOverlay = document.getElementById("editOverlay");
+  const invEditOverlay = document.getElementById("invEditOverlay");
+  const invRemoveOverlay = document.getElementById("invRemoveOverlay");
+  const invAddOverlay = document.getElementById("invAddOverlay");
+
+  if (noteOverlay && noteOverlay.style.display === "block") closeNoteModal();
+  if (editOverlay && editOverlay.style.display === "block") closeEdit();
+  if (invEditOverlay && invEditOverlay.style.display === "block") closeInvEdit();
+  if (invRemoveOverlay && invRemoveOverlay.style.display === "block") closeInvRemoveModal();
+  if (invAddOverlay && invAddOverlay.style.display === "block") closeInvAddModal();
+}
     });
 
     // =========================
@@ -4903,17 +5757,28 @@ accRenderSummary();
         return;
       }
 
-      const u = getMyUser();
-      if (u?.blocked) {
-        alert("Account bloccato.");
-        logout();
-        return;
-      }
-
-      initAfterLogin();
+    const s = loadSession();
+    if (!s?.email) {
+      showOnly("login");
+      showLoginStep("stepEmail");
+      return;
     }
 
-    boot();
+    const u = getMyUser();
+    if (u?.blocked) {
+      alert("Account bloccato.");
+      logout();
+      return;
+    }
+
+    initAfterLogin();
+  } catch (err) {
+    console.error("ERRORE BOOT:", err);
+    alert("Errore avvio dashboard. Apri la console F12 per vedere il punto esatto.");
+  }
+}
+
+boot();
   </script>
 </body>
 </html>
