@@ -4936,7 +4936,6 @@ logEvent(
       });
       accSave(all);
 
-accSave(all);
 
 // LOG
 logEvent(
@@ -5199,39 +5198,49 @@ accRenderSummary();
         }
       }
 if (e.key === "Escape") {
-  if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
-  if (document.getElementById("editOverlay").style.display === "block") closeEdit();
-  if (document.getElementById("invEditOverlay").style.display === "block") closeInvEdit();
-  if (document.getElementById("invRemoveOverlay").style.display === "block") closeInvRemoveModal();
+  const noteOverlay = document.getElementById("noteOverlay");
+  const editOverlay = document.getElementById("editOverlay");
+  const invEditOverlay = document.getElementById("invEditOverlay");
+  const invRemoveOverlay = document.getElementById("invRemoveOverlay");
+
+  if (noteOverlay && noteOverlay.style.display === "block") closeNoteModal();
+  if (editOverlay && editOverlay.style.display === "block") closeEdit();
+  if (invEditOverlay && invEditOverlay.style.display === "block") closeInvEdit();
+  if (invRemoveOverlay && invRemoveOverlay.style.display === "block") closeInvRemoveModal();
 }
     });
 
     // =========================
     // STARTUP
     // =========================
-    function boot() {
-      ensureDemoUsersIfEmpty();
-      setHeaderUser();
-      syncSelectedTagsUI();
+function boot() {
+  try {
+    ensureDemoUsersIfEmpty();
+    setHeaderUser();
+    syncSelectedTagsUI();
 
-      const s = loadSession();
-      if (!s?.email) {
-        showOnly("login");
-        showLoginStep("stepEmail");
-        return;
-      }
-
-      const u = getMyUser();
-      if (u?.blocked) {
-        alert("Account bloccato.");
-        logout();
-        return;
-      }
-
-      initAfterLogin();
+    const s = loadSession();
+    if (!s?.email) {
+      showOnly("login");
+      showLoginStep("stepEmail");
+      return;
     }
 
-    boot();
+    const u = getMyUser();
+    if (u?.blocked) {
+      alert("Account bloccato.");
+      logout();
+      return;
+    }
+
+    initAfterLogin();
+  } catch (err) {
+    console.error("ERRORE BOOT:", err);
+    alert("Errore avvio dashboard. Apri la console F12 per vedere il punto esatto.");
+  }
+}
+
+boot();
   </script>
 </body>
 </html>
