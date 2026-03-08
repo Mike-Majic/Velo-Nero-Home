@@ -461,7 +461,7 @@ table.invTable td:nth-child(8){
 
   <!-- NAV (riordinata) -->
   <div class="nav">
-    <button id="btnDashboard" onclick="showSection('dashboard')">Dashboard</button>
+    <button id="btnDashboard" onclick="showOnly('dashboard')">Dashboard</button>
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
     <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
     <button id="btnDiario" onclick="showSection('diario')">Diario</button>
@@ -625,7 +625,7 @@ table.invTable td:nth-child(8){
   <!-- DASHBOARD (layout aggiornato) -->
   <div id="dashboard" class="section">
     <div class="cards">
-      <div class="box" onclick="showSection('dashboard')">
+      <div class="box" onclick="showOnly('dashboard')">
         <h2>Dashboard</h2>
         <p>Home</p>
       </div>
@@ -3647,8 +3647,8 @@ function invLoad() {
 }
 function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
 
-const invDrafts = {};
-function invGetDraft(category) {
+invDrafts = {};
+    function invGetDraft(category) {
   if (!invDrafts[category]) invDrafts[category] = [];
   return invDrafts[category];
 }
@@ -3798,8 +3798,8 @@ setTimeout(() => {
 function invSetActive(cat) { window.__inv_active = cat; }
 function invGetActive() { return window.__inv_active || INV_CATEGORIES[0]; }
 
-const invDrafts = {};
-function invGetDraft(category) {
+invDrafts = {};
+    function invGetDraft(category) {
   if (!invDrafts[category]) invDrafts[category] = [];
   return invDrafts[category];
 }
