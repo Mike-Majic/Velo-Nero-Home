@@ -2585,8 +2585,10 @@ sel.onchange = () => {
         const tdEmail = document.createElement("td");
         tdEmail.textContent = u.email || "—";
 
-        const tdState = document.createElement("td");
-        tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
+const tdState = document.createElement("td");
+tdState.innerHTML = u.blocked
+  ? `<span style="color:var(--red2); font-weight:900;">BLOCCATO</span>`
+  : `<span style="font-weight:900;">ATTIVO</span>`;
 
         const tdActions = document.createElement("td");
         const wrap = document.createElement("div");
