@@ -350,7 +350,7 @@ table.invTable td:nth-child(8){
       margin-left:8px;
       white-space:nowrap;
     }
-    .userRoleBadge{
+.userRoleBadge{
       display:inline-block;
       margin-top:4px;
       margin-left:0;
@@ -359,6 +359,23 @@ table.invTable td:nth-child(8){
       word-break:break-word;
       max-width:100%;
     }
+
+#utenti table{
+  table-layout:fixed;
+  width:100%;
+}
+
+#utenti th,
+#utenti td{
+  min-width:0;
+}
+
+#utenti td select{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  display:block;
+}
 
 /* GESTIONE ARMI/DROGA: 2 colonne (ANTI SOVRAPPOSIZIONE - FORZATO) */
 .twoColInv{
@@ -654,13 +671,13 @@ table.invTable td:nth-child(8){
 
     <table>
       <thead>
-        <tr>
-          <th>Nome in Game</th>
-          <th>Ruolo</th>
-          <th>Email</th>
-          <th>Stato</th>
-          <th>Azioni</th>
-        </tr>
+<tr>
+  <th style="width:20%;">Nome in Game</th>
+  <th style="width:20%;">Ruolo</th>
+  <th style="width:30%;">Email</th>
+  <th style="width:20%;">Stato</th>
+  <th style="width:10%;">Azioni</th>
+</tr>
       </thead>
       <tbody id="usersTableBody"></tbody>
     </table>
@@ -2510,10 +2527,17 @@ if (id === "contabilita") {
         const tr = document.createElement("tr");
 
         const tdGameName = document.createElement("td");
-        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span><br><span class="tagRole userRoleBadge">${escapeHtml(u.role || "—")}</span>`;
+tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span>`;
+        
+const tdRole = document.createElement("td");
+tdRole.style.minWidth = "0";
+tdRole.style.width = "100%";
 
-        const tdRole = document.createElement("td");
-        const sel = document.createElement("select");
+const sel = document.createElement("select");
+sel.style.width = "100%";
+sel.style.maxWidth = "100%";
+sel.style.boxSizing = "border-box";
+sel.style.display = "block";
 
         const optEmpty = document.createElement("option");
         optEmpty.value = "";
