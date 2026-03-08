@@ -1203,6 +1203,7 @@ table.invTable td:nth-child(8){
     // =========================
     const USERS_KEY = "vn_users_v2";
     const USERS_BACKUP_KEY = "vn_users_backup_v1";
+    const LEGACY_USERS_KEYS = ["vn_users_v1", "vn_users"];
     const OPS_KEY = "vn_ops_v6";
     const SESSION_KEY = "vn_session_v1";
     const LOGS_KEY = "vn_login_logs";
@@ -1263,6 +1264,18 @@ table.invTable td:nth-child(8){
           return bk;
         }
       } catch {}
+
+      // fallback: migrazione automatica da vecchie chiavi localStorage
+      for (const legacyKey of LEGACY_USERS_KEYS) {
+        try {
+          const rawLegacy = localStorage.getItem(legacyKey);
+          const legacyUsers = rawLegacy ? JSON.parse(rawLegacy) : [];
+          if (Array.isArray(legacyUsers) && legacyUsers.length) {
+            saveUsers(legacyUsers);
+            return legacyUsers;
+          }
+        } catch {}
+      }
 
       return [];
     }
