@@ -482,7 +482,7 @@ table.invTable td:nth-child(8){
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
-            <input id="loginPassword" type="password" placeholder="Password" />
+            <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('loginPassword', this)">👁</button>
           </div>
         </div>
@@ -498,13 +498,13 @@ table.invTable td:nth-child(8){
 
           <label>Nuova password</label>
           <div class="pwbox">
-            <input id="newPassword" type="password" placeholder="Nuova password" />
+            <input id="newPassword" type="password" placeholder="Nuova password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('newPassword', this)">👁</button>
           </div>
 
           <label>Conferma nuova password</label>
           <div class="pwbox">
-            <input id="newPassword2" type="password" placeholder="Conferma" />
+            <input id="newPassword2" type="password" placeholder="Conferma" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('newPassword2', this)">👁</button>
           </div>
         </div>
@@ -530,12 +530,12 @@ table.invTable td:nth-child(8){
         <div class="field" style="min-width:320px; flex:1;">
           <label>Password</label>
           <div class="pwbox">
-            <input id="regPassword" type="password" placeholder="Password" />
+            <input id="regPassword" type="password" placeholder="Password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('regPassword', this)">👁</button>
           </div>
           <label>Conferma password</label>
           <div class="pwbox">
-            <input id="regPassword2" type="password" placeholder="Conferma password" />
+            <input id="regPassword2" type="password" placeholder="Conferma password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
             <button class="eye" type="button" onclick="togglePassword('regPassword2', this)">👁</button>
           </div>
         </div>
@@ -1202,6 +1202,7 @@ table.invTable td:nth-child(8){
     // STORAGE
     // =========================
     const USERS_KEY = "vn_users_v2";
+    const USERS_BACKUP_KEY = "vn_users_backup_v1";
     const OPS_KEY = "vn_ops_v6";
     const SESSION_KEY = "vn_session_v1";
     const LOGS_KEY = "vn_login_logs";
@@ -1250,10 +1251,26 @@ table.invTable td:nth-child(8){
       try {
         const raw = localStorage.getItem(USERS_KEY);
         const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      } catch { return []; }
+        if (Array.isArray(arr) && arr.length) return arr;
+      } catch {}
+
+      // fallback: prova ripristino da backup locale
+      try {
+        const rawBk = localStorage.getItem(USERS_BACKUP_KEY);
+        const bk = rawBk ? JSON.parse(rawBk) : [];
+        if (Array.isArray(bk) && bk.length) {
+          localStorage.setItem(USERS_KEY, JSON.stringify(bk));
+          return bk;
+        }
+      } catch {}
+
+      return [];
     }
-    function saveUsers(arr) { localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
+    function saveUsers(arr) {
+      const payload = JSON.stringify(arr || []);
+      localStorage.setItem(USERS_KEY, payload);
+      localStorage.setItem(USERS_BACKUP_KEY, payload);
+    }
 
     function ensureDemoUsersIfEmpty() {
       const users = loadUsers();
@@ -1414,15 +1431,29 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
     // =========================
     // HASH
     // =========================
+    function normalizePasswordInput(str) {
+      return String(str || "")
+        .replace(/ /g, " ")
+        .normalize("NFKC")
+        .trim();
+    }
+
     function simpleHash(str) {
+      const input = String(str || "");
       let hash = 0;
-      if (str.length === 0) return String(hash);
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
+      if (input.length === 0) return String(hash);
+      for (let i = 0; i < input.length; i++) {
+        const char = input.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash;
       }
       return Math.abs(hash).toString(16);
+    }
+
+    function passwordMatches(rawInput, storedHash) {
+      const raw = String(rawInput || "");
+      const norm = normalizePasswordInput(raw);
+      return simpleHash(raw) === storedHash || simpleHash(norm) === storedHash;
     }
 
     function upsertUser(email, password = null, gameName = null) {
@@ -1437,14 +1468,14 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
           email: e,
           role: "",
           blocked: false,
-          passwordHash: password ? simpleHash(password) : null,
+          passwordHash: password ? simpleHash(normalizePasswordInput(password)) : null,
           gameName: gameName || "",
           totpSecret: null,
           totpNeedsSetup: false
         };
         users.push(u);
       } else if (password) {
-        u.passwordHash = simpleHash(password);
+        u.passwordHash = simpleHash(normalizePasswordInput(password));
       }
 
       if (gameName) u.gameName = gameName;
@@ -2064,7 +2095,18 @@ function logTagsLine(tagNames) {
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
       pendingEmail = email;
 
-      const existing = findUserByEmail(email);
+      let existing = findUserByEmail(email);
+      if (!existing) {
+        // fallback extra: se storage principale era vuoto/corrotto, prova backup e ripeti lookup
+        try {
+          const rawBk = localStorage.getItem(USERS_BACKUP_KEY);
+          const bk = rawBk ? JSON.parse(rawBk) : [];
+          if (Array.isArray(bk) && bk.length) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(bk));
+            existing = bk.find(u => (u.email || "").toLowerCase() === email) || null;
+          }
+        } catch {}
+      }
       if (!existing) {
         document.getElementById("regEmail").value = email;
         document.getElementById("regGameName").value = "";
@@ -2125,7 +2167,7 @@ function logTagsLine(tagNames) {
 
       const pw = document.getElementById("loginPassword").value || "";
       if (!pw) return alert("Inserisci la password");
-      if (simpleHash(pw) !== existing.passwordHash) return alert("Email o password errata");
+      if (!passwordMatches(pw, existing.passwordHash)) return alert("Email o password errata");
 
       pendingUser = existing;
 
@@ -2172,7 +2214,7 @@ function logTagsLine(tagNames) {
       if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
       if (p1 !== p2) return alert("Le password non coincidono");
 
-      u.passwordHash = simpleHash(p1);
+      u.passwordHash = simpleHash(normalizePasswordInput(p1));
       saveUsers(users);
 
       document.getElementById("newPassword").value = "";
