@@ -1161,37 +1161,8 @@ table.invTable td:nth-child(8){
     </div>
   </div>
 
-  <!-- REMOVE ITEM LIST MODAL -->
-  <div id="invAddOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px;">
-    <div id="invAddModal" style="max-width:700px; margin:0 auto; background:var(--panel2); border:1px solid #ff1a1a77; border-radius:14px; box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset; padding:18px; text-align:left;">
-      <h3 style="margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Nuovo item lista</h3>
-      <div class="muted">Aggiungi un item personalizzato alla categoria corrente.</div>
-
-      <div class="row" style="margin-top:12px;">
-        <div class="field" style="min-width:280px; flex:1;">
-          <label>Categoria</label>
-          <input id="invAddCategory" type="text" disabled />
-        </div>
-
-        <div class="field" style="min-width:320px; flex:1;">
-          <label>Nome nuovo item</label>
-          <input id="invAddItemName" type="text" placeholder="Scrivi il nome dell'item.." />
-        </div>
-      </div>
-
-      <div class="row" style="align-items:center; margin-top:14px;">
-        <div class="muted">L'item verrà aggiunto alla lista selezionabile della categoria corrente.</div>
-        <div class="right">
-          <button class="btn small" onclick="closeInvAddModal()">Chiudi</button>
-          <button class="btn small" onclick="confirmInvAddCustomItem()">Conferma</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</body>
-</html>
-
+  <div id="appScriptContainer" style="display:none;">
+  <script>
     // =========================
     // CONFIG (OWNER EMAIL)
     // =========================
@@ -3181,6 +3152,12 @@ accRenderDueTable();
       });
     }
 
+    if (typeof noteOverlay !== "undefined" && noteOverlay) {
+      noteOverlay.addEventListener("click", (e) => {
+        if (e.target === noteOverlay) closeNoteModal();
+      });
+    }
+
 if (typeof noteOverlay !== "undefined" && noteOverlay) {
   noteOverlay.addEventListener("click", (e) => {
     if (e.target === noteOverlay) closeNoteModal();
@@ -3654,47 +3631,70 @@ function invFillItemSelect(cat) {
     sel.appendChild(opt);
   });
 
-  sel.value = "";
-}
+          <div class="row" style="align-items:flex-end; flex-wrap:nowrap;">
+            <div class="field" style="min-width:120px; flex:0 0 20%;">
+              <label>Tipo</label>
+<select id="invType_${tid}" ${disabledAttr}>
+                <option value="add">AGGIUNTO</option>
+                <option value="rem">RIMOSSO</option>
+                <option value="sold">VENDUTO</option>
+                <option value="buy">ACQUISTATO</option>
+              </select>
+            </div>
 
-function invRenderTabs() {
-  const tabs = document.getElementById("invTabs");
-  const panels = document.getElementById("invPanels");
-  if (!tabs || !panels) return;
+            <div class="field" style="min-width:0; flex:1 1 0;">
+              <label>Soldi puliti ($)</label>
+              <input id="invMoneyClean_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
 
-  tabs.innerHTML = "";
-  panels.innerHTML = "";
+            <div class="field" style="min-width:0; flex:1 1 0;">
+              <label>Soldi sporchi ($)</label>
+              <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
 
-  const disabledAttr = canEditOps() ? "" : "disabled";
-  const disabledCls = canEditOps() ? "" : "disabled";
-  const invListBtnStyle = canManageInvItemList() ? "" : 'style="display:none;"';
+            <div class="field" style="min-width:0; flex:1 1 0;">
+              <label>Soldi spaccio ($)</label>
+              <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
+            </div>
+          </div>
 
-  INV_CATEGORIES.forEach((cat, idx) => {
-    const tid = invTabId(cat);
+          <div class="row">
+            <div class="field" style="width:100%; min-width:0;">
+              <label>Note</label>
+              <input id="invNote_${tid}" type="text" placeholder="Dettagli.." ${disabledAttr} />
+            </div>
+          </div>
 
-    const b = document.createElement("button");
-    b.id = "invTab_" + tid;
-    b.textContent = cat;
-    b.onclick = () => invShowTab(cat);
-    tabs.appendChild(b);
+          <div class="row" style="align-items:flex-end;">
+            <div class="field" style="min-width:320px; flex:1;">
+              <label>Item</label>
+              <select id="invItem_${tid}" ${disabledAttr}></select>
+            </div>
 
-    const p = document.createElement("div");
-    p.className = "panel invPanel";
-    p.id = "invPanel_" + tid;
+            <div class="field" style="min-width:160px; flex:0.8;">
+              <label>Quantità</label>
+              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
+            </div>
 
-    p.innerHTML = `
-      <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">${escapeHtml(cat)}</h3>
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
+            </div>
+          </div>
 
-      <div class="row" style="align-items:flex-end;">
-        <div class="field" style="min-width:170px; flex:0.9;">
-          <label>Tipo</label>
-          <select id="invType_${tid}" ${disabledAttr}>
-            <option value="add">AGGIUNTO</option>
-            <option value="rem">RIMOSSO</option>
-            <option value="sold">VENDUTO</option>
-            <option value="buy">ACQUISTATO</option>
-          </select>
-        </div>
+          <div class="row">
+            <div class="field" style="min-width:220px; max-width:260px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invSaveRecord('${escapeHtml(cat)}')">Salva registrazione</button>
+            </div>
+          </div>
+
+          <div class="panel active" style="display:block; margin-top:12px;">
+            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Bozza items</h4>
+            <div class="muted">Nessun item in bozza</div>
+          </div>
+
+<div class="hint" style="margin-top:8px;">
+            Tag (dalla lista a destra)
+          </div>
 
         <div class="field" style="min-width:140px; flex:1;">
           <label>Soldi puliti ($)</label>
@@ -3706,11 +3706,11 @@ function invRenderTabs() {
           <input id="invMoneyDirty_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
         </div>
 
-        <div class="field" style="min-width:140px; flex:1;">
-          <label>Soldi spaccio ($)</label>
-          <input id="invMoneyDrug_${tid}" type="number" min="0" step="1" placeholder="es. 25000" ${disabledAttr} />
-        </div>
-      </div>
+<thead>
+<tr>
+<th>Quando</th><th>Chi</th><th>Tipo</th><th>Soldi (P/S/SP)</th><th>Tag</th><th>Note</th><th>Items</th><th style="width:120px;">Azioni</th>
+</tr>
+</thead>
 
       <div class="row">
         <div class="field" style="width:100%; min-width:0;">
@@ -3727,10 +3727,11 @@ function invRenderTabs() {
           <select id="invItem_${tid}" ${disabledAttr}></select>
         </div>
 
-        <div class="field" style="min-width:160px; flex:0.8;">
-          <label>Quantità</label>
-          <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
-        </div>
+        setTimeout(() => {
+          invFillItemSelect(cat);
+          invRenderTable(cat);
+          syncSelectedTagsUI();
+        }, 0);
 
         <div class="field" style="min-width:180px;">
           <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItem('${escapeHtml(cat)}')">Aggiungi item</button>
@@ -3795,13 +3796,53 @@ function invRenderTabs() {
   });
 }
 
-function invShowTab(cat) {
-  invSetActive(cat);
-  const tid = invTabId(cat);
+    function invFillItemSelect(cat) {
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (!sel) return;
 
-  document.querySelectorAll("#invTabs button").forEach(x => x.classList.remove("active"));
-  const tb = document.getElementById("invTab_" + tid);
-  if (tb) tb.classList.add("active");
+      sel.innerHTML = "";
+
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = "-";
+      sel.appendChild(emptyOpt);
+
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        sel.appendChild(o);
+      });
+
+      sel.value = "";
+    }
+
+    function invAddItem(cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const name = prompt("Nuovo item per " + cat + ":");
+      const v = String(name || "").trim();
+      if (!v) return;
+
+      const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
+      if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
+        arr.push(v);
+      }
+
+      invFillItemSelect(cat);
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (sel) sel.value = v;
+    }
+
+    function invSaveRecord(cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+
+      const tid = invTabId(cat);
+      const type = document.getElementById("invType_" + tid)?.value || "add";
+      const item = document.getElementById("invItem_" + tid)?.value || "";
+      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
+      if (!Number.isFinite(qty) || qty < 0) qty = 0;
 
   document.querySelectorAll(".invPanel").forEach(x => x.classList.remove("active"));
   const pn = document.getElementById("invPanel_" + tid);
@@ -3813,10 +3854,13 @@ function invShowTab(cat) {
   syncSelectedTagsUI();
 }
 
-function invRenderDraft(cat) {
-  const tid = invTabId(cat);
-  const wrap = document.getElementById("invDraft_" + tid);
-  if (!wrap) return;
+      const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
+      if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+      if (item && qty < 1) {
+        return alert("Inserisci una quantità valida (> 0) quando selezioni un item.");
+      }
 
   const draft = invGetDraft(cat);
   if (!draft.length) {
@@ -3845,8 +3889,24 @@ function invRenderDraft(cat) {
   });
 }
 
-function invAddItem(cat) {
-  if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const all = invLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        category: cat,
+        type,
+        item,
+        qty,
+        items: item ? [{ name: item, qty }] : [],
+        money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
+        note,
+        who,
+        tagUserIds,
+        tagNames,
+        // compat vecchio
+        tagName: tagNames.length ? tagNames[0] : null
+      });
+invSave(all);
 
   const tid = invTabId(cat);
   const item = String(document.getElementById("invItem_" + tid)?.value || "").trim();
@@ -4296,12 +4356,207 @@ function invSaveEdit() {
   accRenderDueTable();
   accRenderSummary();
 }
+      document.getElementById("invItem_" + tid).value = "";
+      document.getElementById("invQty_" + tid).value = "0";
+      document.getElementById("invMoneyClean_" + tid).value = "";
+      document.getElementById("invMoneyDirty_" + tid).value = "";
+      document.getElementById("invMoneyDrug_" + tid).value = "";
+      document.getElementById("invNote_" + tid).value = "";
 
 function invDeleteRecord(id, cat) {
   if (!canEditOps()) return;
 
-  const ok = confirm("Confermi eliminazione registrazione?");
-  if (!ok) return;
+    const invEditInfo = document.getElementById("invEditInfo");
+    const invEditType = document.getElementById("invEditType");
+    const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+    const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+    const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+    const invEditNote = document.getElementById("invEditNote");
+    const invEditTagName = document.getElementById("invEditTagName");
+    const invEditItemSelect = document.getElementById("invEditItemSelect");
+    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemsList = document.getElementById("invEditItemsList");
+
+    let invEditingId = null;
+    let invEditingCategory = null;
+    let invEditingItems = [];
+
+    function invFillEditItemSelect(cat) {
+      if (!invEditItemSelect) return;
+      invEditItemSelect.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      invEditItemSelect.appendChild(empty);
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        invEditItemSelect.appendChild(o);
+      });
+      invEditItemSelect.value = "";
+    }
+
+    function invRenderEditItems() {
+      if (!invEditItemsList) return;
+      if (!invEditingItems.length) {
+        invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      invEditItemsList.innerHTML = "";
+      invEditingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${Number(it.qty || 0)}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="invEditRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        invEditItemsList.appendChild(div);
+      });
+    }
+
+    function invEditAddItem() {
+      const name = String(invEditItemSelect?.value || "").trim();
+      let qty = parseInt(invEditItemQty?.value || "1", 10);
+      if (!name) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = invEditingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else invEditingItems.push({ name, qty });
+
+      if (invEditItemQty) invEditItemQty.value = "1";
+      invFillEditItemSelect(invEditingCategory || "Armi");
+      invRenderEditItems();
+    }
+
+    function invEditRemoveItem(name) {
+      invEditingItems = invEditingItems.filter(x => x.name !== name);
+      invRenderEditItems();
+    }
+
+    function invEditRecord(id, cat) {
+      if (!canEditOps()) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      if (!rec) return;
+
+      hideAllActionMenus();
+      try { closeEdit(); } catch {}
+      try { closeNoteModal(); } catch {}
+      setModalOpen(true);
+
+      invEditingId = id;
+      invEditingCategory = cat;
+      invEditingItems = Array.isArray(rec.items) && rec.items.length
+        ? rec.items.map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) })).filter(x => x.name)
+        : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : []);
+
+      invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+      invEditType.value = rec.type || "add";
+
+      const m = rec.money;
+      const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+      const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+      const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+      invEditMoneyClean.value = String(clean || 0);
+      invEditMoneyDirty.value = String(dirty || 0);
+      invEditMoneyDrug.value = String(drug || 0);
+      invEditNote.value = rec.note || "";
+
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      invEditTagName.value = tnames.length ? tnames.join(", ") : "—";
+
+      invFillEditItemSelect(cat);
+      invRenderEditItems();
+      if (invEditOverlay) invEditOverlay.style.display = "block";
+    }
+
+    function closeInvEdit() {
+      if (!invEditOverlay) return;
+      invEditOverlay.style.display = "none";
+      invEditingId = null;
+      invEditingCategory = null;
+      invEditingItems = [];
+      setModalOpen(false);
+    }
+
+    function invSaveEdit() {
+      if (!invEditingId || !invEditingCategory) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === invEditingId);
+      if (!rec) return;
+
+      const type = String(invEditType?.value || "add").trim().toLowerCase();
+      if (!["add","rem","sold","buy"].includes(type)) return alert("Tipo non valido.");
+
+      const moneyClean = Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0);
+      const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
+      const note = String(invEditNote?.value || "").trim();
+
+      const normalizedItems = (invEditingItems || [])
+        .map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) }))
+        .filter(x => x.name);
+
+      const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+      const item = firstItem.name;
+      const qty = firstItem.qty;
+
+      if (!normalizedItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+
+      rec.type = type;
+      rec.item = item;
+      rec.qty = qty;
+      rec.items = normalizedItems;
+      rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
+      rec.note = note;
+      rec.updatedAt = Date.now();
+      invSave(all);
+
+      logEvent("INV_EDIT", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      const currentCat = invEditingCategory || rec.category;
+      closeInvEdit();
+      invRenderTable(currentCat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
+    function invDeleteRecord(id, cat) {
+      if (!canEditOps()) return;
+      const ok = confirm("Confermi eliminazione registrazione?");
+      if (!ok) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      const next = all.filter(x => x.id !== id);
+      invSave(next);
+      if (rec) {
+        logEvent("INV_DELETE", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      } else {
+        logEvent("INV_DELETE", `${cat} .. id:${id}`);
+      }
+      invRenderTable(cat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
+    function invRenderTable(cat) {
+      const tid = invTabId(cat);
+      const body = document.getElementById("invTable_" + tid);
+      if (!body) return;
 
   const all = invLoad();
   const rec = all.find(x => x.id === id);
@@ -4317,15 +4572,46 @@ function invDeleteRecord(id, cat) {
     logEvent("INV_DELETE", `${cat} .. id:${id}`);
   }
 
-  accSave(
-    accLoad().filter(r => !(r.kind === "salary" && (r.status || "paid") === "due" && r.source === "inv" && r.sourceId === id))
-  );
+        tr.innerHTML = `
+          <td>${new Date(r.ts).toLocaleString()}</td>
+          <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
+          <td style="font-weight:900; color:${(r.type === "sold" || r.type === "rem") ? "var(--red2)" : "#fff"};">${t}</td>
+          <td style="font-weight:900;">
+            ${(() => {
+              const m = r.money;
+              const clean = (typeof m === "number") ? m : Number(m?.clean || 0);
+              const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+              const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
 
-  invRenderTable(cat);
-  invRenderTotals();
-  accRenderDueTable();
-  accRenderSummary();
-}
+              const parts = [];
+              if (clean) parts.push("P: " + formatMoney(clean));
+              if (dirty) parts.push("S: " + formatMoney(dirty));
+              if (drug)  parts.push("SP: " + formatMoney(drug));
+              return parts.length
+                ? `<div style="white-space:pre-wrap; line-height:1.25;">${parts.join("<br>")}</div>`
+                : '<span class="muted">—</span>';
+            })()}
+          </td>
+          <td>${tagHtml}</td>
+          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:14px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${(() => {
+            const items = Array.isArray(r.items) && r.items.length
+              ? r.items
+              : (r.item ? [{ name: r.item, qty: Number(r.qty || 0) }] : []);
+            if (!items.length) return '<span class="muted">—</span>';
+            const lines = items
+              .map(it => `${Number(it.qty || 0)}x ${escapeHtml(it.name || "—")}`)
+              .join("<br>");
+            return `<div style="white-space:pre-wrap; font-size:14px; font-weight:800; line-height:1.25;">${lines}</div>`;
+          })()}</td>
+          <td>${canEditOps() ? `<div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+            <button class="btn small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invEditRecord('${r.id}','${escapeHtml(r.category)}')">Modifica</button>
+            <button class="btn danger small" style="white-space:nowrap; width:100%; min-width:0;" onclick="invDeleteRecord('${r.id}','${escapeHtml(r.category)}')">Elimina</button>
+          </div>` : `<span class="muted">—</span>`}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
 
 function invRenderTable(cat) {
   const tid = invTabId(cat);
@@ -5232,5 +5518,6 @@ function boot() {
 
 boot();
   </script>
+  </div>
 </body>
 </html>
