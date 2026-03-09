@@ -1161,8 +1161,88 @@ table.invTable td:nth-child(8){
     </div>
   </div>
 
-  <div id="appScriptContainer" style="display:none;">
-  <script>
+<div id="appScriptContainer" style="display:none;">
+<script>
+
+// =========================
+// CONFIG
+// =========================
+const OWNER_EMAIL = "m.colurci@gmail.com";
+
+// =========================
+// LOGIN STEP 1
+// =========================
+function loginStepEmail(){
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+
+  if(!email){
+    alert("Inserisci l'email");
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem("vn_users") || "[]");
+  const user = users.find(u => u.email === email);
+
+  if(!user){
+    document.getElementById("regEmail").value = email;
+    showLoginPanel("stepRegister");
+    return;
+  }
+
+  document.getElementById("pwEmail").value = email;
+  showLoginPanel("stepPassword");
+}
+
+// =========================
+// LOGIN STEP 2
+// =========================
+function loginStepPassword(){
+  const email = document.getElementById("pwEmail").value.trim().toLowerCase();
+  const password = document.getElementById("loginPassword").value;
+
+  const users = JSON.parse(localStorage.getItem("vn_users") || "[]");
+  const user = users.find(u => u.email === email);
+
+  if(!user || user.password !== password){
+    alert("Password errata");
+    return;
+  }
+
+  document.getElementById("twofaEmailInline").value = email;
+  showLoginPanel("step2FA");
+}
+
+// =========================
+// LOGIN STEP 3 (2FA)
+// =========================
+function loginStep2FA(){
+  const code = document.getElementById("login2fa").value.trim();
+
+  if(code.length !== 6){
+    alert("Inserisci il codice 2FA");
+    return;
+  }
+
+  const email = document.getElementById("twofaEmailInline").value;
+
+  localStorage.setItem("vn_session_v1", JSON.stringify({
+    email: email,
+    login: Date.now()
+  }));
+
+  initAfterLogin();
+}
+
+// =========================
+// PANEL LOGIN
+// =========================
+function showLoginPanel(id){
+  document.querySelectorAll("#login .panel").forEach(p=>{
+    p.style.display = "none";
+  });
+
+  document.getElementById(id).style.display = "block";
+}
 </html>
 
 
