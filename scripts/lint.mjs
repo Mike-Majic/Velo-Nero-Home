@@ -23,7 +23,51 @@ function checkFile(path) {
   execFileSync("node", ["--check", path], { stdio: "pipe" });
 }
 
+function validateHtmlStructure(file, html) {
+  const problems = [];
+
+  const openHtml = [...html.matchAll(/<html\b/gi)].length;
+  const closeHtml = [...html.matchAll(/<\/html>/gi)].length;
+  const openBody = [...html.matchAll(/<body\b/gi)].length;
+  const closeBody = [...html.matchAll(/<\/body>/gi)].length;
+
+  if (openHtml !== 1 || closeHtml !== 1) {
+    problems.push(`Expected exactly 1 <html> and 1 </html>, found ${openHtml} / ${closeHtml}`);
+  }
+  if (openBody !== 1 || closeBody !== 1) {
+    problems.push(`Expected exactly 1 <body> and 1 </body>, found ${openBody} / ${closeBody}`);
+  }
+
+  const iHtmlOpen = html.search(/<html\b/i);
+  const iHeadOpen = html.search(/<head\b/i);
+  const iHeadClose = html.search(/<\/head>/i);
+  const iBodyOpen = html.search(/<body\b/i);
+  const iBodyClose = html.search(/<\/body>/i);
+  const iHtmlClose = html.search(/<\/html>/i);
+
+  if (!(iHtmlOpen >= 0 && iHeadOpen >= 0 && iHeadClose > iHeadOpen && iBodyOpen > iHeadClose && iBodyClose > iBodyOpen && iHtmlClose > iBodyClose)) {
+    problems.push("Invalid head/body/html tag order");
+  }
+
+  if (iHtmlClose >= 0) {
+    const trailing = html.slice(iHtmlClose + "</html>".length).trim();
+    if (trailing.length > 0) {
+      problems.push("Unexpected content found after </html>");
+    }
+  }
+
+  const scriptsOpen = [...html.matchAll(/<script\b/gi)].length;
+  const scriptsClose = [...html.matchAll(/<\/script>/gi)].length;
+  if (scriptsOpen !== scriptsClose) {
+    problems.push(`Mismatched <script> tags: ${scriptsOpen} openings vs ${scriptsClose} closings`);
+  }
+
+  return problems.map((p) => `${file}: ${p}`);
+}
+
 const targets = [];
+const htmlStructureFailures = [];
+
 for (const dir of jsDirs) {
   try {
     if (statSync(dir).isDirectory()) targets.push(...walkJs(dir));
@@ -33,6 +77,7 @@ for (const dir of jsDirs) {
 for (const file of htmlFiles) {
   try {
     const html = readFileSync(file, "utf8");
+    htmlStructureFailures.push(...validateHtmlStructure(file, html));
     const rx = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
     let m;
     let i = 0;
@@ -56,11 +101,16 @@ for (const t of targets) {
 
 rmSync(tmp, { recursive: true, force: true });
 
-if (failures.length) {
-  console.error("Lint failed. Syntax errors found:\n");
+if (failures.length || htmlStructureFailures.length) {
+  console.error("Lint failed. Issues found:\n");
   for (const f of failures) {
     console.error(`--- ${f.file} ---`);
     console.error(f.error.trim());
+    console.error("");
+  }
+  if (htmlStructureFailures.length) {
+    console.error("HTML structure problems:\n");
+    for (const p of htmlStructureFailures) console.error(`- ${p}`);
     console.error("");
   }
   process.exit(1);
