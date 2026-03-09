@@ -452,6 +452,156 @@ table.invTable td:nth-child(8){
     <button id="btnUtenti" onclick="showSection('utenti')" style="display:none;">Utenti</button>
     <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
   </div>
+  <div id="login" class="section">
+  <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Accesso</h2>
+  <div class="hint">Accesso in 3 passaggi: Email → Password → Codice 2FA.</div>
+
+  <div class="panel active" id="stepEmail" style="display:block;">
+    <div class="row">
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Email</label>
+        <input id="loginEmail" type="email" placeholder="nome@gmail.com" />
+      </div>
+      <div class="field" style="min-width:220px;">
+        <button class="btn" onclick="loginStepEmail()">Continua</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="stepPassword">
+    <div class="row">
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Email</label>
+        <input id="pwEmail" type="email" disabled />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Password</label>
+        <div class="pwbox">
+          <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button class="eye" type="button" onclick="togglePassword('loginPassword', this)">👁</button>
+        </div>
+      </div>
+      <div class="field" style="min-width:220px;">
+        <button class="btn" onclick="loginStepPassword()">Accedi</button>
+        <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
+      </div>
+    </div>
+
+    <div class="row" id="pwResetBox" style="display:none;">
+      <div class="field" style="min-width:320px; flex:1;">
+        <div class="hint">⚠️ Password resettata da un admin: devi impostarne una nuova.</div>
+
+        <label>Nuova password</label>
+        <div class="pwbox">
+          <input id="newPassword" type="password" placeholder="Nuova password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button class="eye" type="button" onclick="togglePassword('newPassword', this)">👁</button>
+        </div>
+
+        <label>Conferma nuova password</label>
+        <div class="pwbox">
+          <input id="newPassword2" type="password" placeholder="Conferma" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button class="eye" type="button" onclick="togglePassword('newPassword2', this)">👁</button>
+        </div>
+      </div>
+      <div class="field" style="min-width:220px;">
+        <button class="btn" onclick="saveNewPassword()">Salva password</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="stepRegister">
+    <div class="row">
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Email</label>
+        <input id="regEmail" type="email" disabled />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Nome utente in game</label>
+        <input id="regGameName" type="text" placeholder="Il tuo nick in game" />
+      </div>
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Password</label>
+        <div class="pwbox">
+          <input id="regPassword" type="password" placeholder="Password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button class="eye" type="button" onclick="togglePassword('regPassword', this)">👁</button>
+        </div>
+        <label>Conferma password</label>
+        <div class="pwbox">
+          <input id="regPassword2" type="password" placeholder="Conferma password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button class="eye" type="button" onclick="togglePassword('regPassword2', this)">👁</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field" style="min-width:220px;">
+        <button class="btn" onclick="registerAccount()">Crea account</button>
+        <button class="btn danger" onclick="backToEmail()" style="margin-left:10px;">Indietro</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="step2FA">
+    <div class="row">
+      <div class="field" style="min-width:320px; flex:1;">
+        <label>Email</label>
+        <input id="twofaEmailInline" disabled />
+      </div>
+    </div>
+
+    <div class="row" id="twofaSetupBox" style="display:none;">
+      <div class="field" style="min-width:320px; flex:1;">
+        <div class="hint">Configura 2FA (obbligatorio) su Google Authenticator (o simili).</div>
+
+        <label>Chiave segreta 2FA</label>
+        <input id="twofaSecretInline" class="mono" disabled />
+
+        <div class="row" style="margin-top:10px; align-items:flex-start;">
+          <div class="field" style="min-width:220px;">
+            <button class="btn small" id="btnToggleQR" onclick="toggleQR()">Mostra QR</button>
+          </div>
+
+          <div class="field qrwrap" id="qrWrap" style="display:none; min-width:220px;">
+            <div class="hint">Scansiona il QR con l’app Authenticator</div>
+            <img id="twofaQR" alt="QR 2FA" />
+          </div>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+          <input id="confirmAdded" type="checkbox" />
+          Ho aggiunto questo account nell’app Authenticator
+        </label>
+
+        <div class="hint" style="margin-top:8px;">
+          Se il codice non viene accettato, controlla che l’orologio del PC sia corretto (data/ora automatiche).
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field" style="min-width:240px;">
+        <label>Codice 2FA (6 cifre)</label>
+        <input id="login2fa" type="text" inputmode="numeric" maxlength="6" placeholder="123456" />
+        <div class="hint" id="twofaHintInline"></div>
+      </div>
+
+      <div class="field" style="min-width:320px;">
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input id="rememberDevice" type="checkbox" />
+          Ricorda questo dispositivo per 30 giorni
+        </label>
+        <button class="btn" onclick="loginStep2FA()">Verifica e entra</button>
+        <button class="btn danger" onclick="backToPasswordOrEmail()" style="margin-left:10px;">Indietro</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <!-- LOGIN -->
   <div id="login" class="section active">
