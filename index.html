@@ -454,7 +454,7 @@ table.invTable td:nth-child(8){
   </div>
 
   <!-- LOGIN -->
-  <div id="login" class="section">
+  <div id="login" class="section active">
     <h2 style="color:var(--red2); margin:0 0 10px 0; text-shadow:0 0 10px #ff3b3b80; font-weight:900;">Accesso</h2>
     <div class="hint">Accesso in 3 passaggi: Email → Password → Codice 2FA.</div>
 
@@ -3837,6 +3837,45 @@ function invFillItemSelect(cat) {
       if (sel) sel.value = v;
     }
 
+    function invFillItemSelect(cat) {
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (!sel) return;
+
+      sel.innerHTML = "";
+
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = "-";
+      sel.appendChild(emptyOpt);
+
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        sel.appendChild(o);
+      });
+
+      sel.value = "";
+    }
+
+    function invAddItem(cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const name = prompt("Nuovo item per " + cat + ":");
+      const v = String(name || "").trim();
+      if (!v) return;
+
+      const arr = INV_ITEMS[cat] || (INV_ITEMS[cat] = []);
+      if (!arr.some(x => String(x).toLowerCase() === v.toLowerCase())) {
+        arr.push(v);
+      }
+
+      invFillItemSelect(cat);
+      const tid = invTabId(cat);
+      const sel = document.getElementById("invItem_" + tid);
+      if (sel) sel.value = v;
+    }
+
     function invSaveRecord(cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
@@ -4367,6 +4406,193 @@ function invSaveEdit() {
 
 function invDeleteRecord(id, cat) {
   if (!canEditOps()) return;
+
+    const invEditInfo = document.getElementById("invEditInfo");
+    const invEditType = document.getElementById("invEditType");
+    const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+    const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+    const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+    const invEditNote = document.getElementById("invEditNote");
+    const invEditTagName = document.getElementById("invEditTagName");
+    const invEditItemSelect = document.getElementById("invEditItemSelect");
+    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemsList = document.getElementById("invEditItemsList");
+
+    let invEditingId = null;
+    let invEditingCategory = null;
+    let invEditingItems = [];
+
+    function invFillEditItemSelect(cat) {
+      if (!invEditItemSelect) return;
+      invEditItemSelect.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "-";
+      invEditItemSelect.appendChild(empty);
+      (INV_ITEMS[cat] || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        invEditItemSelect.appendChild(o);
+      });
+      invEditItemSelect.value = "";
+    }
+
+    function invRenderEditItems() {
+      if (!invEditItemsList) return;
+      if (!invEditingItems.length) {
+        invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      invEditItemsList.innerHTML = "";
+      invEditingItems.forEach(it => {
+        const div = document.createElement("div");
+        div.className = "itemRow";
+        div.innerHTML = `
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input value="${Number(it.qty || 0)}" disabled />
+          </div>
+          <div class="right">
+            <button class="btn danger small" onclick="invEditRemoveItem('${escapeHtml(it.name)}')">Rimuovi</button>
+          </div>
+        `;
+        invEditItemsList.appendChild(div);
+      });
+    }
+
+    function invEditAddItem() {
+      const name = String(invEditItemSelect?.value || "").trim();
+      let qty = parseInt(invEditItemQty?.value || "1", 10);
+      if (!name) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const existing = invEditingItems.find(x => x.name === name);
+      if (existing) existing.qty += qty;
+      else invEditingItems.push({ name, qty });
+
+      if (invEditItemQty) invEditItemQty.value = "1";
+      invFillEditItemSelect(invEditingCategory || "Armi");
+      invRenderEditItems();
+    }
+
+    function invEditRemoveItem(name) {
+      invEditingItems = invEditingItems.filter(x => x.name !== name);
+      invRenderEditItems();
+    }
+
+    function invEditRecord(id, cat) {
+      if (!canEditOps()) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      if (!rec) return;
+
+      hideAllActionMenus();
+      try { closeEdit(); } catch {}
+      try { closeNoteModal(); } catch {}
+      setModalOpen(true);
+
+      invEditingId = id;
+      invEditingCategory = cat;
+      invEditingItems = Array.isArray(rec.items) && rec.items.length
+        ? rec.items.map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) })).filter(x => x.name)
+        : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) || 1 }] : []);
+
+      invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+      invEditType.value = rec.type || "add";
+
+      const m = rec.money;
+      const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
+      const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+      const drug = (typeof m === "number") ? 0 : Number(m?.drug || 0);
+      invEditMoneyClean.value = String(clean || 0);
+      invEditMoneyDirty.value = String(dirty || 0);
+      invEditMoneyDrug.value = String(drug || 0);
+      invEditNote.value = rec.note || "";
+
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      invEditTagName.value = tnames.length ? tnames.join(", ") : "—";
+
+      invFillEditItemSelect(cat);
+      invRenderEditItems();
+      if (invEditOverlay) invEditOverlay.style.display = "block";
+    }
+
+    function closeInvEdit() {
+      if (!invEditOverlay) return;
+      invEditOverlay.style.display = "none";
+      invEditingId = null;
+      invEditingCategory = null;
+      invEditingItems = [];
+      setModalOpen(false);
+    }
+
+    function invSaveEdit() {
+      if (!invEditingId || !invEditingCategory) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === invEditingId);
+      if (!rec) return;
+
+      const type = String(invEditType?.value || "add").trim().toLowerCase();
+      if (!["add","rem","sold","buy"].includes(type)) return alert("Tipo non valido.");
+
+      const moneyClean = Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0);
+      const moneyDirty = Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0);
+      const moneyDrug = Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0);
+      const note = String(invEditNote?.value || "").trim();
+
+      const normalizedItems = (invEditingItems || [])
+        .map(x => ({ name: String(x.name || "").trim(), qty: Math.max(1, parseInt(x.qty || 1, 10) || 1) }))
+        .filter(x => x.name);
+
+      const firstItem = normalizedItems[0] || { name: "", qty: 0 };
+      const item = firstItem.name;
+      const qty = firstItem.qty;
+
+      if (!normalizedItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+        return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
+      }
+
+      rec.type = type;
+      rec.item = item;
+      rec.qty = qty;
+      rec.items = normalizedItems;
+      rec.money = { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug };
+      rec.note = note;
+      rec.updatedAt = Date.now();
+      invSave(all);
+
+      logEvent("INV_EDIT", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      const currentCat = invEditingCategory || rec.category;
+      closeInvEdit();
+      invRenderTable(currentCat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
+
+    function invDeleteRecord(id, cat) {
+      if (!canEditOps()) return;
+      const ok = confirm("Confermi eliminazione registrazione?");
+      if (!ok) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === id);
+      const next = all.filter(x => x.id !== id);
+      invSave(next);
+      if (rec) {
+        logEvent("INV_DELETE", `${rec.category} .. ${rec.type} .. Item(${rec.item || "—"} x${Number(rec.qty || 0)})`);
+      } else {
+        logEvent("INV_DELETE", `${cat} .. id:${id}`);
+      }
+      invRenderTable(cat);
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
+    }
 
     const invEditInfo = document.getElementById("invEditInfo");
     const invEditType = document.getElementById("invEditType");
