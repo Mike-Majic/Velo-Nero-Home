@@ -5942,32 +5942,6 @@ function boot() {
       return;
     }
 
-    boot();
-<div id="invAddOverlay" class="overlay" style="display:none;">
-  <div class="modalBox">
-    <h3 style="margin-top:0; color:var(--red2);">Nuovo item lista</h3>
-
-    <div class="row">
-      <div class="field" style="width:100%;">
-        <label>Categoria</label>
-        <input id="invAddCategory" type="text" disabled />
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="field" style="width:100%;">
-        <label>Nome nuovo item</label>
-        <input id="invAddItemName" type="text" placeholder="Scrivi il nome dell'item.." />
-      </div>
-    </div>
-
-    <div class="row" style="justify-content:flex-end; margin-top:14px;">
-      <button class="btn danger" onclick="closeInvAddModal()">Annulla</button>
-      <button class="btn" onclick="confirmInvAddCustomItem()">Conferma</button>
-    </div>
-  </div>
-</div>
-
 boot();
 </script>
 </body>
