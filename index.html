@@ -152,15 +152,15 @@
 
  
 
-    .cards { text-align:center; }
+    .cards { text-align:center; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
 
     .box {
 
-      display:inline-block; background-color:var(--panel); padding:40px 60px; margin:12px;
-
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      background-color:var(--panel); padding:32px 20px; margin:0;
       border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
-
-      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
+      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff;
+      width:260px; min-height:160px; box-sizing:border-box;
 
     }
 
@@ -277,6 +277,15 @@
  
 
     table { width:100%; border-collapse:collapse; margin-top:12px; table-layout:fixed; }
+    table.usersTable, table.accTable { table-layout:auto; }
+    table.usersTable td, table.usersTable th { overflow:visible; }
+    table.usersTable select { width:100%; min-width:120px; }
+    table.accTable th, table.accTable td { overflow-wrap:normal; word-break:normal; white-space:normal; }
+
+    .row.moneyRow { flex-wrap:nowrap; align-items:flex-end; }
+    .moneyRow .field { min-width:0; flex:1; }
+    .moneyRow .field.typeField { flex:0 0 160px; }
+    .noteWide { min-width:420px !important; flex:1 !important; }
 
     /* =========================
 
@@ -798,7 +807,7 @@ table.invTable td:last-child{
 
     <div class="userpill">
 
-      <span class="pill" id="pillEmail">Non autenticato</span>
+      <span class="pill" id="pillEmail">Utente: Non autenticato</span>
 
       <span class="pill" id="pillRole">Ruolo: —</span>
 
@@ -824,13 +833,13 @@ table.invTable td:last-child{
 
     <button id="btnAzioni" onclick="showSection('azioni')">Azioni</button>
 
-    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
-
     <button id="btnComandi" onclick="showSection('comandi')">Gestione armi-droga</button>
 
-    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
+    <button id="btnDiario" onclick="showSection('diario')">Diario</button>
 
     <button id="btnContabilita" onclick="showSection('contabilita')">Contabilità</button>
+
+    <button id="btnUtenti" onclick="showSection('utenti')">Utenti</button>
 
     <button id="btnLog" onclick="showSection('log')" style="display:none;">📋 Log</button>
 
@@ -1168,16 +1177,6 @@ table.invTable td:last-child{
 
  
 
-      <div class="box" onclick="showSection('contabilita')">
-
-        <h2>Contabilità</h2>
-
-        <p>Stipendi</p>
-
-      </div>
-
- 
-
       <div class="box" onclick="showSection('diario')">
 
         <h2>Diario</h2>
@@ -1186,7 +1185,13 @@ table.invTable td:last-child{
 
       </div>
 
- 
+      <div class="box" onclick="showSection('contabilita')">
+
+        <h2>Contabilità</h2>
+
+        <p>Stipendi</p>
+
+      </div>
 
       <div class="box" id="cardUtenti" onclick="showSection('utenti')">
 
@@ -1196,9 +1201,15 @@ table.invTable td:last-child{
 
       </div>
 
-    </div>
+      <div class="box" id="cardLog" onclick="showSection('log')" style="display:none;">
 
- 
+        <h2>Log</h2>
+
+        <p>Attività</p>
+
+      </div>
+
+      </div>
 
     <div class="hint" id="dashHint" style="text-align:center; margin-top:18px;"></div>
 
@@ -1216,7 +1227,7 @@ table.invTable td:last-child{
 
  
 
-    <table>
+    <table class="usersTable">
 
       <thead>
 
@@ -1224,7 +1235,7 @@ table.invTable td:last-child{
 
           <th>Nome in Game</th>
 
-          <th>Ruolo</th>
+          <th style="width:170px;">Ruolo</th>
 
           <th>Email</th>
 
@@ -1291,6 +1302,29 @@ table.invTable td:last-child{
       <div class="colSide">
 
         <div class="sidePanel">
+          <h3 class="sideTitle">Resoconto Soldi (Azioni)</h3>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
+              <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
+              <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
+              <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
+              <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
+              <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
+              <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
+        </div>
+
+        <div class="sidePanel" style="margin-top:14px;">
 
           <h3 class="sideTitle">Tag (Utente)</h3>
 
@@ -1343,61 +1377,7 @@ table.invTable td:last-child{
  
 
           <div class="hint">I tag vengono salvati dentro le registrazioni (Azioni e Gestione).</div>
-
- 
-
-          <div class="panel active" style="display:block; margin-top:12px;">
-
-            <h4 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Resoconto Soldi (Azioni)</h4>
-
- 
-
-            <div style="display:flex; flex-direction:column; gap:10px;">
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-
-                <span class="pill">Puliti +: <span id="opsMoneyCleanAdd">$0</span></span>
-
-                <span class="pill">Puliti -: <span id="opsMoneyCleanRem">$0</span></span>
-
-                <span class="pill">Puliti =: <span id="opsMoneyCleanSal">$0</span></span>
-
-              </div>
-
- 
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-
-                <span class="pill">Sporchi +: <span id="opsMoneyDirtyAdd">$0</span></span>
-
-                <span class="pill">Sporchi -: <span id="opsMoneyDirtyRem">$0</span></span>
-
-                <span class="pill">Sporchi =: <span id="opsMoneyDirtySal">$0</span></span>
-
-              </div>
-
- 
-
-              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-
-                <span class="pill">Spaccio +: <span id="opsMoneyDrugAdd">$0</span></span>
-
-                <span class="pill">Spaccio -: <span id="opsMoneyDrugRem">$0</span></span>
-
-                <span class="pill">Spaccio =: <span id="opsMoneyDrugSal">$0</span></span>
-
-              </div>
-
-            </div>
-
- 
-
-            <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
-
-          </div>
-
         </div>
-
       </div>
 
     </div>
@@ -1410,63 +1390,66 @@ table.invTable td:last-child{
 
   <div id="diario" class="section">
 
-    <div class="hint">Invio per cercare .. click su una riga per aprire la nota</div>
+    <div class="hint">Nuova nota e modifica direttamente in pagina.</div>
 
- 
+    <div class="twoCol" style="margin-top:12px;">
+      <div class="colMain">
+        <div class="diaryBar">
+          <div class="diarySearch">
+            <span class="icon">🔎</span>
+            <input id="diaryQuery" type="text" placeholder="Cerca nel diario.. (titolo, nomi, accordi, note)" />
+          </div>
+          <button class="btn" onclick="diarySearch()">Cerca</button>
+          <button class="btn" onclick="diaryClear()">Pulisci</button>
+          <button class="btn" id="btnNewNote" onclick="openNoteModal(null)">Nuova nota</button>
+        </div>
 
-    <div class="diaryBar">
+        <div id="diaryEditorHost" class="panel active" style="display:block; margin-top:12px;"></div>
 
-      <div class="diarySearch">
-
-        <span class="icon">🔎</span>
-
-        <input id="diaryQuery" type="text" placeholder="Cerca nel diario.. (titolo, nomi, accordi, note)" />
-
+        <div class="diaryTableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:220px;">Quando</th>
+                <th style="width:160px;">Tipo</th>
+                <th>Risultato</th>
+              </tr>
+            </thead>
+            <tbody id="diaryTableBody">
+              <tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
- 
+      <div class="colSide">
+        <div class="sidePanel">
+          <h3 class="sideTitle">Tag (Utente)</h3>
+          <div class="muted">Tag salvati anche nelle note del diario.</div>
 
-      <button class="btn" onclick="diarySearch()">Cerca</button>
+          <div class="tagSelected">
+            <div class="muted">Selezionati:</div>
+            <div id="tagSelectedWrapDiary" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary();">Pulisci</button>
+          </div>
 
-      <button class="btn" onclick="diaryClear()">Pulisci</button>
+          <div class="tagSearchRow">
+            <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+            <input id="tagSearchDiary" type="text" placeholder="Cerca tag.." oninput="renderTagListDiary()" />
+          </div>
 
-      <button class="btn" id="btnNewNote" onclick="openNoteModal(null)">Nuova nota</button>
-
+          <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+            <table style="margin-top:0;">
+              <thead><tr><th>Nome</th></tr></thead>
+              <tbody id="tagTableBodyDiary">
+                <tr><td class="muted">Nessun utente</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
-
- 
-
-    <div class="diaryTableWrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th style="width:220px;">Quando</th>
-
-            <th style="width:160px;">Tipo</th>
-
-            <th>Risultato</th>
-
-          </tr>
-
-        </thead>
-
-        <tbody id="diaryTableBody">
-
-          <tr><td class="muted" colspan="3">Scrivi qualcosa per cercare nel diario</td></tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
   </div>
-
- 
 
   <!-- CONTABILITÀ -->
 
@@ -1536,6 +1519,26 @@ table.invTable td:last-child{
 
             <div class="muted" id="accSalarySummary">Totale stipendi: $0 .. Ultimi 30gg: $0</div>
 
+          </div>
+
+          <div class="sidePanel" style="margin-top:12px;">
+            <h3 class="sideTitle">Tag (Utente)</h3>
+            <div class="muted">Tag selezionati usati come destinatari stipendio.</div>
+            <div class="tagSelected">
+              <div class="muted">Selezionati:</div>
+              <div id="tagSelectedWrapAcc" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+              <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary(); renderTagListAcc();">Pulisci</button>
+            </div>
+            <div class="tagSearchRow">
+              <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+              <input id="tagSearchAcc" type="text" placeholder="Cerca tag.." oninput="renderTagListAcc()" />
+            </div>
+            <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+              <table style="margin-top:0;">
+                <thead><tr><th>Nome</th></tr></thead>
+                <tbody id="tagTableBodyAcc"><tr><td class="muted">Nessun utente</td></tr></tbody>
+              </table>
+            </div>
           </div>
 
         </div>
@@ -1945,6 +1948,11 @@ table.invTable td:last-child{
       <h3 id="noteModalTitle">Nuova nota</h3>
 
       <div class="muted" id="noteInfo"></div>
+
+      <div style="margin-top:8px;">
+        <label>Tag selezionati</label>
+        <div id="noteTagsPreview" class="tagSelected" style="margin-top:6px;"></div>
+      </div>
 
  
 
@@ -2490,6 +2498,10 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
         toUserId: u.id,
 
+        tagUserIds: [u.id],
+
+        tagNames: [u.gameName || u.email || "—"],
+
         amount: add,
 
         payType,
@@ -2818,323 +2830,178 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
  
 
-    // NOTE MODAL
+    // NOTE INLINE (DIARIO)
 
     const noteOverlay = document.getElementById("noteOverlay");
-
+    const noteModal = document.getElementById("noteModal");
     const noteModalTitle = document.getElementById("noteModalTitle");
-
     const noteInfo = document.getElementById("noteInfo");
-
     const noteType = document.getElementById("noteType");
-
     const noteTitle = document.getElementById("noteTitle");
-
     const noteNames = document.getElementById("noteNames");
-
     const noteAgreements = document.getElementById("noteAgreements");
-
     const noteBody = document.getElementById("noteBody");
-
     const btnDeleteNote = document.getElementById("btnDeleteNote");
-
     const notePermHint = document.getElementById("notePermHint");
-
     const btnSaveNote = document.getElementById("btnSaveNote");
-
- 
 
     let editingNoteId = null;
 
- 
+    function initDiaryInlineEditor() {
+      const host = document.getElementById("diaryEditorHost");
+      if (host && noteModal && noteModal.parentElement !== host) {
+        host.appendChild(noteModal);
+      }
+      if (noteOverlay) noteOverlay.style.display = "none";
+    }
 
     function openNoteModal(id) {
-
       editingNoteId = id;
 
- 
-
       const canAdd = canAddDiaryNote();
-
       const canEdit = canEditDiaryNote();
-
       const isExisting = !!id;
 
- 
-
       const fields = [noteType, noteTitle, noteNames, noteAgreements, noteBody];
-
       fields.forEach(f => { if (f) f.disabled = isExisting ? !canEdit : !canAdd; });
 
- 
-
       btnSaveNote.disabled = isExisting ? !canEdit : !canAdd;
-
       btnSaveNote.classList.toggle("disabled", btnSaveNote.disabled);
 
- 
-
       if (isExisting && !canEdit) {
-
         notePermHint.textContent = "Solo Owner, Boss e Vice Boss possono modificare le note.";
-
       } else if (!isExisting && !canAdd) {
-
         notePermHint.textContent = "⚠️ In attesa di ruolo: puoi leggere, ma non inserire note.";
-
       } else {
-
         notePermHint.textContent = "";
-
       }
-
- 
 
       const btnNew = document.getElementById("btnNewNote");
-
       if (btnNew) {
-
         btnNew.disabled = !canAdd;
-
         btnNew.classList.toggle("disabled", !canAdd);
-
       }
-
- 
 
       if (id) {
-
         const n = loadDiary().find(x => x.id === id);
-
         if (!n) return;
 
- 
-
         noteModalTitle.textContent = "Diario";
-
         noteInfo.textContent = `${n.createdBy || "—"} — ${new Date(n.ts).toLocaleString()}`;
-
         noteType.value = n.type || "Nota";
-
         noteTitle.value = n.title || "";
-
         noteNames.value = n.names || "";
-
         noteAgreements.value = n.agreements || "";
-
         noteBody.value = n.body || "";
 
- 
-
+        selectedTagUserIds = Array.isArray(n.tagUserIds) ? n.tagUserIds.slice() : [];
+        syncSelectedTagsUI();
+        renderTagList();
+        renderTagListInv();
+        renderTagListDiary();
         btnDeleteNote.style.display = canEdit ? "inline-block" : "none";
-
       } else {
-
         if (!canAdd) return alert("Sei in attesa di ruolo: non puoi inserire note.");
-
         noteModalTitle.textContent = "Nuova nota";
-
         noteInfo.textContent = "";
-
         noteType.value = "Nota";
-
         noteTitle.value = "";
-
         noteNames.value = "";
-
         noteAgreements.value = "";
-
         noteBody.value = "";
-
+        syncSelectedTagsUI();
         btnDeleteNote.style.display = "none";
-
       }
-
- 
-
-      noteOverlay.style.display = "block";
-
     }
-
- 
 
     function closeNoteModal() {
-
-      noteOverlay.style.display = "none";
-
       editingNoteId = null;
-
+      noteModalTitle.textContent = "Nuova nota";
+      noteInfo.textContent = "";
+      noteType.value = "Nota";
+      noteTitle.value = "";
+      noteNames.value = "";
+      noteAgreements.value = "";
+      noteBody.value = "";
+      btnDeleteNote.style.display = "none";
     }
-
- 
 
 function saveNote() {
-
   const isExisting = !!editingNoteId;
-
   if (isExisting && !canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono modificare.");
-
   if (!isExisting && !canAddDiaryNote()) return alert("Sei in attesa di ruolo: non puoi inserire note.");
 
- 
-
   const t = (noteType.value || "Nota").trim();
-
   const title = (noteTitle.value || "").trim();
-
   const names = (noteNames.value || "").trim();
-
   const agreements = (noteAgreements.value || "").trim();
-
   const body = (noteBody.value || "").trim();
 
- 
-
   if (!title && !names && !agreements && !body) {
-
     return alert("Scrivi almeno qualcosa (titolo, nomi, accordi o note).");
-
   }
-
- 
 
   const all = loadDiary();
-
   const me = myGameNameOrEmail();
-
- 
+  const tagUserIds = selectedTagUserIds.slice();
+  const tagNames = selectedTagNames();
 
   if (editingNoteId) {
-
     const n = all.find(x => x.id === editingNoteId);
-
     if (!n) return;
 
- 
-
     n.type = t;
-
     n.title = title;
-
     n.names = names;
-
     n.agreements = agreements;
-
     n.body = body;
-
+    n.tagUserIds = tagUserIds;
+    n.tagNames = tagNames;
     n.updatedAt = Date.now();
 
- 
-
-    // LOG
-
-    logEvent(
-
-      "DIARY_EDIT",
-
-      `Tipo(${t || "—"}) .. Titolo(${(title || "—").slice(0,80)}) .. Nomi(${(names || "—").slice(0,80)})`
-
-    );
-
+    logEvent("DIARY_EDIT", `Tipo(${t || "—"}) .. Titolo(${(title || "—").slice(0,80)}) .. Nomi(${(names || "—").slice(0,80)})`);
   } else {
-
-    const newId = uid();
-
     all.push({
-
-      id: newId,
-
+      id: uid(),
       ts: Date.now(),
-
       type: t,
-
       title,
-
       names,
-
       agreements,
-
       body,
-
+      tagUserIds,
+      tagNames,
       createdBy: me
-
     });
 
- 
-
-    // LOG
-
-    logEvent(
-
-      "DIARY_ADD",
-
-      `Tipo(${t || "—"}) .. Titolo(${(title || "—").slice(0,80)}) .. Nomi(${(names || "—").slice(0,80)})`
-
-    );
-
+    logEvent("DIARY_ADD", `Tipo(${t || "—"}) .. Titolo(${(title || "—").slice(0,80)}) .. Nomi(${(names || "—").slice(0,80)})`);
   }
 
- 
-
   saveDiary(all);
-
   closeNoteModal();
-
   diarySearch();
-
 }
-
- 
 
 function deleteNote() {
-
   if (!canEditDiaryNote()) return alert("Permesso negato: solo Owner/Boss/Vice Boss possono eliminare.");
-
   if (!editingNoteId) return;
 
- 
-
   const ok = confirm("Confermi eliminazione nota?");
-
   if (!ok) return;
 
- 
-
-  // LOG (prima di eliminare)
-
   try {
-
     const n = loadDiary().find(x => x.id === editingNoteId);
-
     if (n) {
-
-      logEvent(
-
-        "DIARY_DELETE",
-
-        `Tipo(${n.type || "—"}) .. Titolo(${(n.title || "—").slice(0,80)}) .. CreatoDa(${n.createdBy || "—"})`
-
-      );
-
+      logEvent("DIARY_DELETE", `Tipo(${n.type || "—"}) .. Titolo(${(n.title || "—").slice(0,80)}) .. CreatoDa(${n.createdBy || "—"})`);
     } else {
-
       logEvent("DIARY_DELETE", `id:${editingNoteId}`);
-
     }
-
   } catch {}
 
- 
-
   saveDiary(loadDiary().filter(x => x.id !== editingNoteId));
-
   closeNoteModal();
-
   diarySearch();
-
 }
-
- 
 
     // =========================
 
@@ -4112,7 +3979,7 @@ function logTagsLine(tagNames) {
 
       if (!s?.email) {
 
-        pillEmail.textContent = "Non autenticato";
+        pillEmail.textContent = "Utente: Non autenticato";
 
         pillRole.textContent = "Ruolo: —";
 
@@ -4124,7 +3991,8 @@ function logTagsLine(tagNames) {
 
  
 
-      pillEmail.textContent = s.email;
+      const shown = (u?.gameName || s.email || "—");
+      pillEmail.textContent = "Utente: " + shown;
 
       pillRole.textContent = "Ruolo: " + (u?.role || "—");
 
@@ -4258,6 +4126,7 @@ function logTagsLine(tagNames) {
 
         }
 
+        renderTagListDiary();
         diarySearch();
 
       }
@@ -4293,6 +4162,7 @@ if (id === "contabilita") {
   accRenderAdminPanel();
 
   accRenderDueTable();
+  renderTagListAcc();
 
 }
 
@@ -4329,6 +4199,7 @@ if (id === "contabilita") {
       const cardUtenti = document.getElementById("cardUtenti");
 
       const btnLog = document.getElementById("btnLog");
+      const cardLog = document.getElementById("cardLog");
 
       const dashHint = document.getElementById("dashHint");
 
@@ -4343,6 +4214,7 @@ if (id === "contabilita") {
         cardUtenti.style.display = "none";
 
         btnLog.style.display = "none";
+        if (cardLog) cardLog.style.display = "none";
 
       } else {
 
@@ -4351,6 +4223,7 @@ if (id === "contabilita") {
         cardUtenti.style.display = "inline-block";
 
         btnLog.style.display = "inline-block";
+        if (cardLog) cardLog.style.display = "inline-block";
 
       }
 
@@ -4421,8 +4294,16 @@ if (id === "contabilita") {
  
 
         const tdGameName = document.createElement("td");
-
-        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span> <span class="tagRole">${escapeHtml(u.role || "—")}</span>`;
+        if (myRole() === "Owner") {
+          tdGameName.innerHTML = `
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input id="editGameName_${u.id}" type="text" value="${escapeHtml(u.gameName || "")}" placeholder="Nome in game" style="min-width:180px;" />
+              <button class="btn small" onclick="saveUserGameName('${u.id}')">Salva</button>
+            </div>
+          `;
+        } else {
+          tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span>`;
+        }
 
  
 
@@ -4511,6 +4392,7 @@ sel.onchange = () => {
   renderTagList();
 
   renderTagListInv();
+  renderTagListDiary();
 
 };
 
@@ -4824,6 +4706,26 @@ if (s?.email === u.email) logout();
 
  
 
+    function saveUserGameName(userId) {
+      if (myRole() !== "Owner") return alert("Solo Owner può cambiare il nome in game.");
+      const users = loadUsers();
+      const u = users.find(x => x.id === userId);
+      if (!u) return;
+      const inp = document.getElementById("editGameName_" + userId);
+      const next = (inp?.value || "").trim();
+      if (!next) return alert("Inserisci un nome in game valido.");
+      const old = u.gameName || "—";
+      u.gameName = next;
+      saveUsers(users);
+      logEvent("USER_GAMENAME_SET", `Utente(${u.email || "—"}) .. Da(${old}) -> A(${next})`);
+      setHeaderUser();
+      renderUsersTable();
+      renderTagList();
+      renderTagListInv();
+      renderTagListDiary();
+      renderTagListAcc();
+    }
+
     document.addEventListener("click", () => {
 
       document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
@@ -4903,6 +4805,9 @@ if (s?.email === u.email) logout();
       const wrap = document.getElementById("tagSelectedWrap");
 
       const wrapInv = document.getElementById("tagSelectedWrapInv");
+      const wrapDiary = document.getElementById("tagSelectedWrapDiary");
+      const wrapAcc = document.getElementById("tagSelectedWrapAcc");
+      const noteTagsPreview = document.getElementById("noteTagsPreview");
 
  
 
@@ -4919,6 +4824,9 @@ if (s?.email === u.email) logout();
       if (wrap) wrap.innerHTML = html;
 
       if (wrapInv) wrapInv.innerHTML = html;
+      if (wrapDiary) wrapDiary.innerHTML = html;
+      if (wrapAcc) wrapAcc.innerHTML = html;
+      if (noteTagsPreview) noteTagsPreview.innerHTML = html;
 
  
 
@@ -5011,6 +4919,7 @@ if (s?.email === u.email) logout();
           renderTagList();
 
           renderTagListInv();
+          renderTagListDiary();
 
         };
 
@@ -5075,6 +4984,7 @@ if (s?.email === u.email) logout();
           renderTagList();
 
           renderTagListInv();
+          renderTagListDiary();
 
         };
 
@@ -5093,6 +5003,75 @@ if (s?.email === u.email) logout();
     }
 
  
+
+    function renderTagListDiary() {
+      const body = document.getElementById("tagTableBodyDiary");
+      if (!body) return;
+
+      const q = (document.getElementById("tagSearchDiary")?.value || "");
+      const users = getTagSortedUsers(q);
+
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncSelectedTagsUI();
+        return;
+      }
+
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSelected = isTagSelected(u.id);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+        tr.ondblclick = () => {
+          toggleSelectedTag(u.id);
+          renderTagList();
+          renderTagListInv();
+          renderTagListDiary();
+        };
+
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+
+      syncSelectedTagsUI();
+    }
+
+
+
+    function renderTagListAcc() {
+      const body = document.getElementById("tagTableBodyAcc");
+      if (!body) return;
+
+      const q = (document.getElementById("tagSearchAcc")?.value || "");
+      const users = getTagSortedUsers(q);
+
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncSelectedTagsUI();
+        return;
+      }
+
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSelected = isTagSelected(u.id);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+        tr.ondblclick = () => {
+          toggleSelectedTag(u.id);
+          renderTagList();
+          renderTagListInv();
+          renderTagListDiary();
+          renderTagListAcc();
+        };
+
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+
+      syncSelectedTagsUI();
+    }
 
     // =========================
 
@@ -5956,7 +5935,7 @@ logEvent(
 
       if (!records || records.length === 0) {
 
-        tableBody.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
+        tableBody.innerHTML = `<tr><td class="muted" colspan="9">Nessuna registrazione</td></tr>`;
 
         return;
 
@@ -6160,9 +6139,9 @@ invRenderTotals();
 
  
 
-          <div class="row">
+          <div class="row moneyRow">
 
-            <div class="field" style="min-width:180px;">
+            <div class="field typeField" style="min-width:160px;">
 
               <label>Tipo</label>
 
@@ -6176,9 +6155,7 @@ invRenderTotals();
 
             </div>
 
- 
-
-            <div class="field" style="min-width:220px;">
+            <div class="field">
 
               <label>Soldi puliti ($)</label>
 
@@ -6186,9 +6163,7 @@ invRenderTotals();
 
             </div>
 
- 
-
-            <div class="field" style="min-width:220px;">
+            <div class="field">
 
               <label>Soldi sporchi ($)</label>
 
@@ -6196,9 +6171,7 @@ invRenderTotals();
 
             </div>
 
- 
-
-            <div class="field" style="min-width:220px;">
+            <div class="field">
 
               <label>Soldi spaccio ($)</label>
 
@@ -6206,16 +6179,13 @@ invRenderTotals();
 
             </div>
 
- 
+          </div>
 
-            <div class="field" style="flex:1; min-width:260px;">
-
+          <div class="row">
+            <div class="field noteWide">
               <label>Note</label>
-
               <input id="note_${tid}" type="text" placeholder="Motivo / dettaglio..." ${disabledAttr} />
-
             </div>
-
           </div>
 
  
@@ -6286,7 +6256,7 @@ invRenderTotals();
 
             <tbody id="table_${tid}">
 
-              <tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>
+              <tr><td class="muted" colspan="9">Nessuna registrazione</td></tr>
 
             </tbody>
 
@@ -6596,7 +6566,7 @@ invRenderTotals();
 
           <div class="row">
 
-            <div class="field" style="min-width:180px;">
+            <div class="field typeField" style="min-width:160px;">
 
               <label>Tipo</label>
 
@@ -6634,7 +6604,9 @@ invRenderTotals();
 
             </div>
 
- 
+            <div class="field" style="min-width:180px;">
+              <button class="btn ${disabledCls}" ${disabledAttr} onclick="invAddItemToDraft('${escapeHtml(cat)}')">Aggiungi item</button>
+            </div>
 
             <div class="field" style="min-width:220px;">
 
@@ -6738,7 +6710,7 @@ invRenderTotals();
 
 <tr>
 
-<td class="muted" colspan="8">Nessuna registrazione</td>
+<td class="muted" colspan="9">Nessuna registrazione</td>
 
 </tr>
 
@@ -6779,6 +6751,7 @@ invRenderTotals();
           });
 
           invRenderTable(cat);
+          invRenderDraft(cat);
 
           syncSelectedTagsUI();
 
@@ -6799,6 +6772,41 @@ invRenderTotals();
     }
 
  
+
+
+    const invDraftByCategory = {};
+
+    function invAddItemToDraft(cat) {
+      const tid = invTabId(cat);
+      const item = document.getElementById("invItem_" + tid)?.value || "";
+      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
+      if (!item) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      if (!invDraftByCategory[cat]) invDraftByCategory[cat] = [];
+      const arr = invDraftByCategory[cat];
+      const found = arr.find(x => x.name === item);
+      if (found) found.qty += qty; else arr.push({ name: item, qty });
+      document.getElementById("invQty_" + tid).value = "1";
+      invRenderDraft(cat);
+    }
+
+    function invRemoveDraftItem(cat, idx) {
+      const arr = invDraftByCategory[cat] || [];
+      arr.splice(idx, 1);
+      invRenderDraft(cat);
+    }
+
+    function invRenderDraft(cat) {
+      const tid = invTabId(cat);
+      const box = document.getElementById("invDraft_" + tid);
+      if (!box) return;
+      const arr = invDraftByCategory[cat] || [];
+      if (!arr.length) {
+        box.innerHTML = `<div class="muted">Nessun item in bozza.</div>`;
+        return;
+      }
+      box.innerHTML = arr.map((it, i) => `<div class="itemRow"><div style="font-weight:900;">${escapeHtml(it.name)} x${Number(it.qty||0)}</div><div class="right"><button class="btn small danger" onclick="invRemoveDraftItem('${escapeHtml(cat)}', ${i})">Rimuovi</button></div></div>`).join("");
+    }
 
     function invSetActive(cat) { window.__inv_active = cat; }
 
@@ -6876,7 +6884,7 @@ invRenderTotals();
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
 
-      if (!item && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
+      if (!item && !draftItems.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
 
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
 
@@ -6955,10 +6963,13 @@ if (last) {
   accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
 
   accRenderDueTable();
+  renderTagListAcc();
 
 }
 
       document.getElementById("invQty_" + tid).value = "1";
+      invDraftByCategory[cat] = [];
+      invRenderDraft(cat);
 
       document.getElementById("invMoneyClean_" + tid).value = "";
 
@@ -6992,7 +7003,7 @@ if (last) {
 
       if (!rows.length) {
 
-        body.innerHTML = `<tr><td class="muted" colspan="8">Nessuna registrazione</td></tr>`;
+        body.innerHTML = `<tr><td class="muted" colspan="9">Nessuna registrazione</td></tr>`;
 
         return;
 
@@ -7026,50 +7037,25 @@ if (last) {
 
  
 
+        const itemList = (Array.isArray(r.items) && r.items.length) ? r.items : (r.item ? [{ name:r.item, qty:r.qty }] : []);
+        const itemHtml = itemList.length
+          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\n"))}</div>`
+          : `<span class="muted">—</span>`;
+        const m = r.money;
+        const clean = (typeof m === "number") ? m : Number(m?.clean || 0);
+        const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
+        const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
+        const actionsHtml = canEditOps() ? `<button class="btn danger small" onclick="invDeleteRecord('${r.id}','${escapeHtml(cat)}')">Elimina</button>` : `<span class="muted">—</span>`;
         tr.innerHTML = `
-
           <td>${new Date(r.ts).toLocaleString()}</td>
-
           <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-
           <td style="font-weight:900; color:var(--red2)">${t}</td>
-
+          <td style="font-weight:900;">${formatMoney(clean + dirty + drug)}</td>
+          <td style="font-weight:900;">P:${formatMoney(clean)} .. S:${formatMoney(dirty)} .. SP:${formatMoney(drug)}</td>
           <td>${tagHtml}</td>
-
-          <td>${escapeHtml(r.item || "—")}</td>
-
-          <td style="font-weight:900;">${Number(r.qty||0)}</td>
-
-          <td style="font-weight:900;">
-
-            ${(() => {
-
-              const m = r.money;
-
-              const clean = (typeof m === "number") ? m : Number(m?.clean || 0);
-
-              const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
-
-              const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
-
- 
-
-              const parts = [];
-
-              if (clean) parts.push("P: " + formatMoney(clean));
-
-              if (dirty) parts.push("S: " + formatMoney(dirty));
-
-              if (drug)  parts.push("SP: " + formatMoney(drug));
-
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
-
-            })()}
-
-          </td>
-
           <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
+          <td>${itemHtml}</td>
+          <td>${actionsHtml}</td>
         `;
 
         body.appendChild(tr);
@@ -7079,6 +7065,15 @@ if (last) {
     }
 
  
+
+    function invDeleteRecord(id, cat) {
+      if (!canEditOps()) return;
+      if (!confirm("Confermi eliminazione registrazione?")) return;
+      const all = invLoad().filter(r => r.id !== id);
+      invSave(all);
+      invRenderTable(cat);
+      invRenderTotals();
+    }
 
     function normalizeTotalItemName(name) {
 
@@ -7110,23 +7105,15 @@ function invComputeTotals() {
 
   invLoad().forEach(r => {
 
-    const key = normalizeTotalItemName(r.item);
-
-    if (key) {
-
+    const itemList = (Array.isArray(r.items) && r.items.length) ? r.items : (r.item ? [{ name:r.item, qty:r.qty }] : []);
+    itemList.forEach(it => {
+      const key = normalizeTotalItemName(it.name);
+      if (!key) return;
       if (!totals[key]) totals[key] = 0;
-
-      const q = Number(r.qty || 0);
-
- 
-
-      // Item: add/buy aumentano, rem/sold diminuiscono
-
+      const q = Number(it.qty || 0);
       const signItem = (r.type === "add" || r.type === "buy") ? 1 : -1;
-
       totals[key] += signItem * q;
-
-    }
+    });
 
  
 
@@ -7480,7 +7467,7 @@ p.innerHTML = `
 
   <div class="tableWrap">
 
-    <table>
+    <table class="accTable">
 
       <thead>
 
@@ -7490,11 +7477,13 @@ p.innerHTML = `
 
           <th style="width:220px;">Generato da</th>
 
-          <th>A chi</th>
+          <th style="width:220px;">A chi</th>
 
           <th style="width:160px;">Importo</th>
 
           <th style="width:160px;">Pagamento</th>
+
+          <th style="width:180px;">Tag</th>
 
           <th>Note</th>
 
@@ -7506,7 +7495,7 @@ p.innerHTML = `
 
       <tbody id="accDueTable_${tid}">
 
-        <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+        <tr><td class="muted" colspan="8">Nessun dato</td></tr>
 
       </tbody>
 
@@ -7522,7 +7511,7 @@ p.innerHTML = `
 
   <div class="tableWrap">
 
-    <table>
+    <table class="accTable">
 
       <thead>
 
@@ -7532,13 +7521,17 @@ p.innerHTML = `
 
           <th style="width:220px;">Chi</th>
 
-          <th>A chi</th>
+          <th style="width:220px;">A chi</th>
 
           <th style="width:160px;">Importo</th>
 
           <th style="width:160px;">Pagamento</th>
 
+          <th style="width:180px;">Tag</th>
+
           <th>Note</th>
+
+          <th style="width:160px;">Azioni</th>
 
         </tr>
 
@@ -7546,7 +7539,7 @@ p.innerHTML = `
 
       <tbody id="accTable_${tid}">
 
-        <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+        <tr><td class="muted" colspan="8">Nessun dato</td></tr>
 
       </tbody>
 
@@ -7762,80 +7755,47 @@ accRenderDueTable();
 
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
- 
-
       const tid = accTabId("Stipendi");
-
-      const to = ((document.getElementById("salTo_" + tid)?.value || accSalarySelected) || "").trim();
-
+      const taggedNames = selectedTagNames();
+      const taggedIds = selectedTagUserIds.slice();
+      const toRaw = ((document.getElementById("salTo_" + tid)?.value || accSalarySelected) || "").trim();
+      const to = toRaw || (taggedNames.length ? taggedNames.join(", ") : "");
       const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
-
-      const payType = (document.getElementById("salPayType_" + tid)?.value || "clean"); // clean/dirty/drug
-
+      const payType = (document.getElementById("salPayType_" + tid)?.value || "clean");
       const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
-
- 
 
       if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
 
- 
-
       const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "salary",
+        status: "paid",
+        who: myGameNameOrEmail(),
+        to,
+        tagUserIds: taggedIds,
+        tagNames: taggedNames,
+        amount: amt,
+        payType,
+        note
+      });
+      accSave(all);
 
-all.push({
-
-  id: uid(),
-
-  ts: Date.now(),
-
-  kind: "salary",
-
-  status: "paid",            // manuale = già pagato
-
-  who: myGameNameOrEmail(),
-
-  to,
-
-  amount: amt,
-
-  payType,
-
-  note
-
-});
-
-accSave(all);
-
- 
-
-// LOG
-
-logEvent(
-
-  "ACC_SALARY_ADD",
-
-  `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` + (note ? ` .. Note(${note})` : "")
-
-);
-
- 
+      logEvent(
+        "ACC_SALARY_ADD",
+        `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` + (note ? ` .. Note(${note})` : "")
+      );
 
       document.getElementById("salTo_" + tid).value = "";
-
       document.getElementById("salAmt_" + tid).value = "";
-
       const sel = document.getElementById("salPayType_" + tid);
-
       if (sel) sel.value = "clean";
-
       document.getElementById("salNote_" + tid).value = "";
 
- 
-
       accRenderTable("Stipendi");
-
+      accRenderDueTable();
       accRenderSummary();
-
     }
 
  
@@ -7966,7 +7926,7 @@ const rows = all
 
       if (!rows.length) {
 
-        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 6 : 6}">Nessun dato</td></tr>`;
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 8 : 6}">Nessun dato</td></tr>`;
 
         return;
 
@@ -7999,9 +7959,9 @@ tr.innerHTML = `
   <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
 
   <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-
+  <td style="font-weight:900;">${escapeHtml((r.tagNames && r.tagNames.length) ? r.tagNames.join(", ") : "—")}</td>
   <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
+  <td>${(r.status || "paid") === "paid" ? `<button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
 `;
 
         } else {
@@ -8080,7 +8040,7 @@ function accRenderDueTable() {
 
   if (!rows.length) {
 
-    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    body.innerHTML = `<tr><td class="muted" colspan="8">Nessun dato</td></tr>`;
 
     return;
 
@@ -8111,15 +8071,10 @@ function accRenderDueTable() {
       <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
 
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-
+      <td style="font-weight:900;">${escapeHtml((r.tagNames && r.tagNames.length) ? r.tagNames.join(", ") : "—")}</td>
       <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
       <td>
-
-        <button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>
-
         <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
-
       </td>
 
     `;
@@ -8386,7 +8341,8 @@ accRenderSummary();
 
           e.preventDefault();
 
-          diarySearch();
+          renderTagListDiary();
+        diarySearch();
 
         }
 
@@ -8424,7 +8380,9 @@ accRenderSummary();
 
       setHeaderUser();
 
+      initDiaryInlineEditor();
       syncSelectedTagsUI();
+      renderTagListAcc();
 
  
 
