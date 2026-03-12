@@ -648,3 +648,13 @@ table.invTable td:nth-child(8){
 .gtaSectionRow td:last-child{
   border-right:1px solid #ffd54a88 !important;
 }
+
+.gtaSectionRow td{
+  background:linear-gradient(145deg,#8a6a00,#3a2a00) !important;
+  color:#ffe36a !important;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-weight:900;
+  text-shadow:0 0 8px #000;
+  border-color:#ffd54a55 !important;
+}
