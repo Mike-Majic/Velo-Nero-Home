@@ -152,15 +152,15 @@
 
  
 
-    .cards { text-align:center; }
+    .cards { text-align:center; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
 
     .box {
 
-      display:inline-block; background-color:var(--panel); padding:40px 60px; margin:12px;
-
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      background-color:var(--panel); padding:32px 20px; margin:0;
       border-radius:12px; box-shadow:0 0 12px #ff1a1a66 inset, 0 0 16px #ff000099;
-
-      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff; min-width:260px;
+      transition:transform .3s ease, box-shadow .3s ease; cursor:pointer; color:#fff;
+      width:260px; min-height:160px; box-sizing:border-box;
 
     }
 
@@ -279,10 +279,12 @@
     table { width:100%; border-collapse:collapse; margin-top:12px; table-layout:fixed; }
     table.usersTable, table.accTable { table-layout:auto; }
     table.usersTable td, table.usersTable th { overflow:visible; }
-    table.usersTable select { width:100%; min-width:180px; }
+    table.usersTable select { width:100%; min-width:120px; }
     table.accTable th, table.accTable td { overflow-wrap:normal; word-break:normal; white-space:normal; }
 
-    .moneyRow .field { min-width:220px; }
+    .row.moneyRow { flex-wrap:nowrap; align-items:flex-end; }
+    .moneyRow .field { min-width:0; flex:1; }
+    .moneyRow .field.typeField { flex:0 0 160px; }
     .noteWide { min-width:420px !important; flex:1 !important; }
 
     /* =========================
@@ -805,7 +807,7 @@ table.invTable td:last-child{
 
     <div class="userpill">
 
-      <span class="pill" id="pillEmail">Non autenticato</span>
+      <span class="pill" id="pillEmail">Utente: Non autenticato</span>
 
       <span class="pill" id="pillRole">Ruolo: —</span>
 
@@ -1233,7 +1235,7 @@ table.invTable td:last-child{
 
           <th>Nome in Game</th>
 
-          <th>Ruolo</th>
+          <th style="width:170px;">Ruolo</th>
 
           <th>Email</th>
 
@@ -1517,6 +1519,26 @@ table.invTable td:last-child{
 
             <div class="muted" id="accSalarySummary">Totale stipendi: $0 .. Ultimi 30gg: $0</div>
 
+          </div>
+
+          <div class="sidePanel" style="margin-top:12px;">
+            <h3 class="sideTitle">Tag (Utente)</h3>
+            <div class="muted">Tag selezionati usati come destinatari stipendio.</div>
+            <div class="tagSelected">
+              <div class="muted">Selezionati:</div>
+              <div id="tagSelectedWrapAcc" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+              <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary(); renderTagListAcc();">Pulisci</button>
+            </div>
+            <div class="tagSearchRow">
+              <span style="opacity:.9; color:#ffb3b3;">🔎</span>
+              <input id="tagSearchAcc" type="text" placeholder="Cerca tag.." oninput="renderTagListAcc()" />
+            </div>
+            <div style="margin-top:10px; border-radius:12px; overflow:hidden; border:1px solid #ff1a1a33;">
+              <table style="margin-top:0;">
+                <thead><tr><th>Nome</th></tr></thead>
+                <tbody id="tagTableBodyAcc"><tr><td class="muted">Nessun utente</td></tr></tbody>
+              </table>
+            </div>
           </div>
 
         </div>
@@ -1926,6 +1948,11 @@ table.invTable td:last-child{
       <h3 id="noteModalTitle">Nuova nota</h3>
 
       <div class="muted" id="noteInfo"></div>
+
+      <div style="margin-top:8px;">
+        <label>Tag selezionati</label>
+        <div id="noteTagsPreview" class="tagSelected" style="margin-top:6px;"></div>
+      </div>
 
  
 
@@ -2471,6 +2498,10 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
         toUserId: u.id,
 
+        tagUserIds: [u.id],
+
+        tagNames: [u.gameName || u.email || "—"],
+
         amount: add,
 
         payType,
@@ -2878,6 +2909,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
         noteNames.value = "";
         noteAgreements.value = "";
         noteBody.value = "";
+        syncSelectedTagsUI();
         btnDeleteNote.style.display = "none";
       }
     }
@@ -3947,7 +3979,7 @@ function logTagsLine(tagNames) {
 
       if (!s?.email) {
 
-        pillEmail.textContent = "Non autenticato";
+        pillEmail.textContent = "Utente: Non autenticato";
 
         pillRole.textContent = "Ruolo: —";
 
@@ -3959,7 +3991,8 @@ function logTagsLine(tagNames) {
 
  
 
-      pillEmail.textContent = s.email;
+      const shown = (u?.gameName || s.email || "—");
+      pillEmail.textContent = "Utente: " + shown;
 
       pillRole.textContent = "Ruolo: " + (u?.role || "—");
 
@@ -4129,6 +4162,7 @@ if (id === "contabilita") {
   accRenderAdminPanel();
 
   accRenderDueTable();
+  renderTagListAcc();
 
 }
 
@@ -4260,8 +4294,16 @@ if (id === "contabilita") {
  
 
         const tdGameName = document.createElement("td");
-
-        tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span>`;
+        if (myRole() === "Owner") {
+          tdGameName.innerHTML = `
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input id="editGameName_${u.id}" type="text" value="${escapeHtml(u.gameName || "")}" placeholder="Nome in game" style="min-width:180px;" />
+              <button class="btn small" onclick="saveUserGameName('${u.id}')">Salva</button>
+            </div>
+          `;
+        } else {
+          tdGameName.innerHTML = `<span style="font-weight:900;">${escapeHtml(u.gameName || "—")}</span>`;
+        }
 
  
 
@@ -4664,6 +4706,26 @@ if (s?.email === u.email) logout();
 
  
 
+    function saveUserGameName(userId) {
+      if (myRole() !== "Owner") return alert("Solo Owner può cambiare il nome in game.");
+      const users = loadUsers();
+      const u = users.find(x => x.id === userId);
+      if (!u) return;
+      const inp = document.getElementById("editGameName_" + userId);
+      const next = (inp?.value || "").trim();
+      if (!next) return alert("Inserisci un nome in game valido.");
+      const old = u.gameName || "—";
+      u.gameName = next;
+      saveUsers(users);
+      logEvent("USER_GAMENAME_SET", `Utente(${u.email || "—"}) .. Da(${old}) -> A(${next})`);
+      setHeaderUser();
+      renderUsersTable();
+      renderTagList();
+      renderTagListInv();
+      renderTagListDiary();
+      renderTagListAcc();
+    }
+
     document.addEventListener("click", () => {
 
       document.querySelectorAll(".action-menu").forEach(menu => menu.style.display = "none");
@@ -4744,6 +4806,8 @@ if (s?.email === u.email) logout();
 
       const wrapInv = document.getElementById("tagSelectedWrapInv");
       const wrapDiary = document.getElementById("tagSelectedWrapDiary");
+      const wrapAcc = document.getElementById("tagSelectedWrapAcc");
+      const noteTagsPreview = document.getElementById("noteTagsPreview");
 
  
 
@@ -4761,6 +4825,8 @@ if (s?.email === u.email) logout();
 
       if (wrapInv) wrapInv.innerHTML = html;
       if (wrapDiary) wrapDiary.innerHTML = html;
+      if (wrapAcc) wrapAcc.innerHTML = html;
+      if (noteTagsPreview) noteTagsPreview.innerHTML = html;
 
  
 
@@ -4971,6 +5037,41 @@ if (s?.email === u.email) logout();
       syncSelectedTagsUI();
     }
 
+
+
+    function renderTagListAcc() {
+      const body = document.getElementById("tagTableBodyAcc");
+      if (!body) return;
+
+      const q = (document.getElementById("tagSearchAcc")?.value || "");
+      const users = getTagSortedUsers(q);
+
+      if (!users.length) {
+        body.innerHTML = `<tr><td class="muted">Nessun risultato</td></tr>`;
+        syncSelectedTagsUI();
+        return;
+      }
+
+      body.innerHTML = "";
+      users.forEach(u => {
+        const tr = document.createElement("tr");
+        const isSelected = isTagSelected(u.id);
+        tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
+
+        tr.ondblclick = () => {
+          toggleSelectedTag(u.id);
+          renderTagList();
+          renderTagListInv();
+          renderTagListDiary();
+          renderTagListAcc();
+        };
+
+        tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td>`;
+        body.appendChild(tr);
+      });
+
+      syncSelectedTagsUI();
+    }
 
     // =========================
 
@@ -6040,7 +6141,7 @@ invRenderTotals();
 
           <div class="row moneyRow">
 
-            <div class="field" style="min-width:180px;">
+            <div class="field typeField" style="min-width:160px;">
 
               <label>Tipo</label>
 
@@ -6465,7 +6566,7 @@ invRenderTotals();
 
           <div class="row">
 
-            <div class="field" style="min-width:180px;">
+            <div class="field typeField" style="min-width:160px;">
 
               <label>Tipo</label>
 
@@ -6862,6 +6963,7 @@ if (last) {
   accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
 
   accRenderDueTable();
+  renderTagListAcc();
 
 }
 
@@ -7381,6 +7483,8 @@ p.innerHTML = `
 
           <th style="width:160px;">Pagamento</th>
 
+          <th style="width:180px;">Tag</th>
+
           <th>Note</th>
 
           <th style="width:220px;">Stato</th>
@@ -7391,7 +7495,7 @@ p.innerHTML = `
 
       <tbody id="accDueTable_${tid}">
 
-        <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+        <tr><td class="muted" colspan="8">Nessun dato</td></tr>
 
       </tbody>
 
@@ -7423,7 +7527,11 @@ p.innerHTML = `
 
           <th style="width:160px;">Pagamento</th>
 
+          <th style="width:180px;">Tag</th>
+
           <th>Note</th>
+
+          <th style="width:160px;">Azioni</th>
 
         </tr>
 
@@ -7431,7 +7539,7 @@ p.innerHTML = `
 
       <tbody id="accTable_${tid}">
 
-        <tr><td class="muted" colspan="6">Nessun dato</td></tr>
+        <tr><td class="muted" colspan="8">Nessun dato</td></tr>
 
       </tbody>
 
@@ -7647,80 +7755,47 @@ accRenderDueTable();
 
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
 
- 
-
       const tid = accTabId("Stipendi");
-
-      const to = ((document.getElementById("salTo_" + tid)?.value || accSalarySelected) || "").trim();
-
+      const taggedNames = selectedTagNames();
+      const taggedIds = selectedTagUserIds.slice();
+      const toRaw = ((document.getElementById("salTo_" + tid)?.value || accSalarySelected) || "").trim();
+      const to = toRaw || (taggedNames.length ? taggedNames.join(", ") : "");
       const amt = Math.max(0, parseInt(document.getElementById("salAmt_" + tid)?.value || "0", 10) || 0);
-
-      const payType = (document.getElementById("salPayType_" + tid)?.value || "clean"); // clean/dirty/drug
-
+      const payType = (document.getElementById("salPayType_" + tid)?.value || "clean");
       const note = (document.getElementById("salNote_" + tid)?.value || "").trim();
-
- 
 
       if (!to && amt === 0 && !note) return alert("Inserisci almeno a chi, importo o note.");
 
- 
-
       const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "salary",
+        status: "paid",
+        who: myGameNameOrEmail(),
+        to,
+        tagUserIds: taggedIds,
+        tagNames: taggedNames,
+        amount: amt,
+        payType,
+        note
+      });
+      accSave(all);
 
-all.push({
-
-  id: uid(),
-
-  ts: Date.now(),
-
-  kind: "salary",
-
-  status: "paid",            // manuale = già pagato
-
-  who: myGameNameOrEmail(),
-
-  to,
-
-  amount: amt,
-
-  payType,
-
-  note
-
-});
-
-accSave(all);
-
- 
-
-// LOG
-
-logEvent(
-
-  "ACC_SALARY_ADD",
-
-  `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` + (note ? ` .. Note(${note})` : "")
-
-);
-
- 
+      logEvent(
+        "ACC_SALARY_ADD",
+        `Manuale .. A(${to || "—"}) .. Importo(${amt.toLocaleString("it-IT")}) .. Tipo(${payType})` + (note ? ` .. Note(${note})` : "")
+      );
 
       document.getElementById("salTo_" + tid).value = "";
-
       document.getElementById("salAmt_" + tid).value = "";
-
       const sel = document.getElementById("salPayType_" + tid);
-
       if (sel) sel.value = "clean";
-
       document.getElementById("salNote_" + tid).value = "";
 
- 
-
       accRenderTable("Stipendi");
-
+      accRenderDueTable();
       accRenderSummary();
-
     }
 
  
@@ -7851,7 +7926,7 @@ const rows = all
 
       if (!rows.length) {
 
-        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 6 : 6}">Nessun dato</td></tr>`;
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 8 : 6}">Nessun dato</td></tr>`;
 
         return;
 
@@ -7884,9 +7959,9 @@ tr.innerHTML = `
   <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
 
   <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-
+  <td style="font-weight:900;">${escapeHtml((r.tagNames && r.tagNames.length) ? r.tagNames.join(", ") : "—")}</td>
   <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
+  <td>${(r.status || "paid") === "paid" ? `<button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
 `;
 
         } else {
@@ -7965,7 +8040,7 @@ function accRenderDueTable() {
 
   if (!rows.length) {
 
-    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    body.innerHTML = `<tr><td class="muted" colspan="8">Nessun dato</td></tr>`;
 
     return;
 
@@ -7996,15 +8071,10 @@ function accRenderDueTable() {
       <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
 
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-
+      <td style="font-weight:900;">${escapeHtml((r.tagNames && r.tagNames.length) ? r.tagNames.join(", ") : "—")}</td>
       <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
       <td>
-
-        <button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>
-
         <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
-
       </td>
 
     `;
@@ -8312,6 +8382,7 @@ accRenderSummary();
 
       initDiaryInlineEditor();
       syncSelectedTagsUI();
+      renderTagListAcc();
 
  
 
