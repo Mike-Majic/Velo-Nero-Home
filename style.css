@@ -656,5 +656,15 @@ table.invTable td:nth-child(8){
   letter-spacing:1px;
   font-weight:900;
   text-shadow:0 0 8px #000;
-  border-color:#ffd54a55 !important;
+  border-top:1px solid #ffd54a88 !important;
+  border-bottom:1px solid #ffd54a88 !important;
+  border-left:1px solid #ffd54a55 !important;
+  border-right:1px solid #ffd54a55 !important;
+  box-shadow:inset 0 0 10px rgba(255,213,74,.18);
+}
+.gtaSectionRow td:first-child{
+  border-left:1px solid #ffd54a88 !important;
+}
+.gtaSectionRow td:last-child{
+  border-right:1px solid #ffd54a88 !important;
 }
