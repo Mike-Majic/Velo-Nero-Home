@@ -1536,12 +1536,12 @@ table.invTable td:last-child{
 
 </style>
 
-  <link id="faviconMain" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
-  <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
-  <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069" />
+  <link id="faviconMain" rel="icon" type="image/png" sizes="32x32" href="icon-069.png" />
+  <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069.png" />
+  <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069.png" />
   <link id="faviconIso" rel="icon" type="image/x-icon" href="favicon.iso" />
-  <link id="faviconAlt" rel="shortcut icon" type="image/png" href="icon-069" />
-  <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069" />
+  <link id="faviconAlt" rel="shortcut icon" type="image/png" href="icon-069.png" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069.png" />
 
 </head>
 
@@ -1570,7 +1570,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="icon-069.png" alt="Logo Velo Nero" />
     <h1>VELO NERO</h1>
   </div>
 
@@ -3030,10 +3030,10 @@ table.invTable td:last-child{
 
     const BRAND_ASSETS = {
       // File caricati da te su GitHub
-      hero: "icon-69",
-      favicon: "icon-069",
+      hero: "icon-069.png",
+      favicon: "icon-069.png",
       faviconLegacy: "favicon.iso",
-      apple: "icon-069"
+      apple: "icon-069.png"
     };
 
     function applyImageFallback(url, fallback, onResolved) {
@@ -3052,11 +3052,11 @@ table.invTable td:last-child{
       const favIso = document.getElementById("faviconIso");
       const apple = document.getElementById("appleTouchIcon");
 
-      applyImageFallback(BRAND_ASSETS.hero || "icon-69", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.hero || "icon-069.png", "logo.png", (src) => {
         if (hero) hero.src = src;
       });
 
-      applyImageFallback(BRAND_ASSETS.favicon || "icon-069", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.favicon || "icon-069.png", "logo.png", (src) => {
         if (favMain) favMain.href = src;
         if (favAlt) favAlt.href = src;
       });
@@ -3065,7 +3065,7 @@ table.invTable td:last-child{
         if (favIso) favIso.href = src;
       });
 
-      applyImageFallback(BRAND_ASSETS.apple || "icon-069", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.apple || "icon-069.png", "logo.png", (src) => {
         if (apple) apple.href = src;
         if (fav32) fav32.href = src;
         if (fav16) fav16.href = src;
