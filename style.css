@@ -468,13 +468,10 @@ table.invTable td:nth-child(8){
   color:#fff;
   text-shadow:0 0 10px #000;
   white-space:nowrap;
-  overflow:hidden;
+  overflow:visible;
   text-overflow:clip;
   font-variant-numeric:tabular-nums;
-  letter-spacing:-.6px;
-  line-height:1.05;
-  width:100%;
-  min-width:0;
+  letter-spacing:-.2px;
 }
     .moneyCard.positive .moneyCardValue{ color:#7dffab; }
     .moneyCard.negative .moneyCardValue{ color:#ff8b8b; }
