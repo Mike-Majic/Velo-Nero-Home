@@ -249,12 +249,31 @@
       position:absolute;
       width:min(300px,56vw);
       height:auto;
-      opacity:.18;
-      filter:drop-shadow(0 0 22px #ff1a1aaa) saturate(1.15);
+      opacity:.17;
+      filter:blur(1.4px) drop-shadow(0 0 24px #ff1a1aaa) saturate(1.10);
       pointer-events:none;
       z-index:0;
-      transform:translateY(2px) scale(1.02);
+      transform:translateY(2px) scale(1.04);
       animation:brandLogoPulse 4.2s ease-in-out infinite;
+      clip-path:ellipse(45% 43% at 50% 50%);
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 34%, rgba(0,0,0,.90) 52%, rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 82%);
+      mask-image: radial-gradient(ellipse at center, #000 34%, rgba(0,0,0,.90) 52%, rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 82%);
+    }
+    .brandHero::before{
+      content:"";
+      position:absolute;
+      inset:-34px;
+      background:radial-gradient(circle at center, transparent 28%, rgba(13,13,13,.42) 58%, rgba(13,13,13,.98) 88%);
+      z-index:0;
+      pointer-events:none;
+    }
+    .brandHero::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      background:radial-gradient(ellipse at center, rgba(255,0,0,.08), rgba(0,0,0,0) 68%);
+      z-index:0;
+      pointer-events:none;
     }
     @keyframes brandLogoPulse{
       0%,100%{ opacity:.14; transform:translateY(2px) scale(1.00); filter:drop-shadow(0 0 18px #ff1a1a88) saturate(1.05);}
@@ -900,6 +919,32 @@ table.invTable td:last-child{
       font-weight:900;
       box-shadow:0 0 10px #00ff6a22 inset;
     }
+
+    .diaryInvestigationTable thead th,
+    .diaryInvestigationTable tbody td{
+      overflow-wrap:normal;
+      word-break:normal;
+      white-space:normal;
+    }
+    .diaryInvestigationTable thead th:last-child,
+    .diaryInvestigationTable tbody td:last-child{
+      min-width:210px;
+      width:210px;
+    }
+    .diaryInvestigationTable .diaryPillsWrap{
+      min-width:0;
+      overflow:hidden;
+      align-items:center;
+    }
+    .diaryInvestigationTable .diaryTagPill,
+    .diaryInvestigationTable .diaryNamePill{
+      writing-mode:horizontal-tb;
+      text-orientation:mixed;
+      white-space:nowrap;
+      max-width:180px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
     .diaryEmpty{
       color:var(--muted);
       text-align:center;
@@ -1491,9 +1536,12 @@ table.invTable td:last-child{
 
 </style>
 
-  <link id="faviconMain" rel="icon" href="logo.png" />
-  <link id="faviconAlt" rel="shortcut icon" href="logo.png" />
-  <link id="appleTouchIcon" rel="apple-touch-icon" href="logo.png" />
+  <link id="faviconMain" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
+  <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
+  <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069" />
+  <link id="faviconIso" rel="icon" type="image/x-icon" href="favicon.iso" />
+  <link id="faviconAlt" rel="shortcut icon" type="image/png" href="icon-069" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069" />
 
 </head>
 
@@ -1522,7 +1570,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
     <h1>VELO NERO</h1>
   </div>
 
@@ -2980,44 +3028,47 @@ table.invTable td:last-child{
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
 
-    const BRAND_ASSET_CANDIDATES = {
-      hero: ["icon-69", "icon-69.png", "icon-069", "icon-069.png", "logo.png"],
-      favicon: ["favicon.iso", "favicon.ico", "favicon.png", "icon-069", "icon-069.png", "logo.png"],
-      apple: ["icon-069", "icon-069.png", "icon-69", "icon-69.png", "logo.png"]
+    const BRAND_ASSETS = {
+      // File caricati da te su GitHub
+      hero: "icon-69",
+      favicon: "icon-069",
+      faviconLegacy: "favicon.iso",
+      apple: "icon-069"
     };
 
-    function resolveFirstImage(candidates, onDone) {
-      const list = Array.isArray(candidates) ? candidates.slice() : [];
-      const testNext = () => {
-        const src = list.shift();
-        if (!src) return onDone(null);
-        const img = new Image();
-        img.onload = () => onDone(src);
-        img.onerror = () => testNext();
-        img.src = src + (src.includes("?") ? "&" : "?") + "v=" + Date.now();
-      };
-      testNext();
+    function applyImageFallback(url, fallback, onResolved) {
+      const test = new Image();
+      test.onload = () => onResolved(url);
+      test.onerror = () => onResolved(fallback);
+      test.src = url;
     }
 
     function setupBrandAssets() {
       const hero = document.getElementById("brandBgLogo");
       const favMain = document.getElementById("faviconMain");
+      const fav32 = document.getElementById("favicon32");
+      const fav16 = document.getElementById("favicon16");
       const favAlt = document.getElementById("faviconAlt");
+      const favIso = document.getElementById("faviconIso");
       const apple = document.getElementById("appleTouchIcon");
 
-      resolveFirstImage(BRAND_ASSET_CANDIDATES.hero, (src) => {
-        if (!hero) return;
-        hero.src = src || "logo.png";
+      applyImageFallback(BRAND_ASSETS.hero || "icon-69", "logo.png", (src) => {
+        if (hero) hero.src = src;
       });
 
-      resolveFirstImage(BRAND_ASSET_CANDIDATES.favicon, (src) => {
-        const chosen = src || "logo.png";
-        if (favMain) favMain.href = chosen;
-        if (favAlt) favAlt.href = chosen;
+      applyImageFallback(BRAND_ASSETS.favicon || "icon-069", "logo.png", (src) => {
+        if (favMain) favMain.href = src;
+        if (favAlt) favAlt.href = src;
       });
 
-      resolveFirstImage(BRAND_ASSET_CANDIDATES.apple, (src) => {
-        if (apple) apple.href = src || "logo.png";
+      applyImageFallback(BRAND_ASSETS.faviconLegacy || "favicon.iso", "logo.png", (src) => {
+        if (favIso) favIso.href = src;
+      });
+
+      applyImageFallback(BRAND_ASSETS.apple || "icon-069", "logo.png", (src) => {
+        if (apple) apple.href = src;
+        if (fav32) fav32.href = src;
+        if (fav16) fav16.href = src;
       });
     }
 
