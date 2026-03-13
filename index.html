@@ -39,8 +39,8 @@
     }
 
     @keyframes neonPulse {
-      0%,100% { text-shadow:0 0 16px #ff0000aa, 0 0 32px #ff000055; }
-      50% { text-shadow:0 0 20px #ff0000cc, 0 0 42px #ff1a1a88; }
+      0%,100% { text-shadow:0 0 18px #ff0000d9, 0 0 36px #ff1a1ab3, 0 0 62px #ff3b3b66; }
+      50% { text-shadow:0 0 26px #ff3b3bff, 0 0 52px #ff1a1ae6, 0 0 84px #ff4d4db3; }
     }
 
     @keyframes cardGlow {
@@ -83,6 +83,7 @@
     }
 
     p.subtitle {
+
 
       font-size:18px; color:#ff6666; margin:0 0 22px 0;
 
@@ -232,6 +233,55 @@
       gap:24px;
       text-align:center;
       align-items:stretch;
+    }
+
+
+    .brandHero{
+      position:relative;
+      display:inline-flex;
+      justify-content:center;
+      align-items:center;
+      min-height:120px;
+      margin:0 auto 6px;
+      isolation:isolate;
+    }
+    #brandBgLogo{
+      position:absolute;
+      width:min(300px,56vw);
+      height:auto;
+      opacity:.18;
+      filter:drop-shadow(0 0 22px #ff1a1aaa) saturate(1.15);
+      pointer-events:none;
+      z-index:0;
+      transform:translateY(2px) scale(1.02);
+      animation:brandLogoPulse 4.2s ease-in-out infinite;
+    }
+    @keyframes brandLogoPulse{
+      0%,100%{ opacity:.14; transform:translateY(2px) scale(1.00); filter:drop-shadow(0 0 18px #ff1a1a88) saturate(1.05);}
+      50%{ opacity:.28; transform:translateY(-2px) scale(1.05); filter:drop-shadow(0 0 32px #ff3b3bcc) saturate(1.25);}
+    }
+    .brandHero h1{ position:relative; z-index:1; margin:0; }
+
+    .moneyCard.total.total-negative{
+      background:linear-gradient(145deg,#600b0b,#2b0303);
+      border-color:#ff4a4a99;
+      box-shadow:0 0 0 1px #ff2a2a33 inset, 0 0 12px #ff000044;
+    }
+    .moneyCard.total.total-negative .moneyCardValue{ color:#ff8b8b; }
+
+    #tagSelectedWrapDiary{
+      flex:1 1 100%;
+      min-width:0;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+    }
+    #tagSelectedWrapDiary .tagPill{
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
 
     .box {
@@ -1441,6 +1491,10 @@ table.invTable td:last-child{
 
 </style>
 
+  <link id="faviconMain" rel="icon" href="logo.png" />
+  <link id="faviconAlt" rel="shortcut icon" href="logo.png" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="logo.png" />
+
 </head>
 
  
@@ -1467,7 +1521,10 @@ table.invTable td:last-child{
 
  
 
-  <h1>VELO NERO</h1>
+  <div class="brandHero">
+    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
+    <h1>VELO NERO</h1>
+  </div>
 
   <p class="subtitle" id="pageSubtitle">Sistema Privato Interno</p>
 
@@ -2121,10 +2178,10 @@ table.invTable td:last-child{
           <h3 class="sideTitle">Tag (Utente)</h3>
           <div class="muted">Tag salvati anche nelle note del diario.</div>
 
-          <div class="tagSelected">
-            <div class="muted">Selezionati:</div>
-            <div id="tagSelectedWrapDiary" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-            <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary(); renderTagListAcc();">Pulisci</button>
+          <div class="tagSelected" style="align-items:center;">
+            <div class="muted" style="white-space:nowrap;">Selezionati:</div>
+            <div id="tagSelectedWrapDiary"></div>
+            <button class="btn small danger" style="margin-left:auto;" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary(); renderTagListAcc();">Pulisci</button>
           </div>
 
           <div class="tagSearchRow">
@@ -2220,6 +2277,7 @@ table.invTable td:last-child{
 
           <div class="summaryActionsRow">
             <button class="btn danger small" id="btnAccReset" onclick="accResetAll()" style="display:none;">AZZERA STIPENDI</button>
+            <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetAll()" style="display:none;">RESET RESOCONTO SOLDI</button>
           </div>
 
         </div>
@@ -2356,6 +2414,9 @@ table.invTable td:last-child{
           <h3 class="sideTitle">Resoconto Totali</h3>
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
+          <div class="summaryActionsRow" style="margin-top:8px;">
+            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetAll()" style="display:none;">RESET RESOCONTO</button>
+          </div>
 
  
 
@@ -2502,7 +2563,7 @@ table.invTable td:last-child{
         <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
         <div class="row">
           <div class="field" style="min-width:320px;"><label>Item</label><select id="invEditItemSelect"></select></div>
-          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQty" type="number" min="1" step="1" value="1" /></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQty" type="number" min="0" step="1" value="0" /></div>
           <div class="field" style="min-width:180px;"><button class="btn" onclick="invEditAddItem()">Aggiungi item</button></div>
         </div>
         <div id="invEditItemsList"></div>
@@ -2632,7 +2693,7 @@ table.invTable td:last-child{
 
             <label>Quantità</label>
 
-            <input id="editItemQty" type="number" min="1" step="1" value="1" />
+            <input id="editItemQty" type="number" min="0" step="1" value="0" />
 
           </div>
 
@@ -2842,15 +2903,24 @@ table.invTable td:last-child{
 
  
 
-    const FIXED_ITEMS = [
-
-      "Pistola","Pistola Pesante","SMG","Micro SMG","Carabina","AK-47","Fucile a pompa","Munizioni",
-
-      "Giubbotto antiproiettile","Radio",
-
-      "Grimaldello","Altri oggetti","Droga","Cibo","Bevande","Telecamera","Bende","Medikit"
-
-    ];
+    const ACTION_BASE_ITEMS = {
+      armi: [
+        "Pistola","Pistola da combattimento","Pistola AP","Pistola pesante","Pistola .50",
+        "Revolver","Micro SMG","SMG","SMG da combattimento","Mini SMG",
+        "Fucile d'assalto","Carabina","Carabina speciale","AK47","Fucile a pompa",
+        "Fucile di precisione","MG","Combat MG","Munizioni Pistola","Munizioni SMG",
+        "Munizioni Fucile d'assalto","Munizioni Pompa","Munizioni Cecchino","Giubbotto antiproiettile"
+      ],
+      droga: [
+        "Marijuana / Erba","Cocaina","Metanfetamina","Crack","Eroina","Oppio","LSD",
+        "MDMA / Ecstasy","Funghi","Speed / Anfetamine","Ketamina","Fentanyl","Hashish",
+        "Semi","Sostanze chimiche","Confezioni / Buste","Bilancino","Taglierino / Lametta",
+        "Acetone","Ammoniaca"
+      ],
+      varie: [
+        "Radio","Grimaldello","Bende","Medikit","Telecamera","Cibo","Bevande","Altri oggetti"
+      ]
+    };
 
  
 
@@ -2887,7 +2957,7 @@ table.invTable td:last-child{
     // Contabilità
 
     const ACC_KEY = "vn_accounting_v1";
-    const ACTION_ITEMS_CUSTOM_KEY = "vn_action_items_custom_v1";
+    const ACTION_ITEMS_CUSTOM_KEY = "vn_action_items_custom_v2";
     const INV_ITEMS_CUSTOM_KEY = "vn_inv_items_custom_v1";
 
  
@@ -2909,6 +2979,47 @@ table.invTable td:last-child{
     }
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
+
+    const BRAND_ASSET_CANDIDATES = {
+      hero: ["icon-69", "icon-69.png", "icon-069", "icon-069.png", "logo.png"],
+      favicon: ["favicon.iso", "favicon.ico", "favicon.png", "icon-069", "icon-069.png", "logo.png"],
+      apple: ["icon-069", "icon-069.png", "icon-69", "icon-69.png", "logo.png"]
+    };
+
+    function resolveFirstImage(candidates, onDone) {
+      const list = Array.isArray(candidates) ? candidates.slice() : [];
+      const testNext = () => {
+        const src = list.shift();
+        if (!src) return onDone(null);
+        const img = new Image();
+        img.onload = () => onDone(src);
+        img.onerror = () => testNext();
+        img.src = src + (src.includes("?") ? "&" : "?") + "v=" + Date.now();
+      };
+      testNext();
+    }
+
+    function setupBrandAssets() {
+      const hero = document.getElementById("brandBgLogo");
+      const favMain = document.getElementById("faviconMain");
+      const favAlt = document.getElementById("faviconAlt");
+      const apple = document.getElementById("appleTouchIcon");
+
+      resolveFirstImage(BRAND_ASSET_CANDIDATES.hero, (src) => {
+        if (!hero) return;
+        hero.src = src || "logo.png";
+      });
+
+      resolveFirstImage(BRAND_ASSET_CANDIDATES.favicon, (src) => {
+        const chosen = src || "logo.png";
+        if (favMain) favMain.href = chosen;
+        if (favAlt) favAlt.href = chosen;
+      });
+
+      resolveFirstImage(BRAND_ASSET_CANDIDATES.apple, (src) => {
+        if (apple) apple.href = src || "logo.png";
+      });
+    }
 
  
 
@@ -5979,6 +6090,11 @@ function animateMoneyValue(el, nextValue, key){
   if (!el) return;
   const target = Number(nextValue || 0);
   const prev = Number(moneyAnimState[key] ?? 0);
+  const card = el.closest('.moneyCard');
+
+  if (card && card.classList.contains('total')) {
+    card.classList.toggle('total-negative', target <= 0);
+  }
 
   if (prev === target) {
     el.textContent = formatMoneyCardValue(target);
@@ -5987,7 +6103,6 @@ function animateMoneyValue(el, nextValue, key){
   }
 
   moneyAnimState[key] = target;
-  const card = el.closest('.moneyCard');
   if (card) {
     card.classList.remove('flash');
     void card.offsetWidth;
@@ -6071,20 +6186,39 @@ function animateMoneyValue(el, nextValue, key){
  
 
     function loadCustomActionItems() {
-      try { return JSON.parse(localStorage.getItem(ACTION_ITEMS_CUSTOM_KEY) || "[]"); } catch { return []; }
+      try {
+        const parsed = JSON.parse(localStorage.getItem(ACTION_ITEMS_CUSTOM_KEY) || "{}");
+        const old = JSON.parse(localStorage.getItem("vn_action_items_custom_v1") || "[]");
+        const map = {
+          armi: Array.isArray(parsed?.armi) ? parsed.armi : [],
+          droga: Array.isArray(parsed?.droga) ? parsed.droga : [],
+          varie: Array.isArray(parsed?.varie) ? parsed.varie : []
+        };
+        if (!map.varie.length && Array.isArray(old) && old.length) map.varie = old;
+        return map;
+      } catch {
+        return { armi: [], droga: [], varie: [] };
+      }
     }
 
-    function saveCustomActionItems(items) {
-      localStorage.setItem(ACTION_ITEMS_CUSTOM_KEY, JSON.stringify(Array.from(new Set((items || []).map(x => String(x || "").trim()).filter(Boolean)))));
+    function saveCustomActionItems(map) {
+      const clean = {
+        armi: Array.from(new Set((map?.armi || []).map(x => String(x || "").trim()).filter(Boolean))),
+        droga: Array.from(new Set((map?.droga || []).map(x => String(x || "").trim()).filter(Boolean))),
+        varie: Array.from(new Set((map?.varie || []).map(x => String(x || "").trim()).filter(Boolean)))
+      };
+      localStorage.setItem(ACTION_ITEMS_CUSTOM_KEY, JSON.stringify(clean));
     }
 
-    function getActionItems() {
-      return Array.from(new Set([...FIXED_ITEMS, ...loadCustomActionItems()]));
+    function getActionItems(group) {
+      const g = String(group || "varie").toLowerCase();
+      const custom = loadCustomActionItems();
+      return Array.from(new Set([...(ACTION_BASE_ITEMS[g] || []), ...((custom && custom[g]) || [])]));
     }
 
-    function fillItemSelect(selectEl) {
+    function fillItemSelect(selectEl, group = "varie") {
       selectEl.innerHTML = "";
-      getActionItems().forEach(it => {
+      getActionItems(group).forEach(it => {
         const opt = document.createElement("option");
         opt.value = it;
         opt.textContent = it;
@@ -6095,28 +6229,43 @@ function animateMoneyValue(el, nextValue, key){
     function actionRefreshAllItemSelects(selectedValue = "") {
       CATEGORIES.forEach(cat => {
         const tid = tabIdFromName(cat);
-        ["itemArmi_", "itemDroga_", "itemVarie_", "item_"].forEach(prefix => {
+        [["itemArmi_", "armi"], ["itemDroga_", "droga"], ["itemVarie_", "varie"], ["item_", "varie"]].forEach(([prefix, group]) => {
           const sel = document.getElementById(prefix + tid);
           if (!sel) return;
           const prev = selectedValue || sel.value;
-          fillItemSelect(sel);
+          fillItemSelect(sel, group);
           if (prev && Array.from(sel.options).some(o => o.value === prev)) sel.value = prev;
         });
       });
+      const editSel = document.getElementById("editItemSelect");
+      if (editSel) {
+        const prev = selectedValue || editSel.value;
+        editSel.innerHTML = "";
+        ["armi", "droga", "varie"].forEach(group => {
+          getActionItems(group).forEach(it => {
+            const opt = document.createElement("option");
+            opt.value = it;
+            opt.textContent = it;
+            editSel.appendChild(opt);
+          });
+        });
+        if (prev && Array.from(editSel.options).some(o => o.value === prev)) editSel.value = prev;
+      }
     }
 
     function actionAddCustomItem(category) {
       if (!isAdmin()) return alert("Solo Owner, Boss e Vice Boss possono aggiungere item.");
       const tid = tabIdFromName(category);
       const input = document.getElementById("customItem_" + tid);
+      const group = String(document.getElementById("customGroup_" + tid)?.value || "varie").toLowerCase();
       const name = String(input?.value || "").trim();
       if (!name) return alert("Scrivi il nome del nuovo item.");
-      const items = loadCustomActionItems();
-      if (getActionItems().some(x => x.toLowerCase() === name.toLowerCase())) {
+      if (getActionItems(group).some(x => x.toLowerCase() === name.toLowerCase())) {
         return alert("Questo item esiste già.");
       }
-      items.push(name);
-      saveCustomActionItems(items);
+      const map = loadCustomActionItems();
+      map[group] = [...(map[group] || []), name];
+      saveCustomActionItems(map);
       actionRefreshAllItemSelects(name);
       if (input) input.value = "";
     }
@@ -6124,14 +6273,17 @@ function animateMoneyValue(el, nextValue, key){
     function actionRemoveSelectedItem(category) {
       if (!isAdmin()) return alert("Solo Owner, Boss e Vice Boss possono rimuovere item.");
       const tid = tabIdFromName(category);
-      const sel = document.getElementById("item_" + tid);
+      const group = String(document.getElementById("customGroup_" + tid)?.value || "varie").toLowerCase();
+      const selId = group === "armi" ? "itemArmi_" : group === "droga" ? "itemDroga_" : "itemVarie_";
+      const sel = document.getElementById(selId + tid);
       const name = String(sel?.value || "").trim();
       if (!name) return alert("Seleziona un item da rimuovere.");
-      if (FIXED_ITEMS.some(x => x.toLowerCase() === name.toLowerCase())) {
+      if ((ACTION_BASE_ITEMS[group] || []).some(x => x.toLowerCase() === name.toLowerCase())) {
         return alert("Non puoi rimuovere un item base.");
       }
-      const items = loadCustomActionItems().filter(x => x.toLowerCase() !== name.toLowerCase());
-      saveCustomActionItems(items);
+      const map = loadCustomActionItems();
+      map[group] = (map[group] || []).filter(x => x.toLowerCase() !== name.toLowerCase());
+      saveCustomActionItems(map);
       actionRefreshAllItemSelects();
     }
 
@@ -6226,9 +6378,9 @@ function animateMoneyValue(el, nextValue, key){
 
       const name = itemEl.value;
 
-      let qty = parseInt(qtyEl.value || "1", 10);
+      let qty = parseInt(qtyEl.value || "0", 10);
 
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
 
  
 
@@ -6242,7 +6394,7 @@ function animateMoneyValue(el, nextValue, key){
 
  
 
-      qtyEl.value = "1";
+      qtyEl.value = "0";
 
       renderDraft(category);
 
@@ -6558,7 +6710,7 @@ accRenderDueTable();
 
     const editItemsList = document.getElementById("editItemsList");
 
-    fillItemSelect(editItemSelect);
+    actionRefreshAllItemSelects();
 
  
 
@@ -6720,9 +6872,9 @@ accRenderDueTable();
 
       const name = editItemSelect.value;
 
-      let qty = parseInt(editItemQty.value || "1", 10);
+      let qty = parseInt(editItemQty.value || "0", 10);
 
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
 
  
 
@@ -6734,7 +6886,7 @@ accRenderDueTable();
 
  
 
-      editItemQty.value = "1";
+      editItemQty.value = "0";
 
       renderEditItems();
 
@@ -7109,7 +7261,7 @@ invRenderTotals();
 
               <label>Quantità</label>
 
-              <input id="qtyArmi_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="qtyArmi_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
 
             </div>
 
@@ -7137,7 +7289,7 @@ invRenderTotals();
 
               <label>Quantità</label>
 
-              <input id="qtyDroga_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="qtyDroga_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
 
             </div>
 
@@ -7165,7 +7317,7 @@ invRenderTotals();
 
               <label>Quantità</label>
 
-              <input id="qtyVarie_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="qtyVarie_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
 
             </div>
 
@@ -7187,6 +7339,14 @@ invRenderTotals();
 
           ${isAdmin() ? `
           <div class="itemManageRow">
+            <div class="field" style="min-width:180px;">
+              <label>Lista</label>
+              <select id="customGroup_${tid}">
+                <option value="armi">Armi</option>
+                <option value="droga">Droga</option>
+                <option value="varie">Oggetti/Varie</option>
+              </select>
+            </div>
             <div class="field">
               <label>Nuovo item</label>
               <input id="customItem_${tid}" type="text" placeholder="es. Cassetta armi" />
@@ -7233,15 +7393,14 @@ invRenderTotals();
  
 
         setTimeout(() => {
-
-          const itemSel = document.getElementById("item_" + tid);
-
-          if (itemSel) fillItemSelect(itemSel);
-
+          const itemArmi = document.getElementById("itemArmi_" + tid);
+          const itemDroga = document.getElementById("itemDroga_" + tid);
+          const itemVarie = document.getElementById("itemVarie_" + tid);
+          if (itemArmi) fillItemSelect(itemArmi, "armi");
+          if (itemDroga) fillItemSelect(itemDroga, "droga");
+          if (itemVarie) fillItemSelect(itemVarie, "varie");
           renderDraft(cat);
-
           renderCategory(cat);
-
         }, 0);
 
  
@@ -7591,7 +7750,7 @@ invRenderTotals();
 
               <label>Quantità</label>
 
-              <input id="invQty_${tid}" type="number" min="1" step="1" value="1" ${disabledAttr} />
+              <input id="invQty_${tid}" type="number" min="0" step="1" value="0" ${disabledAttr} />
 
             </div>
 
@@ -7755,14 +7914,14 @@ invRenderTotals();
     function invAddItemToDraft(cat) {
       const tid = invTabId(cat);
       const item = document.getElementById("invItem_" + tid)?.value || "";
-      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
+      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
       if (!item) return alert("Seleziona un item.");
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
       if (!invDraftByCategory[cat]) invDraftByCategory[cat] = [];
       const arr = invDraftByCategory[cat];
       const found = arr.find(x => x.name === item);
       if (found) found.qty += qty; else arr.push({ name: item, qty });
-      document.getElementById("invQty_" + tid).value = "1";
+      document.getElementById("invQty_" + tid).value = "0";
       invRenderDraft(cat);
     }
 
@@ -7831,8 +7990,7 @@ invRenderTotals();
       const tid = invTabId(cat);
       const type = document.getElementById("invType_" + tid)?.value || "add";
       const item = document.getElementById("invItem_" + tid)?.value || "";
-      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "1", 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+      let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
 
       const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
       const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
@@ -7844,6 +8002,9 @@ invRenderTotals();
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       const draftItems = (invDraftByCategory[cat] || []).map(x => ({ name: x.name, qty: x.qty }));
+      if (!draftItems.length && item) {
+        if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
+      }
       const itemList = draftItems.length ? draftItems : (item ? [{ name: item, qty }] : []);
 
       if (!itemList.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
@@ -7861,7 +8022,7 @@ invRenderTotals();
         category: cat,
         type,
         item: itemList[0]?.name || "",
-        qty: itemList[0]?.qty || 1,
+        qty: itemList[0]?.qty || 0,
         items: itemList,
         money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
         note,
@@ -7885,7 +8046,7 @@ invRenderTotals();
         accRenderDueTable();
       }
 
-      document.getElementById("invQty_" + tid).value = "1";
+      document.getElementById("invQty_" + tid).value = "0";
       invDraftByCategory[cat] = [];
       invRenderDraft(cat);
 
@@ -7974,6 +8135,139 @@ invRenderTotals();
       invSave(all);
       invRenderTable(cat);
       invRenderTotals();
+    }
+
+    const invEditOverlay = document.getElementById("invEditOverlay");
+    const invEditInfo = document.getElementById("invEditInfo");
+    const invEditType = document.getElementById("invEditType");
+    const invEditMoneyClean = document.getElementById("invEditMoneyClean");
+    const invEditMoneyDirty = document.getElementById("invEditMoneyDirty");
+    const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
+    const invEditNote = document.getElementById("invEditNote");
+    const invEditTags = document.getElementById("invEditTags");
+    const invEditItemSelect = document.getElementById("invEditItemSelect");
+    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemsList = document.getElementById("invEditItemsList");
+
+    let invEditingId = null;
+    let invEditingCategory = null;
+    let invEditingItems = [];
+
+    function openInvEdit(id, cat) {
+      if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
+      const rec = invLoad().find(x => x.id === id && x.category === cat);
+      if (!rec) return;
+      setModalOpen(true);
+
+      invEditingId = id;
+      invEditingCategory = cat;
+      invEditingItems = (Array.isArray(rec.items) && rec.items.length)
+        ? rec.items.map(x => ({ name: x.name, qty: Number(x.qty || 0) }))
+        : (rec.item ? [{ name: rec.item, qty: Number(rec.qty || 0) }] : []);
+
+      if (invEditInfo) invEditInfo.textContent = `${rec.category} — ${rec.who || "—"} — ${new Date(rec.ts).toLocaleString()}`;
+      if (invEditType) invEditType.value = rec.type || "add";
+      const m = rec.money;
+      if (invEditMoneyClean) invEditMoneyClean.value = String((typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0));
+      if (invEditMoneyDirty) invEditMoneyDirty.value = String((typeof m === "number") ? 0 : Number(m?.dirty || 0));
+      if (invEditMoneyDrug) invEditMoneyDrug.value = String((typeof m === "number") ? 0 : Number(m?.drug || 0));
+      if (invEditNote) invEditNote.value = rec.note || "";
+      const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
+      if (invEditTags) invEditTags.value = tnames.length ? tnames.join(", ") : "—";
+
+      if (invEditItemSelect) {
+        const prev = invEditItemSelect.value;
+        invEditItemSelect.innerHTML = "";
+        invItemsForCategory(cat).forEach(it => {
+          const o = document.createElement("option");
+          o.value = it;
+          o.textContent = it;
+          invEditItemSelect.appendChild(o);
+        });
+        if (prev && Array.from(invEditItemSelect.options).some(o => o.value === prev)) invEditItemSelect.value = prev;
+      }
+
+      invRenderEditItems();
+      if (invEditOverlay) invEditOverlay.style.display = "block";
+    }
+
+    function closeInvEdit() {
+      if (invEditOverlay) invEditOverlay.style.display = "none";
+      invEditingId = null;
+      invEditingCategory = null;
+      invEditingItems = [];
+      setModalOpen(false);
+    }
+
+    function invRenderEditItems() {
+      if (!invEditItemsList) return;
+      if (!invEditingItems.length) {
+        invEditItemsList.innerHTML = `<div class="muted">Nessun item</div>`;
+        return;
+      }
+      invEditItemsList.innerHTML = invEditingItems.map((it, idx) => `
+        <div class="itemRow">
+          <div style="font-weight:900;">${escapeHtml(it.name)} x${Number(it.qty || 0)}</div>
+          <div class="right"><button class="btn small danger" onclick="invEditRemoveItem(${idx})">Rimuovi</button></div>
+        </div>
+      `).join("");
+    }
+
+    function invEditAddItem() {
+      const name = String(invEditItemSelect?.value || "").trim();
+      const qty = parseInt(invEditItemQty?.value || "0", 10);
+      if (!name) return alert("Seleziona un item.");
+      if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
+      const found = invEditingItems.find(x => x.name === name);
+      if (found) found.qty += qty;
+      else invEditingItems.push({ name, qty });
+      if (invEditItemQty) invEditItemQty.value = "0";
+      invRenderEditItems();
+    }
+
+    function invEditRemoveItem(idx) {
+      invEditingItems.splice(idx, 1);
+      invRenderEditItems();
+    }
+
+    function saveInvEdit() {
+      if (!invEditingId || !invEditingCategory) return;
+      const all = invLoad();
+      const rec = all.find(x => x.id === invEditingId && x.category === invEditingCategory);
+      if (!rec) return;
+
+      rec.type = invEditType?.value || rec.type;
+      rec.money = {
+        clean: Math.max(0, parseInt(invEditMoneyClean?.value || "0", 10) || 0),
+        dirty: Math.max(0, parseInt(invEditMoneyDirty?.value || "0", 10) || 0),
+        drug: Math.max(0, parseInt(invEditMoneyDrug?.value || "0", 10) || 0)
+      };
+      rec.note = String(invEditNote?.value || "").trim();
+      rec.items = invEditingItems.map(x => ({ name: x.name, qty: Number(x.qty || 0) }));
+      rec.item = rec.items[0]?.name || "";
+      rec.qty = rec.items[0]?.qty || 0;
+
+      invSave(all);
+
+      logEvent(
+        "INV_EDIT",
+        `${rec.category} .. ${rec.type} .. Item(${rec.items.map(it => `${it.name} x${it.qty}`).join(", ") || "—"}) .. Soldi(${logMoneyParts(rec.money)})` +
+        (rec.note ? ` .. Note(${rec.note})` : "")
+      );
+
+      const noteBase = `Auto da Gestione (modifica): ${rec.category} .. ${rec.type}`;
+      accUpsertDueSalariesFromSource("inv", rec.id, rec.money, rec.tagUserIds || [], noteBase);
+      accRenderDueTable();
+
+      closeInvEdit();
+      invRenderTable(rec.category);
+      invRenderTotals();
+    }
+
+    if (invEditOverlay) {
+      invEditOverlay.addEventListener("click", (e) => {
+        if (e.target === invEditOverlay) closeInvEdit();
+      });
     }
 
     function normalizeTotalItemName(name) {
@@ -8205,6 +8499,8 @@ function invComputeTotals() {
 
       const invResetBtn = document.getElementById("btnInvReset");
       if (invResetBtn) invResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      const invTotalsResetBtn = document.getElementById("btnInvTotalsReset");
+      if (invTotalsResetBtn) invTotalsResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
 
     }
 
@@ -9276,6 +9572,8 @@ function accRenderSummary() {
       s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
       const accResetBtn = document.getElementById("btnAccReset");
       if (accResetBtn) accResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      const accMoneyResetBtn = document.getElementById("btnAccMoneyReset");
+      if (accMoneyResetBtn) accMoneyResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
     }
 
  
@@ -9337,6 +9635,7 @@ accRenderSummary();
         if (document.getElementById("noteOverlay").style.display === "block") closeNoteModal();
 
         if (document.getElementById("editOverlay").style.display === "block") closeEdit();
+        if (document.getElementById("invEditOverlay").style.display === "block") closeInvEdit();
 
       }
 
@@ -9352,6 +9651,7 @@ accRenderSummary();
 
     function boot() {
 
+      setupBrandAssets();
       ensureDemoUsersIfEmpty();
 
       setHeaderUser();
