@@ -5952,7 +5952,7 @@ if (s?.email === u.email) logout();
 const moneyAnimState = {};
 
 function formatMoneyCardValue(v){
-  return Number(v || 0).toLocaleString("it-IT");
+  return "$" + Number(v || 0).toLocaleString("it-IT");
 }
 
 function fitMoneyCardValue(el){
