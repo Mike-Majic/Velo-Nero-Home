@@ -9506,9 +9506,7 @@ tr.innerHTML = `
 function accRenderDueTable() {
 
   const tid = accTabId("Stipendi");
-
   const body = document.getElementById("accDueTable_" + tid);
-
   if (!body) return;
 
   const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
@@ -9516,55 +9514,62 @@ function accRenderDueTable() {
   const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
 
   if (!rows.length) {
-
     body.innerHTML = `<tr><td class="muted" colspan="8">Nessun dato</td></tr>`;
-
     return;
-
   }
 
   body.innerHTML = "";
 
   rows.forEach(r => {
+    const toKey = String(r.toUserId || r.to || "—");
+    const pt = String(r.payType || "clean");
+    const key = `${toKey}__${pt}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        key,
+        to: r.to || "—",
+        toUserId: r.toUserId || "",
+        payType: pt,
+        amount: 0,
+        tagSet: new Set(),
+        noteSet: new Set(),
+        ts: r.ts || 0,
+        count: 0
+      });
+    }
+    const g = grouped.get(key);
+    g.amount += Number(r.amount || 0);
+    g.count += 1;
+    if ((r.ts||0) > g.ts) g.ts = r.ts || 0;
+    (r.tagNames || []).forEach(t => g.tagSet.add(String(t || "").trim()));
+    if (r.note) g.noteSet.add(String(r.note).trim());
+  });
 
     const pt = (r.payType || "clean");
 
     const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
 
     const tr = document.createElement("tr");
-
-    const tagHtml = (Array.isArray(r.tagNames) && r.tagNames.length)
-      ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.tagNames.join(", "))}</div>`
+    const tags = Array.from(g.tagSet).filter(Boolean);
+    const notes = Array.from(g.noteSet).filter(Boolean);
+    const tagHtml = tags.length
+      ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(tags.join(", "))}</div>`
       : `<span class="muted">—</span>`;
 
     tr.innerHTML = `
-
-      <td>${new Date(r.ts).toLocaleString()}</td>
-
-      <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-
-      <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
-
+      <td>${new Date(g.ts).toLocaleString()}</td>
+      <td style="font-weight:900;">Auto</td>
+      <td style="font-weight:900;">${escapeHtml(g.to)}</td>
       <td>${tagHtml}</td>
-
-      <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-
+      <td style="font-weight:900;">${formatMoney(g.amount || 0)}</td>
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-
-      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
+      <td>${notes.length ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(notes[0])}${notes.length>1?` .. (+${notes.length-1})`:""}</div>` : `<span class="muted">—</span>`}</td>
       <td>
-
-        <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
-
+        <button class="btn small" onclick="accSetSalaryStatusGroup('${escapeHtml(g.toUserId || g.to)}', '${g.payType}', 'paid')">PAGATO (${g.count})</button>
       </td>
-
     `;
-
     body.appendChild(tr);
-
   });
-
 }
 
 function accSetSalaryStatus(id, status) {
