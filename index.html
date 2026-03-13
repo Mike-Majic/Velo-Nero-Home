@@ -449,7 +449,7 @@
  
 
     table { width:100%; border-collapse:collapse; margin-top:12px; table-layout:fixed; }
-    table.usersTable, table.accTable { table-layout:auto; }
+    table.usersTable, table.accTable { table-layout:fixed; }
     table.usersTable td, table.usersTable th { overflow:visible; }
     table.usersTable select { width:100%; min-width:150px; }
     table.accTable th, table.accTable td { overflow-wrap:normal; word-break:normal; white-space:normal; }
@@ -622,9 +622,9 @@ table.invTable td:nth-child(7){
 
  
 
-    #editOverlay, #noteOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; }
+    #editOverlay, #noteOverlay, #invEditOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:1000; padding:24px; overflow:auto; }
 
-    #editModal, #noteModal {
+    #editModal, #noteModal, #invEditModal {
 
       max-width:900px; margin:0 auto; background:var(--panel2);
 
@@ -633,6 +633,7 @@ table.invTable td:nth-child(7){
       box-shadow:0 0 20px #ff1a1a33, 0 0 22px #ff000055 inset;
 
       padding:18px; text-align:left;
+      max-height:calc(100vh - 48px); overflow:auto;
 
     }
 
@@ -816,7 +817,7 @@ table.invTable td:nth-child(7){
     }
 
     .diaryTableWrap table.diaryInvestigationTable{
-      table-layout:auto;
+      table-layout:fixed;
       width:100%;
       border-collapse:separate;
       border-spacing:0 12px;
@@ -837,6 +838,7 @@ table.invTable td:nth-child(7){
       border-right:0;
       padding:14px 12px;
       vertical-align:middle;
+      overflow:hidden;
     }
     .diaryInvestigationTable tbody td:first-child{
       border-left:1px solid #ff1a1a33;
@@ -1217,6 +1219,7 @@ table.invTable td:nth-child(7){
  
 
 
+  .profileAvatar{ display:none !important; }
 @media (max-width:900px){
   body{
     padding:22px 12px 40px;
@@ -1407,6 +1410,7 @@ table.invTable td:last-child{
 table.invTable td:last-child{
   vertical-align:middle;
 }
+  .profileAvatar{ display:none !important; }
 @media (max-width:900px){
   .invItemDraftRow{
     grid-template-columns:1fr;
@@ -1544,6 +1548,7 @@ table.invTable td:last-child{
 .gtaSectionRow td:last-child{
   border-right:1px solid #ffd54a88 !important;
 }
+  .profileAvatar{ display:none !important; }
 @media (max-width:900px){
   .diaryAdvancedBar,
   .diaryMiniStats{
@@ -2623,6 +2628,13 @@ table.invTable td:last-child{
       </div>
       <div class="row" style="margin-top:10px;">
         <div class="field" style="min-width:320px; flex:1;"><label>Tag (Nome in game)</label><input id="invEditTags" disabled /></div>
+        <div class="field" style="min-width:220px;"><label>&nbsp;</label><button class="btn" onclick="toggleInvEditTagPicker()">Seleziona tag</button></div>
+      </div>
+      <div id="invEditTagPicker" class="panel" style="display:none; margin-top:8px;">
+        <div class="muted" style="margin-bottom:6px;">Click su un nome per aggiungere/rimuovere tag.</div>
+        <div style="max-height:180px; overflow:auto; border:1px solid #ff1a1a33; border-radius:10px;">
+          <table style="margin-top:0;"><tbody id="invEditTagPickerBody"><tr><td class="muted">Nessun utente</td></tr></tbody></table>
+        </div>
       </div>
       <div style="margin-top:14px;">
         <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
@@ -2635,7 +2647,7 @@ table.invTable td:last-child{
       </div>
       <div class="right" style="margin-top:14px;">
         <button class="btn small" onclick="closeInvEdit()">Chiudi</button>
-        <button class="btn small" onclick="saveInvEdit()">Salva</button>
+        <button class="btn small success" onclick="saveInvEdit()">Salva</button>
       </div>
     </div>
   </div>
@@ -2714,7 +2726,7 @@ table.invTable td:last-child{
 
           <button class="btn small" onclick="closeEdit()">Chiudi</button>
 
-          <button class="btn small" onclick="saveEdit()">Salva</button>
+          <button class="btn small success" onclick="saveEdit()">Salva</button>
 
         </div>
 
@@ -2730,7 +2742,14 @@ table.invTable td:last-child{
 
           <input id="editTagName" disabled />
 
-          <div class="hint">Per cambiare tag: seleziona uno o più nomi nella lista a destra e poi salva.</div>
+          <div class="hint">Per cambiare tag: usa il pulsante qui sotto.</div>
+          <button class="btn" style="margin-top:8px;" onclick="toggleEditTagPicker()">Seleziona tag</button>
+          <div id="editTagPicker" class="panel" style="display:none; margin-top:8px;">
+            <div class="muted" style="margin-bottom:6px;">Click su un nome per aggiungere/rimuovere tag.</div>
+            <div style="max-height:180px; overflow:auto; border:1px solid #ff1a1a33; border-radius:10px;">
+              <table style="margin-top:0;"><tbody id="editTagPickerBody"><tr><td class="muted">Nessun utente</td></tr></tbody></table>
+            </div>
+          </div>
 
         </div>
 
@@ -3044,6 +3063,26 @@ table.invTable td:last-child{
     }
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
+
+    function mapUserIdsToNames(ids, fallbackNames = []) {
+      const users = loadUsers();
+      const names = (Array.isArray(ids) ? ids : [])
+        .map(id => users.find(u => u.id === id))
+        .filter(Boolean)
+        .map(u => u.gameName || u.email || "—")
+        .filter(Boolean);
+      if (names.length) return names;
+      return Array.isArray(fallbackNames) ? fallbackNames.slice() : [];
+    }
+
+    function formatItemsPreview(itemList, maxItems = 3) {
+      const arr = Array.isArray(itemList) ? itemList : [];
+      if (!arr.length) return "";
+      const lines = arr.slice(0, maxItems).map(it => `${Number(it.qty || 0)}x ${it.name}`);
+      if (arr.length > maxItems) lines.push("...");
+      return lines.join("\n");
+    }
+
 
     const BRAND_ASSETS = {
       // File caricati da te su GitHub
@@ -3369,9 +3408,11 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
   function addForType(payType, amount){
 
-    const pool = Math.floor(Number(amount || 0) * 0.5);
+    const amt = Number(amount || 0);
 
-    if (pool <= 0) return;
+    if (amt <= 0) return;
+
+    const pool = Math.max(1, Math.round(amt * 0.5));
 
  
 
@@ -3864,7 +3905,7 @@ function saveNote() {
   const all = loadDiary();
   const me = myGameNameOrEmail();
   const tagUserIds = selectedTagUserIds.slice();
-  const tagNames = selectedTagNames();
+  const tagNames = mapUserIdsToNames(tagUserIds, selectedTagNames());
 
   if (editingNoteId) {
     const n = all.find(x => x.id === editingNoteId);
@@ -5856,7 +5897,7 @@ if (s?.email === u.email) logout();
 
  
 
-        tr.ondblclick = () => {
+        tr.onclick = () => {
 
           toggleSelectedTag(u.id);
 
@@ -5922,7 +5963,7 @@ if (s?.email === u.email) logout();
 
  
 
-        tr.ondblclick = () => {
+        tr.onclick = () => {
 
           toggleSelectedTag(u.id);
 
@@ -5969,7 +6010,7 @@ if (s?.email === u.email) logout();
         const isSelected = isTagSelected(u.id);
         tr.className = "clickRow" + (isSelected ? " selectedRow" : "");
 
-        tr.ondblclick = () => {
+        tr.onclick = () => {
           toggleSelectedTag(u.id);
           renderTagList();
           renderTagListInv();
@@ -6016,7 +6057,7 @@ if (s?.email === u.email) logout();
         const isPaidMemo = isAccTagChecked(u.id);
         if (isPaidMemo) tr.classList.add("accTagPaidRow");
 
-        tr.ondblclick = toggleSelect;
+        tr.onclick = toggleSelect;
 
         tr.innerHTML = `<td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span>${isSelected ? ` <span class="tagRole">SELEZIONATO</span>` : ``}</td>
                         <td class="tagToggleCell"><button type="button" class="tagToggleBtn${isPaidMemo ? " active" : ""}" data-tag-id="${escapeHtml(u.id)}">${isPaidMemo ? "✓" : ""}</button></td>`;
@@ -6788,8 +6829,36 @@ accRenderDueTable();
     let editingItems = [];
 
     let editingCategory = null;
+    let editTagUserIds = [];
 
  
+
+    function renderEditTagPicker(){
+      const body = document.getElementById("editTagPickerBody");
+      if (!body) return;
+      const users = getTagSortedUsers("");
+      if (!users.length) { body.innerHTML = `<tr><td class="muted">Nessun utente</td></tr>`; return; }
+      body.innerHTML = users.map(u => {
+        const active = editTagUserIds.includes(u.id);
+        return `<tr class="clickRow ${active ? "selectedRow" : ""}" onclick="editToggleTag('${escapeHtml(u.id)}')"><td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td></tr>`;
+      }).join("");
+    }
+
+    function editToggleTag(id){
+      if (editTagUserIds.includes(id)) editTagUserIds = editTagUserIds.filter(x => x !== id);
+      else editTagUserIds.push(id);
+      const names = mapUserIdsToNames(editTagUserIds, []);
+      if (editTagName) editTagName.value = names.length ? names.join(", ") : "—";
+      renderEditTagPicker();
+    }
+
+    function toggleEditTagPicker(){
+      const box = document.getElementById("editTagPicker");
+      if (!box) return;
+      const open = box.style.display === "block";
+      box.style.display = open ? "none" : "block";
+      if (!open) renderEditTagPicker();
+    }
 
     function openEdit(id) {
 
@@ -6874,6 +6943,8 @@ accRenderDueTable();
       editingCategory = null;
 
       editingItems = [];
+      editTagUserIds = [];
+      const etp = document.getElementById("editTagPicker"); if (etp) etp.style.display = "none";
 
  
 
@@ -7094,11 +7165,7 @@ logEvent(
 
  
 
-        const itemsText = (r.items && r.items.length)
-
-          ? r.items.map(it => `${Number(it.qty||0)}x ${it.name}`).join("\n")
-
-          : "";
+        const itemsText = formatItemsPreview((r.items && r.items.length) ? r.items : [], 3);
 
  
 
@@ -8089,7 +8156,7 @@ invRenderTotals();
 
       const who = myGameNameOrEmail();
       const tagUserIds = selectedTagUserIds.slice();
-      const tagNames = selectedTagNames();
+      const tagNames = mapUserIdsToNames(tagUserIds, selectedTagNames());
 
       const all = invLoad();
       all.push({
@@ -8166,8 +8233,9 @@ invRenderTotals();
           : `<span class="muted">—</span>`;
 
         const itemList = (Array.isArray(r.items) && r.items.length) ? r.items : (r.item ? [{ name:r.item, qty:r.qty }] : []);
-        const itemHtml = itemList.length
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\\n"))}</div>`
+        const itemPreview = formatItemsPreview(itemList, 3);
+        const itemHtml = itemPreview
+          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemPreview)}</div>`
           : `<span class="muted">—</span>`;
 
         const m = r.money;
@@ -8228,6 +8296,34 @@ invRenderTotals();
     let invEditingId = null;
     let invEditingCategory = null;
     let invEditingItems = [];
+    let invEditTagUserIds = [];
+
+    function renderInvEditTagPicker(){
+      const body = document.getElementById("invEditTagPickerBody");
+      if (!body) return;
+      const users = getTagSortedUsers("");
+      if (!users.length) { body.innerHTML = `<tr><td class="muted">Nessun utente</td></tr>`; return; }
+      body.innerHTML = users.map(u => {
+        const active = invEditTagUserIds.includes(u.id);
+        return `<tr class="clickRow ${active ? "selectedRow" : ""}" onclick="invEditToggleTag('${escapeHtml(u.id)}')"><td style="font-weight:900;">${escapeHtml(u.gameName || u.email || "—")} <span class="tagRole">${escapeHtml(u.role || "—")}</span></td></tr>`;
+      }).join("");
+    }
+
+    function invEditToggleTag(id){
+      if (invEditTagUserIds.includes(id)) invEditTagUserIds = invEditTagUserIds.filter(x => x !== id);
+      else invEditTagUserIds.push(id);
+      const names = mapUserIdsToNames(invEditTagUserIds, []);
+      if (invEditTags) invEditTags.value = names.length ? names.join(", ") : "—";
+      renderInvEditTagPicker();
+    }
+
+    function toggleInvEditTagPicker(){
+      const box = document.getElementById("invEditTagPicker");
+      if (!box) return;
+      const open = box.style.display === "block";
+      box.style.display = open ? "none" : "block";
+      if (!open) renderInvEditTagPicker();
+    }
 
     function openInvEdit(id, cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
@@ -8249,7 +8345,8 @@ invRenderTotals();
       if (invEditMoneyDrug) invEditMoneyDrug.value = String((typeof m === "number") ? 0 : Number(m?.drug || 0));
       if (invEditNote) invEditNote.value = rec.note || "";
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
-      if (invEditTags) invEditTags.value = tnames.length ? tnames.join(", ") : "—";
+      invEditTagUserIds = Array.isArray(rec.tagUserIds) ? rec.tagUserIds.slice() : [];
+      if (invEditTags) invEditTags.value = (mapUserIdsToNames(invEditTagUserIds, tnames).join(", ") || "—");
 
       if (invEditItemSelect) {
         const prev = invEditItemSelect.value;
@@ -8272,6 +8369,8 @@ invRenderTotals();
       invEditingId = null;
       invEditingCategory = null;
       invEditingItems = [];
+      invEditTagUserIds = [];
+      const itp = document.getElementById("invEditTagPicker"); if (itp) itp.style.display = "none";
       setModalOpen(false);
     }
 
@@ -8336,6 +8435,9 @@ invRenderTotals();
       rec.items = invEditingItems.map(x => ({ name: x.name, qty: Number(x.qty || 0) }));
       rec.item = rec.items[0]?.name || "";
       rec.qty = rec.items[0]?.qty || 0;
+      rec.tagUserIds = invEditTagUserIds.slice();
+      rec.tagNames = mapUserIdsToNames(invEditTagUserIds, rec.tagNames || []);
+      rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
       invSave(all);
 
