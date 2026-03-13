@@ -463,16 +463,15 @@ table.invTable td:nth-child(8){
     }
 .moneyCardValue{
   display:block;
-  font-size:clamp(14px, 2.2vw, 22px);
+  font-size:clamp(14px, 2vw, 22px);
   font-weight:900;
   color:#fff;
   text-shadow:0 0 10px #000;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:clip;
-  font-variant-numeric:tabular-nums;
-  letter-spacing:-.6px;
   line-height:1.05;
+  letter-spacing:-0.6px;
   width:100%;
   min-width:0;
 }
