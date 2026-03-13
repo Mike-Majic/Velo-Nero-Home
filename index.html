@@ -3149,6 +3149,38 @@ table.invTable td:last-child{
 
     function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
+     function loadArrayWithKeyFallback(primaryKey, legacyKeys = []) {
+
+      const keys = [primaryKey, ...(legacyKeys || [])].filter(Boolean);
+
+      for (const k of keys) {
+
+        try {
+
+          const raw = localStorage.getItem(k);
+
+          if (!raw) continue;
+
+          const arr = JSON.parse(raw);
+
+          if (!Array.isArray(arr)) continue;
+
+          if (k !== primaryKey && !localStorage.getItem(primaryKey)) {
+
+            localStorage.setItem(primaryKey, JSON.stringify(arr));
+
+          }
+
+          return arr;
+
+        } catch {}
+
+      }
+
+      return [];
+
+    }
+
  
 
     // =========================
@@ -3159,15 +3191,7 @@ table.invTable td:last-child{
 
     function loadUsers() {
 
-      try {
-
-        const raw = localStorage.getItem(USERS_KEY);
-
-        const arr = raw ? JSON.parse(raw) : [];
-
-        return Array.isArray(arr) ? arr : [];
-
-      } catch { return []; }
+      return loadArrayWithKeyFallback(USERS_KEY, ["vn_users_v1", "vn_users"]);
 
     }
 
@@ -3590,15 +3614,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     function loadOps() {
 
-      try {
-
-        const raw = localStorage.getItem(OPS_KEY);
-
-        const arr = raw ? JSON.parse(raw) : [];
-
-        return Array.isArray(arr) ? arr : [];
-
-      } catch { return []; }
+      return loadArrayWithKeyFallback(OPS_KEY, ["vn_ops_v5", "vn_ops_v4", "vn_ops_v3", "vn_ops_v2", "vn_ops_v1", "vn_ops"]);
 
     }
 
@@ -3614,15 +3630,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     function loadDiary() {
 
-      try {
-
-        const raw = localStorage.getItem(DIARY_KEY);
-
-        const arr = raw ? JSON.parse(raw) : [];
-
-        return Array.isArray(arr) ? arr : [];
-
-      } catch { return []; }
+      return loadArrayWithKeyFallback(DIARY_KEY, ["vn_diary", "vn_diary_v0"]);
 
     }
 
@@ -7757,15 +7765,7 @@ invRenderTotals();
 
     function invLoad() {
 
-      try {
-
-        const raw = localStorage.getItem(INV_KEY);
-
-        const arr = raw ? JSON.parse(raw) : [];
-
-        return Array.isArray(arr) ? arr : [];
-
-      } catch { return []; }
+      return loadArrayWithKeyFallback(INV_KEY, ["vn_inv", "vn_inv_v0"]);
 
     }
 
@@ -8751,15 +8751,7 @@ invRenderTotals();
 
     function accLoad() {
 
-      try {
-
-        const raw = localStorage.getItem(ACC_KEY);
-
-        const arr = raw ? JSON.parse(raw) : [];
-
-        return Array.isArray(arr) ? arr : [];
-
-      } catch { return []; }
+      return loadArrayWithKeyFallback(ACC_KEY, ["vn_accounting", "vn_acc_v1"]);
 
     }
 
