@@ -249,20 +249,29 @@
       position:absolute;
       width:min(300px,56vw);
       height:auto;
-      opacity:.18;
-      filter:drop-shadow(0 0 22px #ff1a1aaa) saturate(1.15);
+      opacity:.17;
+      filter:blur(1.4px) drop-shadow(0 0 24px #ff1a1aaa) saturate(1.10);
       pointer-events:none;
       z-index:0;
-      transform:translateY(2px) scale(1.02);
+      transform:translateY(2px) scale(1.04);
       animation:brandLogoPulse 4.2s ease-in-out infinite;
-      -webkit-mask-image: radial-gradient(ellipse at center, #000 46%, rgba(0,0,0,.85) 62%, rgba(0,0,0,0) 84%);
-      mask-image: radial-gradient(ellipse at center, #000 46%, rgba(0,0,0,.85) 62%, rgba(0,0,0,0) 84%);
+      clip-path:ellipse(45% 43% at 50% 50%);
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 34%, rgba(0,0,0,.90) 52%, rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 82%);
+      mask-image: radial-gradient(ellipse at center, #000 34%, rgba(0,0,0,.90) 52%, rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 82%);
     }
     .brandHero::before{
       content:"";
       position:absolute;
-      inset:-20px;
-      background:radial-gradient(circle at center, transparent 35%, rgba(13,13,13,.25) 66%, rgba(13,13,13,.95) 92%);
+      inset:-34px;
+      background:radial-gradient(circle at center, transparent 28%, rgba(13,13,13,.42) 58%, rgba(13,13,13,.98) 88%);
+      z-index:0;
+      pointer-events:none;
+    }
+    .brandHero::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      background:radial-gradient(ellipse at center, rgba(255,0,0,.08), rgba(0,0,0,0) 68%);
       z-index:0;
       pointer-events:none;
     }
@@ -910,6 +919,32 @@ table.invTable td:last-child{
       font-weight:900;
       box-shadow:0 0 10px #00ff6a22 inset;
     }
+
+    .diaryInvestigationTable thead th,
+    .diaryInvestigationTable tbody td{
+      overflow-wrap:normal;
+      word-break:normal;
+      white-space:normal;
+    }
+    .diaryInvestigationTable thead th:last-child,
+    .diaryInvestigationTable tbody td:last-child{
+      min-width:210px;
+      width:210px;
+    }
+    .diaryInvestigationTable .diaryPillsWrap{
+      min-width:0;
+      overflow:hidden;
+      align-items:center;
+    }
+    .diaryInvestigationTable .diaryTagPill,
+    .diaryInvestigationTable .diaryNamePill{
+      writing-mode:horizontal-tb;
+      text-orientation:mixed;
+      white-space:nowrap;
+      max-width:180px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
     .diaryEmpty{
       color:var(--muted);
       text-align:center;
@@ -1501,10 +1536,11 @@ table.invTable td:last-child{
 
 </style>
 
-  <link id="faviconMain" rel="icon" type="image/x-icon" href="favicon.iso" />
+  <link id="faviconMain" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
   <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
   <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069" />
-  <link id="faviconAlt" rel="shortcut icon" type="image/x-icon" href="favicon.iso" />
+  <link id="faviconIso" rel="icon" type="image/x-icon" href="favicon.iso" />
+  <link id="faviconAlt" rel="shortcut icon" type="image/png" href="icon-069" />
   <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069" />
 
 </head>
@@ -2995,7 +3031,8 @@ table.invTable td:last-child{
     const BRAND_ASSETS = {
       // File caricati da te su GitHub
       hero: "icon-69",
-      favicon: "favicon.iso",
+      favicon: "icon-069",
+      faviconLegacy: "favicon.iso",
       apple: "icon-069"
     };
 
@@ -3012,15 +3049,20 @@ table.invTable td:last-child{
       const fav32 = document.getElementById("favicon32");
       const fav16 = document.getElementById("favicon16");
       const favAlt = document.getElementById("faviconAlt");
+      const favIso = document.getElementById("faviconIso");
       const apple = document.getElementById("appleTouchIcon");
 
       applyImageFallback(BRAND_ASSETS.hero || "icon-69", "logo.png", (src) => {
         if (hero) hero.src = src;
       });
 
-      applyImageFallback(BRAND_ASSETS.favicon || "favicon.iso", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.favicon || "icon-069", "logo.png", (src) => {
         if (favMain) favMain.href = src;
         if (favAlt) favAlt.href = src;
+      });
+
+      applyImageFallback(BRAND_ASSETS.faviconLegacy || "favicon.iso", "logo.png", (src) => {
+        if (favIso) favIso.href = src;
       });
 
       applyImageFallback(BRAND_ASSETS.apple || "icon-069", "logo.png", (src) => {
