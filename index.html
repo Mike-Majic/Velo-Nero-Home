@@ -168,7 +168,7 @@
 
       display:inline-block; padding:6px 10px; border-radius:999px;
 
-      border:1px solid var(--border); background:rgba(18,18,18,.92); color:#fff; font-size:12px;
+      border:1px solid var(--border); background:rgba(18,18,18,.92); color:#fff; font-size:11px;
 
       box-shadow:0 0 10px #ff1a1a22 inset, 0 0 10px #ff000033;
 
@@ -206,7 +206,7 @@
 
       box-shadow:0 0 10px #ff1a1a44 inset, 0 0 12px #ff000066;
 
-      font-size:14px;
+      font-size:13px;
 
       font-weight:900;
 
@@ -260,22 +260,8 @@
       -webkit-mask-image: radial-gradient(ellipse at center, #000 34%, rgba(0,0,0,.90) 52%, rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 82%);
       mask-image: radial-gradient(ellipse at center, #000 34%, rgba(0,0,0,.90) 52%, rgba(0,0,0,.45) 66%, rgba(0,0,0,0) 82%);
     }
-    .brandHero::before{
-      content:"";
-      position:absolute;
-      inset:-34px;
-      background:radial-gradient(circle at center, transparent 28%, rgba(13,13,13,.42) 58%, rgba(13,13,13,.98) 88%);
-      z-index:0;
-      pointer-events:none;
-    }
-    .brandHero::after{
-      content:"";
-      position:absolute;
-      inset:-6px;
-      background:radial-gradient(ellipse at center, rgba(255,0,0,.08), rgba(0,0,0,0) 68%);
-      z-index:0;
-      pointer-events:none;
-    }
+    .brandHero::before,
+    .brandHero::after{ display:none; }
     @keyframes brandLogoPulse{
       0%,100%{ opacity:.14; transform:translateY(2px) scale(1.00); filter:drop-shadow(0 0 18px #ff1a1a88) saturate(1.05);}
       50%{ opacity:.28; transform:translateY(-2px) scale(1.05); filter:drop-shadow(0 0 32px #ff3b3bcc) saturate(1.25);}
@@ -836,7 +822,7 @@ table.invTable td:nth-child(7){
       border-bottom:1px solid #ff1a1a33;
       border-left:0;
       border-right:0;
-      padding:14px 12px;
+      padding:10px 10px;
       vertical-align:middle;
       overflow:hidden;
     }
@@ -963,6 +949,7 @@ table.invTable td:nth-child(7){
       overflow:hidden;
       text-overflow:ellipsis;
     }
+    .cellClamp3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;}
     .diaryEmpty{
       color:var(--muted);
       text-align:center;
@@ -2098,7 +2085,7 @@ table.invTable td:last-child{
           </div>
           <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
           <div class="summaryActionsRow">
-            <button class="btn danger small" id="btnOpsReset" onclick="resetAllOps()" style="display:none;">RESET RESOCONTO</button>
+            <button class="btn danger small" id="btnOpsReset" onclick="resetOpsMoneyOnly()" style="display:none;">RESET RESOCONTO</button>
           </div>
         </div>
 
@@ -2485,7 +2472,7 @@ table.invTable td:last-child{
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
           <div class="summaryActionsRow" style="margin-top:8px;">
-            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetAll()" style="display:none;">RESET RESOCONTO</button>
+            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetItemTotals()" style="display:none;">RESET RESOCONTO</button>
           </div>
 
  
@@ -3412,7 +3399,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     if (amt <= 0) return;
 
-    const pool = Math.max(1, Math.round(amt * 0.5));
+    if (amt < 2) return;
+    const pool = Math.floor(amt * 0.5);
 
  
 
@@ -6388,8 +6376,8 @@ function animateMoneyValue(el, nextValue, key){
       const sel = document.getElementById(selId + tid);
       const name = String(sel?.value || "").trim();
       if (!name) return alert("Seleziona un item da rimuovere.");
-      if ((ACTION_BASE_ITEMS[group] || []).some(x => x.toLowerCase() === name.toLowerCase())) {
-        return alert("Non puoi rimuovere un item base.");
+      if (!isOwner() && (ACTION_BASE_ITEMS[group] || []).some(x => x.toLowerCase() === name.toLowerCase())) {
+        return alert("Solo Owner può rimuovere un item base.");
       }
       const map = loadCustomActionItems();
       map[group] = (map[group] || []).filter(x => x.toLowerCase() !== name.toLowerCase());
@@ -6574,7 +6562,7 @@ function animateMoneyValue(el, nextValue, key){
 
       const tagUserIds = selectedTagUserIds.slice();
 
-      const tagNames = selectedTagNames();
+      const tagNames = mapUserIdsToNames(tagUserIds, selectedTagNames());
 
  
 
@@ -7293,6 +7281,25 @@ renderOpsMoneySummary();
 
 invRenderTotals();
 
+    }
+
+    function resetOpsMoneyOnly() {
+      if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
+      const ok = confirm("Confermi RESET RESOCONTO SOLDI Azioni?");
+      if (!ok) return;
+      const all = loadOps();
+      all.forEach(r => { r.money = { clean:0, dirty:0, drug:0 }; });
+      saveOps(all);
+      // pulisci i due da Azioni e ricalcola
+      const acc = accLoad().filter(r => !(r.kind === "salary" && (r.status||"paid") === "due" && r.source === "ops"));
+      accSave(acc);
+      all.forEach(r => accUpsertDueSalariesFromSource("ops", r.id, r.money, r.tagUserIds || [], `Auto da Azioni (reset soldi): ${r.category} .. ${r.type}`));
+      logEvent("OPS_RESET_MONEY", "Reset soli soldi Azioni");
+      CATEGORIES.forEach(c => renderCategory(c));
+      renderOpsMoneySummary();
+      invRenderTotals();
+      accRenderDueTable();
+      accRenderSummary();
     }
 
  
@@ -8043,8 +8050,8 @@ invRenderTotals();
       const sel = document.getElementById("invItem_" + tid);
       const name = String(sel?.value || "").trim();
       if (!name) return alert("Seleziona un item da rimuovere.");
-      if ((INV_ITEMS[cat] || []).some(x => x.toLowerCase() === name.toLowerCase())) {
-        return alert("Non puoi rimuovere un item base.");
+      if (!isOwner() && (INV_ITEMS[cat] || []).some(x => x.toLowerCase() === name.toLowerCase())) {
+        return alert("Solo Owner può rimuovere un item base.");
       }
       const map = loadCustomInvItems();
       map[cat] = (map[cat] || []).filter(x => x.toLowerCase() !== name.toLowerCase());
@@ -8712,6 +8719,22 @@ INV_CATEGORIES.forEach(c => invRenderTable(c));
 
 invRenderTotals();
 
+    }
+
+    function invResetItemTotals() {
+      if (!canResetAccounting()) return alert("Permesso negato");
+      const ok = confirm("Confermi RESET RESOCONTO ITEM?");
+      if (!ok) return;
+      const inv = invLoad();
+      inv.forEach(r => { r.items = []; r.item = ""; r.qty = 0; });
+      invSave(inv);
+      const ops = loadOps();
+      ops.forEach(r => { r.items = []; });
+      saveOps(ops);
+      logEvent("INV_RESET_ITEMS", "Reset soli item (Gestione + Azioni)");
+      INV_CATEGORIES.forEach(c => invRenderTable(c));
+      CATEGORIES.forEach(c => renderCategory(c));
+      invRenderTotals();
     }
 
  
@@ -9487,14 +9510,16 @@ function accRenderDueTable() {
   if (!body) return;
 
   const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
-  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due");
+
+  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
 
   if (!rows.length) {
     body.innerHTML = `<tr><td class="muted" colspan="8">Nessun dato</td></tr>`;
     return;
   }
 
-  const grouped = new Map();
+  body.innerHTML = "";
+
   rows.forEach(r => {
     const toKey = String(r.toUserId || r.to || "—");
     const pt = String(r.payType || "clean");
@@ -9520,11 +9545,10 @@ function accRenderDueTable() {
     if (r.note) g.noteSet.add(String(r.note).trim());
   });
 
-  const list = Array.from(grouped.values()).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0, 80);
+    const pt = (r.payType || "clean");
 
-  body.innerHTML = "";
-  list.forEach(g => {
-    const ptLabel = (g.payType === "dirty") ? "SPORCHI" : (g.payType === "drug") ? "SPACCIO" : "PULITI";
+    const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
+
     const tr = document.createElement("tr");
     const tags = Array.from(g.tagSet).filter(Boolean);
     const notes = Array.from(g.noteSet).filter(Boolean);
@@ -9546,29 +9570,6 @@ function accRenderDueTable() {
     `;
     body.appendChild(tr);
   });
-}
-
-function accSetSalaryStatusGroup(toKey, payType, status) {
-  const all = accLoad();
-  const s = (status === "paid") ? "paid" : "due";
-  let changed = 0;
-  all.forEach(r => {
-    if (r.kind !== "salary") return;
-    const rk = String(r.toUserId || r.to || "—");
-    const rp = String(r.payType || "clean");
-    const current = String(r.status || "paid");
-    if (rk === String(toKey || "") && rp === String(payType || "clean") && current === "due") {
-      r.status = s;
-      r.paidAt = (s === "paid") ? Date.now() : null;
-      changed += 1;
-    }
-  });
-  if (!changed) return;
-  accSave(all);
-  logEvent("ACC_SALARY_STATUS", `Gruppo(${toKey}) .. Tipo(${payType}) .. Stato(${s}) .. Righe(${changed})`);
-  accRenderDueTable();
-  accRenderTable("Stipendi");
-  accRenderSummary();
 }
 
 function accSetSalaryStatus(id, status) {
