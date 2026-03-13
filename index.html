@@ -5001,9 +5001,19 @@ function logTagsLine(tagNames) {
 
     function showOnly(id) {
 
+      const target = document.getElementById(id);
+
+      if (!target) {
+
+        console.warn("showOnly: sezione non trovata", id);
+
+        return;
+
+      }
+
       document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
 
-      document.getElementById(id).classList.add("active");
+      target.classList.add("active");
 
  
 
@@ -9851,18 +9861,38 @@ accRenderSummary();
 
     // =========================
 
+    function ensureVisibleSection() {
+
+      const hasActive = !!document.querySelector(".section.active");
+
+      if (hasActive) return;
+
+      const s = loadSession();
+
+      if (s?.email) {
+
+        showOnly("dashboard");
+
+      } else {
+
+        showOnly("login");
+
+        showLoginStep("stepEmail");
+
+      }
+
+    }
+
     function boot() {
 
-      setupBrandAssets();
-      ensureDemoUsersIfEmpty();
+      try { setupBrandAssets(); } catch (e) { console.warn("setupBrandAssets error", e); }
+      try { ensureDemoUsersIfEmpty(); } catch (e) { console.warn("seed users error", e); }
 
-      setHeaderUser();
+      try { setHeaderUser(); } catch (e) { console.warn("header init error", e); }
 
-      initDiaryInlineEditor();
-      syncSelectedTagsUI();
-      setTimeout(() => diarySearch(), 0);
-
- 
+      try { initDiaryInlineEditor(); } catch (e) { console.warn("diary inline init error", e); }
+      try { syncSelectedTagsUI(); } catch (e) { console.warn("syncSelectedTagsUI error", e); }
+      setTimeout(() => { try { diarySearch(); } catch (e) { console.warn("diarySearch error", e); } }, 0);
 
       const s = loadSession();
 
@@ -9872,11 +9902,11 @@ accRenderSummary();
 
         showLoginStep("stepEmail");
 
+        ensureVisibleSection();
+
         return;
 
       }
-
- 
 
       const u = getMyUser();
 
@@ -9886,13 +9916,23 @@ accRenderSummary();
 
         logout();
 
+        ensureVisibleSection();
+
         return;
 
       }
 
- 
+      try {
 
-      initAfterLogin();
+        initAfterLogin();
+
+      } catch (e) {
+
+        console.warn("initAfterLogin error", e);
+
+      }
+
+      ensureVisibleSection();
 
     }
 
