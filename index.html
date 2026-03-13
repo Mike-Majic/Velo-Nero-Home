@@ -247,12 +247,18 @@
     }
     #brandBgLogo{
       position:absolute;
-      width:min(280px,52vw);
+      width:min(300px,56vw);
       height:auto;
-      opacity:.20;
-      filter:drop-shadow(0 0 16px #ff1a1a66);
+      opacity:.18;
+      filter:drop-shadow(0 0 22px #ff1a1aaa) saturate(1.15);
       pointer-events:none;
       z-index:0;
+      transform:translateY(2px) scale(1.02);
+      animation:brandLogoPulse 4.2s ease-in-out infinite;
+    }
+    @keyframes brandLogoPulse{
+      0%,100%{ opacity:.14; transform:translateY(2px) scale(1.00); filter:drop-shadow(0 0 18px #ff1a1a88) saturate(1.05);}
+      50%{ opacity:.28; transform:translateY(-2px) scale(1.05); filter:drop-shadow(0 0 32px #ff3b3bcc) saturate(1.25);}
     }
     .brandHero h1{ position:relative; z-index:1; margin:0; }
 
@@ -1485,9 +1491,9 @@ table.invTable td:last-child{
 
 </style>
 
-  <link rel="icon" href="favicon.iso" />
-  <link rel="icon" href="icon-69" />
-  <link rel="apple-touch-icon" href="icon-069" />
+  <link id="faviconMain" rel="icon" href="logo.png" />
+  <link id="faviconAlt" rel="shortcut icon" href="logo.png" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="logo.png" />
 
 </head>
 
@@ -1516,7 +1522,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
     <h1>VELO NERO</h1>
   </div>
 
@@ -2973,6 +2979,47 @@ table.invTable td:last-child{
     }
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
+
+    const BRAND_ASSET_CANDIDATES = {
+      hero: ["icon-69", "icon-69.png", "icon-069", "icon-069.png", "logo.png"],
+      favicon: ["favicon.iso", "favicon.ico", "favicon.png", "icon-069", "icon-069.png", "logo.png"],
+      apple: ["icon-069", "icon-069.png", "icon-69", "icon-69.png", "logo.png"]
+    };
+
+    function resolveFirstImage(candidates, onDone) {
+      const list = Array.isArray(candidates) ? candidates.slice() : [];
+      const testNext = () => {
+        const src = list.shift();
+        if (!src) return onDone(null);
+        const img = new Image();
+        img.onload = () => onDone(src);
+        img.onerror = () => testNext();
+        img.src = src + (src.includes("?") ? "&" : "?") + "v=" + Date.now();
+      };
+      testNext();
+    }
+
+    function setupBrandAssets() {
+      const hero = document.getElementById("brandBgLogo");
+      const favMain = document.getElementById("faviconMain");
+      const favAlt = document.getElementById("faviconAlt");
+      const apple = document.getElementById("appleTouchIcon");
+
+      resolveFirstImage(BRAND_ASSET_CANDIDATES.hero, (src) => {
+        if (!hero) return;
+        hero.src = src || "logo.png";
+      });
+
+      resolveFirstImage(BRAND_ASSET_CANDIDATES.favicon, (src) => {
+        const chosen = src || "logo.png";
+        if (favMain) favMain.href = chosen;
+        if (favAlt) favAlt.href = chosen;
+      });
+
+      resolveFirstImage(BRAND_ASSET_CANDIDATES.apple, (src) => {
+        if (apple) apple.href = src || "logo.png";
+      });
+    }
 
  
 
@@ -9604,6 +9651,7 @@ accRenderSummary();
 
     function boot() {
 
+      setupBrandAssets();
       ensureDemoUsersIfEmpty();
 
       setHeaderUser();
