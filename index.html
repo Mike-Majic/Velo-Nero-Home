@@ -5949,35 +5949,72 @@ if (s?.email === u.email) logout();
 
  
 
-    const moneyAnimState = {};
+const moneyAnimState = {};
 
-    function animateMoneyValue(el, nextValue, key){
-      if (!el) return;
-      const target = Number(nextValue || 0);
-      const prev = Number(moneyAnimState[key] ?? 0);
-      if (prev === target) {
-        el.textContent = formatMoney(target);
-        return;
-      }
-      moneyAnimState[key] = target;
-      const card = el.closest('.moneyCard');
-      if (card) {
-        card.classList.remove('flash');
-        void card.offsetWidth;
-        card.classList.add('flash');
-      }
-      const startTs = performance.now();
-      const duration = 650;
-      function step(ts){
-        const progress = Math.min(1, (ts - startTs) / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = prev + ((target - prev) * eased);
-        el.textContent = formatMoney(Math.round(current));
-        if (progress < 1) requestAnimationFrame(step);
-        else el.textContent = formatMoney(target);
-      }
+function formatMoneyCardValue(v){
+  return Number(v || 0).toLocaleString("it-IT");
+}
+
+function fitMoneyCardValue(el){
+  if (!el) return;
+
+  const card = el.closest('.moneyCard');
+  if (!card) return;
+
+  const maxSize = 22;
+  const minSize = 11;
+  let size = maxSize;
+
+  el.style.fontSize = maxSize + "px";
+
+  const availableWidth = card.clientWidth - 24;
+
+  while (size > minSize && el.scrollWidth > availableWidth) {
+    size -= 1;
+    el.style.fontSize = size + "px";
+  }
+}
+
+function animateMoneyValue(el, nextValue, key){
+  if (!el) return;
+  const target = Number(nextValue || 0);
+  const prev = Number(moneyAnimState[key] ?? 0);
+
+  if (prev === target) {
+    el.textContent = formatMoneyCardValue(target);
+    fitMoneyCardValue(el);
+    return;
+  }
+
+  moneyAnimState[key] = target;
+  const card = el.closest('.moneyCard');
+  if (card) {
+    card.classList.remove('flash');
+    void card.offsetWidth;
+    card.classList.add('flash');
+  }
+
+  const startTs = performance.now();
+  const duration = 650;
+
+  function step(ts){
+    const progress = Math.min(1, (ts - startTs) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = prev + ((target - prev) * eased);
+
+    el.textContent = formatMoneyCardValue(Math.round(current));
+    fitMoneyCardValue(el);
+
+    if (progress < 1) {
       requestAnimationFrame(step);
+    } else {
+      el.textContent = formatMoneyCardValue(target);
+      fitMoneyCardValue(el);
     }
+  }
+
+  requestAnimationFrame(step);
+}
 
     function renderOpsMoneySummary(){
 
