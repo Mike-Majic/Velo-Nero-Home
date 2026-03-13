@@ -122,6 +122,7 @@
     }
 
     .profileAvatar{
+      display:none !important;
       width:42px;
       height:42px;
       border-radius:50%;
@@ -537,11 +538,19 @@ table.invTable td{
 
  
 
-/* solo NOTE può andare a capo */
+/* NOTE + ITEMS possono andare a capo */
 
 table.invTable th:last-child,
 
-table.invTable td:last-child{
+table.invTable td:last-child,
+
+table.invTable th:nth-child(6),
+
+table.invTable td:nth-child(6),
+
+table.invTable th:nth-child(7),
+
+table.invTable td:nth-child(7){
 
   white-space:normal;
 
@@ -628,6 +637,7 @@ table.invTable td:last-child{
     }
 
     #editModal h3, #noteModal h3 { margin:0 0 10px 0; color:var(--red2); text-shadow:0 0 10px #ff3b3b80; font-weight:900; }
+    #invEditItemsList{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
 
  
 
@@ -883,13 +893,19 @@ table.invTable td:last-child{
       font-size:14px;
       font-weight:900;
       color:#fff;
-      white-space:pre-wrap;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
     }
     .diaryExcerpt{
       font-size:12px;
       color:#ffb3b3;
       line-height:1.35;
-      white-space:pre-wrap;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
     }
     .diaryPillsWrap{
       display:flex;
@@ -1286,6 +1302,7 @@ table.invTable td:last-child{
     min-width:100%;
   }
   .profileAvatar{
+      display:none !important;
     width:38px;
     height:38px;
     font-size:13px;
@@ -1536,12 +1553,12 @@ table.invTable td:last-child{
 
 </style>
 
-  <link id="faviconMain" rel="icon" type="image/png" sizes="32x32" href="icon-069.png" />
-  <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069.png" />
-  <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069.png" />
+  <link id="faviconMain" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
+  <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
+  <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069" />
   <link id="faviconIso" rel="icon" type="image/x-icon" href="favicon.iso" />
-  <link id="faviconAlt" rel="shortcut icon" type="image/png" href="icon-069.png" />
-  <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069.png" />
+  <link id="faviconAlt" rel="shortcut icon" type="image/png" href="icon-069" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069" />
 
 </head>
 
@@ -1570,7 +1587,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="icon-069.png" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
     <h1>VELO NERO</h1>
   </div>
 
@@ -3030,10 +3047,10 @@ table.invTable td:last-child{
 
     const BRAND_ASSETS = {
       // File caricati da te su GitHub
-      hero: "icon-069.png",
-      favicon: "icon-069.png",
+      hero: "icon-69",
+      favicon: "icon-069",
       faviconLegacy: "favicon.iso",
-      apple: "icon-069.png"
+      apple: "icon-069"
     };
 
     function applyImageFallback(url, fallback, onResolved) {
@@ -3052,11 +3069,11 @@ table.invTable td:last-child{
       const favIso = document.getElementById("faviconIso");
       const apple = document.getElementById("appleTouchIcon");
 
-      applyImageFallback(BRAND_ASSETS.hero || "icon-069.png", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.hero || "icon-69", "logo.png", (src) => {
         if (hero) hero.src = src;
       });
 
-      applyImageFallback(BRAND_ASSETS.favicon || "icon-069.png", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.favicon || "icon-069", "logo.png", (src) => {
         if (favMain) favMain.href = src;
         if (favAlt) favAlt.href = src;
       });
@@ -3065,7 +3082,7 @@ table.invTable td:last-child{
         if (favIso) favIso.href = src;
       });
 
-      applyImageFallback(BRAND_ASSETS.apple || "icon-069.png", "logo.png", (src) => {
+      applyImageFallback(BRAND_ASSETS.apple || "icon-069", "logo.png", (src) => {
         if (apple) apple.href = src;
         if (fav32) fav32.href = src;
         if (fav16) fav16.href = src;
@@ -5308,12 +5325,13 @@ sel.onchange = () => {
 
   setHeaderUser();
 
-  initAfterLogin();
+  renderUsersTable();
 
   renderTagList();
 
   renderTagListInv();
   renderTagListDiary();
+  renderTagListAcc();
 
 };
 
@@ -6879,7 +6897,7 @@ accRenderDueTable();
 
       editItemsList.innerHTML = "";
 
-      editingItems.forEach(it => {
+      editingItems.forEach((it, idx) => {
 
         const div = document.createElement("div");
 
@@ -6899,7 +6917,7 @@ accRenderDueTable();
 
             <label>Quantità</label>
 
-            <input value="${it.qty}" disabled />
+            <input type="number" min="1" step="1" value="${Number(it.qty || 0)}" onchange="editSetItemQty(${idx}, this.value)" />
 
           </div>
 
@@ -6944,6 +6962,13 @@ accRenderDueTable();
     }
 
  
+
+    function editSetItemQty(idx, value) {
+      const qty = parseInt(String(value || "0"), 10);
+      if (!Number.isFinite(qty) || qty <= 0) return;
+      if (!editingItems[idx]) return;
+      editingItems[idx].qty = qty;
+    }
 
     function editRemoveItem(name) {
 
@@ -7071,7 +7096,7 @@ logEvent(
 
         const itemsText = (r.items && r.items.length)
 
-          ? r.items.map(it => `${it.name} x${it.qty}`).join("\n")
+          ? r.items.map(it => `${Number(it.qty||0)}x ${it.name}`).join("\n")
 
           : "";
 
@@ -8258,7 +8283,14 @@ invRenderTotals();
       }
       invEditItemsList.innerHTML = invEditingItems.map((it, idx) => `
         <div class="itemRow">
-          <div style="font-weight:900;">${escapeHtml(it.name)} x${Number(it.qty || 0)}</div>
+          <div class="field" style="min-width:320px;">
+            <label>Item</label>
+            <input value="${escapeHtml(it.name)}" disabled />
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Quantità</label>
+            <input type="number" min="1" step="1" value="${Number(it.qty || 0)}" onchange="invEditSetItemQty(${idx}, this.value)" />
+          </div>
           <div class="right"><button class="btn small danger" onclick="invEditRemoveItem(${idx})">Rimuovi</button></div>
         </div>
       `).join("");
@@ -8274,6 +8306,13 @@ invRenderTotals();
       else invEditingItems.push({ name, qty });
       if (invEditItemQty) invEditItemQty.value = "0";
       invRenderEditItems();
+    }
+
+    function invEditSetItemQty(idx, value) {
+      const qty = parseInt(String(value || "0"), 10);
+      if (!Number.isFinite(qty) || qty <= 0) return;
+      if (!invEditingItems[idx]) return;
+      invEditingItems[idx].qty = qty;
     }
 
     function invEditRemoveItem(idx) {
@@ -9342,76 +9381,93 @@ tr.innerHTML = `
 function accRenderDueTable() {
 
   const tid = accTabId("Stipendi");
-
   const body = document.getElementById("accDueTable_" + tid);
-
   if (!body) return;
 
- 
-
   const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
-
-  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
-
- 
+  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due");
 
   if (!rows.length) {
-
     body.innerHTML = `<tr><td class="muted" colspan="8">Nessun dato</td></tr>`;
-
     return;
-
   }
 
- 
+  const grouped = new Map();
+  rows.forEach(r => {
+    const toKey = String(r.toUserId || r.to || "—");
+    const pt = String(r.payType || "clean");
+    const key = `${toKey}__${pt}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        key,
+        to: r.to || "—",
+        toUserId: r.toUserId || "",
+        payType: pt,
+        amount: 0,
+        tagSet: new Set(),
+        noteSet: new Set(),
+        ts: r.ts || 0,
+        count: 0
+      });
+    }
+    const g = grouped.get(key);
+    g.amount += Number(r.amount || 0);
+    g.count += 1;
+    if ((r.ts||0) > g.ts) g.ts = r.ts || 0;
+    (r.tagNames || []).forEach(t => g.tagSet.add(String(t || "").trim()));
+    if (r.note) g.noteSet.add(String(r.note).trim());
+  });
+
+  const list = Array.from(grouped.values()).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0, 80);
 
   body.innerHTML = "";
-
-  rows.forEach(r => {
-
-    const pt = (r.payType || "clean");
-
-    const ptLabel = (pt === "dirty") ? "SPORCHI" : (pt === "drug") ? "SPACCIO" : "PULITI";
-
- 
-
+  list.forEach(g => {
+    const ptLabel = (g.payType === "dirty") ? "SPORCHI" : (g.payType === "drug") ? "SPACCIO" : "PULITI";
     const tr = document.createElement("tr");
-
-    const tagHtml = (Array.isArray(r.tagNames) && r.tagNames.length)
-      ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.tagNames.join(", "))}</div>`
+    const tags = Array.from(g.tagSet).filter(Boolean);
+    const notes = Array.from(g.noteSet).filter(Boolean);
+    const tagHtml = tags.length
+      ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(tags.join(", "))}</div>`
       : `<span class="muted">—</span>`;
 
     tr.innerHTML = `
-
-      <td>${new Date(r.ts).toLocaleString()}</td>
-
-      <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-
-      <td style="font-weight:900;">${escapeHtml(r.to || "—")}</td>
-
+      <td>${new Date(g.ts).toLocaleString()}</td>
+      <td style="font-weight:900;">Auto</td>
+      <td style="font-weight:900;">${escapeHtml(g.to)}</td>
       <td>${tagHtml}</td>
-
-      <td style="font-weight:900;">${formatMoney(r.amount || 0)}</td>
-
+      <td style="font-weight:900;">${formatMoney(g.amount || 0)}</td>
       <td style="font-weight:900; color:var(--red2)">${ptLabel}</td>
-
-      <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-
+      <td>${notes.length ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(notes[0])}${notes.length>1?` .. (+${notes.length-1})`:""}</div>` : `<span class="muted">—</span>`}</td>
       <td>
-
-        <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
-
+        <button class="btn small" onclick="accSetSalaryStatusGroup('${escapeHtml(g.toUserId || g.to)}', '${g.payType}', 'paid')">PAGATO (${g.count})</button>
       </td>
-
     `;
-
     body.appendChild(tr);
-
   });
-
 }
 
- 
+function accSetSalaryStatusGroup(toKey, payType, status) {
+  const all = accLoad();
+  const s = (status === "paid") ? "paid" : "due";
+  let changed = 0;
+  all.forEach(r => {
+    if (r.kind !== "salary") return;
+    const rk = String(r.toUserId || r.to || "—");
+    const rp = String(r.payType || "clean");
+    const current = String(r.status || "paid");
+    if (rk === String(toKey || "") && rp === String(payType || "clean") && current === "due") {
+      r.status = s;
+      r.paidAt = (s === "paid") ? Date.now() : null;
+      changed += 1;
+    }
+  });
+  if (!changed) return;
+  accSave(all);
+  logEvent("ACC_SALARY_STATUS", `Gruppo(${toKey}) .. Tipo(${payType}) .. Stato(${s}) .. Righe(${changed})`);
+  accRenderDueTable();
+  accRenderTable("Stipendi");
+  accRenderSummary();
+}
 
 function accSetSalaryStatus(id, status) {
 
