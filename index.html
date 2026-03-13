@@ -255,6 +255,16 @@
       z-index:0;
       transform:translateY(2px) scale(1.02);
       animation:brandLogoPulse 4.2s ease-in-out infinite;
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 46%, rgba(0,0,0,.85) 62%, rgba(0,0,0,0) 84%);
+      mask-image: radial-gradient(ellipse at center, #000 46%, rgba(0,0,0,.85) 62%, rgba(0,0,0,0) 84%);
+    }
+    .brandHero::before{
+      content:"";
+      position:absolute;
+      inset:-20px;
+      background:radial-gradient(circle at center, transparent 35%, rgba(13,13,13,.25) 66%, rgba(13,13,13,.95) 92%);
+      z-index:0;
+      pointer-events:none;
     }
     @keyframes brandLogoPulse{
       0%,100%{ opacity:.14; transform:translateY(2px) scale(1.00); filter:drop-shadow(0 0 18px #ff1a1a88) saturate(1.05);}
@@ -1491,8 +1501,10 @@ table.invTable td:last-child{
 
 </style>
 
-  <link id="faviconMain" rel="icon" href="favicon.iso" />
-  <link id="faviconAlt" rel="shortcut icon" href="favicon.iso" />
+  <link id="faviconMain" rel="icon" type="image/x-icon" href="favicon.iso" />
+  <link id="favicon32" rel="icon" type="image/png" sizes="32x32" href="icon-069" />
+  <link id="favicon16" rel="icon" type="image/png" sizes="16x16" href="icon-069" />
+  <link id="faviconAlt" rel="shortcut icon" type="image/x-icon" href="favicon.iso" />
   <link id="appleTouchIcon" rel="apple-touch-icon" href="icon-069" />
 
 </head>
@@ -2997,6 +3009,8 @@ table.invTable td:last-child{
     function setupBrandAssets() {
       const hero = document.getElementById("brandBgLogo");
       const favMain = document.getElementById("faviconMain");
+      const fav32 = document.getElementById("favicon32");
+      const fav16 = document.getElementById("favicon16");
       const favAlt = document.getElementById("faviconAlt");
       const apple = document.getElementById("appleTouchIcon");
 
@@ -3011,6 +3025,8 @@ table.invTable td:last-child{
 
       applyImageFallback(BRAND_ASSETS.apple || "icon-069", "logo.png", (src) => {
         if (apple) apple.href = src;
+        if (fav32) fav32.href = src;
+        if (fav16) fav16.href = src;
       });
     }
 
