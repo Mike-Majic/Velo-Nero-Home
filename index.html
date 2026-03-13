@@ -84,6 +84,7 @@
 
     p.subtitle {
 
+
       font-size:18px; color:#ff6666; margin:0 0 22px 0;
 
       letter-spacing:.5px;
@@ -232,6 +233,49 @@
       gap:24px;
       text-align:center;
       align-items:stretch;
+    }
+
+
+    .brandHero{
+      position:relative;
+      display:inline-flex;
+      justify-content:center;
+      align-items:center;
+      min-height:120px;
+      margin:0 auto 6px;
+      isolation:isolate;
+    }
+    #brandBgLogo{
+      position:absolute;
+      width:min(280px,52vw);
+      height:auto;
+      opacity:.20;
+      filter:drop-shadow(0 0 16px #ff1a1a66);
+      pointer-events:none;
+      z-index:0;
+    }
+    .brandHero h1{ position:relative; z-index:1; margin:0; }
+
+    .moneyCard.total.total-negative{
+      background:linear-gradient(145deg,#600b0b,#2b0303);
+      border-color:#ff4a4a99;
+      box-shadow:0 0 0 1px #ff2a2a33 inset, 0 0 12px #ff000044;
+    }
+    .moneyCard.total.total-negative .moneyCardValue{ color:#ff8b8b; }
+
+    #tagSelectedWrapDiary{
+      flex:1 1 100%;
+      min-width:0;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+    }
+    #tagSelectedWrapDiary .tagPill{
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
 
     .box {
@@ -1441,6 +1485,10 @@ table.invTable td:last-child{
 
 </style>
 
+  <link rel="icon" href="favicon.iso" />
+  <link rel="icon" href="icon-69" />
+  <link rel="apple-touch-icon" href="icon-069" />
+
 </head>
 
  
@@ -1467,7 +1515,10 @@ table.invTable td:last-child{
 
  
 
-  <h1>VELO NERO</h1>
+  <div class="brandHero">
+    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
+    <h1>VELO NERO</h1>
+  </div>
 
   <p class="subtitle" id="pageSubtitle">Sistema Privato Interno</p>
 
@@ -2121,10 +2172,10 @@ table.invTable td:last-child{
           <h3 class="sideTitle">Tag (Utente)</h3>
           <div class="muted">Tag salvati anche nelle note del diario.</div>
 
-          <div class="tagSelected">
-            <div class="muted">Selezionati:</div>
-            <div id="tagSelectedWrapDiary" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-            <button class="btn small danger" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary(); renderTagListAcc();">Pulisci</button>
+          <div class="tagSelected" style="align-items:center;">
+            <div class="muted" style="white-space:nowrap;">Selezionati:</div>
+            <div id="tagSelectedWrapDiary"></div>
+            <button class="btn small danger" style="margin-left:auto;" onclick="clearSelectedTags(); renderTagList(); renderTagListInv(); renderTagListDiary(); renderTagListAcc();">Pulisci</button>
           </div>
 
           <div class="tagSearchRow">
@@ -2220,6 +2271,7 @@ table.invTable td:last-child{
 
           <div class="summaryActionsRow">
             <button class="btn danger small" id="btnAccReset" onclick="accResetAll()" style="display:none;">AZZERA STIPENDI</button>
+            <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetAll()" style="display:none;">RESET RESOCONTO SOLDI</button>
           </div>
 
         </div>
@@ -2356,6 +2408,9 @@ table.invTable td:last-child{
           <h3 class="sideTitle">Resoconto Totali</h3>
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
+          <div class="summaryActionsRow" style="margin-top:8px;">
+            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetAll()" style="display:none;">RESET RESOCONTO</button>
+          </div>
 
  
 
@@ -5988,6 +6043,11 @@ function animateMoneyValue(el, nextValue, key){
   if (!el) return;
   const target = Number(nextValue || 0);
   const prev = Number(moneyAnimState[key] ?? 0);
+  const card = el.closest('.moneyCard');
+
+  if (card && card.classList.contains('total')) {
+    card.classList.toggle('total-negative', target <= 0);
+  }
 
   if (prev === target) {
     el.textContent = formatMoneyCardValue(target);
@@ -5996,7 +6056,6 @@ function animateMoneyValue(el, nextValue, key){
   }
 
   moneyAnimState[key] = target;
-  const card = el.closest('.moneyCard');
   if (card) {
     card.classList.remove('flash');
     void card.offsetWidth;
@@ -7885,7 +7944,6 @@ invRenderTotals();
       const type = document.getElementById("invType_" + tid)?.value || "add";
       const item = document.getElementById("invItem_" + tid)?.value || "";
       let qty = parseInt(document.getElementById("invQty_" + tid)?.value || "0", 10);
-      if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
 
       const mcRaw = document.getElementById("invMoneyClean_" + tid)?.value || "";
       const mdRaw = document.getElementById("invMoneyDirty_" + tid)?.value || "";
@@ -7897,6 +7955,9 @@ invRenderTotals();
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       const draftItems = (invDraftByCategory[cat] || []).map(x => ({ name: x.name, qty: x.qty }));
+      if (!draftItems.length && item) {
+        if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
+      }
       const itemList = draftItems.length ? draftItems : (item ? [{ name: item, qty }] : []);
 
       if (!itemList.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
@@ -8391,6 +8452,8 @@ function invComputeTotals() {
 
       const invResetBtn = document.getElementById("btnInvReset");
       if (invResetBtn) invResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      const invTotalsResetBtn = document.getElementById("btnInvTotalsReset");
+      if (invTotalsResetBtn) invTotalsResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
 
     }
 
@@ -9462,6 +9525,8 @@ function accRenderSummary() {
       s.textContent = `Totale stipendi: ${formatMoney(salaryTotal)} .. Ultimi 30gg: ${formatMoney(salary30)}`;
       const accResetBtn = document.getElementById("btnAccReset");
       if (accResetBtn) accResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      const accMoneyResetBtn = document.getElementById("btnAccMoneyReset");
+      if (accMoneyResetBtn) accMoneyResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
     }
 
  
