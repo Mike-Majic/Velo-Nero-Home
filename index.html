@@ -1635,6 +1635,8 @@ table.invTable td:last-child{
 
           <button class="btn" onclick="loginStepEmail()">Continua</button>
 
+          <button class="btn small" style="margin-top:8px;" onclick="quickDemoAccess()">Accesso rapido demo</button>
+
         </div>
 
       </div>
@@ -4545,6 +4547,31 @@ function logTagsLine(tagNames) {
     }
 
  
+
+    function quickDemoAccess() {
+
+      ensureDemoUsersIfEmpty();
+
+      const u = findUserByEmail("boss.demo@vn.local") || loadUsers()[0];
+
+      if (!u?.email) {
+
+        alert("Nessun utente demo disponibile.");
+
+        return;
+
+      }
+
+      saveSession({ email: u.email });
+
+      setHeaderUser();
+
+      initAfterLogin();
+
+      alert("Accesso demo attivato come " + (u.gameName || u.email));
+
+    }
+
 
     function loginStepEmail() {
 
