@@ -6564,6 +6564,12 @@ function animateMoneyValue(el, nextValue, key){
 
 saveOps(ops);
 
+      clearSelectedTags();
+      renderTagList();
+      renderTagListInv();
+      renderTagListDiary();
+      renderTagListAcc();
+
  
 
 // LOG
@@ -8168,6 +8174,12 @@ invRenderTotals();
       document.getElementById("invMoneyDirty_" + tid).value = "";
       document.getElementById("invMoneyDrug_" + tid).value = "";
       document.getElementById("invNote_" + tid).value = "";
+
+      clearSelectedTags();
+      renderTagList();
+      renderTagListInv();
+      renderTagListDiary();
+      renderTagListAcc();
 
       invRenderTable(cat);
       invRenderTotals();
