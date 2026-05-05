@@ -8047,10 +8047,8 @@ invRenderTotals();
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       const draftItems = (invDraftByCategory[cat] || []).map(x => ({ name: x.name, qty: x.qty }));
-      if (!draftItems.length && item) {
-        if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
-      }
-      const itemList = draftItems.length ? draftItems : (item ? [{ name: item, qty }] : []);
+      const hasInlineItem = !!item && Number.isFinite(qty) && qty > 0;
+      const itemList = draftItems.length ? draftItems : (hasInlineItem ? [{ name: item, qty }] : []);
 
       if (!itemList.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
