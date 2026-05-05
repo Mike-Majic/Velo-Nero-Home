@@ -2604,15 +2604,25 @@ table.invTable td:last-child{
       <div style="margin-top:14px;">
         <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
         <div class="row">
-          <div class="field" style="min-width:320px;"><label>Item</label><select id="invEditItemSelect"></select></div>
-          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQty" type="number" min="0" step="1" value="0" /></div>
-          <div class="field" style="min-width:180px;"><button class="btn" onclick="invEditAddItem()">Aggiungi item</button></div>
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Armi)</label><select id="invEditItemSelectArmi"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQtyArmi" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="invEditAddItem('Armi')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Droga)</label><select id="invEditItemSelectDroga"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQtyDroga" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="invEditAddItem('Droga')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Oggetti/Varie)</label><select id="invEditItemSelectVarie"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQtyVarie" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="invEditAddItem('Oggetti/Varie')">Aggiungi item</button></div>
         </div>
         <div id="invEditItemsList"></div>
       </div>
       <div class="right" style="margin-top:14px;">
         <button class="btn small" onclick="closeInvEdit()">Chiudi</button>
-        <button class="btn small" onclick="saveInvEdit()">Salva</button>
+        <button class="btn success small" onclick="saveInvEdit()">Salva</button>
       </div>
     </div>
   </div>
@@ -8182,8 +8192,12 @@ invRenderTotals();
     const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
     const invEditNote = document.getElementById("invEditNote");
     const invEditTags = document.getElementById("invEditTags");
-    const invEditItemSelect = document.getElementById("invEditItemSelect");
-    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditItemSelectArmi = document.getElementById("invEditItemSelectArmi");
+    const invEditItemSelectDroga = document.getElementById("invEditItemSelectDroga");
+    const invEditItemSelectVarie = document.getElementById("invEditItemSelectVarie");
+    const invEditItemQtyArmi = document.getElementById("invEditItemQtyArmi");
+    const invEditItemQtyDroga = document.getElementById("invEditItemQtyDroga");
+    const invEditItemQtyVarie = document.getElementById("invEditItemQtyVarie");
     const invEditItemsList = document.getElementById("invEditItemsList");
 
     let invEditingId = null;
@@ -8212,17 +8226,9 @@ invRenderTotals();
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
       if (invEditTags) invEditTags.value = tnames.length ? tnames.join(", ") : "—";
 
-      if (invEditItemSelect) {
-        const prev = invEditItemSelect.value;
-        invEditItemSelect.innerHTML = "";
-        invItemsForCategory(cat).forEach(it => {
-          const o = document.createElement("option");
-          o.value = it;
-          o.textContent = it;
-          invEditItemSelect.appendChild(o);
-        });
-        if (prev && Array.from(invEditItemSelect.options).some(o => o.value === prev)) invEditItemSelect.value = prev;
-      }
+      fillInvEditSelect(invEditItemSelectArmi, "Armi");
+      fillInvEditSelect(invEditItemSelectDroga, "Droga");
+      fillInvEditSelect(invEditItemSelectVarie, "Oggetti/Varie");
 
       invRenderEditItems();
       if (invEditOverlay) invEditOverlay.style.display = "block";
@@ -8250,15 +8256,34 @@ invRenderTotals();
       `).join("");
     }
 
-    function invEditAddItem() {
-      const name = String(invEditItemSelect?.value || "").trim();
-      const qty = parseInt(invEditItemQty?.value || "0", 10);
+    function fillInvEditSelect(selectEl, cat) {
+      if (!selectEl) return;
+      const prev = selectEl.value;
+      selectEl.innerHTML = "";
+      (invItemsForCategory(cat) || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        selectEl.appendChild(o);
+      });
+      if (prev && Array.from(selectEl.options).some(o => o.value === prev)) selectEl.value = prev;
+    }
+
+    function invEditAddItem(cat) {
+      const map = {
+        "Armi": [invEditItemSelectArmi, invEditItemQtyArmi],
+        "Droga": [invEditItemSelectDroga, invEditItemQtyDroga],
+        "Oggetti/Varie": [invEditItemSelectVarie, invEditItemQtyVarie]
+      };
+      const [sel, qtyInput] = map[String(cat)] || [];
+      const name = String(sel?.value || "").trim();
+      const qty = parseInt(qtyInput?.value || "0", 10);
       if (!name) return alert("Seleziona un item.");
       if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
       const found = invEditingItems.find(x => x.name === name);
       if (found) found.qty += qty;
       else invEditingItems.push({ name, qty });
-      if (invEditItemQty) invEditItemQty.value = "0";
+      if (qtyInput) qtyInput.value = "0";
       invRenderEditItems();
     }
 
