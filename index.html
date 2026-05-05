@@ -829,7 +829,7 @@ table.invTable td:last-child{
     }
 
     .diaryTableWrap table.diaryInvestigationTable{
-      table-layout:auto;
+      table-layout:fixed;
       width:100%;
       border-collapse:separate;
       border-spacing:0 12px;
@@ -906,41 +906,33 @@ table.invTable td:last-child{
       font-size:14px;
       font-weight:900;
       color:#fff;
-      white-space:pre-wrap;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .diaryExcerpt{
       font-size:12px;
       color:#ffb3b3;
       line-height:1.35;
-      white-space:pre-wrap;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .diaryPillsWrap{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-    }
-    .diaryNamePill{
-      display:inline-flex;
-      align-items:center;
-      padding:6px 9px;
-      border-radius:999px;
-      background:#111;
-      border:1px solid #ff1a1a44;
-      color:#fff;
-      font-size:11px;
+    .diaryNamesText, .diaryTagsText{
+      display:block;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-size:13px;
       font-weight:800;
     }
-    .diaryTagPill{
-      display:inline-flex;
-      align-items:center;
-      padding:6px 9px;
-      border-radius:999px;
-      background:#0c3c1d;
-      border:1px solid #17bf5f;
+    .diaryNamesText{
+      color:#fff;
+    }
+    .diaryTagsText{
       color:#d7ffe6;
-      font-size:11px;
-      font-weight:900;
-      box-shadow:0 0 10px #00ff6a22 inset;
     }
     .diaryEmpty{
       color:var(--muted);
@@ -2203,9 +2195,9 @@ table.invTable td:last-child{
               <tr>
                 <th style="width:220px;">Quando</th>
                 <th style="width:140px;">Tipo</th>
-                <th style="width:220px;">Titolo</th>
-                <th style="width:220px;">Nomi</th>
-                <th>Tag selezionati</th>
+                <th style="width:140px;">Titolo</th>
+                <th style="width:140px;">Nomi</th>
+                <th style="width:140px;">Tag selezionati</th>
               </tr>
             </thead>
             <tbody id="diaryTableBody">
@@ -3632,12 +3624,14 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
     function diaryNamesHtml(names) {
       const arr = String(names || "").split(",").map(x => x.trim()).filter(Boolean);
       if (!arr.length) return `<span class="muted">—</span>`;
-      return `<div class="diaryPillsWrap">${arr.map(n => `<span class="diaryNamePill">${escapeHtml(n)}</span>`).join("")}</div>`;
+      const text = arr.join(", ");
+      return `<span class="diaryNamesText" data-tooltip-full="${escapeHtml(text)}">${escapeHtml(text)}</span>`;
     }
 
     function diaryTagsHtml(tagNames) {
       if (!Array.isArray(tagNames) || !tagNames.length) return `<span class="muted">—</span>`;
-      return `<div class="diaryPillsWrap">${tagNames.map(t => `<span class="diaryTagPill">${escapeHtml(t)}</span>`).join("")}</div>`;
+      const text = tagNames.join(", ");
+      return `<span class="diaryTagsText" data-tooltip-full="${escapeHtml(text)}">${escapeHtml(text)}</span>`;
     }
 
     function renderDiaryRows(list) {
@@ -3659,8 +3653,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
           <td><span class="diaryTypeBadge">${escapeHtml(n.type || "Nota")}</span></td>
           <td>
             <div class="diaryTitleBlock">
-              <div class="diaryTitleMain">${n.title ? escapeHtml(n.title) : "—"}</div>
-              <div class="diaryExcerpt">${escapeHtml(diaryExcerptText(n))}</div>
+              <div class="diaryTitleMain" data-tooltip-full="${escapeHtml(n.title || "—")}">${n.title ? escapeHtml(n.title) : "—"}</div>
+              <div class="diaryExcerpt" data-tooltip-full="${escapeHtml(diaryExcerptText(n))}">${escapeHtml(diaryExcerptText(n))}</div>
             </div>
           </td>
           <td>${diaryNamesHtml(n.names)}</td>
