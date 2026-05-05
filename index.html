@@ -524,6 +524,14 @@ table.invTable .itemsOneLine{
   font-weight:800;
 }
 
+table.invTable .cellOneLine{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
 .itemsTooltip{
   position:fixed;
   z-index:5000;
@@ -3014,9 +3022,14 @@ table.invTable td:last-child{
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
 
+    function buildCellTooltipHtml(fullText, className = "cellOneLine") {
+      const raw = String(fullText ?? "").trim();
+      if (!raw) return `<span class="muted">—</span>`;
+      return `<span class="${className}" data-tooltip-full="${escapeHtml(raw)}">${escapeHtml(raw)}</span>`;
+    }
+
     function buildItemsCellHtml(itemsText) {
-      if (!itemsText) return `<span class="muted">—</span>`;
-      return `<span class="itemsOneLine" data-items-full="${escapeHtml(itemsText)}">${escapeHtml(itemsText)}</span>`;
+      return buildCellTooltipHtml(itemsText, "itemsOneLine");
     }
 
     function initItemsTooltip() {
@@ -3045,10 +3058,10 @@ table.invTable td:last-child{
       }
 
       document.addEventListener("mouseover", (ev) => {
-        const target = ev.target.closest("[data-items-full]");
+        const target = ev.target.closest("[data-tooltip-full]");
         if (!target) return;
         currentTarget = target;
-        tooltip.textContent = target.getAttribute("data-items-full") || "";
+        tooltip.textContent = target.getAttribute("data-tooltip-full") || "";
         tooltip.classList.add("isVisible");
         positionTooltip(ev);
       });
@@ -7077,23 +7090,11 @@ logEvent(
 
  
 
-        const noteHtml = (r.note && r.note.trim())
-
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>`
-
-          : `<span class="muted">—</span>`;
+        const noteHtml = buildCellTooltipHtml(r.note);
 
  
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-
-        const tagHtml = tnames.length
-
-          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-
-          : `<span class="muted">—</span>`;
-
- 
 
         const actionsHtml = canEditOps()
 
@@ -7107,11 +7108,11 @@ logEvent(
 
         tr.innerHTML = `
 
-          <td>${when}</td>
+          <td>${buildCellTooltipHtml(when)}</td>
 
-          <td style="font-weight:900;">${escapeHtml(r.createdByName || "—")}</td>
+          <td style="font-weight:900;">${buildCellTooltipHtml(r.createdByName || "—")}</td>
 
-          <td>${tipo}</td>
+          <td>${buildCellTooltipHtml(tipo)}</td>
 
           <td style="font-weight:900;">
 
@@ -7139,13 +7140,13 @@ logEvent(
 
               if (drug)  parts.push("SP: " + formatMoney(drug));
 
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              return buildCellTooltipHtml(parts.join(" .. "));
 
             })()}
 
           </td>
 
-          <td>${tagHtml}</td>
+          <td>${buildCellTooltipHtml(tnames.join(", "))}</td>
 
           <td>${noteHtml}</td>
 
@@ -8128,10 +8129,6 @@ invRenderTotals();
           r.type === "buy" ? "ACQUISTATO" : "—";
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-        const tagHtml = tnames.length
-          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-          : `<span class="muted">—</span>`;
-
         const itemList = (Array.isArray(r.items) && r.items.length) ? r.items : (r.item ? [{ name:r.item, qty:r.qty }] : []);
         const itemHtml = buildItemsCellHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\\n"));
 
@@ -8145,20 +8142,20 @@ invRenderTotals();
           : `<span class="muted">—</span>`;
 
         tr.innerHTML = `
-          <td>${new Date(r.ts).toLocaleString()}</td>
-          <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-          <td>${t}</td>
+          <td>${buildCellTooltipHtml(new Date(r.ts).toLocaleString())}</td>
+          <td style="font-weight:900;">${buildCellTooltipHtml(r.who || "—")}</td>
+          <td>${buildCellTooltipHtml(t)}</td>
           <td style="font-weight:900;">
             ${(() => {
               const parts = [];
               if (clean) parts.push("P: " + formatMoney(clean));
               if (dirty) parts.push("S: " + formatMoney(dirty));
               if (drug)  parts.push("SP: " + formatMoney(drug));
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              return buildCellTooltipHtml(parts.join(" .. "));
             })()}
           </td>
-          <td>${tagHtml}</td>
-          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
+          <td>${buildCellTooltipHtml(tnames.join(", "))}</td>
+          <td>${buildCellTooltipHtml(r.note)}</td>
           <td class="itemsCell">${itemHtml}</td>
           <td>${actionsHtml}</td>
         `;
