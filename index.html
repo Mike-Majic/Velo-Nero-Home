@@ -5101,7 +5101,7 @@ if (id === "contabilita") {
 
     // =========================
 
-    function initAfterLogin() {
+    function initAfterLogin(keepCurrentSection = false) {
 
       const btnUtenti = document.getElementById("btnUtenti");
 
@@ -5154,7 +5154,7 @@ if (id === "contabilita") {
 
  
 
-      showOnly("dashboard");
+      if (!keepCurrentSection) showOnly("dashboard");
 
     }
 
@@ -5317,7 +5317,8 @@ sel.onchange = () => {
 
   setHeaderUser();
 
-  initAfterLogin();
+  initAfterLogin(true);
+  renderUsersTable();
 
   renderTagList();
 
