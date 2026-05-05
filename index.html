@@ -510,6 +510,46 @@ table.invTable td{
 
 }
 
+table.invTable td.itemsCell{
+  position:relative;
+}
+
+table.invTable .itemsOneLine{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:800;
+}
+
+.itemsTooltip{
+  position:fixed;
+  z-index:5000;
+  max-width:min(520px, 80vw);
+  padding:10px 12px;
+  border:1px solid #ff3b3b88;
+  border-radius:10px;
+  background:rgba(12, 12, 12, .97);
+  color:#fff;
+  box-shadow:0 8px 24px rgba(0,0,0,.45), 0 0 16px #ff1a1a4d;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  font-size:12px;
+  line-height:1.35;
+  pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .12s ease;
+}
+
+.itemsTooltip.isVisible{
+  opacity:1;
+  visibility:visible;
+}
+
  
 
 /* solo NOTE può andare a capo */
@@ -2973,6 +3013,60 @@ table.invTable td:last-child{
     }
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
+
+    function buildItemsCellHtml(itemsText) {
+      if (!itemsText) return `<span class="muted">—</span>`;
+      return `<span class="itemsOneLine" data-items-full="${escapeHtml(itemsText)}">${escapeHtml(itemsText)}</span>`;
+    }
+
+    function initItemsTooltip() {
+      if (window.__itemsTooltipInit) return;
+      window.__itemsTooltipInit = true;
+
+      const tooltip = document.createElement("div");
+      tooltip.className = "itemsTooltip";
+      document.body.appendChild(tooltip);
+
+      let currentTarget = null;
+
+      function positionTooltip(ev) {
+        if (!currentTarget) return;
+        const gap = 12;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const tw = tooltip.offsetWidth;
+        const th = tooltip.offsetHeight;
+        let left = ev.clientX + gap;
+        let top = ev.clientY + gap;
+        if (left + tw > vw - 8) left = Math.max(8, ev.clientX - tw - gap);
+        if (top + th > vh - 8) top = Math.max(8, ev.clientY - th - gap);
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+      }
+
+      document.addEventListener("mouseover", (ev) => {
+        const target = ev.target.closest("[data-items-full]");
+        if (!target) return;
+        currentTarget = target;
+        tooltip.textContent = target.getAttribute("data-items-full") || "";
+        tooltip.classList.add("isVisible");
+        positionTooltip(ev);
+      });
+
+      document.addEventListener("mousemove", (ev) => {
+        if (!currentTarget) return;
+        positionTooltip(ev);
+      });
+
+      document.addEventListener("mouseout", (ev) => {
+        if (!currentTarget) return;
+        const related = ev.relatedTarget;
+        if (related && currentTarget.contains(related)) return;
+        if (ev.target !== currentTarget && !currentTarget.contains(ev.target)) return;
+        currentTarget = null;
+        tooltip.classList.remove("isVisible");
+      });
+    }
 
  
 
@@ -6979,11 +7073,7 @@ logEvent(
 
  
 
-        const itemsHtml = itemsText
-
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>`
-
-          : `<span class="muted">—</span>`;
+        const itemsHtml = buildItemsCellHtml(itemsText);
 
  
 
@@ -7059,7 +7149,7 @@ logEvent(
 
           <td>${noteHtml}</td>
 
-          <td>${itemsHtml}</td>
+          <td class="itemsCell">${itemsHtml}</td>
 
           <td>${actionsHtml}</td>
 
@@ -8043,9 +8133,7 @@ invRenderTotals();
           : `<span class="muted">—</span>`;
 
         const itemList = (Array.isArray(r.items) && r.items.length) ? r.items : (r.item ? [{ name:r.item, qty:r.qty }] : []);
-        const itemHtml = itemList.length
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\\n"))}</div>`
-          : `<span class="muted">—</span>`;
+        const itemHtml = buildItemsCellHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\\n"));
 
         const m = r.money;
         const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
@@ -8071,7 +8159,7 @@ invRenderTotals();
           </td>
           <td>${tagHtml}</td>
           <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-          <td>${itemHtml}</td>
+          <td class="itemsCell">${itemHtml}</td>
           <td>${actionsHtml}</td>
         `;
         body.appendChild(tr);
@@ -9603,6 +9691,8 @@ accRenderSummary();
     // =========================
 
     function boot() {
+
+      initItemsTooltip();
 
       ensureDemoUsersIfEmpty();
 
