@@ -2698,7 +2698,7 @@ table.invTable td:last-child{
 
           <button class="btn small" onclick="closeEdit()">Chiudi</button>
 
-          <button class="btn small" onclick="saveEdit()">Salva</button>
+          <button class="btn success small" onclick="saveEdit()">Salva</button>
 
         </div>
 
@@ -2707,18 +2707,16 @@ table.invTable td:last-child{
  
 
       <div class="row" style="margin-top:10px;">
-
-        <div class="field" style="min-width:320px;">
-
+        <div class="field" style="min-width:320px; flex:1;">
           <label>Tag (Nome in game)</label>
-
           <input id="editTagName" disabled />
-
-          <div class="hint">Per cambiare tag: seleziona uno o più nomi nella lista a destra e poi salva.</div>
-
         </div>
-
       </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field" style="min-width:320px; flex:1;"><label>Aggiungi tag</label><select id="editTagSelect"></select></div>
+        <div class="field" style="min-width:180px;"><button class="btn" onclick="editAddTag()">Aggiungi tag</button></div>
+      </div>
+      <div id="editTagPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;"></div>
 
  
 
@@ -2730,27 +2728,21 @@ table.invTable td:last-child{
 
         <div class="row">
 
-          <div class="field" style="min-width:320px;">
-
-            <label>Item</label>
-
-            <select id="editItemSelect"></select>
-
-          </div>
-
-          <div class="field" style="min-width:160px;">
-
-            <label>Quantità</label>
-
-            <input id="editItemQty" type="number" min="0" step="1" value="0" />
-
-          </div>
-
-          <div class="field" style="min-width:180px;">
-
-            <button class="btn" onclick="editAddItem()">Aggiungi item</button>
-
-          </div>
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Armi)</label><select id="editItemSelectArmi"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="editItemQtyArmi" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="editAddItem('armi')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Droga)</label><select id="editItemSelectDroga"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="editItemQtyDroga" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="editAddItem('droga')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Oggetti/Varie)</label><select id="editItemSelectVarie"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="editItemQtyVarie" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="editAddItem('varie')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
 
         </div>
 
@@ -6774,9 +6766,14 @@ accRenderDueTable();
 
     const editTagName = document.getElementById("editTagName");
 
-    const editItemSelect = document.getElementById("editItemSelect");
-
-    const editItemQty = document.getElementById("editItemQty");
+    const editTagSelect = document.getElementById("editTagSelect");
+    const editTagPills = document.getElementById("editTagPills");
+    const editItemSelectArmi = document.getElementById("editItemSelectArmi");
+    const editItemSelectDroga = document.getElementById("editItemSelectDroga");
+    const editItemSelectVarie = document.getElementById("editItemSelectVarie");
+    const editItemQtyArmi = document.getElementById("editItemQtyArmi");
+    const editItemQtyDroga = document.getElementById("editItemQtyDroga");
+    const editItemQtyVarie = document.getElementById("editItemQtyVarie");
 
     const editItemsList = document.getElementById("editItemsList");
 
@@ -6789,6 +6786,7 @@ accRenderDueTable();
     let editingItems = [];
 
     let editingCategory = null;
+    let editingTagUserIds = [];
 
  
 
@@ -6851,8 +6849,19 @@ accRenderDueTable();
  
 
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
-
-      editTagName.value = tnames.length ? tnames.join(", ") : "—";
+      editingTagUserIds = Array.isArray(rec.tagUserIds) ? rec.tagUserIds.slice() : [];
+      if (!editingTagUserIds.length && tnames.length) {
+        const allUsers = loadUsers();
+        editingTagUserIds = tnames.map(nm => {
+          const found = allUsers.find(u => (u.gameName || u.email || "").trim() === nm);
+          return found?.id;
+        }).filter(Boolean);
+      }
+      editFillTagSelect();
+      editRenderTagPills();
+      fillEditItemSelect(editItemSelectArmi, "armi");
+      fillEditItemSelect(editItemSelectDroga, "droga");
+      fillEditItemSelect(editItemSelectVarie, "varie");
 
  
 
@@ -6875,6 +6884,7 @@ accRenderDueTable();
       editingCategory = null;
 
       editingItems = [];
+      editingTagUserIds = [];
 
  
 
@@ -6938,11 +6948,28 @@ accRenderDueTable();
 
  
 
-    function editAddItem() {
+    function fillEditItemSelect(selectEl, group) {
+      if (!selectEl) return;
+      const prev = selectEl.value;
+      selectEl.innerHTML = "";
+      getActionItems(group).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        selectEl.appendChild(o);
+      });
+      if (prev && Array.from(selectEl.options).some(o => o.value === prev)) selectEl.value = prev;
+    }
 
-      const name = editItemSelect.value;
-
-      let qty = parseInt(editItemQty.value || "0", 10);
+    function editAddItem(group) {
+      const map = {
+        armi: [editItemSelectArmi, editItemQtyArmi],
+        droga: [editItemSelectDroga, editItemQtyDroga],
+        varie: [editItemSelectVarie, editItemQtyVarie]
+      };
+      const [sel, qtyInput] = map[String(group)] || [];
+      const name = sel?.value || "";
+      let qty = parseInt(qtyInput?.value || "0", 10);
 
       if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
 
@@ -6956,7 +6983,7 @@ accRenderDueTable();
 
  
 
-      editItemQty.value = "0";
+      if (qtyInput) qtyInput.value = "0";
 
       renderEditItems();
 
@@ -6970,6 +6997,40 @@ accRenderDueTable();
 
       renderEditItems();
 
+    }
+
+    function editFillTagSelect() {
+      if (!editTagSelect) return;
+      const users = loadUsers().filter(u => !!u.id).sort((a,b) => (a.gameName || a.email || "").localeCompare(b.gameName || b.email || ""));
+      editTagSelect.innerHTML = `<option value="">—</option>`;
+      users.forEach(u => {
+        const o = document.createElement("option");
+        o.value = u.id;
+        o.textContent = u.gameName || u.email || "—";
+        editTagSelect.appendChild(o);
+      });
+    }
+
+    function editRenderTagPills() {
+      const users = loadUsers();
+      const chosen = editingTagUserIds.map(id => users.find(u => u.id === id)).filter(Boolean);
+      const names = chosen.map(u => u.gameName || u.email || "—");
+      if (editTagName) editTagName.value = names.length ? names.join(", ") : "—";
+      if (!editTagPills) return;
+      if (!chosen.length) return (editTagPills.innerHTML = `<span class="muted">Nessun tag selezionato</span>`);
+      editTagPills.innerHTML = chosen.map(u => `<span class="pill">${escapeHtml(u.gameName || u.email || "—")} <button class="btn small danger" style="margin-left:6px; padding:2px 6px;" onclick="editRemoveTag('${escapeHtml(u.id)}')">x</button></span>`).join("");
+    }
+
+    function editAddTag() {
+      const id = String(editTagSelect?.value || "");
+      if (!id) return;
+      if (!editingTagUserIds.includes(id)) editingTagUserIds.push(id);
+      editRenderTagPills();
+    }
+
+    function editRemoveTag(id) {
+      editingTagUserIds = editingTagUserIds.filter(x => x !== id);
+      editRenderTagPills();
     }
 
  
@@ -7002,10 +7063,11 @@ accRenderDueTable();
 
  
 
-      rec.tagUserIds = selectedTagUserIds.slice();
-
-      rec.tagNames = selectedTagNames();
-
+      rec.tagUserIds = editingTagUserIds.slice();
+      rec.tagNames = editingTagUserIds
+        .map(id => loadUsers().find(u => u.id === id))
+        .filter(Boolean)
+        .map(u => u.gameName || u.email || "—");
       rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
  
