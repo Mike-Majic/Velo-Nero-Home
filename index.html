@@ -2593,6 +2593,11 @@ table.invTable td:last-child{
       <div class="row" style="margin-top:10px;">
         <div class="field" style="min-width:320px; flex:1;"><label>Tag (Nome in game)</label><input id="invEditTags" disabled /></div>
       </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field" style="min-width:320px; flex:1;"><label>Aggiungi tag</label><select id="invEditTagSelect"></select></div>
+        <div class="field" style="min-width:180px;"><button class="btn" onclick="invEditAddTag()">Aggiungi tag</button></div>
+      </div>
+      <div id="invEditTagPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;"></div>
       <div style="margin-top:14px;">
         <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
         <div class="row">
@@ -2873,7 +2878,7 @@ table.invTable td:last-child{
 
           <button class="btn danger small" id="btnDeleteNote" onclick="deleteNote()" style="display:none;">Elimina</button>
 
-          <button class="btn small" id="btnSaveNote" onclick="saveNote()">Salva</button>
+          <button class="btn success small" id="btnSaveNote" onclick="saveNote()">Salva</button>
 
         </div>
 
@@ -8186,6 +8191,8 @@ invRenderTotals();
     const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
     const invEditNote = document.getElementById("invEditNote");
     const invEditTags = document.getElementById("invEditTags");
+    const invEditTagSelect = document.getElementById("invEditTagSelect");
+    const invEditTagPills = document.getElementById("invEditTagPills");
     const invEditItemSelectArmi = document.getElementById("invEditItemSelectArmi");
     const invEditItemSelectDroga = document.getElementById("invEditItemSelectDroga");
     const invEditItemSelectVarie = document.getElementById("invEditItemSelectVarie");
@@ -8197,6 +8204,7 @@ invRenderTotals();
     let invEditingId = null;
     let invEditingCategory = null;
     let invEditingItems = [];
+    let invEditingTagUserIds = [];
 
     function openInvEdit(id, cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
@@ -8218,7 +8226,16 @@ invRenderTotals();
       if (invEditMoneyDrug) invEditMoneyDrug.value = String((typeof m === "number") ? 0 : Number(m?.drug || 0));
       if (invEditNote) invEditNote.value = rec.note || "";
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
-      if (invEditTags) invEditTags.value = tnames.length ? tnames.join(", ") : "—";
+      invEditingTagUserIds = Array.isArray(rec.tagUserIds) ? rec.tagUserIds.slice() : [];
+      if (!invEditingTagUserIds.length && tnames.length) {
+        const allUsers = loadUsers();
+        invEditingTagUserIds = tnames.map(nm => {
+          const found = allUsers.find(u => (u.gameName || u.email || "").trim() === nm);
+          return found?.id;
+        }).filter(Boolean);
+      }
+      invEditFillTagSelect();
+      invEditRenderTagPills();
 
       fillInvEditSelect(invEditItemSelectArmi, "Armi");
       fillInvEditSelect(invEditItemSelectDroga, "Droga");
@@ -8233,6 +8250,7 @@ invRenderTotals();
       invEditingId = null;
       invEditingCategory = null;
       invEditingItems = [];
+      invEditingTagUserIds = [];
       setModalOpen(false);
     }
 
@@ -8281,6 +8299,49 @@ invRenderTotals();
       invRenderEditItems();
     }
 
+    function invEditFillTagSelect() {
+      if (!invEditTagSelect) return;
+      const users = loadUsers()
+        .filter(u => !!u.id)
+        .sort((a, b) => (a.gameName || a.email || "").localeCompare(b.gameName || b.email || ""));
+      invEditTagSelect.innerHTML = `<option value="">—</option>`;
+      users.forEach(u => {
+        const o = document.createElement("option");
+        o.value = u.id;
+        o.textContent = u.gameName || u.email || "—";
+        invEditTagSelect.appendChild(o);
+      });
+    }
+
+    function invEditRenderTagPills() {
+      const users = loadUsers();
+      const chosen = invEditingTagUserIds
+        .map(id => users.find(u => u.id === id))
+        .filter(Boolean);
+      const names = chosen.map(u => u.gameName || u.email || "—");
+      if (invEditTags) invEditTags.value = names.length ? names.join(", ") : "—";
+      if (!invEditTagPills) return;
+      if (!chosen.length) {
+        invEditTagPills.innerHTML = `<span class="muted">Nessun tag selezionato</span>`;
+        return;
+      }
+      invEditTagPills.innerHTML = chosen.map(u => `
+        <span class="pill">${escapeHtml(u.gameName || u.email || "—")} <button class="btn small danger" style="margin-left:6px; padding:2px 6px;" onclick="invEditRemoveTag('${escapeHtml(u.id)}')">x</button></span>
+      `).join("");
+    }
+
+    function invEditAddTag() {
+      const id = String(invEditTagSelect?.value || "");
+      if (!id) return;
+      if (!invEditingTagUserIds.includes(id)) invEditingTagUserIds.push(id);
+      invEditRenderTagPills();
+    }
+
+    function invEditRemoveTag(id) {
+      invEditingTagUserIds = invEditingTagUserIds.filter(x => x !== id);
+      invEditRenderTagPills();
+    }
+
     function invEditRemoveItem(idx) {
       invEditingItems.splice(idx, 1);
       invRenderEditItems();
@@ -8300,6 +8361,12 @@ invRenderTotals();
       };
       rec.note = String(invEditNote?.value || "").trim();
       rec.items = invEditingItems.map(x => ({ name: x.name, qty: Number(x.qty || 0) }));
+      rec.tagUserIds = invEditingTagUserIds.slice();
+      rec.tagNames = invEditingTagUserIds
+        .map(id => loadUsers().find(u => u.id === id))
+        .filter(Boolean)
+        .map(u => u.gameName || u.email || "—");
+      rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
       rec.item = rec.items[0]?.name || "";
       rec.qty = rec.items[0]?.qty || 0;
 
