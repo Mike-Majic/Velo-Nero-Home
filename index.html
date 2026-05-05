@@ -510,6 +510,54 @@ table.invTable td{
 
 }
 
+table.invTable td.itemsCell{
+  position:relative;
+}
+
+table.invTable .itemsOneLine{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:800;
+}
+
+table.invTable .cellOneLine{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.itemsTooltip{
+  position:fixed;
+  z-index:5000;
+  max-width:min(520px, 80vw);
+  padding:10px 12px;
+  border:1px solid #ff3b3b88;
+  border-radius:10px;
+  background:rgba(12, 12, 12, .97);
+  color:#fff;
+  box-shadow:0 8px 24px rgba(0,0,0,.45), 0 0 16px #ff1a1a4d;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  font-size:12px;
+  line-height:1.35;
+  pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .12s ease;
+}
+
+.itemsTooltip.isVisible{
+  opacity:1;
+  visibility:visible;
+}
+
  
 
 /* solo NOTE può andare a capo */
@@ -781,7 +829,7 @@ table.invTable td:last-child{
     }
 
     .diaryTableWrap table.diaryInvestigationTable{
-      table-layout:auto;
+      table-layout:fixed;
       width:100%;
       border-collapse:separate;
       border-spacing:0 12px;
@@ -858,41 +906,33 @@ table.invTable td:last-child{
       font-size:14px;
       font-weight:900;
       color:#fff;
-      white-space:pre-wrap;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .diaryExcerpt{
       font-size:12px;
       color:#ffb3b3;
       line-height:1.35;
-      white-space:pre-wrap;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .diaryPillsWrap{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-    }
-    .diaryNamePill{
-      display:inline-flex;
-      align-items:center;
-      padding:6px 9px;
-      border-radius:999px;
-      background:#111;
-      border:1px solid #ff1a1a44;
-      color:#fff;
-      font-size:11px;
+    .diaryNamesText, .diaryTagsText{
+      display:block;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-size:13px;
       font-weight:800;
     }
-    .diaryTagPill{
-      display:inline-flex;
-      align-items:center;
-      padding:6px 9px;
-      border-radius:999px;
-      background:#0c3c1d;
-      border:1px solid #17bf5f;
+    .diaryNamesText{
+      color:#fff;
+    }
+    .diaryTagsText{
       color:#d7ffe6;
-      font-size:11px;
-      font-weight:900;
-      box-shadow:0 0 10px #00ff6a22 inset;
     }
     .diaryEmpty{
       color:var(--muted);
@@ -2155,9 +2195,9 @@ table.invTable td:last-child{
               <tr>
                 <th style="width:220px;">Quando</th>
                 <th style="width:140px;">Tipo</th>
-                <th style="width:220px;">Titolo</th>
-                <th style="width:220px;">Nomi</th>
-                <th>Tag selezionati</th>
+                <th style="width:140px;">Titolo</th>
+                <th style="width:140px;">Nomi</th>
+                <th style="width:140px;">Tag selezionati</th>
               </tr>
             </thead>
             <tbody id="diaryTableBody">
@@ -2553,18 +2593,33 @@ table.invTable td:last-child{
       <div class="row" style="margin-top:10px;">
         <div class="field" style="min-width:320px; flex:1;"><label>Tag (Nome in game)</label><input id="invEditTags" disabled /></div>
       </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field" style="min-width:320px; flex:1;"><label>Aggiungi tag</label><select id="invEditTagSelect"></select></div>
+        <div class="field" style="min-width:180px;"><button class="btn" onclick="invEditAddTag()">Aggiungi tag</button></div>
+      </div>
+      <div id="invEditTagPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;"></div>
       <div style="margin-top:14px;">
         <h4 style="margin:10px 0 8px 0; color:var(--red2); font-weight:900;">Items</h4>
         <div class="row">
-          <div class="field" style="min-width:320px;"><label>Item</label><select id="invEditItemSelect"></select></div>
-          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQty" type="number" min="0" step="1" value="0" /></div>
-          <div class="field" style="min-width:180px;"><button class="btn" onclick="invEditAddItem()">Aggiungi item</button></div>
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Armi)</label><select id="invEditItemSelectArmi"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQtyArmi" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="invEditAddItem('Armi')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Droga)</label><select id="invEditItemSelectDroga"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQtyDroga" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="invEditAddItem('Droga')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Oggetti/Varie)</label><select id="invEditItemSelectVarie"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="invEditItemQtyVarie" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="invEditAddItem('Oggetti/Varie')">Aggiungi item</button></div>
         </div>
         <div id="invEditItemsList"></div>
       </div>
       <div class="right" style="margin-top:14px;">
         <button class="btn small" onclick="closeInvEdit()">Chiudi</button>
-        <button class="btn small" onclick="saveInvEdit()">Salva</button>
+        <button class="btn success small" onclick="saveInvEdit()">Salva</button>
       </div>
     </div>
   </div>
@@ -2643,7 +2698,7 @@ table.invTable td:last-child{
 
           <button class="btn small" onclick="closeEdit()">Chiudi</button>
 
-          <button class="btn small" onclick="saveEdit()">Salva</button>
+          <button class="btn success small" onclick="saveEdit()">Salva</button>
 
         </div>
 
@@ -2652,18 +2707,16 @@ table.invTable td:last-child{
  
 
       <div class="row" style="margin-top:10px;">
-
-        <div class="field" style="min-width:320px;">
-
+        <div class="field" style="min-width:320px; flex:1;">
           <label>Tag (Nome in game)</label>
-
           <input id="editTagName" disabled />
-
-          <div class="hint">Per cambiare tag: seleziona uno o più nomi nella lista a destra e poi salva.</div>
-
         </div>
-
       </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field" style="min-width:320px; flex:1;"><label>Aggiungi tag</label><select id="editTagSelect"></select></div>
+        <div class="field" style="min-width:180px;"><button class="btn" onclick="editAddTag()">Aggiungi tag</button></div>
+      </div>
+      <div id="editTagPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;"></div>
 
  
 
@@ -2675,27 +2728,21 @@ table.invTable td:last-child{
 
         <div class="row">
 
-          <div class="field" style="min-width:320px;">
-
-            <label>Item</label>
-
-            <select id="editItemSelect"></select>
-
-          </div>
-
-          <div class="field" style="min-width:160px;">
-
-            <label>Quantità</label>
-
-            <input id="editItemQty" type="number" min="0" step="1" value="0" />
-
-          </div>
-
-          <div class="field" style="min-width:180px;">
-
-            <button class="btn" onclick="editAddItem()">Aggiungi item</button>
-
-          </div>
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Armi)</label><select id="editItemSelectArmi"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="editItemQtyArmi" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="editAddItem('armi')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Droga)</label><select id="editItemSelectDroga"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="editItemQtyDroga" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="editAddItem('droga')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px; flex:1;"><label>Item (Oggetti/Varie)</label><select id="editItemSelectVarie"></select></div>
+          <div class="field" style="min-width:160px;"><label>Quantità</label><input id="editItemQtyVarie" type="number" min="0" step="1" value="0" /></div>
+          <div class="field" style="min-width:180px;"><button class="btn btn-gta" onclick="editAddItem('varie')">Aggiungi item</button></div>
+        </div>
+        <div class="row">
 
         </div>
 
@@ -2823,7 +2870,7 @@ table.invTable td:last-child{
 
           <button class="btn danger small" id="btnDeleteNote" onclick="deleteNote()" style="display:none;">Elimina</button>
 
-          <button class="btn small" id="btnSaveNote" onclick="saveNote()">Salva</button>
+          <button class="btn success small" id="btnSaveNote" onclick="saveNote()">Salva</button>
 
         </div>
 
@@ -2973,6 +3020,65 @@ table.invTable td:last-child{
     }
 
     function formatMoney(n) { const v = Math.round(Number(n || 0)); return "$" + v.toLocaleString("it-IT"); }
+
+    function buildCellTooltipHtml(fullText, className = "cellOneLine") {
+      const raw = String(fullText ?? "").trim();
+      if (!raw) return `<span class="muted">—</span>`;
+      return `<span class="${className}" data-tooltip-full="${escapeHtml(raw)}">${escapeHtml(raw)}</span>`;
+    }
+
+    function buildItemsCellHtml(itemsText) {
+      return buildCellTooltipHtml(itemsText, "itemsOneLine");
+    }
+
+    function initItemsTooltip() {
+      if (window.__itemsTooltipInit) return;
+      window.__itemsTooltipInit = true;
+
+      const tooltip = document.createElement("div");
+      tooltip.className = "itemsTooltip";
+      document.body.appendChild(tooltip);
+
+      let currentTarget = null;
+
+      function positionTooltip(ev) {
+        if (!currentTarget) return;
+        const gap = 12;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const tw = tooltip.offsetWidth;
+        const th = tooltip.offsetHeight;
+        let left = ev.clientX + gap;
+        let top = ev.clientY + gap;
+        if (left + tw > vw - 8) left = Math.max(8, ev.clientX - tw - gap);
+        if (top + th > vh - 8) top = Math.max(8, ev.clientY - th - gap);
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+      }
+
+      document.addEventListener("mouseover", (ev) => {
+        const target = ev.target.closest("[data-tooltip-full]");
+        if (!target) return;
+        currentTarget = target;
+        tooltip.textContent = target.getAttribute("data-tooltip-full") || "";
+        tooltip.classList.add("isVisible");
+        positionTooltip(ev);
+      });
+
+      document.addEventListener("mousemove", (ev) => {
+        if (!currentTarget) return;
+        positionTooltip(ev);
+      });
+
+      document.addEventListener("mouseout", (ev) => {
+        if (!currentTarget) return;
+        const related = ev.relatedTarget;
+        if (related && currentTarget.contains(related)) return;
+        if (ev.target !== currentTarget && !currentTarget.contains(ev.target)) return;
+        currentTarget = null;
+        tooltip.classList.remove("isVisible");
+      });
+    }
 
  
 
@@ -3515,12 +3621,14 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
     function diaryNamesHtml(names) {
       const arr = String(names || "").split(",").map(x => x.trim()).filter(Boolean);
       if (!arr.length) return `<span class="muted">—</span>`;
-      return `<div class="diaryPillsWrap">${arr.map(n => `<span class="diaryNamePill">${escapeHtml(n)}</span>`).join("")}</div>`;
+      const text = arr.join(", ");
+      return `<span class="diaryNamesText" data-tooltip-full="${escapeHtml(text)}">${escapeHtml(text)}</span>`;
     }
 
     function diaryTagsHtml(tagNames) {
       if (!Array.isArray(tagNames) || !tagNames.length) return `<span class="muted">—</span>`;
-      return `<div class="diaryPillsWrap">${tagNames.map(t => `<span class="diaryTagPill">${escapeHtml(t)}</span>`).join("")}</div>`;
+      const text = tagNames.join(", ");
+      return `<span class="diaryTagsText" data-tooltip-full="${escapeHtml(text)}">${escapeHtml(text)}</span>`;
     }
 
     function renderDiaryRows(list) {
@@ -3542,8 +3650,8 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
           <td><span class="diaryTypeBadge">${escapeHtml(n.type || "Nota")}</span></td>
           <td>
             <div class="diaryTitleBlock">
-              <div class="diaryTitleMain">${n.title ? escapeHtml(n.title) : "—"}</div>
-              <div class="diaryExcerpt">${escapeHtml(diaryExcerptText(n))}</div>
+              <div class="diaryTitleMain" data-tooltip-full="${escapeHtml(n.title || "—")}">${n.title ? escapeHtml(n.title) : "—"}</div>
+              <div class="diaryExcerpt" data-tooltip-full="${escapeHtml(diaryExcerptText(n))}">${escapeHtml(diaryExcerptText(n))}</div>
             </div>
           </td>
           <td>${diaryNamesHtml(n.names)}</td>
@@ -4994,7 +5102,7 @@ if (id === "contabilita") {
 
     // =========================
 
-    function initAfterLogin() {
+    function initAfterLogin(keepCurrentSection = false) {
 
       const btnUtenti = document.getElementById("btnUtenti");
 
@@ -5047,7 +5155,7 @@ if (id === "contabilita") {
 
  
 
-      showOnly("dashboard");
+      if (!keepCurrentSection) showOnly("dashboard");
 
     }
 
@@ -5210,7 +5318,8 @@ sel.onchange = () => {
 
   setHeaderUser();
 
-  initAfterLogin();
+  initAfterLogin(true);
+  renderUsersTable();
 
   renderTagList();
 
@@ -6455,6 +6564,12 @@ function animateMoneyValue(el, nextValue, key){
 
 saveOps(ops);
 
+      clearSelectedTags();
+      renderTagList();
+      renderTagListInv();
+      renderTagListDiary();
+      renderTagListAcc();
+
  
 
 // LOG
@@ -6657,9 +6772,14 @@ accRenderDueTable();
 
     const editTagName = document.getElementById("editTagName");
 
-    const editItemSelect = document.getElementById("editItemSelect");
-
-    const editItemQty = document.getElementById("editItemQty");
+    const editTagSelect = document.getElementById("editTagSelect");
+    const editTagPills = document.getElementById("editTagPills");
+    const editItemSelectArmi = document.getElementById("editItemSelectArmi");
+    const editItemSelectDroga = document.getElementById("editItemSelectDroga");
+    const editItemSelectVarie = document.getElementById("editItemSelectVarie");
+    const editItemQtyArmi = document.getElementById("editItemQtyArmi");
+    const editItemQtyDroga = document.getElementById("editItemQtyDroga");
+    const editItemQtyVarie = document.getElementById("editItemQtyVarie");
 
     const editItemsList = document.getElementById("editItemsList");
 
@@ -6672,6 +6792,7 @@ accRenderDueTable();
     let editingItems = [];
 
     let editingCategory = null;
+    let editingTagUserIds = [];
 
  
 
@@ -6734,8 +6855,19 @@ accRenderDueTable();
  
 
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
-
-      editTagName.value = tnames.length ? tnames.join(", ") : "—";
+      editingTagUserIds = Array.isArray(rec.tagUserIds) ? rec.tagUserIds.slice() : [];
+      if (!editingTagUserIds.length && tnames.length) {
+        const allUsers = loadUsers();
+        editingTagUserIds = tnames.map(nm => {
+          const found = allUsers.find(u => (u.gameName || u.email || "").trim() === nm);
+          return found?.id;
+        }).filter(Boolean);
+      }
+      editFillTagSelect();
+      editRenderTagPills();
+      fillEditItemSelect(editItemSelectArmi, "armi");
+      fillEditItemSelect(editItemSelectDroga, "droga");
+      fillEditItemSelect(editItemSelectVarie, "varie");
 
  
 
@@ -6758,6 +6890,7 @@ accRenderDueTable();
       editingCategory = null;
 
       editingItems = [];
+      editingTagUserIds = [];
 
  
 
@@ -6821,11 +6954,28 @@ accRenderDueTable();
 
  
 
-    function editAddItem() {
+    function fillEditItemSelect(selectEl, group) {
+      if (!selectEl) return;
+      const prev = selectEl.value;
+      selectEl.innerHTML = "";
+      getActionItems(group).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        selectEl.appendChild(o);
+      });
+      if (prev && Array.from(selectEl.options).some(o => o.value === prev)) selectEl.value = prev;
+    }
 
-      const name = editItemSelect.value;
-
-      let qty = parseInt(editItemQty.value || "0", 10);
+    function editAddItem(group) {
+      const map = {
+        armi: [editItemSelectArmi, editItemQtyArmi],
+        droga: [editItemSelectDroga, editItemQtyDroga],
+        varie: [editItemSelectVarie, editItemQtyVarie]
+      };
+      const [sel, qtyInput] = map[String(group)] || [];
+      const name = sel?.value || "";
+      let qty = parseInt(qtyInput?.value || "0", 10);
 
       if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
 
@@ -6839,7 +6989,7 @@ accRenderDueTable();
 
  
 
-      editItemQty.value = "0";
+      if (qtyInput) qtyInput.value = "0";
 
       renderEditItems();
 
@@ -6853,6 +7003,40 @@ accRenderDueTable();
 
       renderEditItems();
 
+    }
+
+    function editFillTagSelect() {
+      if (!editTagSelect) return;
+      const users = loadUsers().filter(u => !!u.id).sort((a,b) => (a.gameName || a.email || "").localeCompare(b.gameName || b.email || ""));
+      editTagSelect.innerHTML = `<option value="">—</option>`;
+      users.forEach(u => {
+        const o = document.createElement("option");
+        o.value = u.id;
+        o.textContent = u.gameName || u.email || "—";
+        editTagSelect.appendChild(o);
+      });
+    }
+
+    function editRenderTagPills() {
+      const users = loadUsers();
+      const chosen = editingTagUserIds.map(id => users.find(u => u.id === id)).filter(Boolean);
+      const names = chosen.map(u => u.gameName || u.email || "—");
+      if (editTagName) editTagName.value = names.length ? names.join(", ") : "—";
+      if (!editTagPills) return;
+      if (!chosen.length) return (editTagPills.innerHTML = `<span class="muted">Nessun tag selezionato</span>`);
+      editTagPills.innerHTML = chosen.map(u => `<span class="pill">${escapeHtml(u.gameName || u.email || "—")} <button class="btn small danger" style="margin-left:6px; padding:2px 6px;" onclick="editRemoveTag('${escapeHtml(u.id)}')">x</button></span>`).join("");
+    }
+
+    function editAddTag() {
+      const id = String(editTagSelect?.value || "");
+      if (!id) return;
+      if (!editingTagUserIds.includes(id)) editingTagUserIds.push(id);
+      editRenderTagPills();
+    }
+
+    function editRemoveTag(id) {
+      editingTagUserIds = editingTagUserIds.filter(x => x !== id);
+      editRenderTagPills();
     }
 
  
@@ -6885,10 +7069,11 @@ accRenderDueTable();
 
  
 
-      rec.tagUserIds = selectedTagUserIds.slice();
-
-      rec.tagNames = selectedTagNames();
-
+      rec.tagUserIds = editingTagUserIds.slice();
+      rec.tagNames = editingTagUserIds
+        .map(id => loadUsers().find(u => u.id === id))
+        .filter(Boolean)
+        .map(u => u.gameName || u.email || "—");
       rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
 
  
@@ -6979,31 +7164,15 @@ logEvent(
 
  
 
-        const itemsHtml = itemsText
-
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemsText)}</div>`
-
-          : `<span class="muted">—</span>`;
+        const itemsHtml = buildItemsCellHtml(itemsText);
 
  
 
-        const noteHtml = (r.note && r.note.trim())
-
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note.trim())}</div>`
-
-          : `<span class="muted">—</span>`;
+        const noteHtml = buildCellTooltipHtml(r.note);
 
  
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-
-        const tagHtml = tnames.length
-
-          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-
-          : `<span class="muted">—</span>`;
-
- 
 
         const actionsHtml = canEditOps()
 
@@ -7017,11 +7186,11 @@ logEvent(
 
         tr.innerHTML = `
 
-          <td>${when}</td>
+          <td>${buildCellTooltipHtml(when)}</td>
 
-          <td style="font-weight:900;">${escapeHtml(r.createdByName || "—")}</td>
+          <td style="font-weight:900;">${buildCellTooltipHtml(r.createdByName || "—")}</td>
 
-          <td>${tipo}</td>
+          <td>${buildCellTooltipHtml(tipo)}</td>
 
           <td style="font-weight:900;">
 
@@ -7049,17 +7218,17 @@ logEvent(
 
               if (drug)  parts.push("SP: " + formatMoney(drug));
 
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              return buildCellTooltipHtml(parts.join(" .. "));
 
             })()}
 
           </td>
 
-          <td>${tagHtml}</td>
+          <td>${buildCellTooltipHtml(tnames.join(", "))}</td>
 
           <td>${noteHtml}</td>
 
-          <td>${itemsHtml}</td>
+          <td class="itemsCell">${itemsHtml}</td>
 
           <td>${actionsHtml}</td>
 
@@ -7955,10 +8124,8 @@ invRenderTotals();
 
       const note = (document.getElementById("invNote_" + tid)?.value || "").trim();
       const draftItems = (invDraftByCategory[cat] || []).map(x => ({ name: x.name, qty: x.qty }));
-      if (!draftItems.length && item) {
-        if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
-      }
-      const itemList = draftItems.length ? draftItems : (item ? [{ name: item, qty }] : []);
+      const hasInlineItem = !!item && Number.isFinite(qty) && qty > 0;
+      const itemList = draftItems.length ? draftItems : (hasInlineItem ? [{ name: item, qty }] : []);
 
       if (!itemList.length && moneyClean === 0 && moneyDirty === 0 && moneyDrug === 0 && !note) {
         return alert("Inserisci almeno item, o soldi (puliti/sporchi/spaccio), o nota.");
@@ -8008,6 +8175,12 @@ invRenderTotals();
       document.getElementById("invMoneyDrug_" + tid).value = "";
       document.getElementById("invNote_" + tid).value = "";
 
+      clearSelectedTags();
+      renderTagList();
+      renderTagListInv();
+      renderTagListDiary();
+      renderTagListAcc();
+
       invRenderTable(cat);
       invRenderTotals();
     }
@@ -8038,14 +8211,8 @@ invRenderTotals();
           r.type === "buy" ? "ACQUISTATO" : "—";
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
-        const tagHtml = tnames.length
-          ? `<span style="font-weight:900;">${escapeHtml(tnames.join(", "))}</span>`
-          : `<span class="muted">—</span>`;
-
         const itemList = (Array.isArray(r.items) && r.items.length) ? r.items : (r.item ? [{ name:r.item, qty:r.qty }] : []);
-        const itemHtml = itemList.length
-          ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\\n"))}</div>`
-          : `<span class="muted">—</span>`;
+        const itemHtml = buildItemsCellHtml(itemList.map(it => `${it.name} x${it.qty}`).join("\\n"));
 
         const m = r.money;
         const clean = (typeof m === "number") ? Number(m || 0) : Number(m?.clean || 0);
@@ -8057,21 +8224,21 @@ invRenderTotals();
           : `<span class="muted">—</span>`;
 
         tr.innerHTML = `
-          <td>${new Date(r.ts).toLocaleString()}</td>
-          <td style="font-weight:900;">${escapeHtml(r.who || "—")}</td>
-          <td>${t}</td>
+          <td>${buildCellTooltipHtml(new Date(r.ts).toLocaleString())}</td>
+          <td style="font-weight:900;">${buildCellTooltipHtml(r.who || "—")}</td>
+          <td>${buildCellTooltipHtml(t)}</td>
           <td style="font-weight:900;">
             ${(() => {
               const parts = [];
               if (clean) parts.push("P: " + formatMoney(clean));
               if (dirty) parts.push("S: " + formatMoney(dirty));
               if (drug)  parts.push("SP: " + formatMoney(drug));
-              return parts.length ? parts.join(" .. ") : '<span class="muted">—</span>';
+              return buildCellTooltipHtml(parts.join(" .. "));
             })()}
           </td>
-          <td>${tagHtml}</td>
-          <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
-          <td>${itemHtml}</td>
+          <td>${buildCellTooltipHtml(tnames.join(", "))}</td>
+          <td>${buildCellTooltipHtml(r.note)}</td>
+          <td class="itemsCell">${itemHtml}</td>
           <td>${actionsHtml}</td>
         `;
         body.appendChild(tr);
@@ -8098,13 +8265,20 @@ invRenderTotals();
     const invEditMoneyDrug = document.getElementById("invEditMoneyDrug");
     const invEditNote = document.getElementById("invEditNote");
     const invEditTags = document.getElementById("invEditTags");
-    const invEditItemSelect = document.getElementById("invEditItemSelect");
-    const invEditItemQty = document.getElementById("invEditItemQty");
+    const invEditTagSelect = document.getElementById("invEditTagSelect");
+    const invEditTagPills = document.getElementById("invEditTagPills");
+    const invEditItemSelectArmi = document.getElementById("invEditItemSelectArmi");
+    const invEditItemSelectDroga = document.getElementById("invEditItemSelectDroga");
+    const invEditItemSelectVarie = document.getElementById("invEditItemSelectVarie");
+    const invEditItemQtyArmi = document.getElementById("invEditItemQtyArmi");
+    const invEditItemQtyDroga = document.getElementById("invEditItemQtyDroga");
+    const invEditItemQtyVarie = document.getElementById("invEditItemQtyVarie");
     const invEditItemsList = document.getElementById("invEditItemsList");
 
     let invEditingId = null;
     let invEditingCategory = null;
     let invEditingItems = [];
+    let invEditingTagUserIds = [];
 
     function openInvEdit(id, cat) {
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
@@ -8126,19 +8300,20 @@ invRenderTotals();
       if (invEditMoneyDrug) invEditMoneyDrug.value = String((typeof m === "number") ? 0 : Number(m?.drug || 0));
       if (invEditNote) invEditNote.value = rec.note || "";
       const tnames = (rec.tagNames && rec.tagNames.length) ? rec.tagNames : (rec.tagName ? [rec.tagName] : []);
-      if (invEditTags) invEditTags.value = tnames.length ? tnames.join(", ") : "—";
-
-      if (invEditItemSelect) {
-        const prev = invEditItemSelect.value;
-        invEditItemSelect.innerHTML = "";
-        invItemsForCategory(cat).forEach(it => {
-          const o = document.createElement("option");
-          o.value = it;
-          o.textContent = it;
-          invEditItemSelect.appendChild(o);
-        });
-        if (prev && Array.from(invEditItemSelect.options).some(o => o.value === prev)) invEditItemSelect.value = prev;
+      invEditingTagUserIds = Array.isArray(rec.tagUserIds) ? rec.tagUserIds.slice() : [];
+      if (!invEditingTagUserIds.length && tnames.length) {
+        const allUsers = loadUsers();
+        invEditingTagUserIds = tnames.map(nm => {
+          const found = allUsers.find(u => (u.gameName || u.email || "").trim() === nm);
+          return found?.id;
+        }).filter(Boolean);
       }
+      invEditFillTagSelect();
+      invEditRenderTagPills();
+
+      fillInvEditSelect(invEditItemSelectArmi, "Armi");
+      fillInvEditSelect(invEditItemSelectDroga, "Droga");
+      fillInvEditSelect(invEditItemSelectVarie, "Oggetti/Varie");
 
       invRenderEditItems();
       if (invEditOverlay) invEditOverlay.style.display = "block";
@@ -8149,6 +8324,7 @@ invRenderTotals();
       invEditingId = null;
       invEditingCategory = null;
       invEditingItems = [];
+      invEditingTagUserIds = [];
       setModalOpen(false);
     }
 
@@ -8166,16 +8342,78 @@ invRenderTotals();
       `).join("");
     }
 
-    function invEditAddItem() {
-      const name = String(invEditItemSelect?.value || "").trim();
-      const qty = parseInt(invEditItemQty?.value || "0", 10);
+    function fillInvEditSelect(selectEl, cat) {
+      if (!selectEl) return;
+      const prev = selectEl.value;
+      selectEl.innerHTML = "";
+      (invItemsForCategory(cat) || []).forEach(it => {
+        const o = document.createElement("option");
+        o.value = it;
+        o.textContent = it;
+        selectEl.appendChild(o);
+      });
+      if (prev && Array.from(selectEl.options).some(o => o.value === prev)) selectEl.value = prev;
+    }
+
+    function invEditAddItem(cat) {
+      const map = {
+        "Armi": [invEditItemSelectArmi, invEditItemQtyArmi],
+        "Droga": [invEditItemSelectDroga, invEditItemQtyDroga],
+        "Oggetti/Varie": [invEditItemSelectVarie, invEditItemQtyVarie]
+      };
+      const [sel, qtyInput] = map[String(cat)] || [];
+      const name = String(sel?.value || "").trim();
+      const qty = parseInt(qtyInput?.value || "0", 10);
       if (!name) return alert("Seleziona un item.");
       if (!Number.isFinite(qty) || qty <= 0) return alert("La quantità deve essere maggiore di 0.");
       const found = invEditingItems.find(x => x.name === name);
       if (found) found.qty += qty;
       else invEditingItems.push({ name, qty });
-      if (invEditItemQty) invEditItemQty.value = "0";
+      if (qtyInput) qtyInput.value = "0";
       invRenderEditItems();
+    }
+
+    function invEditFillTagSelect() {
+      if (!invEditTagSelect) return;
+      const users = loadUsers()
+        .filter(u => !!u.id)
+        .sort((a, b) => (a.gameName || a.email || "").localeCompare(b.gameName || b.email || ""));
+      invEditTagSelect.innerHTML = `<option value="">—</option>`;
+      users.forEach(u => {
+        const o = document.createElement("option");
+        o.value = u.id;
+        o.textContent = u.gameName || u.email || "—";
+        invEditTagSelect.appendChild(o);
+      });
+    }
+
+    function invEditRenderTagPills() {
+      const users = loadUsers();
+      const chosen = invEditingTagUserIds
+        .map(id => users.find(u => u.id === id))
+        .filter(Boolean);
+      const names = chosen.map(u => u.gameName || u.email || "—");
+      if (invEditTags) invEditTags.value = names.length ? names.join(", ") : "—";
+      if (!invEditTagPills) return;
+      if (!chosen.length) {
+        invEditTagPills.innerHTML = `<span class="muted">Nessun tag selezionato</span>`;
+        return;
+      }
+      invEditTagPills.innerHTML = chosen.map(u => `
+        <span class="pill">${escapeHtml(u.gameName || u.email || "—")} <button class="btn small danger" style="margin-left:6px; padding:2px 6px;" onclick="invEditRemoveTag('${escapeHtml(u.id)}')">x</button></span>
+      `).join("");
+    }
+
+    function invEditAddTag() {
+      const id = String(invEditTagSelect?.value || "");
+      if (!id) return;
+      if (!invEditingTagUserIds.includes(id)) invEditingTagUserIds.push(id);
+      invEditRenderTagPills();
+    }
+
+    function invEditRemoveTag(id) {
+      invEditingTagUserIds = invEditingTagUserIds.filter(x => x !== id);
+      invEditRenderTagPills();
     }
 
     function invEditRemoveItem(idx) {
@@ -8197,6 +8435,12 @@ invRenderTotals();
       };
       rec.note = String(invEditNote?.value || "").trim();
       rec.items = invEditingItems.map(x => ({ name: x.name, qty: Number(x.qty || 0) }));
+      rec.tagUserIds = invEditingTagUserIds.slice();
+      rec.tagNames = invEditingTagUserIds
+        .map(id => loadUsers().find(u => u.id === id))
+        .filter(Boolean)
+        .map(u => u.gameName || u.email || "—");
+      rec.tagName = rec.tagNames.length ? rec.tagNames[0] : null;
       rec.item = rec.items[0]?.name || "";
       rec.qty = rec.items[0]?.qty || 0;
 
@@ -9603,6 +9847,8 @@ accRenderSummary();
     // =========================
 
     function boot() {
+
+      initItemsTooltip();
 
       ensureDemoUsersIfEmpty();
 
