@@ -121,22 +121,6 @@
       box-shadow:0 0 14px #ff1a1a22 inset, 0 0 16px #ff000044;
     }
 
-    .profileAvatar{
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      letter-spacing:.6px;
-      color:#fff;
-      border:1px solid #ff1a1aaa;
-      background:radial-gradient(circle at 30% 30%, #ff3b3b, #2b0000 70%);
-      box-shadow:0 0 14px #ff000066;
-      flex:0 0 auto;
-    }
-
     .profileMeta{
       display:flex;
       flex-direction:column;
@@ -253,6 +237,11 @@
       filter:drop-shadow(0 0 16px #ff1a1a66);
       pointer-events:none;
       z-index:0;
+      animation:brandLogoFade 6s ease-in-out infinite;
+    }
+    @keyframes brandLogoFade{
+      0%,100%{ opacity:.05; }
+      50%{ opacity:.24; }
     }
     .brandHero h1{ position:relative; z-index:1; margin:0; }
 
@@ -1274,11 +1263,6 @@ table.invTable td:last-child{
     flex:1 1 100%;
     min-width:100%;
   }
-  .profileAvatar{
-    width:38px;
-    height:38px;
-    font-size:13px;
-  }
   .pill{
     font-size:11px;
     padding:5px 9px;
@@ -1526,8 +1510,8 @@ table.invTable td:last-child{
 </style>
 
   <link rel="icon" href="favicon.iso" />
-  <link rel="icon" href="icon-69" />
-  <link rel="apple-touch-icon" href="icon-069" />
+  <link rel="icon" href="icon-69.png" />
+  <link rel="apple-touch-icon" href="icon-069.png" />
 
 </head>
 
@@ -1540,7 +1524,6 @@ table.invTable td:last-child{
     <div></div>
 
     <div class="userpill">
-      <div class="profileAvatar" id="profileAvatar">VN</div>
       <div class="profileMeta">
         <div class="profileBadges">
           <span class="pill" id="pillEmail">Email: —</span>
@@ -1556,7 +1539,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
     <h1>VELO NERO</h1>
   </div>
 
