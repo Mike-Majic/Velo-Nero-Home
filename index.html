@@ -237,6 +237,11 @@
       filter:drop-shadow(0 0 16px #ff1a1a66);
       pointer-events:none;
       z-index:0;
+      animation:brandLogoFade 6s ease-in-out infinite;
+    }
+    @keyframes brandLogoFade{
+      0%,100%{ opacity:.05; }
+      50%{ opacity:.24; }
     }
     .brandHero h1{ position:relative; z-index:1; margin:0; }
 
@@ -1505,8 +1510,8 @@ table.invTable td:last-child{
 </style>
 
   <link rel="icon" href="favicon.iso" />
-  <link rel="icon" href="icon-69" />
-  <link rel="apple-touch-icon" href="icon-069" />
+  <link rel="icon" href="icon-69.png" />
+  <link rel="apple-touch-icon" href="icon-069.png" />
 
 </head>
 
@@ -1534,7 +1539,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="icon-69" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
     <h1>VELO NERO</h1>
   </div>
 
