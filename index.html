@@ -3368,6 +3368,8 @@ function getParticipantsForSalary(tagUserIds) {
 
 function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, noteBase) {
 
+  if (source !== "ops") return;
+
   const mm = accMoneyObj(money);
 
   const parts = getParticipantsForSalary(tagUserIds);
@@ -6467,6 +6469,7 @@ logEvent(
         accUpsertDueSalariesFromSource("ops", last.id, last.money, last.tagUserIds, noteBase);
 
         accRenderDueTable();
+        accRenderSalaryTotalsTable();
 
       }
 
@@ -6539,6 +6542,7 @@ const all = accLoad();
 accSave(all.filter(r => !(r.kind === "salary" && (r.status || "paid") === "due" && r.source === "ops" && r.sourceId === id)));
 
 accRenderDueTable();
+accRenderSalaryTotalsTable();
 
       renderCategory(category);
 
@@ -8029,12 +8033,6 @@ invRenderTotals();
         (note ? ` .. Note(${note})` : "")
       );
 
-      const last = all[all.length - 1];
-      if (last) {
-        const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
-        accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
-        accRenderDueTable();
-      }
 
       document.getElementById("invQty_" + tid).value = "0";
       invDraftByCategory[cat] = [];
@@ -8322,9 +8320,6 @@ invRenderTotals();
         (rec.note ? ` .. Note(${rec.note})` : "")
       );
 
-      const noteBase = `Auto da Gestione (modifica): ${rec.category} .. ${rec.type}`;
-      accUpsertDueSalariesFromSource("inv", rec.id, rec.money, rec.tagUserIds || [], noteBase);
-      accRenderDueTable();
 
       closeInvEdit();
       invRenderTable(rec.category);
@@ -8597,7 +8592,7 @@ invRenderTotals();
 
     // =========================
 
-    const ACC_TABS = ["Stipendi"];
+    const ACC_TABS = ["Stipendi", "Totale Stipendi"];
 
  
 
@@ -8616,6 +8611,14 @@ invRenderTotals();
     }
 
     function accSave(arr) { vnRemoteStore.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+
+    function accIsSalaryRow(r) {
+      return r && r.kind === "salary" && r.source !== "inv";
+    }
+
+    function accSalaryPersonKey(r) {
+      return String(r?.toUserId || r?.to || "—");
+    }
 
  
 
@@ -8747,7 +8750,7 @@ p.innerHTML = `
 
   <h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
 
-  <div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
+  <div class="muted">Generati automaticamente dalle registrazioni con soldi in Azioni ..</div>
 
  
 
@@ -8834,6 +8837,31 @@ p.innerHTML = `
   </div>
 
 `;
+
+        } else if (tname === "Totale Stipendi") {
+
+          p.innerHTML = `
+            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totale Stipendi</h3>
+            <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni.</div>
+            <div class="tableWrap" style="margin-top:12px;">
+              <table class="accTable">
+                <thead>
+                  <tr>
+                    <th style="width:240px;">Nome</th>
+                    <th style="width:160px;">Puliti</th>
+                    <th style="width:160px;">Sporchi</th>
+                    <th style="width:160px;">Spaccio</th>
+                    <th style="width:120px;">Righe</th>
+                    <th style="width:160px;">Stato</th>
+                    <th style="width:180px;">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="accSalaryTotalsBody">
+                  <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+                </tbody>
+              </table>
+            </div>
+          `;
 
         } else {
 
@@ -8985,6 +9013,7 @@ p.innerHTML = `
 
         accRenderTable("Stipendi");
         accRenderDueTable();
+        accRenderSalaryTotalsTable();
 
         renderTagListAcc();
         syncSalaryRecipientFromTags();
@@ -9016,6 +9045,8 @@ p.innerHTML = `
  
 
 accRenderTable(name);
+
+if (name === "Totale Stipendi") accRenderSalaryTotalsTable();
 
 accRenderSummary();
 
@@ -9228,7 +9259,7 @@ const rows = all
 
   .filter(r => {
 
-    if (tabName === "Stipendi") return r.kind === "salary" && (r.status || "paid") === "paid";
+    if (tabName === "Stipendi") return accIsSalaryRow(r) && (r.status || "paid") === "paid";
 
     return r.kind === "balance";
 
@@ -9342,6 +9373,76 @@ tr.innerHTML = `
 
  
 
+
+function accSalaryTotalsGroups() {
+  const groups = new Map();
+  accLoad().filter(accIsSalaryRow).forEach(r => {
+    const status = (r.status || "paid") === "paid" ? "paid" : "due";
+    const personKey = accSalaryPersonKey(r);
+    const key = `${status}::${personKey}`;
+    if (!groups.has(key)) {
+      groups.set(key, { key: personKey, status, to: r.to || "—", clean: 0, dirty: 0, drug: 0, count: 0, latestTs: 0 });
+    }
+    const g = groups.get(key);
+    const amt = Number(r.amount || 0);
+    const payType = r.payType || "clean";
+    if (payType === "dirty") g.dirty += amt;
+    else if (payType === "drug") g.drug += amt;
+    else g.clean += amt;
+    g.count += 1;
+    g.latestTs = Math.max(g.latestTs, Number(r.ts || 0));
+  });
+  return Array.from(groups.values()).sort((a,b) => {
+    if (a.status !== b.status) return a.status === "due" ? -1 : 1;
+    return (b.latestTs || 0) - (a.latestTs || 0);
+  });
+}
+
+function accRenderSalaryTotalsTable() {
+  const body = document.getElementById("accSalaryTotalsBody");
+  if (!body) return;
+  const rows = accSalaryTotalsGroups();
+  if (!rows.length) {
+    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    return;
+  }
+  body.innerHTML = "";
+  rows.forEach(g => {
+    const tr = document.createElement("tr");
+    const nextStatus = g.status === "due" ? "paid" : "due";
+    const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
+    tr.innerHTML = `
+      <td style="font-weight:900;">${escapeHtml(g.to || "—")}</td>
+      <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
+      <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
+      <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
+      <td style="font-weight:900;">${g.count}</td>
+      <td><span class="tagRole">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
+      <td><button class="btn small ${g.status === "paid" ? "danger" : ""}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function accSetSalaryGroupStatus(encodedKey, status) {
+  const key = decodeURIComponent(encodedKey || "");
+  const all = accLoad();
+  const nextStatus = status === "paid" ? "paid" : "due";
+  const now = Date.now();
+  all.forEach(r => {
+    if (!accIsSalaryRow(r)) return;
+    if (accSalaryPersonKey(r) !== key) return;
+    r.status = nextStatus;
+    r.paidAt = nextStatus === "paid" ? now : null;
+  });
+  accSave(all);
+  logEvent("ACC_SALARY_TOTAL_STATUS", `Persona(${key}) .. Stato(${nextStatus})`);
+  accRenderDueTable();
+  accRenderTable("Stipendi");
+  accRenderSalaryTotalsTable();
+  accRenderSummary();
+}
+
 function accRenderDueTable() {
 
   const tid = accTabId("Stipendi");
@@ -9354,7 +9455,7 @@ function accRenderDueTable() {
 
   const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
 
-  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
+  const rows = all.filter(r => accIsSalaryRow(r) && (r.status || "paid") === "due").slice(0, 80);
 
  
 
@@ -9422,7 +9523,7 @@ function accSetSalaryStatus(id, status) {
 
   const r = all.find(x => x.id === id);
 
-  if (!r || r.kind !== "salary") return;
+  if (!accIsSalaryRow(r)) return;
 
  
 
@@ -9455,6 +9556,8 @@ function accSetSalaryStatus(id, status) {
   accRenderDueTable();
 
   accRenderTable("Stipendi");
+
+  accRenderSalaryTotalsTable();
 
   accRenderSummary();
 
@@ -9524,7 +9627,7 @@ function accComputeSummary() {
 
  
 
-    if (r.kind === "salary") {
+    if (accIsSalaryRow(r)) {
 
       const amt = Number(r.amount || 0);
       const payType = (r.payType || "clean");
@@ -9652,7 +9755,7 @@ function accRenderSummary() {
       const kept = [];
 
       all.forEach(r => {
-        if (r.kind !== "salary") {
+        if (!accIsSalaryRow(r)) {
           kept.push(r);
           return;
         }
@@ -9683,6 +9786,7 @@ function accRenderSummary() {
 
       accRenderTable("Stipendi");
       accRenderDueTable();
+      accRenderSalaryTotalsTable();
       accRenderSummary();
 
     }
@@ -9701,6 +9805,7 @@ function accRenderSummary() {
 
       accRenderTable("Stipendi");
       accRenderDueTable();
+      accRenderSalaryTotalsTable();
       accRenderSummary();
 
     }
