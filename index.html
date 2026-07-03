@@ -1881,7 +1881,7 @@ table.invTable td:last-child{
 
     <div class="cards">
 
-      <div class="box" onclick="showSection('azioni')">
+      <div class="box" id="cardAzioni" onclick="showSection('azioni')">
 
         <h2>Azioni</h2>
 
@@ -1891,7 +1891,7 @@ table.invTable td:last-child{
 
  
 
-      <div class="box" onclick="showSection('comandi')">
+      <div class="box" id="cardComandi" onclick="showSection('comandi')">
 
         <h2>Gestione Armi-Droga</h2>
 
@@ -1901,7 +1901,7 @@ table.invTable td:last-child{
 
  
 
-      <div class="box" onclick="showSection('diario')">
+      <div class="box" id="cardDiario" onclick="showSection('diario')">
 
         <h2>Diario</h2>
 
@@ -1909,7 +1909,7 @@ table.invTable td:last-child{
 
       </div>
 
-      <div class="box" onclick="showSection('contabilita')">
+      <div class="box" id="cardContabilita" onclick="showSection('contabilita')">
 
         <h2>Contabilità</h2>
 
@@ -2889,6 +2889,20 @@ table.invTable td:last-child{
 
       return idx === -1 ? 9999 : idx;
 
+    }
+
+
+    function roleLabelFromApi(role) {
+      const r = String(role || "none").toLowerCase();
+      if (r === "owner" || r === "admin") return "Owner";
+      if (r === "boss") return "Boss";
+      if (r === "vice") return "Vice Boss";
+      if (r === "member") return "Soldato";
+      return "";
+    }
+
+    function hasAssignedRole() {
+      return !!myRole();
     }
 
  
@@ -4479,9 +4493,21 @@ function logTagsLine(tagNames) {
 
     function finishLogin(user) {
 
-      logEvent("LOGIN", "Accesso completato", user.email, user.gameName || "");
+      const users = loadUsers();
+      const email = String(user.email || "").toLowerCase();
+      const role = roleLabelFromApi(user.role || user.roleApi || user.apiRole);
+      let ref = users.find(x => (x.email || "").toLowerCase() === email);
+      if (!ref) {
+        ref = { id: uid(), email, blocked: false, passwordHash: null, totpSecret: null, totpNeedsSetup: false };
+        users.push(ref);
+      }
+      ref.gameName = user.gameName || user.name || ref.gameName || email;
+      ref.role = email === OWNER_EMAIL.toLowerCase() ? "Owner" : role;
+      saveUsers(users);
 
-      saveSession({ email: user.email });
+      logEvent("LOGIN", "Accesso completato", email, ref.gameName || "");
+
+      saveSession({ email });
 
       setHeaderUser();
 
@@ -4592,7 +4618,7 @@ function logTagsLine(tagNames) {
         pendingUser = {
           email: out.user.email,
           gameName: out.user.name || out.user.email,
-          role: out.user.role || "none"
+          roleApi: out.user.role || "none"
         };
         finishLogin(pendingUser);
       } catch (err) {
@@ -4794,6 +4820,12 @@ function logTagsLine(tagNames) {
 
  
 
+      if (!hasAssignedRole() && id !== "dashboard") {
+
+        return showOnly("dashboard");
+
+      }
+
       if ((id === "utenti" || id === "log") && !isAdmin()) {
 
         return showOnly("dashboard");
@@ -4910,12 +4942,22 @@ if (id === "contabilita") {
 
       const btnLog = document.getElementById("btnLog");
       const cardLog = document.getElementById("cardLog");
+      const roleControls = [
+        [document.getElementById("btnAzioni"), document.getElementById("cardAzioni")],
+        [document.getElementById("btnComandi"), document.getElementById("cardComandi")],
+        [document.getElementById("btnDiario"), document.getElementById("cardDiario")],
+        [document.getElementById("btnContabilita"), document.getElementById("cardContabilita")]
+      ];
 
       const dashHint = document.getElementById("dashHint");
 
       const actionsHint = document.getElementById("actionsHint");
 
- 
+      const hasRole = hasAssignedRole();
+      roleControls.forEach(([btn, card]) => {
+        if (btn) btn.style.display = hasRole ? "inline-block" : "none";
+        if (card) card.style.display = hasRole ? "block" : "none";
+      });
 
       if (!isAdmin()) {
 
@@ -4941,9 +4983,9 @@ if (id === "contabilita") {
 
       if (!canEditOps()) {
 
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni, diario e contabilità.";
+        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi vedere solo la dashboard finché un admin non ti assegna un ruolo.";
 
-        actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+        actionsHint.textContent = "⚠️ In attesa di ruolo: sezione non disponibile finché un admin non ti assegna un ruolo.";
 
       } else {
 

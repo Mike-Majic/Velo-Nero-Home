@@ -100,8 +100,8 @@ create table if not exists public.client_storage (
 
 -- Initial admin profile. Create the Auth user in Supabase Auth with this same email and temporary password Mike00.
 insert into public.profiles (email, username, name, role)
-values ('m.colurci@gmail.com', 'Mike', 'Mike', 'admin')
-on conflict (email) do update set username='Mike', name='Mike', role='admin', updated_at=now();
+values ('m.colurci@gmail.com', 'Mike', 'Mike', 'owner')
+on conflict (email) do update set username='Mike', name='Mike', role='owner', updated_at=now();
 
 -- Data API permissions for server-side REST calls with SUPABASE_SERVICE_ROLE_KEY.
 -- Without explicit grants, PostgREST can return 42501 permission denied on new objects.

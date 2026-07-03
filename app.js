@@ -28,6 +28,16 @@ const vnRemoteStore = window.vnRemoteStore || (() => {
 })();
 window.vnRemoteStore = vnRemoteStore;
 
+
+function roleLabelFromApi(role) {
+  const r = String(role || "none").toLowerCase();
+  if (r === "owner" || r === "admin") return "Owner";
+  if (r === "boss") return "Boss";
+  if (r === "vice") return "Vice Boss";
+  if (r === "member") return "Soldato";
+  return "";
+}
+
 // =========================
 // LOGIN FLOW
 // =========================
@@ -79,7 +89,19 @@ function backToPasswordOrEmail() {
 function finishLogin(user) {
   if (!user) return;
 
-  saveSession({ email: user.email });
+  const users = loadUsers();
+  const email = String(user.email || "").toLowerCase();
+  const ownerEmail = String(window.OWNER_EMAIL || "m.colurci@gmail.com").toLowerCase();
+  let ref = users.find(x => (x.email || "").toLowerCase() === email);
+  if (!ref) {
+    ref = { id: typeof uid === "function" ? uid() : Math.random().toString(16).slice(2), email, blocked: false, passwordHash: null, totpSecret: null, totpNeedsSetup: false };
+    users.push(ref);
+  }
+  ref.gameName = user.gameName || user.name || ref.gameName || email;
+  ref.role = email === ownerEmail ? "Owner" : roleLabelFromApi(user.role || user.roleApi || user.apiRole);
+  saveUsers(users);
+
+  saveSession({ email });
   setHeaderUser();
   if (typeof window.updateChromeForAuth === "function") {
     window.updateChromeForAuth();
@@ -205,7 +227,7 @@ async function loginStepPassword() {
     pendingUser = {
       email: out.user.email,
       gameName: out.user.name || out.user.email,
-      role: out.user.role || "none"
+      roleApi: out.user.role || "none"
     };
     finishLogin(pendingUser);
   } catch (err) {
