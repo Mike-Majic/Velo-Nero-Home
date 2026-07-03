@@ -2276,7 +2276,7 @@ table.invTable td:last-child{
 
           <div class="summaryActionsRow">
             <button class="btn danger small" id="btnAccReset" onclick="accResetAll()" style="display:none;">AZZERA STIPENDI</button>
-            <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetAll()" style="display:none;">RESET RESOCONTO SOLDI</button>
+            <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetMoneySummary()" style="display:none;">RESET RESOCONTO SOLDI</button>
           </div>
 
         </div>
@@ -9542,6 +9542,13 @@ function accComputeSummary() {
 
     }
 
+    if (r.kind === "salary_archive") {
+      const mm = moneyObj(r.amount);
+      expense.clean += mm.clean;
+      expense.dirty += mm.dirty;
+      expense.drug += mm.drug;
+    }
+
   });
 
  
@@ -9636,18 +9643,65 @@ function accRenderSummary() {
 
       if (!canResetAccounting()) return alert("Permesso negato");
 
-      const ok = confirm("Confermi AZZERA STIPENDI?");
+      const ok = confirm("Confermi AZZERA STIPENDI? Verranno cancellate solo le righe degli stipendi; il resoconto soldi resterà invariato.");
 
       if (!ok) return;
 
-logEvent("ACC_RESET", "Azzera Stipendi");
+      const all = accLoad();
+      const archived = { clean: 0, dirty: 0, drug: 0 };
+      const kept = [];
 
-vnRemoteStore.removeItem(ACC_KEY);
+      all.forEach(r => {
+        if (r.kind !== "salary") {
+          kept.push(r);
+          return;
+        }
 
-accRenderTable("Stipendi");
+        const isPaid = (r.status || "paid") === "paid";
+        if (!isPaid) return;
 
+        const amt = Number(r.amount || 0);
+        const payType = r.payType || "clean";
+        if (payType === "dirty") archived.dirty += amt;
+        else if (payType === "drug") archived.drug += amt;
+        else archived.clean += amt;
+      });
 
-accRenderSummary();
+      if (archived.clean || archived.dirty || archived.drug) {
+        kept.push({
+          id: uid(),
+          ts: Date.now(),
+          kind: "salary_archive",
+          amount: archived,
+          note: "Archivio stipendi azzerati"
+        });
+      }
+
+      accSave(kept);
+
+      logEvent("ACC_SALARY_CLEAR", "Azzera righe stipendi senza modificare il resoconto soldi");
+
+      accRenderTable("Stipendi");
+      accRenderDueTable();
+      accRenderSummary();
+
+    }
+
+    function accResetMoneySummary() {
+
+      if (!canResetAccounting()) return alert("Permesso negato");
+
+      const ok = confirm("Confermi RESET RESOCONTO SOLDI? Verranno azzerati resoconto e stipendi salvati in contabilità.");
+
+      if (!ok) return;
+
+      logEvent("ACC_MONEY_RESET", "Reset Resoconto Soldi");
+
+      vnRemoteStore.removeItem(ACC_KEY);
+
+      accRenderTable("Stipendi");
+      accRenderDueTable();
+      accRenderSummary();
 
     }
 
