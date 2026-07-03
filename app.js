@@ -1,3 +1,43 @@
+
+const vnRemoteStore = window.vnRemoteStore || (() => {
+  function request(method, url, body) {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url, false);
+    xhr.withCredentials = true;
+    if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+    try {
+      xhr.send(body === undefined ? undefined : JSON.stringify(body));
+      if (xhr.status < 200 || xhr.status >= 300) return null;
+      return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+    } catch {
+      return null;
+    }
+  }
+  return {
+    getItem(key) {
+      const out = request("GET", `/api/storage/get?key=${encodeURIComponent(key)}`);
+      return out && out.ok ? out.value : null;
+    },
+    setItem(key, value) {
+      request("POST", "/api/storage/set", { key, value: String(value ?? "") });
+    },
+    removeItem(key) {
+      request("POST", "/api/storage/remove", { key });
+    }
+  };
+})();
+window.vnRemoteStore = vnRemoteStore;
+
+
+function roleLabelFromApi(role) {
+  const r = String(role || "none").toLowerCase();
+  if (r === "owner" || r === "admin") return "Owner";
+  if (r === "boss") return "Boss";
+  if (r === "vice") return "Vice Boss";
+  if (r === "member") return "Soldato";
+  return "";
+}
+
 // =========================
 // LOGIN FLOW
 // =========================
@@ -49,7 +89,19 @@ function backToPasswordOrEmail() {
 function finishLogin(user) {
   if (!user) return;
 
-  saveSession({ email: user.email });
+  const users = loadUsers();
+  const email = String(user.email || "").toLowerCase();
+  const ownerEmail = String(window.OWNER_EMAIL || "m.colurci@gmail.com").toLowerCase();
+  let ref = users.find(x => (x.email || "").toLowerCase() === email);
+  if (!ref) {
+    ref = { id: typeof uid === "function" ? uid() : Math.random().toString(16).slice(2), email, blocked: false, passwordHash: null, totpSecret: null, totpNeedsSetup: false };
+    users.push(ref);
+  }
+  ref.gameName = user.gameName || user.name || ref.gameName || email;
+  ref.role = email === ownerEmail ? "Owner" : roleLabelFromApi(user.role || user.roleApi || user.apiRole);
+  saveUsers(users);
+
+  saveSession({ email });
   setHeaderUser();
   if (typeof window.updateChromeForAuth === "function") {
     window.updateChromeForAuth();
@@ -80,36 +132,13 @@ function loginStepEmail() {
 
   pendingEmail = email;
 
-  const existing = findUserByEmail(email);
-
-  if (!existing) {
-    const regEmail = document.getElementById("regEmail");
-    const regGameName = document.getElementById("regGameName");
-    const regPassword = document.getElementById("regPassword");
-    const regPassword2 = document.getElementById("regPassword2");
-
-    if (regEmail) regEmail.value = email;
-    if (regGameName) regGameName.value = "";
-    if (regPassword) regPassword.value = "";
-    if (regPassword2) regPassword2.value = "";
-
-    showLoginStep("stepRegister");
-    return;
-  }
-
-  if (existing.blocked) {
-    alert("Account bloccato.");
-    return;
-  }
-
   const pwEmail = document.getElementById("pwEmail");
   const loginPassword = document.getElementById("loginPassword");
   const pwResetBox = document.getElementById("pwResetBox");
 
   if (pwEmail) pwEmail.value = email;
   if (loginPassword) loginPassword.value = "";
-  if (pwResetBox) pwResetBox.style.display = existing.passwordHash ? "none" : "block";
-
+  if (pwResetBox) pwResetBox.style.display = "none";
   showLoginStep("stepPassword");
 }
 
@@ -173,28 +202,9 @@ function registerAccount() {
   showLoginStep("step2FA");
 }
 
-function loginStepPassword() {
+async function loginStepPassword() {
   if (!pendingEmail) {
     backToEmail();
-    return;
-  }
-
-  const existing = findUserByEmail(pendingEmail);
-
-  if (!existing) {
-    backToEmail();
-    return;
-  }
-
-  if (existing.blocked) {
-    alert("Account bloccato.");
-    return;
-  }
-
-  if (!existing.passwordHash) {
-    const pwResetBox = document.getElementById("pwResetBox");
-    if (pwResetBox) pwResetBox.style.display = "block";
-    alert("Devi impostare una nuova password (reset admin).");
     return;
   }
 
@@ -205,137 +215,24 @@ function loginStepPassword() {
     return;
   }
 
-  if (!passwordMatches(pw, existing.passwordHash)) {
-    alert("Email o password errata");
-    return;
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: pendingEmail, password: pw })
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok || !out.ok) throw new Error(out.error || "Email o password errata");
+    pendingUser = {
+      email: out.user.email,
+      gameName: out.user.name || out.user.email,
+      roleApi: out.user.role || "none"
+    };
+    finishLogin(pendingUser);
+  } catch (err) {
+    alert(err?.message || "Email o password errata");
   }
-
-  pendingUser = existing;
-
-  if (!existing.totpNeedsSetup && isTrustedForEmail(existing.email)) {
-    finishLogin(existing);
-    return;
-  }
-
-  const twofaEmailInline = document.getElementById("twofaEmailInline");
-  const twofaSecretInline = document.getElementById("twofaSecretInline");
-  const twofaHintInline = document.getElementById("twofaHintInline");
-  const login2fa = document.getElementById("login2fa");
-  const rememberDevice = document.getElementById("rememberDevice");
-
-  if (twofaEmailInline) twofaEmailInline.value = existing.email;
-
-  if (!existing.totpSecret) {
-    const users = loadUsers();
-    const u = users.find(x => x.email === existing.email);
-    if (u) {
-      u.totpSecret = generateTotpSecret();
-      u.totpNeedsSetup = true;
-      saveUsers(users);
-      pendingUser = u;
-    }
-  }
-
-  const fresh = findUserByEmail(existing.email);
-
-  if (fresh?.totpNeedsSetup) {
-    if (twofaSecretInline) twofaSecretInline.value = fresh.totpSecret;
-    generate2FAQRCode(fresh.email, fresh.totpSecret);
-    show2FASetupUI(true);
-
-    if (twofaHintInline) {
-      twofaHintInline.textContent = "Setup 2FA richiesto: scansiona QR/chiave e inserisci il codice.";
-    }
-  } else {
-    show2FASetupUI(false);
-    if (twofaHintInline) {
-      twofaHintInline.textContent = "Inserisci il codice 2FA.";
-    }
-  }
-
-  if (login2fa) login2fa.value = "";
-  if (rememberDevice) rememberDevice.checked = true;
-
-  showLoginStep("step2FA");
-}
-
-function saveNewPassword() {
-  if (!pendingEmail) {
-    backToEmail();
-    return;
-  }
-
-  const users = loadUsers();
-  const u = users.find(x => (x.email || "").toLowerCase() === pendingEmail.toLowerCase());
-
-  if (!u) {
-    backToEmail();
-    return;
-  }
-
-  const p1 = document.getElementById("newPassword")?.value || "";
-  const p2 = document.getElementById("newPassword2")?.value || "";
-
-  if (!p1 || p1.length < 6) {
-    alert("Password troppo corta (min 6)");
-    return;
-  }
-
-  if (p1 !== p2) {
-    alert("Le password non coincidono");
-    return;
-  }
-
-  u.passwordHash = simpleHash(normalizePasswordInput(p1));
-  saveUsers(users);
-
-  const newPassword = document.getElementById("newPassword");
-  const newPassword2 = document.getElementById("newPassword2");
-  const pwResetBox = document.getElementById("pwResetBox");
-  const twofaEmailInline = document.getElementById("twofaEmailInline");
-  const twofaSecretInline = document.getElementById("twofaSecretInline");
-  const twofaHintInline = document.getElementById("twofaHintInline");
-  const login2fa = document.getElementById("login2fa");
-  const rememberDevice = document.getElementById("rememberDevice");
-
-  if (newPassword) newPassword.value = "";
-  if (newPassword2) newPassword2.value = "";
-  if (pwResetBox) pwResetBox.style.display = "none";
-
-  pendingUser = u;
-
-  if (!u.totpNeedsSetup && isTrustedForEmail(u.email)) {
-    finishLogin(u);
-    return;
-  }
-
-  if (twofaEmailInline) twofaEmailInline.value = u.email;
-
-  if (!u.totpSecret) {
-    u.totpSecret = generateTotpSecret();
-    u.totpNeedsSetup = true;
-    saveUsers(users);
-  }
-
-  if (u.totpNeedsSetup) {
-    if (twofaSecretInline) twofaSecretInline.value = u.totpSecret;
-    generate2FAQRCode(u.email, u.totpSecret);
-    show2FASetupUI(true);
-
-    if (twofaHintInline) {
-      twofaHintInline.textContent = "Setup 2FA richiesto: scansiona QR/chiave e inserisci il codice.";
-    }
-  } else {
-    show2FASetupUI(false);
-    if (twofaHintInline) {
-      twofaHintInline.textContent = "Inserisci il codice 2FA.";
-    }
-  }
-
-  if (login2fa) login2fa.value = "";
-  if (rememberDevice) rememberDevice.checked = true;
-
-  showLoginStep("step2FA");
 }
 
 async function loginStep2FA() {
