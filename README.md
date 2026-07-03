@@ -26,7 +26,7 @@ supabase link --project-ref conqmdvxvakgrvmqxuys
 supabase db push
 ```
 
-La migration crea `roles`, `profiles`, `auth_tokens`, `activity_logs`, `diary_entries`, `actions` e `traffic_records`.
+La migration crea `roles`, `profiles`, `auth_tokens`, `activity_logs`, `diary_entries`, `actions`, `traffic_records` e `client_storage` per sostituire la persistenza browser locale con persistenza Supabase.
 
 ## Primo login admin
 

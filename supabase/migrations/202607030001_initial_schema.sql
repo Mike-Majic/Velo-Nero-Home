@@ -90,6 +90,14 @@ create table if not exists public.traffic_records (
 create index if not exists traffic_records_at_idx on public.traffic_records(at desc);
 create index if not exists traffic_records_area_idx on public.traffic_records(area, at desc);
 
+create table if not exists public.client_storage (
+  key text primary key,
+  value text not null default '',
+  updated_by text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 -- Initial admin profile. Create the Auth user in Supabase Auth with this same email and temporary password Mike00.
 insert into public.profiles (email, username, name, role)
 values ('m.colurci@gmail.com', 'Mike', 'Mike', 'admin')
@@ -106,6 +114,7 @@ grant all privileges on table public.activity_logs to service_role;
 grant all privileges on table public.diary_entries to service_role;
 grant all privileges on table public.actions to service_role;
 grant all privileges on table public.traffic_records to service_role;
+grant all privileges on table public.client_storage to service_role;
 
 -- Required for inserts into identity/serial-backed tables through the Data API.
 -- Grant on all sequences avoids depending on PostgreSQL-generated sequence names.
