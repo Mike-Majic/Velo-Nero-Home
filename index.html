@@ -2239,26 +2239,6 @@ table.invTable td:last-child{
 
         <div id="accPanels"></div>
 
- 
-
-        <div id="accAdminPanel" class="panel" style="display:none;">
-
-          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
-
-          <div class="muted">Reset totale stipendi.</div>
-
- 
-
-          <div class="row" style="margin-top:14px;">
-
-            <button class="btn danger" onclick="accResetAll()">AZZERA STIPENDI</button>
-
-            <div class="muted">Cancella tutti gli stipendi.</div>
-
-          </div>
-
-        </div>
-
       </div>
 
  
@@ -4891,7 +4871,6 @@ if (id === "contabilita") {
 
   accRenderSummary();
 
-  accRenderAdminPanel();
 
   accRenderDueTable();
 
@@ -8970,21 +8949,8 @@ accRenderTable(name);
 
 accRenderSummary();
 
-accRenderAdminPanel();
 
 accRenderDueTable();
-
-    }
-
- 
-
-    function accRenderAdminPanel() {
-
-      const panel = document.getElementById("accAdminPanel");
-
-      if (!panel) return;
-
-      panel.style.display = canResetAccounting() ? "block" : "none";
 
     }
 
