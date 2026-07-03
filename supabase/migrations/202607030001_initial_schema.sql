@@ -94,3 +94,19 @@ create index if not exists traffic_records_area_idx on public.traffic_records(ar
 insert into public.profiles (email, username, name, role)
 values ('m.colurci@gmail.com', 'Mike', 'Mike', 'admin')
 on conflict (email) do update set username='Mike', name='Mike', role='admin', updated_at=now();
+
+-- Data API permissions for server-side REST calls with SUPABASE_SERVICE_ROLE_KEY.
+-- Without explicit grants, PostgREST can return 42501 permission denied on new objects.
+grant usage on schema public to service_role;
+
+grant all privileges on table public.roles to service_role;
+grant all privileges on table public.profiles to service_role;
+grant all privileges on table public.auth_tokens to service_role;
+grant all privileges on table public.activity_logs to service_role;
+grant all privileges on table public.diary_entries to service_role;
+grant all privileges on table public.actions to service_role;
+grant all privileges on table public.traffic_records to service_role;
+
+-- Required for inserts into bigserial-backed logs through the Data API.
+grant usage, select on sequence public.activity_logs_id_seq to service_role;
+grant usage, select on all sequences in schema public to service_role;
