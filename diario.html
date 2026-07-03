@@ -283,13 +283,43 @@
   </div>
 
 <script>
+
+const vnRemoteStore = window.vnRemoteStore || (() => {
+      function request(method, url, body) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url, false);
+        xhr.withCredentials = true;
+        if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+        try {
+          xhr.send(body === undefined ? undefined : JSON.stringify(body));
+          if (xhr.status < 200 || xhr.status >= 300) return null;
+          return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+        } catch {
+          return null;
+        }
+      }
+      return {
+        getItem(key) {
+          const out = request("GET", `/api/storage/get?key=${encodeURIComponent(key)}`);
+          return out && out.ok ? out.value : null;
+        },
+        setItem(key, value) {
+          request("POST", "/api/storage/set", { key, value: String(value ?? "") });
+        },
+        removeItem(key) {
+          request("POST", "/api/storage/remove", { key });
+        }
+      };
+    })();
+    window.vnRemoteStore = vnRemoteStore;
+
 const API_LIST = "/api/diary/list";
 const API_CREATE = "/api/diary/create";
 const API_SEARCH = "/api/search";
 
 function getSession(){
   try{
-    return JSON.parse(localStorage.getItem("vn_session_v1")) || null;
+    return JSON.parse(vnRemoteStore.getItem("vn_session_v1")) || null;
   }catch{
     return null;
   }
