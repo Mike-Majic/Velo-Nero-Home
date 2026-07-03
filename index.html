@@ -2239,26 +2239,6 @@ table.invTable td:last-child{
 
         <div id="accPanels"></div>
 
- 
-
-        <div id="accAdminPanel" class="panel" style="display:none;">
-
-          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
-
-          <div class="muted">Reset totale stipendi.</div>
-
- 
-
-          <div class="row" style="margin-top:14px;">
-
-            <button class="btn danger" onclick="accResetAll()">AZZERA STIPENDI</button>
-
-            <div class="muted">Cancella tutti gli stipendi.</div>
-
-          </div>
-
-        </div>
-
       </div>
 
  
@@ -3083,6 +3063,36 @@ table.invTable td:last-child{
 
     }
 
+
+    const vnRemoteStore = window.vnRemoteStore || (() => {
+      function request(method, url, body) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url, false);
+        xhr.withCredentials = true;
+        if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+        try {
+          xhr.send(body === undefined ? undefined : JSON.stringify(body));
+          if (xhr.status < 200 || xhr.status >= 300) return null;
+          return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+        } catch {
+          return null;
+        }
+      }
+      return {
+        getItem(key) {
+          const out = request("GET", `/api/storage/get?key=${encodeURIComponent(key)}`);
+          return out && out.ok ? out.value : null;
+        },
+        setItem(key, value) {
+          request("POST", "/api/storage/set", { key, value: String(value ?? "") });
+        },
+        removeItem(key) {
+          request("POST", "/api/storage/remove", { key });
+        }
+      };
+    })();
+    window.vnRemoteStore = vnRemoteStore;
+
     // =========================
 
     // SESSION
@@ -3091,13 +3101,13 @@ table.invTable td:last-child{
 
     function loadSession() {
 
-      try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
+      try { return JSON.parse(vnRemoteStore.getItem(SESSION_KEY)) || null; } catch { return null; }
 
     }
 
-    function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+    function saveSession(s) { vnRemoteStore.setItem(SESSION_KEY, JSON.stringify(s)); }
 
-    function clearSession() { localStorage.removeItem(SESSION_KEY); }
+    function clearSession() { vnRemoteStore.removeItem(SESSION_KEY); }
 
  
 
@@ -3111,7 +3121,7 @@ table.invTable td:last-child{
 
       try {
 
-        const raw = localStorage.getItem(USERS_KEY);
+        const raw = vnRemoteStore.getItem(USERS_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -3121,7 +3131,7 @@ table.invTable td:last-child{
 
     }
 
-    function saveUsers(arr) { localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
+    function saveUsers(arr) { vnRemoteStore.setItem(USERS_KEY, JSON.stringify(arr)); }
 
  
 
@@ -3539,7 +3549,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       try {
 
-        const raw = localStorage.getItem(OPS_KEY);
+        const raw = vnRemoteStore.getItem(OPS_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -3549,7 +3559,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     }
 
-    function saveOps(arr) { localStorage.setItem(OPS_KEY, JSON.stringify(arr)); }
+    function saveOps(arr) { vnRemoteStore.setItem(OPS_KEY, JSON.stringify(arr)); }
 
  
 
@@ -3563,7 +3573,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       try {
 
-        const raw = localStorage.getItem(DIARY_KEY);
+        const raw = vnRemoteStore.getItem(DIARY_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -3573,7 +3583,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     }
 
-    function saveDiary(arr) { localStorage.setItem(DIARY_KEY, JSON.stringify(arr)); }
+    function saveDiary(arr) { vnRemoteStore.setItem(DIARY_KEY, JSON.stringify(arr)); }
 
  
 
@@ -3917,7 +3927,7 @@ function logEvent(action, meta = "", email = null, gameName = null) {
 
     const gn = (gameName || u?.gameName || "");
 
-    const raw = localStorage.getItem(LOGS_KEY) || "[]";
+    const raw = vnRemoteStore.getItem(LOGS_KEY) || "[]";
 
     const logs = JSON.parse(raw);
 
@@ -3939,7 +3949,7 @@ function logEvent(action, meta = "", email = null, gameName = null) {
 
  
 
-    localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+    vnRemoteStore.setItem(LOGS_KEY, JSON.stringify(logs));
 
   } catch (e) {
 
@@ -3991,7 +4001,7 @@ function logTagsLine(tagNames) {
 
       try {
 
-        const raw = localStorage.getItem(LOGS_KEY) || "[]";
+        const raw = vnRemoteStore.getItem(LOGS_KEY) || "[]";
 
         const arr = JSON.parse(raw);
 
@@ -4003,7 +4013,7 @@ function logTagsLine(tagNames) {
 
     function saveLoginLogs(arr) {
 
-      localStorage.setItem(LOGS_KEY, JSON.stringify(arr || []));
+      vnRemoteStore.setItem(LOGS_KEY, JSON.stringify(arr || []));
 
     }
 
@@ -4113,13 +4123,13 @@ function logTagsLine(tagNames) {
 
     function getDeviceId() {
 
-      let id = localStorage.getItem(DEVICE_ID_KEY);
+      let id = vnRemoteStore.getItem(DEVICE_ID_KEY);
 
       if (!id) {
 
         id = (Math.random().toString(16).slice(2) + Date.now().toString(16));
 
-        localStorage.setItem(DEVICE_ID_KEY, id);
+        vnRemoteStore.setItem(DEVICE_ID_KEY, id);
 
       }
 
@@ -4129,11 +4139,11 @@ function logTagsLine(tagNames) {
 
     function loadTrusted() {
 
-      try { return JSON.parse(localStorage.getItem(TRUST_KEY)) || {}; } catch { return {}; }
+      try { return JSON.parse(vnRemoteStore.getItem(TRUST_KEY)) || {}; } catch { return {}; }
 
     }
 
-    function saveTrusted(obj) { localStorage.setItem(TRUST_KEY, JSON.stringify(obj)); }
+    function saveTrusted(obj) { vnRemoteStore.setItem(TRUST_KEY, JSON.stringify(obj)); }
 
     function isTrustedForEmail(email) {
 
@@ -4494,39 +4504,9 @@ function logTagsLine(tagNames) {
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
 
       pendingEmail = email;
-
- 
-
-      const existing = findUserByEmail(email);
-
-      if (!existing) {
-
-        document.getElementById("regEmail").value = email;
-
-        document.getElementById("regGameName").value = "";
-
-        document.getElementById("regPassword").value = "";
-
-        document.getElementById("regPassword2").value = "";
-
-        showLoginStep("stepRegister");
-
-        return;
-
-      }
-
- 
-
-      if (existing.blocked) return alert("Account bloccato.");
-
- 
-
       document.getElementById("pwEmail").value = email;
-
       document.getElementById("loginPassword").value = "";
-
-      document.getElementById("pwResetBox").style.display = existing.passwordHash ? "none" : "block";
-
+      document.getElementById("pwResetBox").style.display = "none";
       showLoginStep("stepPassword");
 
     }
@@ -4593,195 +4573,31 @@ function logTagsLine(tagNames) {
 
  
 
-    function loginStepPassword() {
+    async function loginStepPassword() {
 
       if (!pendingEmail) return backToEmail();
-
-      const existing = findUserByEmail(pendingEmail);
-
-      if (!existing) return backToEmail();
-
-      if (existing.blocked) return alert("Account bloccato.");
-
- 
-
-      if (!existing.passwordHash) {
-
-        document.getElementById("pwResetBox").style.display = "block";
-
-        return alert("Devi impostare una nuova password (reset admin).");
-
-      }
-
- 
 
       const pw = document.getElementById("loginPassword").value || "";
-
       if (!pw) return alert("Inserisci la password");
 
-      if (simpleHash(pw) !== existing.passwordHash) return alert("Email o password errata");
-
- 
-
-      pendingUser = existing;
-
- 
-
-      if (!existing.totpNeedsSetup && isTrustedForEmail(existing.email)) {
-
-        finishLogin(existing);
-
-        return;
-
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: pendingEmail, password: pw })
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || !out.ok) throw new Error(out.error || "Email o password errata");
+        pendingUser = {
+          email: out.user.email,
+          gameName: out.user.name || out.user.email,
+          role: out.user.role || "none"
+        };
+        finishLogin(pendingUser);
+      } catch (err) {
+        alert(err?.message || "Email o password errata");
       }
-
- 
-
-      document.getElementById("twofaEmailInline").value = existing.email;
-
- 
-
-      if (!existing.totpSecret) {
-
-        const users = loadUsers();
-
-        const u = users.find(x => x.email === existing.email);
-
-        u.totpSecret = generateTotpSecret();
-
-        u.totpNeedsSetup = true;
-
-        saveUsers(users);
-
-        pendingUser = u;
-
-      }
-
- 
-
-      const fresh = findUserByEmail(existing.email);
-
-      if (fresh.totpNeedsSetup) {
-
-        document.getElementById("twofaSecretInline").value = fresh.totpSecret;
-
-        generate2FAQRCode(fresh.email, fresh.totpSecret);
-
-        show2FASetupUI(true);
-
-        document.getElementById("twofaHintInline").textContent = "Setup 2FA richiesto: scansiona QR/chiave e inserisci il codice.";
-
-      } else {
-
-        show2FASetupUI(false);
-
-        document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA.";
-
-      }
-
- 
-
-      document.getElementById("login2fa").value = "";
-
-      document.getElementById("rememberDevice").checked = true;
-
-      showLoginStep("step2FA");
-
-    }
-
- 
-
-    function saveNewPassword() {
-
-      if (!pendingEmail) return backToEmail();
-
-      const users = loadUsers();
-
-      const u = users.find(x => (x.email || "").toLowerCase() === pendingEmail.toLowerCase());
-
-      if (!u) return backToEmail();
-
- 
-
-      const p1 = document.getElementById("newPassword").value || "";
-
-      const p2 = document.getElementById("newPassword2").value || "";
-
-      if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
-
-      if (p1 !== p2) return alert("Le password non coincidono");
-
- 
-
-      u.passwordHash = simpleHash(p1);
-
-      saveUsers(users);
-
- 
-
-      document.getElementById("newPassword").value = "";
-
-      document.getElementById("newPassword2").value = "";
-
-      document.getElementById("pwResetBox").style.display = "none";
-
- 
-
-      pendingUser = u;
-
- 
-
-      if (!u.totpNeedsSetup && isTrustedForEmail(u.email)) {
-
-        finishLogin(u);
-
-        return;
-
-      }
-
- 
-
-      document.getElementById("twofaEmailInline").value = u.email;
-
- 
-
-      if (!u.totpSecret) {
-
-        u.totpSecret = generateTotpSecret();
-
-        u.totpNeedsSetup = true;
-
-        saveUsers(users);
-
-      }
-
- 
-
-      if (u.totpNeedsSetup) {
-
-        document.getElementById("twofaSecretInline").value = u.totpSecret;
-
-        generate2FAQRCode(u.email, u.totpSecret);
-
-        show2FASetupUI(true);
-
-        document.getElementById("twofaHintInline").textContent = "Setup 2FA richiesto: scansiona QR/chiave e inserisci il codice.";
-
-      } else {
-
-        show2FASetupUI(false);
-
-        document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA.";
-
-      }
-
- 
-
-      document.getElementById("login2fa").value = "";
-
-      document.getElementById("rememberDevice").checked = true;
-
-      showLoginStep("step2FA");
 
     }
 
@@ -5055,7 +4871,6 @@ if (id === "contabilita") {
 
   accRenderSummary();
 
-  accRenderAdminPanel();
 
   accRenderDueTable();
 
@@ -5699,13 +5514,13 @@ if (s?.email === u.email) logout();
 
     function loadAccTagChecks(){
       try {
-        const raw = JSON.parse(localStorage.getItem(ACC_TAG_CHECKED_KEY) || '{}');
+        const raw = JSON.parse(vnRemoteStore.getItem(ACC_TAG_CHECKED_KEY) || '{}');
         return (raw && typeof raw === 'object') ? raw : {};
       } catch { return {}; }
     }
 
     function saveAccTagChecks(map){
-      localStorage.setItem(ACC_TAG_CHECKED_KEY, JSON.stringify(map || {}));
+      vnRemoteStore.setItem(ACC_TAG_CHECKED_KEY, JSON.stringify(map || {}));
     }
 
     function isAccTagChecked(id){
@@ -6234,8 +6049,8 @@ function animateMoneyValue(el, nextValue, key){
 
     function loadCustomActionItems() {
       try {
-        const parsed = JSON.parse(localStorage.getItem(ACTION_ITEMS_CUSTOM_KEY) || "{}");
-        const old = JSON.parse(localStorage.getItem("vn_action_items_custom_v1") || "[]");
+        const parsed = JSON.parse(vnRemoteStore.getItem(ACTION_ITEMS_CUSTOM_KEY) || "{}");
+        const old = JSON.parse(vnRemoteStore.getItem("vn_action_items_custom_v1") || "[]");
         const map = {
           armi: Array.isArray(parsed?.armi) ? parsed.armi : [],
           droga: Array.isArray(parsed?.droga) ? parsed.droga : [],
@@ -6254,7 +6069,7 @@ function animateMoneyValue(el, nextValue, key){
         droga: Array.from(new Set((map?.droga || []).map(x => String(x || "").trim()).filter(Boolean))),
         varie: Array.from(new Set((map?.varie || []).map(x => String(x || "").trim()).filter(Boolean)))
       };
-      localStorage.setItem(ACTION_ITEMS_CUSTOM_KEY, JSON.stringify(clean));
+      vnRemoteStore.setItem(ACTION_ITEMS_CUSTOM_KEY, JSON.stringify(clean));
     }
 
     function getActionItems(group) {
@@ -7249,7 +7064,7 @@ logEvent(
 
 logEvent("OPS_RESET", "Azzera Azioni");
 
-localStorage.removeItem(OPS_KEY);
+vnRemoteStore.removeItem(OPS_KEY);
 
 CATEGORIES.forEach(c => renderCategory(c));
 
@@ -7716,7 +7531,7 @@ invRenderTotals();
 
       try {
 
-        const raw = localStorage.getItem(INV_KEY);
+        const raw = vnRemoteStore.getItem(INV_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -7726,7 +7541,7 @@ invRenderTotals();
 
     }
 
-    function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
+    function invSave(arr) { vnRemoteStore.setItem(INV_KEY, JSON.stringify(arr)); }
 
  
 
@@ -7956,11 +7771,11 @@ invRenderTotals();
  
 
     function loadCustomInvItems() {
-      try { return JSON.parse(localStorage.getItem(INV_ITEMS_CUSTOM_KEY) || "{}"); } catch { return {}; }
+      try { return JSON.parse(vnRemoteStore.getItem(INV_ITEMS_CUSTOM_KEY) || "{}"); } catch { return {}; }
     }
 
     function saveCustomInvItems(map) {
-      localStorage.setItem(INV_ITEMS_CUSTOM_KEY, JSON.stringify(map || {}));
+      vnRemoteStore.setItem(INV_ITEMS_CUSTOM_KEY, JSON.stringify(map || {}));
     }
 
     function invItemsForCategory(cat) {
@@ -8696,7 +8511,7 @@ function invComputeTotals() {
 
 logEvent("INV_RESET", "Azzera Gestione armi-droga");
 
-localStorage.removeItem(INV_KEY);
+vnRemoteStore.removeItem(INV_KEY);
 
 INV_CATEGORIES.forEach(c => invRenderTable(c));
 
@@ -8720,7 +8535,7 @@ invRenderTotals();
 
       try {
 
-        const raw = localStorage.getItem(ACC_KEY);
+        const raw = vnRemoteStore.getItem(ACC_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -8730,7 +8545,7 @@ invRenderTotals();
 
     }
 
-    function accSave(arr) { localStorage.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+    function accSave(arr) { vnRemoteStore.setItem(ACC_KEY, JSON.stringify(arr || [])); }
 
  
 
@@ -9134,21 +8949,8 @@ accRenderTable(name);
 
 accRenderSummary();
 
-accRenderAdminPanel();
 
 accRenderDueTable();
-
-    }
-
- 
-
-    function accRenderAdminPanel() {
-
-      const panel = document.getElementById("accAdminPanel");
-
-      if (!panel) return;
-
-      panel.style.display = canResetAccounting() ? "block" : "none";
 
     }
 
@@ -9770,7 +9572,7 @@ function accRenderSummary() {
 
 logEvent("ACC_RESET", "Azzera Stipendi");
 
-localStorage.removeItem(ACC_KEY);
+vnRemoteStore.removeItem(ACC_KEY);
 
 accRenderTable("Stipendi");
 
