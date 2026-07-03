@@ -285,33 +285,60 @@
 <script>
 
 const vnRemoteStore = window.vnRemoteStore || (() => {
-      function request(method, url, body) {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, url, false);
-        xhr.withCredentials = true;
-        if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
-        try {
-          xhr.send(body === undefined ? undefined : JSON.stringify(body));
-          if (xhr.status < 200 || xhr.status >= 300) return null;
-          return xhr.responseText ? JSON.parse(xhr.responseText) : null;
-        } catch {
-          return null;
-        }
-      }
-      return {
-        getItem(key) {
-          const out = request("GET", `/api/storage/get?key=${encodeURIComponent(key)}`);
-          return out && out.ok ? out.value : null;
-        },
-        setItem(key, value) {
-          request("POST", "/api/storage/set", { key, value: String(value ?? "") });
-        },
-        removeItem(key) {
-          request("POST", "/api/storage/remove", { key });
-        }
-      };
-    })();
-    window.vnRemoteStore = vnRemoteStore;
+  const cache = {};
+  let loaded = false;
+
+  function requestSync(method, url, body) {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url, false);
+    xhr.withCredentials = true;
+    if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+    try {
+      xhr.send(body === undefined ? undefined : JSON.stringify(body));
+      if (xhr.status < 200 || xhr.status >= 300) return null;
+      return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function requestAsync(method, url, body) {
+    return fetch(url, {
+      method,
+      credentials: "include",
+      headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      keepalive: true
+    }).catch(() => null);
+  }
+
+  function loadAll(force = false) {
+    if (loaded && !force) return;
+    const out = requestSync("GET", "/api/storage/all");
+    Object.keys(cache).forEach(k => delete cache[k]);
+    if (out && out.ok && out.items) Object.assign(cache, out.items);
+    loaded = true;
+  }
+
+  return {
+    reload() { loadAll(true); },
+    getItem(key) {
+      loadAll(false);
+      return Object.prototype.hasOwnProperty.call(cache, key) ? cache[key] : null;
+    },
+    setItem(key, value) {
+      loadAll(false);
+      cache[key] = String(value ?? "");
+      requestAsync("POST", "/api/storage/set", { key, value: cache[key] });
+    },
+    removeItem(key) {
+      loadAll(false);
+      delete cache[key];
+      requestAsync("POST", "/api/storage/remove", { key });
+    }
+  };
+})();
+window.vnRemoteStore = vnRemoteStore;
 
 const API_LIST = "/api/diary/list";
 const API_CREATE = "/api/diary/create";

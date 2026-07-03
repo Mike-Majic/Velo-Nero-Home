@@ -3079,7 +3079,10 @@ table.invTable td:last-child{
 
 
     const vnRemoteStore = window.vnRemoteStore || (() => {
-      function request(method, url, body) {
+      const cache = {};
+      let loaded = false;
+
+      function requestSync(method, url, body) {
         const xhr = new XMLHttpRequest();
         xhr.open(method, url, false);
         xhr.withCredentials = true;
@@ -3092,16 +3095,40 @@ table.invTable td:last-child{
           return null;
         }
       }
+
+      function requestAsync(method, url, body) {
+        return fetch(url, {
+          method,
+          credentials: "include",
+          headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+          body: body === undefined ? undefined : JSON.stringify(body),
+          keepalive: true
+        }).catch(() => null);
+      }
+
+      function loadAll(force = false) {
+        if (loaded && !force) return;
+        const out = requestSync("GET", "/api/storage/all");
+        Object.keys(cache).forEach(k => delete cache[k]);
+        if (out && out.ok && out.items) Object.assign(cache, out.items);
+        loaded = true;
+      }
+
       return {
+        reload() { loadAll(true); },
         getItem(key) {
-          const out = request("GET", `/api/storage/get?key=${encodeURIComponent(key)}`);
-          return out && out.ok ? out.value : null;
+          loadAll(false);
+          return Object.prototype.hasOwnProperty.call(cache, key) ? cache[key] : null;
         },
         setItem(key, value) {
-          request("POST", "/api/storage/set", { key, value: String(value ?? "") });
+          loadAll(false);
+          cache[key] = String(value ?? "");
+          requestAsync("POST", "/api/storage/set", { key, value: cache[key] });
         },
         removeItem(key) {
-          request("POST", "/api/storage/remove", { key });
+          loadAll(false);
+          delete cache[key];
+          requestAsync("POST", "/api/storage/remove", { key });
         }
       };
     })();
@@ -4493,8 +4520,9 @@ function logTagsLine(tagNames) {
 
     function finishLogin(user) {
 
-      const users = loadUsers();
       const email = String(user.email || "").toLowerCase();
+      if (vnRemoteStore.reload) vnRemoteStore.reload();
+      const users = loadUsers();
       const role = roleLabelFromApi(user.role || user.roleApi || user.apiRole);
       let ref = users.find(x => (x.email || "").toLowerCase() === email);
       if (!ref) {
