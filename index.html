@@ -407,6 +407,21 @@
 
     .danger { background:#2b0000; border-color:#ff1a1aaa; }
 
+    .btn.salaryPaid {
+      background:linear-gradient(145deg,#0b7a35,#10a34a);
+      border-color:#22e06f;
+      color:#fff;
+      box-shadow:0 0 12px #00ff6a55 inset, 0 0 12px #00ff6a22;
+    }
+    .btn.salaryDue {
+      background:linear-gradient(145deg,#8a6a00,#d39a00);
+      border-color:#ffd34d;
+      color:#fff;
+      box-shadow:0 0 12px #ffd34d55 inset, 0 0 12px #ffcc0033;
+    }
+    .salaryStatusPaid { border-color:#22e06f; color:#8dffb8; box-shadow:0 0 8px #00ff6a33 inset; }
+    .salaryStatusDue { border-color:#ffd34d; color:#ffe58a; box-shadow:0 0 8px #ffd34d33 inset; }
+
     .small { padding:7px 10px; font-size:13px; border-radius:9px; }
 
     .disabled { opacity:.5; cursor:not-allowed; }
@@ -1881,7 +1896,7 @@ table.invTable td:last-child{
 
     <div class="cards">
 
-      <div class="box" onclick="showSection('azioni')">
+      <div class="box" id="cardAzioni" onclick="showSection('azioni')">
 
         <h2>Azioni</h2>
 
@@ -1891,7 +1906,7 @@ table.invTable td:last-child{
 
  
 
-      <div class="box" onclick="showSection('comandi')">
+      <div class="box" id="cardComandi" onclick="showSection('comandi')">
 
         <h2>Gestione Armi-Droga</h2>
 
@@ -1901,7 +1916,7 @@ table.invTable td:last-child{
 
  
 
-      <div class="box" onclick="showSection('diario')">
+      <div class="box" id="cardDiario" onclick="showSection('diario')">
 
         <h2>Diario</h2>
 
@@ -1909,7 +1924,7 @@ table.invTable td:last-child{
 
       </div>
 
-      <div class="box" onclick="showSection('contabilita')">
+      <div class="box" id="cardContabilita" onclick="showSection('contabilita')">
 
         <h2>Contabilità</h2>
 
@@ -2047,7 +2062,7 @@ table.invTable td:last-child{
           </div>
           <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
           <div class="summaryActionsRow">
-            <button class="btn danger small" id="btnOpsReset" onclick="resetAllOps()" style="display:none;">RESET RESOCONTO</button>
+            <button class="btn danger small" id="btnOpsReset" onclick="resetOpsSummary()" style="display:none;">RESET RESOCONTO</button>
           </div>
         </div>
 
@@ -2239,26 +2254,6 @@ table.invTable td:last-child{
 
         <div id="accPanels"></div>
 
- 
-
-        <div id="accAdminPanel" class="panel" style="display:none;">
-
-          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
-
-          <div class="muted">Reset totale stipendi.</div>
-
- 
-
-          <div class="row" style="margin-top:14px;">
-
-            <button class="btn danger" onclick="accResetAll()">AZZERA STIPENDI</button>
-
-            <div class="muted">Cancella tutti gli stipendi.</div>
-
-          </div>
-
-        </div>
-
       </div>
 
  
@@ -2296,7 +2291,7 @@ table.invTable td:last-child{
 
           <div class="summaryActionsRow">
             <button class="btn danger small" id="btnAccReset" onclick="accResetAll()" style="display:none;">AZZERA STIPENDI</button>
-            <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetAll()" style="display:none;">RESET RESOCONTO SOLDI</button>
+            <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetMoneySummary()" style="display:none;">RESET RESOCONTO SOLDI</button>
           </div>
 
         </div>
@@ -2418,6 +2413,15 @@ table.invTable td:last-child{
 
         <div id="invPanels"></div>
 
+        <div id="invManagePanel" class="panel" style="display:none;">
+          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
+          <div class="muted">Pulizia righe gestione senza modificare resoconto soldi o item.</div>
+          <div class="row" style="margin-top:14px;">
+            <button class="btn danger" onclick="invResetAll()">AZZERA GESTIONE</button>
+            <div class="muted">Cancella solo le registrazioni visibili.</div>
+          </div>
+        </div>
+
       </div>
 
  
@@ -2434,7 +2438,7 @@ table.invTable td:last-child{
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
           <div class="summaryActionsRow" style="margin-top:8px;">
-            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetAll()" style="display:none;">RESET RESOCONTO</button>
+            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetTotals()" style="display:none;">RESET RESOCONTO</button>
           </div>
 
  
@@ -2911,6 +2915,20 @@ table.invTable td:last-child{
 
     }
 
+
+    function roleLabelFromApi(role) {
+      const r = String(role || "none").toLowerCase();
+      if (r === "owner" || r === "admin") return "Owner";
+      if (r === "boss") return "Boss";
+      if (r === "vice") return "Vice Boss";
+      if (r === "member") return "Soldato";
+      return "";
+    }
+
+    function hasAssignedRole() {
+      return !!myRole();
+    }
+
  
 
     const CATEGORIES = [
@@ -3083,6 +3101,63 @@ table.invTable td:last-child{
 
     }
 
+
+    const vnRemoteStore = window.vnRemoteStore || (() => {
+      const cache = {};
+      let loaded = false;
+
+      function requestSync(method, url, body) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url, false);
+        xhr.withCredentials = true;
+        if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+        try {
+          xhr.send(body === undefined ? undefined : JSON.stringify(body));
+          if (xhr.status < 200 || xhr.status >= 300) return null;
+          return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function requestAsync(method, url, body) {
+        return fetch(url, {
+          method,
+          credentials: "include",
+          headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+          body: body === undefined ? undefined : JSON.stringify(body),
+          keepalive: true
+        }).catch(() => null);
+      }
+
+      function loadAll(force = false) {
+        if (loaded && !force) return;
+        const out = requestSync("GET", "/api/storage/all");
+        Object.keys(cache).forEach(k => delete cache[k]);
+        if (out && out.ok && out.items) Object.assign(cache, out.items);
+        loaded = true;
+      }
+
+      return {
+        reload() { loadAll(true); },
+        getItem(key) {
+          loadAll(false);
+          return Object.prototype.hasOwnProperty.call(cache, key) ? cache[key] : null;
+        },
+        setItem(key, value) {
+          loadAll(false);
+          cache[key] = String(value ?? "");
+          requestAsync("POST", "/api/storage/set", { key, value: cache[key] });
+        },
+        removeItem(key) {
+          loadAll(false);
+          delete cache[key];
+          requestAsync("POST", "/api/storage/remove", { key });
+        }
+      };
+    })();
+    window.vnRemoteStore = vnRemoteStore;
+
     // =========================
 
     // SESSION
@@ -3091,13 +3166,13 @@ table.invTable td:last-child{
 
     function loadSession() {
 
-      try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
+      try { return JSON.parse(vnRemoteStore.getItem(SESSION_KEY)) || null; } catch { return null; }
 
     }
 
-    function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+    function saveSession(s) { vnRemoteStore.setItem(SESSION_KEY, JSON.stringify(s)); }
 
-    function clearSession() { localStorage.removeItem(SESSION_KEY); }
+    function clearSession() { vnRemoteStore.removeItem(SESSION_KEY); }
 
  
 
@@ -3111,7 +3186,7 @@ table.invTable td:last-child{
 
       try {
 
-        const raw = localStorage.getItem(USERS_KEY);
+        const raw = vnRemoteStore.getItem(USERS_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -3121,7 +3196,7 @@ table.invTable td:last-child{
 
     }
 
-    function saveUsers(arr) { localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
+    function saveUsers(arr) { vnRemoteStore.setItem(USERS_KEY, JSON.stringify(arr)); }
 
  
 
@@ -3316,6 +3391,8 @@ function getParticipantsForSalary(tagUserIds) {
  
 
 function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, noteBase) {
+
+  if (source !== "ops") return;
 
   const mm = accMoneyObj(money);
 
@@ -3539,7 +3616,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       try {
 
-        const raw = localStorage.getItem(OPS_KEY);
+        const raw = vnRemoteStore.getItem(OPS_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -3549,7 +3626,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     }
 
-    function saveOps(arr) { localStorage.setItem(OPS_KEY, JSON.stringify(arr)); }
+    function saveOps(arr) { vnRemoteStore.setItem(OPS_KEY, JSON.stringify(arr)); }
 
  
 
@@ -3563,7 +3640,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
       try {
 
-        const raw = localStorage.getItem(DIARY_KEY);
+        const raw = vnRemoteStore.getItem(DIARY_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -3573,7 +3650,7 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
     }
 
-    function saveDiary(arr) { localStorage.setItem(DIARY_KEY, JSON.stringify(arr)); }
+    function saveDiary(arr) { vnRemoteStore.setItem(DIARY_KEY, JSON.stringify(arr)); }
 
  
 
@@ -3917,7 +3994,7 @@ function logEvent(action, meta = "", email = null, gameName = null) {
 
     const gn = (gameName || u?.gameName || "");
 
-    const raw = localStorage.getItem(LOGS_KEY) || "[]";
+    const raw = vnRemoteStore.getItem(LOGS_KEY) || "[]";
 
     const logs = JSON.parse(raw);
 
@@ -3939,7 +4016,7 @@ function logEvent(action, meta = "", email = null, gameName = null) {
 
  
 
-    localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+    vnRemoteStore.setItem(LOGS_KEY, JSON.stringify(logs));
 
   } catch (e) {
 
@@ -3991,7 +4068,7 @@ function logTagsLine(tagNames) {
 
       try {
 
-        const raw = localStorage.getItem(LOGS_KEY) || "[]";
+        const raw = vnRemoteStore.getItem(LOGS_KEY) || "[]";
 
         const arr = JSON.parse(raw);
 
@@ -4003,7 +4080,7 @@ function logTagsLine(tagNames) {
 
     function saveLoginLogs(arr) {
 
-      localStorage.setItem(LOGS_KEY, JSON.stringify(arr || []));
+      vnRemoteStore.setItem(LOGS_KEY, JSON.stringify(arr || []));
 
     }
 
@@ -4113,13 +4190,13 @@ function logTagsLine(tagNames) {
 
     function getDeviceId() {
 
-      let id = localStorage.getItem(DEVICE_ID_KEY);
+      let id = vnRemoteStore.getItem(DEVICE_ID_KEY);
 
       if (!id) {
 
         id = (Math.random().toString(16).slice(2) + Date.now().toString(16));
 
-        localStorage.setItem(DEVICE_ID_KEY, id);
+        vnRemoteStore.setItem(DEVICE_ID_KEY, id);
 
       }
 
@@ -4129,11 +4206,11 @@ function logTagsLine(tagNames) {
 
     function loadTrusted() {
 
-      try { return JSON.parse(localStorage.getItem(TRUST_KEY)) || {}; } catch { return {}; }
+      try { return JSON.parse(vnRemoteStore.getItem(TRUST_KEY)) || {}; } catch { return {}; }
 
     }
 
-    function saveTrusted(obj) { localStorage.setItem(TRUST_KEY, JSON.stringify(obj)); }
+    function saveTrusted(obj) { vnRemoteStore.setItem(TRUST_KEY, JSON.stringify(obj)); }
 
     function isTrustedForEmail(email) {
 
@@ -4469,9 +4546,22 @@ function logTagsLine(tagNames) {
 
     function finishLogin(user) {
 
-      logEvent("LOGIN", "Accesso completato", user.email, user.gameName || "");
+      const email = String(user.email || "").toLowerCase();
+      if (vnRemoteStore.reload) vnRemoteStore.reload();
+      const users = loadUsers();
+      const role = roleLabelFromApi(user.role || user.roleApi || user.apiRole);
+      let ref = users.find(x => (x.email || "").toLowerCase() === email);
+      if (!ref) {
+        ref = { id: uid(), email, blocked: false, passwordHash: null, totpSecret: null, totpNeedsSetup: false };
+        users.push(ref);
+      }
+      ref.gameName = user.gameName || user.name || ref.gameName || email;
+      ref.role = email === OWNER_EMAIL.toLowerCase() ? "Owner" : role;
+      saveUsers(users);
 
-      saveSession({ email: user.email });
+      logEvent("LOGIN", "Accesso completato", email, ref.gameName || "");
+
+      saveSession({ email });
 
       setHeaderUser();
 
@@ -4494,39 +4584,9 @@ function logTagsLine(tagNames) {
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
 
       pendingEmail = email;
-
- 
-
-      const existing = findUserByEmail(email);
-
-      if (!existing) {
-
-        document.getElementById("regEmail").value = email;
-
-        document.getElementById("regGameName").value = "";
-
-        document.getElementById("regPassword").value = "";
-
-        document.getElementById("regPassword2").value = "";
-
-        showLoginStep("stepRegister");
-
-        return;
-
-      }
-
- 
-
-      if (existing.blocked) return alert("Account bloccato.");
-
- 
-
       document.getElementById("pwEmail").value = email;
-
       document.getElementById("loginPassword").value = "";
-
-      document.getElementById("pwResetBox").style.display = existing.passwordHash ? "none" : "block";
-
+      document.getElementById("pwResetBox").style.display = "none";
       showLoginStep("stepPassword");
 
     }
@@ -4593,195 +4653,31 @@ function logTagsLine(tagNames) {
 
  
 
-    function loginStepPassword() {
+    async function loginStepPassword() {
 
       if (!pendingEmail) return backToEmail();
-
-      const existing = findUserByEmail(pendingEmail);
-
-      if (!existing) return backToEmail();
-
-      if (existing.blocked) return alert("Account bloccato.");
-
- 
-
-      if (!existing.passwordHash) {
-
-        document.getElementById("pwResetBox").style.display = "block";
-
-        return alert("Devi impostare una nuova password (reset admin).");
-
-      }
-
- 
 
       const pw = document.getElementById("loginPassword").value || "";
-
       if (!pw) return alert("Inserisci la password");
 
-      if (simpleHash(pw) !== existing.passwordHash) return alert("Email o password errata");
-
- 
-
-      pendingUser = existing;
-
- 
-
-      if (!existing.totpNeedsSetup && isTrustedForEmail(existing.email)) {
-
-        finishLogin(existing);
-
-        return;
-
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: pendingEmail, password: pw })
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || !out.ok) throw new Error(out.error || "Email o password errata");
+        pendingUser = {
+          email: out.user.email,
+          gameName: out.user.name || out.user.email,
+          roleApi: out.user.role || "none"
+        };
+        finishLogin(pendingUser);
+      } catch (err) {
+        alert(err?.message || "Email o password errata");
       }
-
- 
-
-      document.getElementById("twofaEmailInline").value = existing.email;
-
- 
-
-      if (!existing.totpSecret) {
-
-        const users = loadUsers();
-
-        const u = users.find(x => x.email === existing.email);
-
-        u.totpSecret = generateTotpSecret();
-
-        u.totpNeedsSetup = true;
-
-        saveUsers(users);
-
-        pendingUser = u;
-
-      }
-
- 
-
-      const fresh = findUserByEmail(existing.email);
-
-      if (fresh.totpNeedsSetup) {
-
-        document.getElementById("twofaSecretInline").value = fresh.totpSecret;
-
-        generate2FAQRCode(fresh.email, fresh.totpSecret);
-
-        show2FASetupUI(true);
-
-        document.getElementById("twofaHintInline").textContent = "Setup 2FA richiesto: scansiona QR/chiave e inserisci il codice.";
-
-      } else {
-
-        show2FASetupUI(false);
-
-        document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA.";
-
-      }
-
- 
-
-      document.getElementById("login2fa").value = "";
-
-      document.getElementById("rememberDevice").checked = true;
-
-      showLoginStep("step2FA");
-
-    }
-
- 
-
-    function saveNewPassword() {
-
-      if (!pendingEmail) return backToEmail();
-
-      const users = loadUsers();
-
-      const u = users.find(x => (x.email || "").toLowerCase() === pendingEmail.toLowerCase());
-
-      if (!u) return backToEmail();
-
- 
-
-      const p1 = document.getElementById("newPassword").value || "";
-
-      const p2 = document.getElementById("newPassword2").value || "";
-
-      if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
-
-      if (p1 !== p2) return alert("Le password non coincidono");
-
- 
-
-      u.passwordHash = simpleHash(p1);
-
-      saveUsers(users);
-
- 
-
-      document.getElementById("newPassword").value = "";
-
-      document.getElementById("newPassword2").value = "";
-
-      document.getElementById("pwResetBox").style.display = "none";
-
- 
-
-      pendingUser = u;
-
- 
-
-      if (!u.totpNeedsSetup && isTrustedForEmail(u.email)) {
-
-        finishLogin(u);
-
-        return;
-
-      }
-
- 
-
-      document.getElementById("twofaEmailInline").value = u.email;
-
- 
-
-      if (!u.totpSecret) {
-
-        u.totpSecret = generateTotpSecret();
-
-        u.totpNeedsSetup = true;
-
-        saveUsers(users);
-
-      }
-
- 
-
-      if (u.totpNeedsSetup) {
-
-        document.getElementById("twofaSecretInline").value = u.totpSecret;
-
-        generate2FAQRCode(u.email, u.totpSecret);
-
-        show2FASetupUI(true);
-
-        document.getElementById("twofaHintInline").textContent = "Setup 2FA richiesto: scansiona QR/chiave e inserisci il codice.";
-
-      } else {
-
-        show2FASetupUI(false);
-
-        document.getElementById("twofaHintInline").textContent = "Inserisci il codice 2FA.";
-
-      }
-
- 
-
-      document.getElementById("login2fa").value = "";
-
-      document.getElementById("rememberDevice").checked = true;
-
-      showLoginStep("step2FA");
 
     }
 
@@ -4978,6 +4874,12 @@ function logTagsLine(tagNames) {
 
  
 
+      if (!hasAssignedRole() && id !== "dashboard") {
+
+        return showOnly("dashboard");
+
+      }
+
       if ((id === "utenti" || id === "log") && !isAdmin()) {
 
         return showOnly("dashboard");
@@ -5055,7 +4957,6 @@ if (id === "contabilita") {
 
   accRenderSummary();
 
-  accRenderAdminPanel();
 
   accRenderDueTable();
 
@@ -5095,12 +4996,22 @@ if (id === "contabilita") {
 
       const btnLog = document.getElementById("btnLog");
       const cardLog = document.getElementById("cardLog");
+      const roleControls = [
+        [document.getElementById("btnAzioni"), document.getElementById("cardAzioni")],
+        [document.getElementById("btnComandi"), document.getElementById("cardComandi")],
+        [document.getElementById("btnDiario"), document.getElementById("cardDiario")],
+        [document.getElementById("btnContabilita"), document.getElementById("cardContabilita")]
+      ];
 
       const dashHint = document.getElementById("dashHint");
 
       const actionsHint = document.getElementById("actionsHint");
 
- 
+      const hasRole = hasAssignedRole();
+      roleControls.forEach(([btn, card]) => {
+        if (btn) btn.style.display = hasRole ? "inline-block" : "none";
+        if (card) card.style.display = hasRole ? "block" : "none";
+      });
 
       if (!isAdmin()) {
 
@@ -5126,9 +5037,9 @@ if (id === "contabilita") {
 
       if (!canEditOps()) {
 
-        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi visualizzare, ma non inserire/modificare azioni, diario e contabilità.";
+        dashHint.textContent = "Sei registrato. In attesa di ruolo: puoi vedere solo la dashboard finché un admin non ti assegna un ruolo.";
 
-        actionsHint.textContent = "⚠️ In attesa di ruolo: non puoi inserire/modificare finché un admin non ti assegna un ruolo.";
+        actionsHint.textContent = "⚠️ In attesa di ruolo: sezione non disponibile finché un admin non ti assegna un ruolo.";
 
       } else {
 
@@ -5699,13 +5610,13 @@ if (s?.email === u.email) logout();
 
     function loadAccTagChecks(){
       try {
-        const raw = JSON.parse(localStorage.getItem(ACC_TAG_CHECKED_KEY) || '{}');
+        const raw = JSON.parse(vnRemoteStore.getItem(ACC_TAG_CHECKED_KEY) || '{}');
         return (raw && typeof raw === 'object') ? raw : {};
       } catch { return {}; }
     }
 
     function saveAccTagChecks(map){
-      localStorage.setItem(ACC_TAG_CHECKED_KEY, JSON.stringify(map || {}));
+      vnRemoteStore.setItem(ACC_TAG_CHECKED_KEY, JSON.stringify(map || {}));
     }
 
     function isAccTagChecked(id){
@@ -6234,8 +6145,8 @@ function animateMoneyValue(el, nextValue, key){
 
     function loadCustomActionItems() {
       try {
-        const parsed = JSON.parse(localStorage.getItem(ACTION_ITEMS_CUSTOM_KEY) || "{}");
-        const old = JSON.parse(localStorage.getItem("vn_action_items_custom_v1") || "[]");
+        const parsed = JSON.parse(vnRemoteStore.getItem(ACTION_ITEMS_CUSTOM_KEY) || "{}");
+        const old = JSON.parse(vnRemoteStore.getItem("vn_action_items_custom_v1") || "[]");
         const map = {
           armi: Array.isArray(parsed?.armi) ? parsed.armi : [],
           droga: Array.isArray(parsed?.droga) ? parsed.droga : [],
@@ -6254,7 +6165,7 @@ function animateMoneyValue(el, nextValue, key){
         droga: Array.from(new Set((map?.droga || []).map(x => String(x || "").trim()).filter(Boolean))),
         varie: Array.from(new Set((map?.varie || []).map(x => String(x || "").trim()).filter(Boolean)))
       };
-      localStorage.setItem(ACTION_ITEMS_CUSTOM_KEY, JSON.stringify(clean));
+      vnRemoteStore.setItem(ACTION_ITEMS_CUSTOM_KEY, JSON.stringify(clean));
     }
 
     function getActionItems(group) {
@@ -6582,6 +6493,7 @@ logEvent(
         accUpsertDueSalariesFromSource("ops", last.id, last.money, last.tagUserIds, noteBase);
 
         accRenderDueTable();
+        accRenderSalaryTotalsTable();
 
       }
 
@@ -6654,6 +6566,7 @@ const all = accLoad();
 accSave(all.filter(r => !(r.kind === "salary" && (r.status || "paid") === "due" && r.source === "ops" && r.sourceId === id)));
 
 accRenderDueTable();
+accRenderSalaryTotalsTable();
 
       renderCategory(category);
 
@@ -7243,19 +7156,69 @@ logEvent(
 
       if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
 
-      const ok = confirm("Confermi AZZERA AZIONI?");
+      const ok = confirm("Confermi AZZERA AZIONI? Verranno cancellate solo le righe; resoconto soldi, armi, droga e oggetti resteranno invariati.");
 
       if (!ok) return;
 
-logEvent("OPS_RESET", "Azzera Azioni");
+      const records = loadOps();
+      const archives = records.filter(r => r.kind === "ops_archive");
+      const addMoney = { clean: 0, dirty: 0, drug: 0 };
+      const remMoney = { clean: 0, dirty: 0, drug: 0 };
+      const addItems = new Map();
+      const remItems = new Map();
 
-localStorage.removeItem(OPS_KEY);
+      function addMoneyTo(target, money) {
+        const mm = opsMoneyObj(money);
+        target.clean += mm.clean; target.dirty += mm.dirty; target.drug += mm.drug;
+      }
+      function addItemsTo(target, items) {
+        (items || []).forEach(it => {
+          const key = normalizeTotalItemName(it.name);
+          if (!key) return;
+          target.set(key, (target.get(key) || 0) + Number(it.qty || 0));
+        });
+      }
+      function mapToItems(map) {
+        return Array.from(map.entries()).map(([name, qty]) => ({ name, qty })).filter(x => x.qty);
+      }
 
-CATEGORIES.forEach(c => renderCategory(c));
+      records.filter(r => r.kind !== "ops_archive").forEach(r => {
+        if (r.type === "ottenuto") { addMoneyTo(addMoney, r.money); addItemsTo(addItems, r.items); }
+        else { addMoneyTo(remMoney, r.money); addItemsTo(remItems, r.items); }
+      });
 
-renderOpsMoneySummary();
+      if (addMoney.clean || addMoney.dirty || addMoney.drug || addItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "ops_archive", type: "ottenuto", money: addMoney, items: mapToItems(addItems) });
+      }
+      if (remMoney.clean || remMoney.dirty || remMoney.drug || remItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "ops_archive", type: "perso", money: remMoney, items: mapToItems(remItems) });
+      }
 
-invRenderTotals();
+      saveOps(archives);
+
+      logEvent("OPS_CLEAR_ROWS", "Azzera righe Azioni senza modificare resoconti");
+
+      CATEGORIES.forEach(c => renderCategory(c));
+      renderOpsMoneySummary();
+      invRenderTotals();
+
+    }
+
+    function resetOpsSummary() {
+
+      if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
+
+      const ok = confirm("Confermi RESET RESOCONTO? Verranno azzerati righe e resoconto Azioni.");
+
+      if (!ok) return;
+
+      logEvent("OPS_RESET", "Reset Resoconto Azioni");
+
+      vnRemoteStore.removeItem(OPS_KEY);
+
+      CATEGORIES.forEach(c => renderCategory(c));
+      renderOpsMoneySummary();
+      invRenderTotals();
 
     }
 
@@ -7716,7 +7679,7 @@ invRenderTotals();
 
       try {
 
-        const raw = localStorage.getItem(INV_KEY);
+        const raw = vnRemoteStore.getItem(INV_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -7726,7 +7689,7 @@ invRenderTotals();
 
     }
 
-    function invSave(arr) { localStorage.setItem(INV_KEY, JSON.stringify(arr)); }
+    function invSave(arr) { vnRemoteStore.setItem(INV_KEY, JSON.stringify(arr)); }
 
  
 
@@ -7956,11 +7919,11 @@ invRenderTotals();
  
 
     function loadCustomInvItems() {
-      try { return JSON.parse(localStorage.getItem(INV_ITEMS_CUSTOM_KEY) || "{}"); } catch { return {}; }
+      try { return JSON.parse(vnRemoteStore.getItem(INV_ITEMS_CUSTOM_KEY) || "{}"); } catch { return {}; }
     }
 
     function saveCustomInvItems(map) {
-      localStorage.setItem(INV_ITEMS_CUSTOM_KEY, JSON.stringify(map || {}));
+      vnRemoteStore.setItem(INV_ITEMS_CUSTOM_KEY, JSON.stringify(map || {}));
     }
 
     function invItemsForCategory(cat) {
@@ -8144,12 +8107,6 @@ invRenderTotals();
         (note ? ` .. Note(${note})` : "")
       );
 
-      const last = all[all.length - 1];
-      if (last) {
-        const noteBase = `Auto da Gestione: ${last.category} .. ${last.type}`;
-        accUpsertDueSalariesFromSource("inv", last.id, last.money, last.tagUserIds, noteBase);
-        accRenderDueTable();
-      }
 
       document.getElementById("invQty_" + tid).value = "0";
       invDraftByCategory[cat] = [];
@@ -8437,9 +8394,6 @@ invRenderTotals();
         (rec.note ? ` .. Note(${rec.note})` : "")
       );
 
-      const noteBase = `Auto da Gestione (modifica): ${rec.category} .. ${rec.type}`;
-      accUpsertDueSalariesFromSource("inv", rec.id, rec.money, rec.tagUserIds || [], noteBase);
-      accRenderDueTable();
 
       closeInvEdit();
       invRenderTable(rec.category);
@@ -8679,6 +8633,8 @@ function invComputeTotals() {
 
       animateMoneyValue(sS, sal.drug, "invMoneyDrugSal");
 
+      const invManagePanel = document.getElementById("invManagePanel");
+      if (invManagePanel) invManagePanel.style.display = canResetAccounting() ? "block" : "none";
       const invResetBtn = document.getElementById("btnInvReset");
       if (invResetBtn) invResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
       const invTotalsResetBtn = document.getElementById("btnInvTotalsReset");
@@ -8690,17 +8646,70 @@ function invComputeTotals() {
 
     function invResetAll() {
 
-      const ok = confirm("Confermi AZZERA GESTIONE?");
+      if (!canResetAccounting()) return alert("Permesso negato");
+
+      const ok = confirm("Confermi AZZERA GESTIONE? Verranno cancellate solo le righe; resoconto soldi e item resteranno invariati.");
 
       if (!ok) return;
 
-logEvent("INV_RESET", "Azzera Gestione armi-droga");
+      const records = invLoad();
+      const archives = records.filter(r => r.kind === "inv_archive");
+      const addMoney = { clean: 0, dirty: 0, drug: 0 };
+      const remMoney = { clean: 0, dirty: 0, drug: 0 };
+      const addItems = new Map();
+      const remItems = new Map();
 
-localStorage.removeItem(INV_KEY);
+      function addMoneyTo(target, money) {
+        const mm = accMoneyObj(money);
+        target.clean += mm.clean; target.dirty += mm.dirty; target.drug += mm.drug;
+      }
+      function addItemsTo(target, items) {
+        (items || []).forEach(it => {
+          const key = normalizeTotalItemName(it.name);
+          if (!key) return;
+          target.set(key, (target.get(key) || 0) + Number(it.qty || 0));
+        });
+      }
+      function mapToItems(map) {
+        return Array.from(map.entries()).map(([name, qty]) => ({ name, qty })).filter(x => x.qty);
+      }
 
-INV_CATEGORIES.forEach(c => invRenderTable(c));
+      records.filter(r => r.kind !== "inv_archive").forEach(r => {
+        const isAdd = (r.type === "add" || r.type === "sold");
+        if (isAdd) { addMoneyTo(addMoney, r.money); addItemsTo(addItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : [])); }
+        else { addMoneyTo(remMoney, r.money); addItemsTo(remItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : [])); }
+      });
 
-invRenderTotals();
+      if (addMoney.clean || addMoney.dirty || addMoney.drug || addItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "inv_archive", type: "add", money: addMoney, items: mapToItems(addItems) });
+      }
+      if (remMoney.clean || remMoney.dirty || remMoney.drug || remItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "inv_archive", type: "rem", money: remMoney, items: mapToItems(remItems) });
+      }
+
+      invSave(archives);
+
+      logEvent("INV_CLEAR_ROWS", "Azzera righe Gestione senza modificare resoconti");
+
+      INV_CATEGORIES.forEach(c => invRenderTable(c));
+      invRenderTotals();
+
+    }
+
+    function invResetTotals() {
+
+      if (!canResetAccounting()) return alert("Permesso negato");
+
+      const ok = confirm("Confermi RESET RESOCONTO? Verranno azzerati righe, soldi e item della Gestione.");
+
+      if (!ok) return;
+
+      logEvent("INV_RESET", "Reset Resoconto Gestione armi-droga");
+
+      vnRemoteStore.removeItem(INV_KEY);
+
+      INV_CATEGORIES.forEach(c => invRenderTable(c));
+      invRenderTotals();
 
     }
 
@@ -8712,7 +8721,7 @@ invRenderTotals();
 
     // =========================
 
-    const ACC_TABS = ["Stipendi"];
+    const ACC_TABS = ["Stipendi", "Totale Stipendi"];
 
  
 
@@ -8720,7 +8729,7 @@ invRenderTotals();
 
       try {
 
-        const raw = localStorage.getItem(ACC_KEY);
+        const raw = vnRemoteStore.getItem(ACC_KEY);
 
         const arr = raw ? JSON.parse(raw) : [];
 
@@ -8730,7 +8739,15 @@ invRenderTotals();
 
     }
 
-    function accSave(arr) { localStorage.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+    function accSave(arr) { vnRemoteStore.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+
+    function accIsSalaryRow(r) {
+      return r && r.kind === "salary" && r.source !== "inv";
+    }
+
+    function accSalaryPersonKey(r) {
+      return String(r?.toUserId || r?.to || "—");
+    }
 
  
 
@@ -8862,7 +8879,7 @@ p.innerHTML = `
 
   <h4 style="margin:16px 0 6px 0; font-weight:900;">Stipendi da pagare</h4>
 
-  <div class="muted">Generati automaticamente dalle registrazioni con soldi (Azioni + Gestione armi-droga) ..</div>
+  <div class="muted">Generati automaticamente dalle registrazioni con soldi in Azioni ..</div>
 
  
 
@@ -8949,6 +8966,31 @@ p.innerHTML = `
   </div>
 
 `;
+
+        } else if (tname === "Totale Stipendi") {
+
+          p.innerHTML = `
+            <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totale Stipendi</h3>
+            <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni.</div>
+            <div class="tableWrap" style="margin-top:12px;">
+              <table class="accTable">
+                <thead>
+                  <tr>
+                    <th style="width:240px;">Nome</th>
+                    <th style="width:160px;">Puliti</th>
+                    <th style="width:160px;">Sporchi</th>
+                    <th style="width:160px;">Spaccio</th>
+                    <th style="width:120px;">Righe</th>
+                    <th style="width:160px;">Stato</th>
+                    <th style="width:180px;">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="accSalaryTotalsBody">
+                  <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+                </tbody>
+              </table>
+            </div>
+          `;
 
         } else {
 
@@ -9100,6 +9142,7 @@ p.innerHTML = `
 
         accRenderTable("Stipendi");
         accRenderDueTable();
+        accRenderSalaryTotalsTable();
 
         renderTagListAcc();
         syncSalaryRecipientFromTags();
@@ -9132,23 +9175,12 @@ p.innerHTML = `
 
 accRenderTable(name);
 
+if (name === "Totale Stipendi") accRenderSalaryTotalsTable();
+
 accRenderSummary();
 
-accRenderAdminPanel();
 
 accRenderDueTable();
-
-    }
-
- 
-
-    function accRenderAdminPanel() {
-
-      const panel = document.getElementById("accAdminPanel");
-
-      if (!panel) return;
-
-      panel.style.display = canResetAccounting() ? "block" : "none";
 
     }
 
@@ -9356,7 +9388,7 @@ const rows = all
 
   .filter(r => {
 
-    if (tabName === "Stipendi") return r.kind === "salary" && (r.status || "paid") === "paid";
+    if (tabName === "Stipendi") return accIsSalaryRow(r) && (r.status || "paid") === "paid";
 
     return r.kind === "balance";
 
@@ -9408,7 +9440,7 @@ tr.innerHTML = `
 
   <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 
-  <td>${(r.status || "paid") === "paid" ? `<button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
+  <td>${(r.status || "paid") === "paid" ? `<button class="btn small salaryDue" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
 
 `;
 
@@ -9470,6 +9502,76 @@ tr.innerHTML = `
 
  
 
+
+function accSalaryTotalsGroups() {
+  const groups = new Map();
+  accLoad().filter(accIsSalaryRow).forEach(r => {
+    const status = (r.status || "paid") === "paid" ? "paid" : "due";
+    const personKey = accSalaryPersonKey(r);
+    const key = `${status}::${personKey}`;
+    if (!groups.has(key)) {
+      groups.set(key, { key: personKey, status, to: r.to || "—", clean: 0, dirty: 0, drug: 0, count: 0, latestTs: 0 });
+    }
+    const g = groups.get(key);
+    const amt = Number(r.amount || 0);
+    const payType = r.payType || "clean";
+    if (payType === "dirty") g.dirty += amt;
+    else if (payType === "drug") g.drug += amt;
+    else g.clean += amt;
+    g.count += 1;
+    g.latestTs = Math.max(g.latestTs, Number(r.ts || 0));
+  });
+  return Array.from(groups.values()).sort((a,b) => {
+    if (a.status !== b.status) return a.status === "due" ? -1 : 1;
+    return (b.latestTs || 0) - (a.latestTs || 0);
+  });
+}
+
+function accRenderSalaryTotalsTable() {
+  const body = document.getElementById("accSalaryTotalsBody");
+  if (!body) return;
+  const rows = accSalaryTotalsGroups();
+  if (!rows.length) {
+    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    return;
+  }
+  body.innerHTML = "";
+  rows.forEach(g => {
+    const tr = document.createElement("tr");
+    const nextStatus = g.status === "due" ? "paid" : "due";
+    const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
+    tr.innerHTML = `
+      <td style="font-weight:900;">${escapeHtml(g.to || "—")}</td>
+      <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
+      <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
+      <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
+      <td style="font-weight:900;">${g.count}</td>
+      <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
+      <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function accSetSalaryGroupStatus(encodedKey, status) {
+  const key = decodeURIComponent(encodedKey || "");
+  const all = accLoad();
+  const nextStatus = status === "paid" ? "paid" : "due";
+  const now = Date.now();
+  all.forEach(r => {
+    if (!accIsSalaryRow(r)) return;
+    if (accSalaryPersonKey(r) !== key) return;
+    r.status = nextStatus;
+    r.paidAt = nextStatus === "paid" ? now : null;
+  });
+  accSave(all);
+  logEvent("ACC_SALARY_TOTAL_STATUS", `Persona(${key}) .. Stato(${nextStatus})`);
+  accRenderDueTable();
+  accRenderTable("Stipendi");
+  accRenderSalaryTotalsTable();
+  accRenderSummary();
+}
+
 function accRenderDueTable() {
 
   const tid = accTabId("Stipendi");
@@ -9482,7 +9584,7 @@ function accRenderDueTable() {
 
   const all = accLoad().slice().sort((a,b) => (b.ts||0)-(a.ts||0));
 
-  const rows = all.filter(r => r.kind === "salary" && (r.status || "paid") === "due").slice(0, 80);
+  const rows = all.filter(r => accIsSalaryRow(r) && (r.status || "paid") === "due").slice(0, 80);
 
  
 
@@ -9530,7 +9632,7 @@ function accRenderDueTable() {
 
       <td>
 
-        <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
+        <button class="btn small salaryPaid" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
 
       </td>
 
@@ -9550,7 +9652,7 @@ function accSetSalaryStatus(id, status) {
 
   const r = all.find(x => x.id === id);
 
-  if (!r || r.kind !== "salary") return;
+  if (!accIsSalaryRow(r)) return;
 
  
 
@@ -9583,6 +9685,8 @@ function accSetSalaryStatus(id, status) {
   accRenderDueTable();
 
   accRenderTable("Stipendi");
+
+  accRenderSalaryTotalsTable();
 
   accRenderSummary();
 
@@ -9652,7 +9756,7 @@ function accComputeSummary() {
 
  
 
-    if (r.kind === "salary") {
+    if (accIsSalaryRow(r)) {
 
       const amt = Number(r.amount || 0);
       const payType = (r.payType || "clean");
@@ -9668,6 +9772,13 @@ function accComputeSummary() {
 
       if (isPaid && Number(r.ts || 0) >= (now - days30)) salary30 += amt;
 
+    }
+
+    if (r.kind === "salary_archive") {
+      const mm = moneyObj(r.amount);
+      expense.clean += mm.clean;
+      expense.dirty += mm.dirty;
+      expense.drug += mm.drug;
     }
 
   });
@@ -9764,18 +9875,67 @@ function accRenderSummary() {
 
       if (!canResetAccounting()) return alert("Permesso negato");
 
-      const ok = confirm("Confermi AZZERA STIPENDI?");
+      const ok = confirm("Confermi AZZERA STIPENDI? Verranno cancellate solo le righe degli stipendi; il resoconto soldi resterà invariato.");
 
       if (!ok) return;
 
-logEvent("ACC_RESET", "Azzera Stipendi");
+      const all = accLoad();
+      const archived = { clean: 0, dirty: 0, drug: 0 };
+      const kept = [];
 
-localStorage.removeItem(ACC_KEY);
+      all.forEach(r => {
+        if (!accIsSalaryRow(r)) {
+          kept.push(r);
+          return;
+        }
 
-accRenderTable("Stipendi");
+        const isPaid = (r.status || "paid") === "paid";
+        if (!isPaid) return;
 
+        const amt = Number(r.amount || 0);
+        const payType = r.payType || "clean";
+        if (payType === "dirty") archived.dirty += amt;
+        else if (payType === "drug") archived.drug += amt;
+        else archived.clean += amt;
+      });
 
-accRenderSummary();
+      if (archived.clean || archived.dirty || archived.drug) {
+        kept.push({
+          id: uid(),
+          ts: Date.now(),
+          kind: "salary_archive",
+          amount: archived,
+          note: "Archivio stipendi azzerati"
+        });
+      }
+
+      accSave(kept);
+
+      logEvent("ACC_SALARY_CLEAR", "Azzera righe stipendi senza modificare il resoconto soldi");
+
+      accRenderTable("Stipendi");
+      accRenderDueTable();
+      accRenderSalaryTotalsTable();
+      accRenderSummary();
+
+    }
+
+    function accResetMoneySummary() {
+
+      if (!canResetAccounting()) return alert("Permesso negato");
+
+      const ok = confirm("Confermi RESET RESOCONTO SOLDI? Verranno azzerati resoconto e stipendi salvati in contabilità.");
+
+      if (!ok) return;
+
+      logEvent("ACC_MONEY_RESET", "Reset Resoconto Soldi");
+
+      vnRemoteStore.removeItem(ACC_KEY);
+
+      accRenderTable("Stipendi");
+      accRenderDueTable();
+      accRenderSalaryTotalsTable();
+      accRenderSummary();
 
     }
 
