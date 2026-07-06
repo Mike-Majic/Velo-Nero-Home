@@ -220,32 +220,45 @@
     }
 
 
-    .brandHero{
-      position:relative;
-      display:inline-flex;
-      justify-content:center;
-      align-items:center;
-      min-height:120px;
-      margin:0 auto 6px;
-      isolation:isolate;
+    .brandHero {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      isolation: isolate;
     }
-    #brandBgLogo{
-      position:absolute;
-      width:min(280px,52vw);
-      height:auto;
-      opacity:.20;
-      filter:drop-shadow(0 0 16px #ff1a1a66);
-      -webkit-mask-image:radial-gradient(ellipse at center, #000 42%, rgba(0,0,0,.72) 58%, transparent 78%);
-      mask-image:radial-gradient(ellipse at center, #000 42%, rgba(0,0,0,.72) 58%, transparent 78%);
-      pointer-events:none;
-      z-index:0;
-      animation:brandLogoFade 6s ease-in-out infinite;
+
+    #brandBgLogo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 360px;
+      height: 360px;
+      object-fit: cover;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.18;
+      z-index: -1;
+      pointer-events: none;
+      filter: blur(1px) drop-shadow(0 0 28px rgba(255, 0, 0, 0.45));
+      -webkit-mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,.65) 62%, transparent 78%);
+      mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,.65) 62%, transparent 78%);
+      animation: brandLogoFade 4s ease-in-out infinite;
     }
-    @keyframes brandLogoFade{
-      0%,100%{ opacity:.05; }
-      50%{ opacity:.24; }
+
+    @keyframes brandLogoFade {
+      0%, 100% {
+        opacity: 0.05;
+      }
+      50% {
+        opacity: 0.24;
+      }
     }
-    .brandHero h1{ position:relative; z-index:1; margin:0; }
+
+    .brandHero h1 {
+      position: relative;
+      z-index: 1;
+    }
 
     .moneyCard.total.total-negative{
       background:linear-gradient(145deg,#600b0b,#2b0303);
@@ -1556,7 +1569,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="logo.png" alt="" />
     <h1>VELO NERO</h1>
   </div>
 
