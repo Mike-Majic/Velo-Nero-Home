@@ -220,32 +220,45 @@
     }
 
 
-    .brandHero{
-      position:relative;
-      display:inline-flex;
-      justify-content:center;
-      align-items:center;
-      min-height:120px;
-      margin:0 auto 6px;
-      isolation:isolate;
+    .brandHero {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      isolation: isolate;
     }
-    #brandBgLogo{
-      position:absolute;
-      width:min(280px,52vw);
-      height:auto;
-      opacity:.20;
-      filter:drop-shadow(0 0 16px #ff1a1a66);
-      -webkit-mask-image:radial-gradient(ellipse at center, #000 42%, rgba(0,0,0,.72) 58%, transparent 78%);
-      mask-image:radial-gradient(ellipse at center, #000 42%, rgba(0,0,0,.72) 58%, transparent 78%);
-      pointer-events:none;
-      z-index:0;
-      animation:brandLogoFade 6s ease-in-out infinite;
+
+    #brandBgLogo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 360px;
+      height: 360px;
+      object-fit: cover;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.28;
+      z-index: -1;
+      pointer-events: none;
+      filter: blur(1px) drop-shadow(0 0 28px rgba(255, 0, 0, 0.45));
+      -webkit-mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,.65) 62%, transparent 78%);
+      mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,.65) 62%, transparent 78%);
+      animation: brandLogoFade 4s ease-in-out infinite;
     }
-    @keyframes brandLogoFade{
-      0%,100%{ opacity:.05; }
-      50%{ opacity:.24; }
+
+    @keyframes brandLogoFade {
+      0%, 100% {
+        opacity: 0.08;
+      }
+      50% {
+        opacity: 0.35;
+      }
     }
-    .brandHero h1{ position:relative; z-index:1; margin:0; }
+
+    .brandHero h1 {
+      position: relative;
+      z-index: 1;
+    }
 
     .moneyCard.total.total-negative{
       background:linear-gradient(145deg,#600b0b,#2b0303);
@@ -423,6 +436,48 @@
     .salaryStatusDue { border-color:#ffd34d; color:#ffe58a; box-shadow:0 0 8px #ffd34d33 inset; }
 
     .small { padding:7px 10px; font-size:13px; border-radius:9px; }
+    #btnUtenti { position:relative; }
+    .userNotifyBadge{
+      position:absolute;
+      top:-10px;
+      right:-10px;
+      min-width:20px;
+      height:20px;
+      padding:0 6px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#ff1a1a;
+      border:2px solid #fff;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 0 10px #ff0000aa;
+      box-sizing:border-box;
+    }
+    .usersTable tr.userPending td{
+      background:rgba(211,154,0,.10);
+      box-shadow:0 0 10px #ffd34d22 inset;
+    }
+    .pendingState{
+      display:inline-block;
+      padding:4px 8px;
+      border:1px solid #ffd34d;
+      border-radius:999px;
+      color:#ffe58a;
+      font-size:12px;
+      font-weight:900;
+      box-shadow:0 0 8px #ffd34d33 inset;
+    }
+    .btn.pendingMail{
+      background:linear-gradient(145deg,#8a6a00,#d39a00);
+      border-color:#ffd34d;
+      color:#fff;
+      box-shadow:0 0 12px #ffd34d55 inset, 0 0 12px #ffcc0033;
+      margin-top:8px;
+    }
 
     .disabled { opacity:.5; cursor:not-allowed; }
 
@@ -1556,7 +1611,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="logo.png" alt="" />
     <h1>VELO NERO</h1>
   </div>
 
@@ -3292,6 +3347,46 @@ table.invTable td:last-child{
 
     function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
 
+    function isUserPendingRole(u) {
+      return !!u?.email && !String(u.role || "").trim();
+    }
+
+    function pendingRoleUsersCount() {
+      return loadUsers().filter(isUserPendingRole).length;
+    }
+
+    function updateUsersPendingBadge() {
+      const btn = document.getElementById("btnUtenti");
+      if (!btn) return;
+      let badge = document.getElementById("usersPendingBadge");
+      const count = isAdmin() ? pendingRoleUsersCount() : 0;
+      if (!count) {
+        if (badge) badge.remove();
+        return;
+      }
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.id = "usersPendingBadge";
+        badge.className = "userNotifyBadge";
+        btn.appendChild(badge);
+      }
+      badge.textContent = String(count);
+      badge.title = `${count} utent${count === 1 ? "e" : "i"} senza ruolo`;
+    }
+
+    function sendPendingUserMessage(email) {
+      const to = String(email || "").trim();
+      if (!to) return alert("Email utente non disponibile.");
+      const subject = "Registrazione Velo Nero";
+      const body = [
+        "Ciao!",
+        "Ti sei registrato nel sistema privato di Velo Nero.",
+        "Da chi sei stato autorizzato ad iscriverti?"
+      ].join("\n");
+      window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      logEvent("USER_PENDING_MESSAGE", `Email(${to})`);
+    }
+
  
 
     // permessi
@@ -4584,9 +4679,21 @@ function logTagsLine(tagNames) {
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
 
       pendingEmail = email;
+      pendingUser = null;
+
+      const existing = findUserByEmail(email);
+      if (!existing) {
+        document.getElementById("regEmail").value = email;
+        document.getElementById("regGameName").value = "";
+        document.getElementById("regPassword").value = "";
+        document.getElementById("regPassword2").value = "";
+        showLoginStep("stepRegister");
+        return;
+      }
+
       document.getElementById("pwEmail").value = email;
       document.getElementById("loginPassword").value = "";
-      document.getElementById("pwResetBox").style.display = "none";
+      document.getElementById("pwResetBox").style.display = existing.passwordHash ? "none" : "flex";
       showLoginStep("stepPassword");
 
     }
@@ -4596,6 +4703,10 @@ function logTagsLine(tagNames) {
     function registerAccount() {
 
       if (!pendingEmail) return backToEmail();
+      if (findUserByEmail(pendingEmail)) {
+        alert("Email già registrata. Effettua il login.");
+        return loginStepEmail();
+      }
 
  
 
@@ -4626,6 +4737,7 @@ function logTagsLine(tagNames) {
       ref.totpNeedsSetup = true;
 
       saveUsers(users);
+      updateUsersPendingBadge();
 
       pendingUser = ref;
 
@@ -4660,6 +4772,23 @@ function logTagsLine(tagNames) {
       const pw = document.getElementById("loginPassword").value || "";
       if (!pw) return alert("Inserisci la password");
 
+      const localUser = findUserByEmail(pendingEmail);
+      if (localUser && localUser.passwordHash) {
+        if (localUser.blocked) return alert("Account bloccato.");
+        if (localUser.passwordHash !== simpleHash(pw)) return alert("Email o password errata");
+        pendingUser = localUser;
+        document.getElementById("twofaEmailInline").value = localUser.email;
+        document.getElementById("twofaSecretInline").value = localUser.totpSecret || "";
+        if (localUser.totpSecret) generate2FAQRCode(localUser.email, localUser.totpSecret);
+        show2FASetupUI(!!localUser.totpNeedsSetup);
+        document.getElementById("twofaHintInline").textContent = localUser.totpNeedsSetup
+          ? "Scansiona il QR (o inserisci la chiave), poi inserisci il codice 2FA."
+          : "Inserisci il codice 2FA.";
+        document.getElementById("login2fa").value = "";
+        showLoginStep("step2FA");
+        return;
+      }
+
       try {
         const res = await fetch("/api/auth/login", {
           method: "POST",
@@ -4678,6 +4807,29 @@ function logTagsLine(tagNames) {
       } catch (err) {
         alert(err?.message || "Email o password errata");
       }
+
+    }
+
+    function saveNewPassword() {
+
+      if (!pendingEmail) return backToEmail();
+
+      const p1 = document.getElementById("newPassword").value || "";
+      const p2 = document.getElementById("newPassword2").value || "";
+      if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
+      if (p1 !== p2) return alert("Le password non coincidono");
+
+      const users = loadUsers();
+      const u = users.find(x => (x.email || "").toLowerCase() === pendingEmail);
+      if (!u) return backToEmail();
+
+      u.passwordHash = simpleHash(p1);
+      saveUsers(users);
+      document.getElementById("newPassword").value = "";
+      document.getElementById("newPassword2").value = "";
+      document.getElementById("pwResetBox").style.display = "none";
+      alert("Password salvata. Ora puoi accedere.");
+      updateUsersPendingBadge();
 
     }
 
@@ -4973,6 +5125,7 @@ if (id === "contabilita") {
       clearSession();
 
       setHeaderUser();
+      updateUsersPendingBadge();
 
       showOnly("login");
 
@@ -5051,6 +5204,8 @@ if (id === "contabilita") {
 
  
 
+      updateUsersPendingBadge();
+
       if (!keepCurrentSection) showOnly("dashboard");
 
     }
@@ -5096,6 +5251,8 @@ if (id === "contabilita") {
       users.forEach(u => {
 
         const tr = document.createElement("tr");
+        const isPending = isUserPendingRole(u);
+        if (isPending) tr.classList.add("userPending");
 
  
 
@@ -5215,6 +5372,7 @@ sel.onchange = () => {
   setHeaderUser();
 
   initAfterLogin(true);
+  updateUsersPendingBadge();
   renderUsersTable();
 
   renderTagList();
@@ -5236,7 +5394,8 @@ sel.onchange = () => {
 
         const tdState = document.createElement("td");
 
-        tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
+        if (isPending) tdState.innerHTML = `<span class="pendingState">IN ATTESA</span>`;
+        else tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
 
  
 
@@ -5245,6 +5404,7 @@ sel.onchange = () => {
         const wrap = document.createElement("div");
 
         wrap.style.position = "relative";
+        wrap.style.display = "inline-block";
 
  
 
@@ -5512,6 +5672,17 @@ if (s?.email === u.email) logout();
 
         tdActions.appendChild(wrap);
 
+        if (isPending) {
+          const msgBtn = document.createElement("button");
+          msgBtn.className = "btn small pendingMail";
+          msgBtn.textContent = "Invia messaggio";
+          msgBtn.onclick = (e) => {
+            e.stopPropagation();
+            sendPendingUserMessage(u.email);
+          };
+          tdActions.appendChild(msgBtn);
+        }
+
  
 
         tr.appendChild(tdGameName);
@@ -5529,6 +5700,7 @@ if (s?.email === u.email) logout();
         usersTableBody.appendChild(tr);
 
       });
+      updateUsersPendingBadge();
 
     }
 
