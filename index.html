@@ -407,6 +407,21 @@
 
     .danger { background:#2b0000; border-color:#ff1a1aaa; }
 
+    .btn.salaryPaid {
+      background:linear-gradient(145deg,#0b7a35,#10a34a);
+      border-color:#22e06f;
+      color:#fff;
+      box-shadow:0 0 12px #00ff6a55 inset, 0 0 12px #00ff6a22;
+    }
+    .btn.salaryDue {
+      background:linear-gradient(145deg,#8a6a00,#d39a00);
+      border-color:#ffd34d;
+      color:#fff;
+      box-shadow:0 0 12px #ffd34d55 inset, 0 0 12px #ffcc0033;
+    }
+    .salaryStatusPaid { border-color:#22e06f; color:#8dffb8; box-shadow:0 0 8px #00ff6a33 inset; }
+    .salaryStatusDue { border-color:#ffd34d; color:#ffe58a; box-shadow:0 0 8px #ffd34d33 inset; }
+
     .small { padding:7px 10px; font-size:13px; border-radius:9px; }
 
     .disabled { opacity:.5; cursor:not-allowed; }
@@ -9311,7 +9326,7 @@ tr.innerHTML = `
 
   <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 
-  <td>${(r.status || "paid") === "paid" ? `<button class="btn small danger" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
+  <td>${(r.status || "paid") === "paid" ? `<button class="btn small salaryDue" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
 
 `;
 
@@ -9417,8 +9432,8 @@ function accRenderSalaryTotalsTable() {
       <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
       <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
       <td style="font-weight:900;">${g.count}</td>
-      <td><span class="tagRole">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
-      <td><button class="btn small ${g.status === "paid" ? "danger" : ""}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
+      <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
+      <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
     `;
     body.appendChild(tr);
   });
@@ -9503,7 +9518,7 @@ function accRenderDueTable() {
 
       <td>
 
-        <button class="btn small" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
+        <button class="btn small salaryPaid" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
 
       </td>
 
