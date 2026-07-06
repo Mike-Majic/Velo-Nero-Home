@@ -229,7 +229,8 @@
       margin:0 auto 6px;
       isolation:isolate;
     }
-    #brandBgLogo{
+    .brandHero::before{
+      content:"";
       position:absolute;
       width:min(280px,52vw);
       height:min(280px,52vw);
@@ -244,8 +245,18 @@
       animation:brandLogoFade 6s ease-in-out infinite;
     }
     @keyframes brandLogoFade{
-      0%,100%{ opacity:.05; }
-      50%{ opacity:.24; }
+      0%,100%{ opacity:.20; }
+      50%{ opacity:.40; }
+    }
+    .brandHero h1{
+      position:relative;
+      z-index:1;
+      margin:0;
+    }
+    .brandHero h1{
+      position:relative;
+      z-index:2;
+      margin:0;
     }
     .brandHero h1{
       position:relative;
