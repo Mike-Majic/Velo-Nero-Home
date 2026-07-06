@@ -8984,7 +8984,10 @@ p.innerHTML = `
 
           p.innerHTML = `
             <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totale Stipendi</h3>
-            <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni.</div>
+            <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni, divisi per stato.</div>
+
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale stipendi da pagare</h4>
+            <div class="muted">Somma degli stipendi ancora da saldare per ogni persona.</div>
             <div class="tableWrap" style="margin-top:12px;">
               <table class="accTable">
                 <thead>
@@ -8998,7 +9001,28 @@ p.innerHTML = `
                     <th style="width:180px;">Azioni</th>
                   </tr>
                 </thead>
-                <tbody id="accSalaryTotalsBody">
+                <tbody id="accSalaryTotalsDueBody">
+                  <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale ultimi stipendi (pagati)</h4>
+            <div class="muted">Somma degli stipendi già pagati per ogni persona.</div>
+            <div class="tableWrap" style="margin-top:12px;">
+              <table class="accTable">
+                <thead>
+                  <tr>
+                    <th style="width:240px;">Nome</th>
+                    <th style="width:160px;">Puliti</th>
+                    <th style="width:160px;">Sporchi</th>
+                    <th style="width:160px;">Spaccio</th>
+                    <th style="width:120px;">Righe</th>
+                    <th style="width:160px;">Stato</th>
+                    <th style="width:180px;">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="accSalaryTotalsPaidBody">
                   <tr><td class="muted" colspan="7">Nessun dato</td></tr>
                 </tbody>
               </table>
@@ -9411,7 +9435,7 @@ const rows = all
 
       if (!rows.length) {
 
-        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 7 : 6}">Nessun dato</td></tr>`;
+        body.innerHTML = `<tr><td class="muted" colspan="${tabName === "Stipendi" ? 8 : 6}">Nessun dato</td></tr>`;
 
         return;
 
@@ -9541,29 +9565,38 @@ function accSalaryTotalsGroups() {
 }
 
 function accRenderSalaryTotalsTable() {
-  const body = document.getElementById("accSalaryTotalsBody");
-  if (!body) return;
+  const dueBody = document.getElementById("accSalaryTotalsDueBody");
+  const paidBody = document.getElementById("accSalaryTotalsPaidBody");
+  if (!dueBody && !paidBody) return;
+
   const rows = accSalaryTotalsGroups();
-  if (!rows.length) {
-    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
-    return;
-  }
-  body.innerHTML = "";
-  rows.forEach(g => {
-    const tr = document.createElement("tr");
-    const nextStatus = g.status === "due" ? "paid" : "due";
-    const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
-    tr.innerHTML = `
-      <td style="font-weight:900;">${escapeHtml(g.to || "—")}</td>
-      <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
-      <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
-      <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
-      <td style="font-weight:900;">${g.count}</td>
-      <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
-      <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
-    `;
-    body.appendChild(tr);
-  });
+  const renderBody = (body, status) => {
+    if (!body) return;
+    const filtered = rows.filter(g => g.status === status);
+    if (!filtered.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+      return;
+    }
+    body.innerHTML = "";
+    filtered.forEach(g => {
+      const tr = document.createElement("tr");
+      const nextStatus = g.status === "due" ? "paid" : "due";
+      const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
+      tr.innerHTML = `
+        <td style="font-weight:900;">${escapeHtml(g.to || "—")}</td>
+        <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
+        <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
+        <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
+        <td style="font-weight:900;">${g.count}</td>
+        <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
+        <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
+      `;
+      body.appendChild(tr);
+    });
+  };
+
+  renderBody(dueBody, "due");
+  renderBody(paidBody, "paid");
 }
 
 function accSetSalaryGroupStatus(encodedKey, status) {
