@@ -2062,7 +2062,7 @@ table.invTable td:last-child{
           </div>
           <div class="hint" style="margin-top:10px;">Somma di tutte le Azioni .. OTTENUTO aumenta .. PERSO diminuisce.</div>
           <div class="summaryActionsRow">
-            <button class="btn danger small" id="btnOpsReset" onclick="resetAllOps()" style="display:none;">RESET RESOCONTO</button>
+            <button class="btn danger small" id="btnOpsReset" onclick="resetOpsSummary()" style="display:none;">RESET RESOCONTO</button>
           </div>
         </div>
 
@@ -2413,6 +2413,15 @@ table.invTable td:last-child{
 
         <div id="invPanels"></div>
 
+        <div id="invManagePanel" class="panel" style="display:none;">
+          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
+          <div class="muted">Pulizia righe gestione senza modificare resoconto soldi o item.</div>
+          <div class="row" style="margin-top:14px;">
+            <button class="btn danger" onclick="invResetAll()">AZZERA GESTIONE</button>
+            <div class="muted">Cancella solo le registrazioni visibili.</div>
+          </div>
+        </div>
+
       </div>
 
  
@@ -2429,7 +2438,7 @@ table.invTable td:last-child{
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
           <div class="summaryActionsRow" style="margin-top:8px;">
-            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetAll()" style="display:none;">RESET RESOCONTO</button>
+            <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetTotals()" style="display:none;">RESET RESOCONTO</button>
           </div>
 
  
@@ -7147,19 +7156,69 @@ logEvent(
 
       if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
 
-      const ok = confirm("Confermi AZZERA AZIONI?");
+      const ok = confirm("Confermi AZZERA AZIONI? Verranno cancellate solo le righe; resoconto soldi, armi, droga e oggetti resteranno invariati.");
 
       if (!ok) return;
 
-logEvent("OPS_RESET", "Azzera Azioni");
+      const records = loadOps();
+      const archives = records.filter(r => r.kind === "ops_archive");
+      const addMoney = { clean: 0, dirty: 0, drug: 0 };
+      const remMoney = { clean: 0, dirty: 0, drug: 0 };
+      const addItems = new Map();
+      const remItems = new Map();
 
-vnRemoteStore.removeItem(OPS_KEY);
+      function addMoneyTo(target, money) {
+        const mm = opsMoneyObj(money);
+        target.clean += mm.clean; target.dirty += mm.dirty; target.drug += mm.drug;
+      }
+      function addItemsTo(target, items) {
+        (items || []).forEach(it => {
+          const key = normalizeTotalItemName(it.name);
+          if (!key) return;
+          target.set(key, (target.get(key) || 0) + Number(it.qty || 0));
+        });
+      }
+      function mapToItems(map) {
+        return Array.from(map.entries()).map(([name, qty]) => ({ name, qty })).filter(x => x.qty);
+      }
 
-CATEGORIES.forEach(c => renderCategory(c));
+      records.filter(r => r.kind !== "ops_archive").forEach(r => {
+        if (r.type === "ottenuto") { addMoneyTo(addMoney, r.money); addItemsTo(addItems, r.items); }
+        else { addMoneyTo(remMoney, r.money); addItemsTo(remItems, r.items); }
+      });
 
-renderOpsMoneySummary();
+      if (addMoney.clean || addMoney.dirty || addMoney.drug || addItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "ops_archive", type: "ottenuto", money: addMoney, items: mapToItems(addItems) });
+      }
+      if (remMoney.clean || remMoney.dirty || remMoney.drug || remItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "ops_archive", type: "perso", money: remMoney, items: mapToItems(remItems) });
+      }
 
-invRenderTotals();
+      saveOps(archives);
+
+      logEvent("OPS_CLEAR_ROWS", "Azzera righe Azioni senza modificare resoconti");
+
+      CATEGORIES.forEach(c => renderCategory(c));
+      renderOpsMoneySummary();
+      invRenderTotals();
+
+    }
+
+    function resetOpsSummary() {
+
+      if (!canManageTotals()) return alert("Solo Boss/Vice Boss possono azzerare.");
+
+      const ok = confirm("Confermi RESET RESOCONTO? Verranno azzerati righe e resoconto Azioni.");
+
+      if (!ok) return;
+
+      logEvent("OPS_RESET", "Reset Resoconto Azioni");
+
+      vnRemoteStore.removeItem(OPS_KEY);
+
+      CATEGORIES.forEach(c => renderCategory(c));
+      renderOpsMoneySummary();
+      invRenderTotals();
 
     }
 
@@ -8574,6 +8633,8 @@ function invComputeTotals() {
 
       animateMoneyValue(sS, sal.drug, "invMoneyDrugSal");
 
+      const invManagePanel = document.getElementById("invManagePanel");
+      if (invManagePanel) invManagePanel.style.display = canResetAccounting() ? "block" : "none";
       const invResetBtn = document.getElementById("btnInvReset");
       if (invResetBtn) invResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
       const invTotalsResetBtn = document.getElementById("btnInvTotalsReset");
@@ -8585,17 +8646,70 @@ function invComputeTotals() {
 
     function invResetAll() {
 
-      const ok = confirm("Confermi AZZERA GESTIONE?");
+      if (!canResetAccounting()) return alert("Permesso negato");
+
+      const ok = confirm("Confermi AZZERA GESTIONE? Verranno cancellate solo le righe; resoconto soldi e item resteranno invariati.");
 
       if (!ok) return;
 
-logEvent("INV_RESET", "Azzera Gestione armi-droga");
+      const records = invLoad();
+      const archives = records.filter(r => r.kind === "inv_archive");
+      const addMoney = { clean: 0, dirty: 0, drug: 0 };
+      const remMoney = { clean: 0, dirty: 0, drug: 0 };
+      const addItems = new Map();
+      const remItems = new Map();
 
-vnRemoteStore.removeItem(INV_KEY);
+      function addMoneyTo(target, money) {
+        const mm = accMoneyObj(money);
+        target.clean += mm.clean; target.dirty += mm.dirty; target.drug += mm.drug;
+      }
+      function addItemsTo(target, items) {
+        (items || []).forEach(it => {
+          const key = normalizeTotalItemName(it.name);
+          if (!key) return;
+          target.set(key, (target.get(key) || 0) + Number(it.qty || 0));
+        });
+      }
+      function mapToItems(map) {
+        return Array.from(map.entries()).map(([name, qty]) => ({ name, qty })).filter(x => x.qty);
+      }
 
-INV_CATEGORIES.forEach(c => invRenderTable(c));
+      records.filter(r => r.kind !== "inv_archive").forEach(r => {
+        const isAdd = (r.type === "add" || r.type === "sold");
+        if (isAdd) { addMoneyTo(addMoney, r.money); addItemsTo(addItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : [])); }
+        else { addMoneyTo(remMoney, r.money); addItemsTo(remItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : [])); }
+      });
 
-invRenderTotals();
+      if (addMoney.clean || addMoney.dirty || addMoney.drug || addItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "inv_archive", type: "add", money: addMoney, items: mapToItems(addItems) });
+      }
+      if (remMoney.clean || remMoney.dirty || remMoney.drug || remItems.size) {
+        archives.push({ id: uid(), ts: Date.now(), kind: "inv_archive", type: "rem", money: remMoney, items: mapToItems(remItems) });
+      }
+
+      invSave(archives);
+
+      logEvent("INV_CLEAR_ROWS", "Azzera righe Gestione senza modificare resoconti");
+
+      INV_CATEGORIES.forEach(c => invRenderTable(c));
+      invRenderTotals();
+
+    }
+
+    function invResetTotals() {
+
+      if (!canResetAccounting()) return alert("Permesso negato");
+
+      const ok = confirm("Confermi RESET RESOCONTO? Verranno azzerati righe, soldi e item della Gestione.");
+
+      if (!ok) return;
+
+      logEvent("INV_RESET", "Reset Resoconto Gestione armi-droga");
+
+      vnRemoteStore.removeItem(INV_KEY);
+
+      INV_CATEGORIES.forEach(c => invRenderTable(c));
+      invRenderTotals();
 
     }
 
