@@ -229,6 +229,15 @@
       margin:0 auto 6px;
       isolation:isolate;
     }
+    .brandHero::before{
+      content:"";
+      position:absolute;
+      width:min(280px,52vw);
+      height:min(280px,52vw);
+      background:linear-gradient(90deg, var(--bg) 0%, transparent 18%, transparent 82%, var(--bg) 100%);
+      pointer-events:none;
+      z-index:1;
+    }
     #brandBgLogo{
       position:absolute;
       width:min(340px,62vw);
@@ -248,6 +257,11 @@
     .brandHero h1{
       position:relative;
       z-index:1;
+      margin:0;
+    }
+    .brandHero h1{
+      position:relative;
+      z-index:2;
       margin:0;
     }
 
