@@ -3268,13 +3268,13 @@ table.invTable td:last-child{
 
     function loadSession() {
 
-      try { return JSON.parse(vnRemoteStore.getItem(SESSION_KEY)) || null; } catch { return null; }
+      try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
 
     }
 
-    function saveSession(s) { vnRemoteStore.setItem(SESSION_KEY, JSON.stringify(s)); }
+    function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
 
-    function clearSession() { vnRemoteStore.removeItem(SESSION_KEY); }
+    function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
  
 
@@ -4439,13 +4439,13 @@ function logTagsLine(tagNames) {
 
     function getDeviceId() {
 
-      let id = vnRemoteStore.getItem(DEVICE_ID_KEY);
+      let id = localStorage.getItem(DEVICE_ID_KEY);
 
       if (!id) {
 
         id = (Math.random().toString(16).slice(2) + Date.now().toString(16));
 
-        vnRemoteStore.setItem(DEVICE_ID_KEY, id);
+        localStorage.setItem(DEVICE_ID_KEY, id);
 
       }
 
@@ -4455,11 +4455,11 @@ function logTagsLine(tagNames) {
 
     function loadTrusted() {
 
-      try { return JSON.parse(vnRemoteStore.getItem(TRUST_KEY)) || {}; } catch { return {}; }
+      try { return JSON.parse(localStorage.getItem(TRUST_KEY)) || {}; } catch { return {}; }
 
     }
 
-    function saveTrusted(obj) { vnRemoteStore.setItem(TRUST_KEY, JSON.stringify(obj)); }
+    function saveTrusted(obj) { localStorage.setItem(TRUST_KEY, JSON.stringify(obj)); }
 
     function isTrustedForEmail(email) {
 
@@ -5316,6 +5316,7 @@ if (id === "contabilita") {
       logEvent("LOGOUT", "Uscita");
 
       clearSession();
+      fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => null);
 
       setHeaderUser();
       configurePendingUsersRefresh(false);
