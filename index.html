@@ -4578,6 +4578,9 @@ function logTagsLine(tagNames) {
         if (btn) btn.textContent = "Mostra QR";
 
         if (confirm) confirm.checked = false;
+      } else {
+        if (wrap) wrap.style.display = "block";
+        if (btn) btn.textContent = "Nascondi QR";
 
       }
 
@@ -4776,14 +4779,25 @@ function logTagsLine(tagNames) {
       if (localUser && localUser.passwordHash) {
         if (localUser.blocked) return alert("Account bloccato.");
         if (localUser.passwordHash !== simpleHash(pw)) return alert("Email o password errata");
+        if (!localUser.totpSecret) {
+          const users = loadUsers();
+          const ref = users.find(x => (x.email || "").toLowerCase() === localUser.email);
+          if (ref) {
+            ref.totpSecret = generateTotpSecret();
+            ref.totpNeedsSetup = true;
+            saveUsers(users);
+            localUser.totpSecret = ref.totpSecret;
+            localUser.totpNeedsSetup = true;
+          }
+        }
         pendingUser = localUser;
         document.getElementById("twofaEmailInline").value = localUser.email;
         document.getElementById("twofaSecretInline").value = localUser.totpSecret || "";
         if (localUser.totpSecret) generate2FAQRCode(localUser.email, localUser.totpSecret);
-        show2FASetupUI(!!localUser.totpNeedsSetup);
+        show2FASetupUI(true);
         document.getElementById("twofaHintInline").textContent = localUser.totpNeedsSetup
           ? "Scansiona il QR (o inserisci la chiave), poi inserisci il codice 2FA."
-          : "Inserisci il codice 2FA.";
+          : "Se non hai Authenticator configurato, scansiona il QR. Altrimenti inserisci il codice 2FA.";
         document.getElementById("login2fa").value = "";
         showLoginStep("step2FA");
         return;
