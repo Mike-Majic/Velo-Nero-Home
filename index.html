@@ -237,7 +237,7 @@
       object-fit: cover;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      opacity: 0.28;
+      opacity: 0.34;
       z-index: -1;
       pointer-events: none;
       filter: blur(1px) drop-shadow(0 0 28px rgba(255, 0, 0, 0.45));
@@ -248,10 +248,10 @@
 
     @keyframes brandLogoFade {
       0%, 100% {
-        opacity: 0.08;
+        opacity: 0.12;
       }
       50% {
-        opacity: 0.35;
+        opacity: 0.45;
       }
     }
 
@@ -4789,6 +4789,10 @@ function logTagsLine(tagNames) {
             localUser.totpSecret = ref.totpSecret;
             localUser.totpNeedsSetup = true;
           }
+        }
+        if (!localUser.totpNeedsSetup && isTrustedForEmail(localUser.email)) {
+          finishLogin(localUser);
+          return;
         }
         pendingUser = localUser;
         document.getElementById("twofaEmailInline").value = localUser.email;
