@@ -3355,10 +3355,13 @@ table.invTable td:last-child{
       return loadUsers().filter(isUserPendingRole).length;
     }
 
-    function updateUsersPendingBadge() {
+    let pendingUsersRefreshTimer = null;
+
+    function updateUsersPendingBadge(reloadFromStore = false) {
       const btn = document.getElementById("btnUtenti");
       if (!btn) return;
       let badge = document.getElementById("usersPendingBadge");
+      if (reloadFromStore && isAdmin() && vnRemoteStore.reload) vnRemoteStore.reload();
       const count = isAdmin() ? pendingRoleUsersCount() : 0;
       if (!count) {
         if (badge) badge.remove();
@@ -3372,6 +3375,27 @@ table.invTable td:last-child{
       }
       badge.textContent = String(count);
       badge.title = `${count} utent${count === 1 ? "e" : "i"} senza ruolo`;
+    }
+
+    function configurePendingUsersRefresh(reloadNow = true) {
+      if (pendingUsersRefreshTimer) {
+        clearInterval(pendingUsersRefreshTimer);
+        pendingUsersRefreshTimer = null;
+      }
+      if (!isAdmin()) {
+        updateUsersPendingBadge();
+        return;
+      }
+      updateUsersPendingBadge(reloadNow);
+      pendingUsersRefreshTimer = setInterval(() => {
+        if (!isAdmin()) {
+          configurePendingUsersRefresh();
+          return;
+        }
+        const utentiSection = document.getElementById("utenti");
+        if (utentiSection?.classList.contains("active")) renderUsersTable(true);
+        else updateUsersPendingBadge(true);
+      }, 10000);
     }
 
     function sendPendingUserMessage(email) {
@@ -5062,7 +5086,7 @@ function logTagsLine(tagNames) {
 
  
 
-      if (id === "utenti") renderUsersTable();
+      if (id === "utenti") renderUsersTable(true);
 
  
 
@@ -5143,7 +5167,7 @@ if (id === "contabilita") {
       clearSession();
 
       setHeaderUser();
-      updateUsersPendingBadge();
+      configurePendingUsersRefresh(false);
 
       showOnly("login");
 
@@ -5159,7 +5183,7 @@ if (id === "contabilita") {
 
     // =========================
 
-    function initAfterLogin(keepCurrentSection = false) {
+    function initAfterLogin(keepCurrentSection = false, reloadPendingUsers = true) {
 
       const btnUtenti = document.getElementById("btnUtenti");
 
@@ -5222,7 +5246,7 @@ if (id === "contabilita") {
 
  
 
-      updateUsersPendingBadge();
+      configurePendingUsersRefresh(reloadPendingUsers);
 
       if (!keepCurrentSection) showOnly("dashboard");
 
@@ -5240,9 +5264,10 @@ if (id === "contabilita") {
 
  
 
-    function renderUsersTable() {
+    function renderUsersTable(reloadFromStore = false) {
 
       if (!isAdmin()) return;
+      if (reloadFromStore && vnRemoteStore.reload) vnRemoteStore.reload();
 
  
 
@@ -5389,7 +5414,7 @@ sel.onchange = () => {
 
   setHeaderUser();
 
-  initAfterLogin(true);
+  initAfterLogin(true, false);
   updateUsersPendingBadge();
   renderUsersTable();
 
