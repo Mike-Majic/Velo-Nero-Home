@@ -2980,6 +2980,15 @@ table.invTable td:last-child{
       return "";
     }
 
+    function apiRoleFromLocal(role) {
+      const r = String(role || "").trim();
+      if (r === "Owner") return "owner";
+      if (r === "Boss") return "boss";
+      if (r === "Vice Boss") return "vice";
+      if (!r || r === "Nessuno") return "none";
+      return "member";
+    }
+
     function hasAssignedRole() {
       return !!myRole();
     }
@@ -3357,11 +3366,55 @@ table.invTable td:last-child{
 
     let pendingUsersRefreshTimer = null;
 
+    function apiSyncJson(method, url, body) {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url, false);
+      xhr.withCredentials = true;
+      if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+      try {
+        xhr.send(body === undefined ? undefined : JSON.stringify(body));
+        if (xhr.status < 200 || xhr.status >= 300) return null;
+        return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function authEmailExists(email) {
+      const out = apiSyncJson("GET", `/api/auth/exists?email=${encodeURIComponent(email)}`);
+      return out?.ok && out.exists ? out.user : null;
+    }
+
+    function syncSupabaseUsersToLocal() {
+      if (!isAdmin()) return;
+      const out = apiSyncJson("GET", "/api/admin/list-users");
+      if (!out?.ok || !Array.isArray(out.users)) return;
+      const users = loadUsers();
+      let changed = false;
+      out.users.forEach(remote => {
+        const email = String(remote.email || "").toLowerCase();
+        if (!email) return;
+        let u = users.find(x => (x.email || "").toLowerCase() === email);
+        if (!u) {
+          u = { id: uid(), email, blocked: false, passwordHash: null, gameName: "", totpSecret: null, totpNeedsSetup: false, role: "" };
+          users.push(u);
+          changed = true;
+        }
+        const remoteName = remote.name || remote.email || "";
+        const remoteRole = roleLabelFromApi(remote.role);
+        if (remoteName && !u.gameName) { u.gameName = remoteName; changed = true; }
+        if ((u.email || "").toLowerCase() === OWNER_EMAIL.toLowerCase() && u.role !== "Owner") { u.role = "Owner"; changed = true; }
+        else if ((u.role || "") !== remoteRole) { u.role = remoteRole; changed = true; }
+      });
+      if (changed) saveUsers(users);
+    }
+
     function updateUsersPendingBadge(reloadFromStore = false) {
       const btn = document.getElementById("btnUtenti");
       if (!btn) return;
       let badge = document.getElementById("usersPendingBadge");
       if (reloadFromStore && isAdmin() && vnRemoteStore.reload) vnRemoteStore.reload();
+      if (reloadFromStore) syncSupabaseUsersToLocal();
       const count = isAdmin() ? pendingRoleUsersCount() : 0;
       if (!count) {
         if (badge) badge.remove();
@@ -4710,6 +4763,14 @@ function logTagsLine(tagNames) {
 
       const existing = findUserByEmail(email);
       if (!existing) {
+        const remoteUser = authEmailExists(email);
+        if (remoteUser) {
+          document.getElementById("pwEmail").value = email;
+          document.getElementById("loginPassword").value = "";
+          document.getElementById("pwResetBox").style.display = "none";
+          showLoginStep("stepPassword");
+          return;
+        }
         document.getElementById("regEmail").value = email;
         document.getElementById("regGameName").value = "";
         document.getElementById("regPassword").value = "";
@@ -4727,7 +4788,7 @@ function logTagsLine(tagNames) {
 
  
 
-    function registerAccount() {
+    async function registerAccount() {
 
       if (!pendingEmail) return backToEmail();
       if (findUserByEmail(pendingEmail)) {
@@ -4748,6 +4809,19 @@ function logTagsLine(tagNames) {
       if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
 
       if (p1 !== p2) return alert("Le password non coincidono");
+
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: pendingEmail, password: p1, name: gameName })
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || !out.ok) throw new Error(out.error || "Registrazione non riuscita");
+      } catch (err) {
+        return alert(err?.message || "Registrazione non riuscita");
+      }
 
  
 
@@ -5268,6 +5342,7 @@ if (id === "contabilita") {
 
       if (!isAdmin()) return;
       if (reloadFromStore && vnRemoteStore.reload) vnRemoteStore.reload();
+      if (reloadFromStore) syncSupabaseUsersToLocal();
 
  
 
@@ -5397,6 +5472,12 @@ sel.onchange = () => {
  
 
   saveUsers(users);
+  fetch("/api/admin/set-role", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email: u.email, role: apiRoleFromLocal(u.role) })
+  }).catch(() => null);
 
  
 
