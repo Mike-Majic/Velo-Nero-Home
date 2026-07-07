@@ -457,11 +457,41 @@
       box-shadow:0 0 10px #ff0000aa;
       box-sizing:border-box;
     }
+    .userDeleteBadge{
+      position:absolute;
+      top:-10px;
+      left:-10px;
+      min-width:20px;
+      height:20px;
+      padding:0 6px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#d39a00;
+      border:2px solid #fff;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 0 10px #ffd34daa;
+      box-sizing:border-box;
+    }
     .usersTable tr.userPending td{
       background:rgba(211,154,0,.10);
       box-shadow:0 0 10px #ffd34d22 inset;
     }
     .pendingState{
+      display:inline-block;
+      padding:4px 8px;
+      border:1px solid #ffd34d;
+      border-radius:999px;
+      color:#ffe58a;
+      font-size:12px;
+      font-weight:900;
+      box-shadow:0 0 8px #ffd34d33 inset;
+    }
+    .deleteRequestState{
       display:inline-block;
       padding:4px 8px;
       border:1px solid #ffd34d;
@@ -477,6 +507,14 @@
       color:#fff;
       box-shadow:0 0 12px #ffd34d55 inset, 0 0 12px #ffcc0033;
       margin-top:8px;
+    }
+    .btn.deleteRequestBtn{
+      background:linear-gradient(145deg,#8b0000,#e02020);
+      border-color:#ff5a5a;
+      color:#fff;
+      box-shadow:0 0 12px #ff1a1a66 inset, 0 0 12px #ff000044;
+      margin-left:8px;
+      padding:7px 10px;
     }
 
     .disabled { opacity:.5; cursor:not-allowed; }
@@ -3364,6 +3402,14 @@ table.invTable td:last-child{
       return loadUsers().filter(isUserPendingRole).length;
     }
 
+    function isUserDeleteRequested(u) {
+      return !!u?.email && !!u.deleteRequested;
+    }
+
+    function deleteRequestUsersCount() {
+      return loadUsers().filter(isUserDeleteRequested).length;
+    }
+
     let pendingUsersRefreshTimer = null;
 
     function apiSyncJson(method, url, body) {
@@ -3418,16 +3464,31 @@ table.invTable td:last-child{
       const count = isAdmin() ? pendingRoleUsersCount() : 0;
       if (!count) {
         if (badge) badge.remove();
-        return;
-      }
-      if (!badge) {
+      } else if (!badge) {
         badge = document.createElement("span");
         badge.id = "usersPendingBadge";
         badge.className = "userNotifyBadge";
         btn.appendChild(badge);
       }
-      badge.textContent = String(count);
-      badge.title = `${count} utent${count === 1 ? "e" : "i"} senza ruolo`;
+      if (count && badge) {
+        badge.textContent = String(count);
+        badge.title = `${count} utent${count === 1 ? "e" : "i"} senza ruolo`;
+      }
+
+      let deleteBadge = document.getElementById("usersDeleteBadge");
+      const deleteCount = isAdmin() ? deleteRequestUsersCount() : 0;
+      if (!deleteCount) {
+        if (deleteBadge) deleteBadge.remove();
+      } else if (!deleteBadge) {
+        deleteBadge = document.createElement("span");
+        deleteBadge.id = "usersDeleteBadge";
+        deleteBadge.className = "userDeleteBadge";
+        btn.appendChild(deleteBadge);
+      }
+      if (deleteCount && deleteBadge) {
+        deleteBadge.textContent = String(deleteCount);
+        deleteBadge.title = `${deleteCount} richiesta${deleteCount === 1 ? "" : "e"} eliminazione`;
+      }
     }
 
     function configurePendingUsersRefresh(reloadNow = true) {
@@ -3462,6 +3523,22 @@ table.invTable td:last-child{
       ].join("\n");
       window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       logEvent("USER_PENDING_MESSAGE", `Email(${to})`);
+    }
+
+    function requestOwnUserDeletion(userId) {
+      const me = getMyUser();
+      const users = loadUsers();
+      const u = users.find(x => x.id === userId);
+      if (!me || !u || (u.email || "").toLowerCase() !== (me.email || "").toLowerCase()) {
+        return alert("Puoi richiedere la cancellazione solo della tua utenza.");
+      }
+      u.deleteRequested = true;
+      u.deleteRequestedAt = Date.now();
+      saveUsers(users);
+      logEvent("USER_DELETE_REQUEST", `Utente(${u.gameName || "—"} .. ${u.email || "—"})`);
+      updateUsersPendingBadge();
+      renderUsersTable(false);
+      alert("Richiesta eliminazione inviata.");
     }
 
  
@@ -5142,13 +5219,13 @@ function logTagsLine(tagNames) {
 
  
 
-      if (!hasAssignedRole() && id !== "dashboard") {
+      if (!hasAssignedRole() && id !== "dashboard" && id !== "utenti") {
 
         return showOnly("dashboard");
 
       }
 
-      if ((id === "utenti" || id === "log") && !isAdmin()) {
+      if (id === "log" && !isAdmin()) {
 
         return showOnly("dashboard");
 
@@ -5284,9 +5361,9 @@ if (id === "contabilita") {
 
       if (!isAdmin()) {
 
-        btnUtenti.style.display = "none";
+        btnUtenti.style.display = "inline-block";
 
-        cardUtenti.style.display = "none";
+        cardUtenti.style.display = "block";
 
         btnLog.style.display = "none";
         if (cardLog) cardLog.style.display = "none";
@@ -5340,13 +5417,15 @@ if (id === "contabilita") {
 
     function renderUsersTable(reloadFromStore = false) {
 
-      if (!isAdmin()) return;
+      const me = getMyUser();
+      if (!me) return;
       if (reloadFromStore && vnRemoteStore.reload) vnRemoteStore.reload();
       if (reloadFromStore) syncSupabaseUsersToLocal();
 
  
 
       const users = loadUsers()
+        .filter(u => isAdmin() || (u.email || "").toLowerCase() === (me.email || "").toLowerCase())
 
         .slice()
 
@@ -5445,7 +5524,7 @@ if (id === "contabilita") {
 
  
 
-        if ((u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) sel.disabled = true;
+        if (!isAdmin() || (u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) sel.disabled = true;
 
  
 
@@ -5518,7 +5597,8 @@ sel.onchange = () => {
 
         const tdState = document.createElement("td");
 
-        if (isPending) tdState.innerHTML = `<span class="pendingState">IN ATTESA</span>`;
+        if (isUserDeleteRequested(u)) tdState.innerHTML = `<span class="deleteRequestState">RICHIESTA ELIMINAZIONE</span>`;
+        else if (isPending) tdState.innerHTML = `<span class="pendingState">IN ATTESA</span>`;
         else tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
 
  
@@ -5529,6 +5609,7 @@ sel.onchange = () => {
 
         wrap.style.position = "relative";
         wrap.style.display = "inline-block";
+        if (!isAdmin()) wrap.style.display = "none";
 
  
 
@@ -5796,7 +5877,7 @@ if (s?.email === u.email) logout();
 
         tdActions.appendChild(wrap);
 
-        if (isPending) {
+        if (isPending && isAdmin()) {
           const msgBtn = document.createElement("button");
           msgBtn.className = "btn small pendingMail";
           msgBtn.textContent = "Invia messaggio";
@@ -5805,6 +5886,20 @@ if (s?.email === u.email) logout();
             sendPendingUserMessage(u.email);
           };
           tdActions.appendChild(msgBtn);
+        }
+
+        const canRequestDelete = (u.email || "").toLowerCase() === (me.email || "").toLowerCase() && !isUserDeleteRequested(u);
+        if (canRequestDelete) {
+          const delReqBtn = document.createElement("button");
+          delReqBtn.className = "btn small deleteRequestBtn";
+          delReqBtn.textContent = "✕";
+          delReqBtn.title = "Richiedi cancellazione";
+          delReqBtn.setAttribute("aria-label", "Richiedi cancellazione");
+          delReqBtn.onclick = (e) => {
+            e.stopPropagation();
+            requestOwnUserDeletion(u.id);
+          };
+          tdActions.appendChild(delReqBtn);
         }
 
  
