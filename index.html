@@ -4998,6 +4998,22 @@ function logTagsLine(tagNames) {
         };
         finishLogin(pendingUser);
       } catch (err) {
+        const remoteUser = authEmailExists(pendingEmail);
+        if (remoteUser) {
+          try {
+            const reg = await fetch("/api/auth/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ email: pendingEmail, password: pw, name: remoteUser.name || pendingEmail })
+            });
+            const created = await reg.json().catch(() => ({}));
+            if (reg.ok && created.ok) {
+              finishLogin({ email: created.user.email, gameName: created.user.name || created.user.email, roleApi: created.user.role || "none" });
+              return;
+            }
+          } catch {}
+        }
         alert(err?.message || "Email o password errata");
       }
 
