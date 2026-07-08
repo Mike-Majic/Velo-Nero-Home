@@ -2386,6 +2386,22 @@ table.invTable td:last-child{
             <button class="btn danger small" id="btnAccReset" onclick="accResetAll()" style="display:none;">AZZERA STIPENDI</button>
             <button class="btn danger small" id="btnAccMoneyReset" onclick="accResetMoneySummary()" style="display:none;">RESET RESOCONTO SOLDI</button>
           </div>
+          <div class="row" id="accMoneyCorrectionBox" style="display:none; margin-top:10px; align-items:flex-end;">
+            <div class="field" style="min-width:150px; flex:1;">
+              <label>Correttivo soldi</label>
+              <select id="accMoneyCorrectionType">
+                <option value="clean">Soldi puliti</option>
+                <option value="dirty">Soldi sporchi</option>
+                <option value="drug">Soldi spaccio</option>
+              </select>
+            </div>
+            <div class="field" style="min-width:130px; flex:1;">
+              <label>Importo (+/-)</label>
+              <input id="accMoneyCorrectionAmount" type="number" step="1" placeholder="es. 1000 o -1000" />
+            </div>
+            <button class="btn small salaryPaid" title="Conferma correttivo" onclick="accApplyMoneyCorrection()">✓</button>
+            <button class="btn danger small" title="Annulla correttivo" onclick="accClearMoneyCorrection()">✕</button>
+          </div>
 
         </div>
 
@@ -9056,6 +9072,7 @@ function invComputeTotals() {
       if (invResetBtn) invResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
       const invTotalsResetBtn = document.getElementById("btnInvTotalsReset");
       if (invTotalsResetBtn) invTotalsResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      accRenderSummary();
 
     }
 
@@ -10411,9 +10428,44 @@ function accRenderSummary() {
       if (accResetBtn) accResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
       const accMoneyResetBtn = document.getElementById("btnAccMoneyReset");
       if (accMoneyResetBtn) accMoneyResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      const accMoneyCorrectionBox = document.getElementById("accMoneyCorrectionBox");
+      if (accMoneyCorrectionBox) accMoneyCorrectionBox.style.display = canResetAccounting() ? "flex" : "none";
     }
 
  
+
+    function accClearMoneyCorrection() {
+      const amount = document.getElementById("accMoneyCorrectionAmount");
+      if (amount) amount.value = "";
+    }
+
+    function accApplyMoneyCorrection() {
+      if (!canResetAccounting()) return alert("Permesso negato");
+      const type = document.getElementById("accMoneyCorrectionType")?.value || "clean";
+      const amountEl = document.getElementById("accMoneyCorrectionAmount");
+      const raw = Number(amountEl?.value || 0);
+      const signed = Math.trunc(raw || 0);
+      if (!signed) return alert("Inserisci un importo diverso da zero.");
+      const amount = Math.abs(signed);
+      const money = { clean: 0, dirty: 0, drug: 0 };
+      money[type] = amount;
+      const all = accLoad();
+      all.push({
+        id: uid(),
+        ts: Date.now(),
+        kind: "balance",
+        type: signed > 0 ? "in" : "out",
+        amount: money,
+        note: "Correttivo resoconto soldi",
+        who: myGameNameOrEmail()
+      });
+      accSave(all);
+      const label = type === "dirty" ? "Sporchi" : type === "drug" ? "Spaccio" : "Puliti";
+      logEvent("ACC_MONEY_CORRECTION", `${signed > 0 ? "ENTRATA" : "USCITA"} .. ${label}(${formatMoney(amount)})`);
+      accClearMoneyCorrection();
+      accRenderSummary();
+    }
+
 
     function accResetAll() {
 
