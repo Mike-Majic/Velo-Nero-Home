@@ -9406,6 +9406,8 @@ p.innerHTML = `
               </div>
               <div class="muted" id="accSalaryMissingHint">Diviso sugli stipendi ancora da pagare.</div>
             </div>
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale stipendi da pagare</h4>
+            <div class="muted">Somma degli stipendi ancora da saldare per ogni persona.</div>
             <div class="tableWrap" style="margin-top:12px;">
               <table class="accTable">
                 <thead>
@@ -9424,7 +9426,6 @@ p.innerHTML = `
                 </tbody>
               </table>
             </div>
-
             <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale ultimi stipendi (pagati)</h4>
             <div class="muted">Somma degli stipendi già pagati per ogni persona.</div>
             <div class="tableWrap" style="margin-top:12px;">
@@ -10015,8 +10016,10 @@ function accApplySalaryMissingDeduction(groups) {
 }
 
 function accRenderSalaryTotalsTable() {
-  const body = document.getElementById("accSalaryTotalsBody");
-  if (!body) return;
+  const fallbackBody = document.getElementById("accSalaryTotalsBody");
+  const dueBody = document.getElementById("accSalaryTotalsDueBody");
+  const paidBody = document.getElementById("accSalaryTotalsPaidBody");
+  if (!fallbackBody && !dueBody && !paidBody) return;
   const missingInput = document.getElementById("accSalaryMissingAmount");
   const missingHint = document.getElementById("accSalaryMissingHint");
   const missingAmount = accSalaryMissingAmount();
@@ -10027,12 +10030,7 @@ function accRenderSalaryTotalsTable() {
       : "Diviso sugli stipendi ancora da pagare.";
   }
   const rows = accSalaryTotalsGroups();
-  if (!rows.length) {
-    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
-    return;
-  }
-  body.innerHTML = "";
-  rows.forEach(g => {
+  function buildTotalsRow(g) {
     const tr = document.createElement("tr");
     const nextStatus = g.status === "due" ? "paid" : "due";
     const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
@@ -10045,8 +10043,20 @@ function accRenderSalaryTotalsTable() {
       <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
       <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
     `;
-    body.appendChild(tr);
-  });
+    return tr;
+  }
+  function fillTotalsBody(body, list) {
+    if (!body) return;
+    if (!list.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+      return;
+    }
+    body.innerHTML = "";
+    list.forEach(g => body.appendChild(buildTotalsRow(g)));
+  }
+  if (fallbackBody) fillTotalsBody(fallbackBody, rows);
+  fillTotalsBody(dueBody, rows.filter(g => g.status === "due"));
+  fillTotalsBody(paidBody, rows.filter(g => g.status === "paid"));
 }
 
 function accSetSalaryGroupStatus(encodedKey, status) {
