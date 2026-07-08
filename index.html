@@ -2531,12 +2531,13 @@ table.invTable td:last-child{
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
           <div class="summaryActionsRow" style="margin-top:8px;">
+            <button class="btn small" id="btnInvTotalsToggle" onclick="toggleInvTotals()">Apri</button>
             <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetTotals()" style="display:none;">RESET RESOCONTO</button>
           </div>
 
  
 
-          <div style="margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
+          <div id="invTotalsTableWrap" style="display:none; margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
 
             <table style="margin-top:0;">
 
@@ -3064,7 +3065,7 @@ table.invTable td:last-child{
         "Acetone","Ammoniaca"
       ],
       varie: [
-        "Radio","Grimaldello","Bende","Medikit","Telecamera","Cibo","Bevande","Altri oggetti"
+        "Radio","Grimaldello","Bende","Medikit","Telecamera","Cibo","Bevande"
       ]
     };
 
@@ -3097,6 +3098,7 @@ table.invTable td:last-child{
     // Gestione Armi/Droga
 
     const INV_KEY = "vn_inv_v1";
+    let invTotalsOpen = false;
 
  
 
@@ -8072,7 +8074,7 @@ logEvent(
 
         "Radio","Grimaldello","Bende","Medikit","Telecamera",
 
-        "Cibo","Bevande","Altri oggetti"
+        "Cibo","Bevande"
 
       ]
 
@@ -8922,13 +8924,22 @@ function invComputeTotals() {
 
  
 
+    function toggleInvTotals() {
+      invTotalsOpen = !invTotalsOpen;
+      invRenderTotals();
+    }
+
     function invRenderTotals() {
 
       const body = document.getElementById("invTotalsBody");
 
       const moneyBox = document.getElementById("invMoneySummary");
+      const tableWrap = document.getElementById("invTotalsTableWrap");
+      const toggleBtn = document.getElementById("btnInvTotalsToggle");
 
       if (!body || !moneyBox) return;
+      if (toggleBtn) toggleBtn.textContent = invTotalsOpen ? "Chiudi" : "Apri";
+      if (tableWrap) tableWrap.style.display = invTotalsOpen ? "block" : "none";
 
  
 
