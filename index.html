@@ -9162,10 +9162,21 @@ function invComputeTotals() {
       return Math.max(0, Math.floor(Number(vnRemoteStore.getItem(ACC_SALARY_MISSING_KEY) || 0) || 0));
     }
 
+    function accSalaryMissingDeductionAmount() {
+      return Math.floor(accSalaryMissingAmount() * 0.5);
+    }
+
     function accSetSalaryMissingAmount(value) {
       const amount = Math.max(0, Math.floor(Number(value || 0) || 0));
       vnRemoteStore.setItem(ACC_SALARY_MISSING_KEY, String(amount));
       accRenderSalaryTotalsTable();
+    }
+
+    function accConsumeSalaryMissingDeduction(appliedDeduction) {
+      const applied = Math.max(0, Math.floor(Number(appliedDeduction || 0) || 0));
+      if (!applied) return;
+      const remainingRaw = Math.max(0, accSalaryMissingAmount() - (applied * 2));
+      vnRemoteStore.setItem(ACC_SALARY_MISSING_KEY, String(remainingRaw));
     }
 
     function accIsSalaryRow(r) {
@@ -10000,7 +10011,7 @@ function accDeductFromSalaryGroup(g, amount) {
 }
 
 function accApplySalaryMissingDeduction(groups) {
-  const missing = accSalaryMissingAmount();
+  const missing = accSalaryMissingDeductionAmount();
   const due = groups.filter(g => g.status === "due" && accSalaryGroupTotal(g) > 0);
   if (!missing || !due.length) return;
   const maxDeduction = due.reduce((sum, g) => sum + accSalaryGroupTotal(g), 0);
@@ -10015,6 +10026,28 @@ function accApplySalaryMissingDeduction(groups) {
   });
 }
 
+function accApplySalaryMissingToRows(all, personKey) {
+  const group = accSalaryTotalsGroups().find(g => g.status === "due" && g.key === personKey);
+  let left = Math.max(0, Math.floor(Number(group?.missingDeduction || 0) || 0));
+  if (!left) return 0;
+  let applied = 0;
+  ["clean", "dirty", "drug"].forEach(payType => {
+    if (left <= 0) return;
+    all
+      .filter(r => accIsSalaryRow(r) && (r.status || "paid") === "due" && accSalaryPersonKey(r) === personKey && (r.payType || "clean") === payType)
+      .forEach(r => {
+        if (left <= 0) return;
+        const amount = Math.max(0, Number(r.amount || 0) || 0);
+        const take = Math.min(amount, left);
+        r.amount = amount - take;
+        r.ammancoApplied = Math.max(0, Number(r.ammancoApplied || 0) || 0) + take;
+        left -= take;
+        applied += take;
+      });
+  });
+  return applied;
+}
+
 function accRenderSalaryTotalsTable() {
   const fallbackBody = document.getElementById("accSalaryTotalsBody");
   const dueBody = document.getElementById("accSalaryTotalsDueBody");
@@ -10023,11 +10056,12 @@ function accRenderSalaryTotalsTable() {
   const missingInput = document.getElementById("accSalaryMissingAmount");
   const missingHint = document.getElementById("accSalaryMissingHint");
   const missingAmount = accSalaryMissingAmount();
+  const deductionAmount = accSalaryMissingDeductionAmount();
   if (missingInput && document.activeElement !== missingInput) missingInput.value = missingAmount ? String(missingAmount) : "";
   if (missingHint) {
     missingHint.textContent = missingAmount
-      ? `${formatMoney(missingAmount)} scalati e divisi sugli stipendi ancora da pagare.`
-      : "Diviso sugli stipendi ancora da pagare.";
+      ? `Calcolo 50% ammanco: ${formatMoney(deductionAmount)} divisi sugli stipendi ancora da pagare.`
+      : "Viene calcolato il 50% e diviso sugli stipendi ancora da pagare.";
   }
   const rows = accSalaryTotalsGroups();
   function buildTotalsRow(g) {
@@ -10064,6 +10098,8 @@ function accSetSalaryGroupStatus(encodedKey, status) {
   const all = accLoad();
   const nextStatus = status === "paid" ? "paid" : "due";
   const now = Date.now();
+  const appliedMissing = nextStatus === "paid" ? accApplySalaryMissingToRows(all, key) : 0;
+  if (appliedMissing) accConsumeSalaryMissingDeduction(appliedMissing);
   all.forEach(r => {
     if (!accIsSalaryRow(r)) return;
     if (accSalaryPersonKey(r) !== key) return;
@@ -10071,7 +10107,7 @@ function accSetSalaryGroupStatus(encodedKey, status) {
     r.paidAt = nextStatus === "paid" ? now : null;
   });
   accSave(all);
-  logEvent("ACC_SALARY_TOTAL_STATUS", `Persona(${key}) .. Stato(${nextStatus})`);
+  logEvent("ACC_SALARY_TOTAL_STATUS", `Persona(${key}) .. Stato(${nextStatus})${appliedMissing ? ` .. Ammanco(${formatMoney(appliedMissing)})` : ""}`);
   accRenderDueTable();
   accRenderTable("Stipendi");
   accRenderSalaryTotalsTable();
@@ -10163,6 +10199,8 @@ function accSetSalaryStatus(id, status) {
  
 
   const s = (status === "paid") ? "paid" : "due";
+  const appliedMissing = s === "paid" ? accApplySalaryMissingToRows(all, accSalaryPersonKey(r)) : 0;
+  if (appliedMissing) accConsumeSalaryMissingDeduction(appliedMissing);
 
   r.status = s;
 
@@ -10182,7 +10220,7 @@ function accSetSalaryStatus(id, status) {
 
     "ACC_SALARY_STATUS",
 
-    `A(${r.to || "—"}) .. Importo(${Number(r.amount || 0).toLocaleString("it-IT")}) .. Stato(${s}) .. Tipo(${r.payType || "clean"})`
+    `A(${r.to || "—"}) .. Importo(${Number(r.amount || 0).toLocaleString("it-IT")}) .. Stato(${s}) .. Tipo(${r.payType || "clean"})${appliedMissing ? ` .. Ammanco(${formatMoney(appliedMissing)})` : ""}`
 
   );
 
