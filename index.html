@@ -220,32 +220,45 @@
     }
 
 
-    .brandHero{
-      position:relative;
-      display:inline-flex;
-      justify-content:center;
-      align-items:center;
-      min-height:120px;
-      margin:0 auto 6px;
-      isolation:isolate;
+    .brandHero {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      isolation: isolate;
     }
-    #brandBgLogo{
-      position:absolute;
-      width:min(280px,52vw);
-      height:auto;
-      opacity:.20;
-      filter:drop-shadow(0 0 16px #ff1a1a66);
-      -webkit-mask-image:radial-gradient(ellipse at center, #000 42%, rgba(0,0,0,.72) 58%, transparent 78%);
-      mask-image:radial-gradient(ellipse at center, #000 42%, rgba(0,0,0,.72) 58%, transparent 78%);
-      pointer-events:none;
-      z-index:0;
-      animation:brandLogoFade 6s ease-in-out infinite;
+
+    #brandBgLogo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 360px;
+      height: 360px;
+      object-fit: cover;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.34;
+      z-index: -1;
+      pointer-events: none;
+      filter: blur(1px) drop-shadow(0 0 28px rgba(255, 0, 0, 0.45));
+      -webkit-mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,.65) 62%, transparent 78%);
+      mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,.65) 62%, transparent 78%);
+      animation: brandLogoFade 4s ease-in-out infinite;
     }
-    @keyframes brandLogoFade{
-      0%,100%{ opacity:.05; }
-      50%{ opacity:.24; }
+
+    @keyframes brandLogoFade {
+      0%, 100% {
+        opacity: 0.12;
+      }
+      50% {
+        opacity: 0.45;
+      }
     }
-    .brandHero h1{ position:relative; z-index:1; margin:0; }
+
+    .brandHero h1 {
+      position: relative;
+      z-index: 1;
+    }
 
     .moneyCard.total.total-negative{
       background:linear-gradient(145deg,#600b0b,#2b0303);
@@ -423,6 +436,86 @@
     .salaryStatusDue { border-color:#ffd34d; color:#ffe58a; box-shadow:0 0 8px #ffd34d33 inset; }
 
     .small { padding:7px 10px; font-size:13px; border-radius:9px; }
+    #btnUtenti { position:relative; }
+    .userNotifyBadge{
+      position:absolute;
+      top:-10px;
+      right:-10px;
+      min-width:20px;
+      height:20px;
+      padding:0 6px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#ff1a1a;
+      border:2px solid #fff;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 0 10px #ff0000aa;
+      box-sizing:border-box;
+    }
+    .userDeleteBadge{
+      position:absolute;
+      top:-10px;
+      left:-10px;
+      min-width:20px;
+      height:20px;
+      padding:0 6px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#d39a00;
+      border:2px solid #fff;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 0 10px #ffd34daa;
+      box-sizing:border-box;
+    }
+    .usersTable tr.userPending td{
+      background:rgba(211,154,0,.10);
+      box-shadow:0 0 10px #ffd34d22 inset;
+    }
+    .pendingState{
+      display:inline-block;
+      padding:4px 8px;
+      border:1px solid #ffd34d;
+      border-radius:999px;
+      color:#ffe58a;
+      font-size:12px;
+      font-weight:900;
+      box-shadow:0 0 8px #ffd34d33 inset;
+    }
+    .deleteRequestState{
+      display:inline-block;
+      padding:4px 8px;
+      border:1px solid #ffd34d;
+      border-radius:999px;
+      color:#ffe58a;
+      font-size:12px;
+      font-weight:900;
+      box-shadow:0 0 8px #ffd34d33 inset;
+    }
+    .btn.pendingMail{
+      background:linear-gradient(145deg,#8a6a00,#d39a00);
+      border-color:#ffd34d;
+      color:#fff;
+      box-shadow:0 0 12px #ffd34d55 inset, 0 0 12px #ffcc0033;
+      margin-top:8px;
+    }
+    .btn.deleteRequestBtn{
+      background:linear-gradient(145deg,#8b0000,#e02020);
+      border-color:#ff5a5a;
+      color:#fff;
+      box-shadow:0 0 12px #ff1a1a66 inset, 0 0 12px #ff000044;
+      margin-left:8px;
+      padding:7px 10px;
+    }
 
     .disabled { opacity:.5; cursor:not-allowed; }
 
@@ -1556,7 +1649,7 @@ table.invTable td:last-child{
  
 
   <div class="brandHero">
-    <img id="brandBgLogo" src="logo.png" alt="Logo Velo Nero" />
+    <img id="brandBgLogo" src="logo.png" alt="" />
     <h1>VELO NERO</h1>
   </div>
 
@@ -2438,12 +2531,13 @@ table.invTable td:last-child{
 
           <div class="muted">Saldo item = aggiunti - rimossi (Gestione) + ottenuto/perso (Azioni) .. soldi separati.</div>
           <div class="summaryActionsRow" style="margin-top:8px;">
+            <button class="btn small" id="btnInvTotalsToggle" onclick="toggleInvTotals()">Apri</button>
             <button class="btn danger small" id="btnInvTotalsReset" onclick="invResetTotals()" style="display:none;">RESET RESOCONTO</button>
           </div>
 
  
 
-          <div style="margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
+          <div id="invTotalsTableWrap" style="display:none; margin-top:10px; border:1px solid #ff1a1a33; border-radius:10px; overflow:hidden;">
 
             <table style="margin-top:0;">
 
@@ -2925,6 +3019,15 @@ table.invTable td:last-child{
       return "";
     }
 
+    function apiRoleFromLocal(role) {
+      const r = String(role || "").trim();
+      if (r === "Owner") return "owner";
+      if (r === "Boss") return "boss";
+      if (r === "Vice Boss") return "vice";
+      if (!r || r === "Nessuno") return "none";
+      return "member";
+    }
+
     function hasAssignedRole() {
       return !!myRole();
     }
@@ -2958,11 +3061,11 @@ table.invTable td:last-child{
       droga: [
         "Marijuana / Erba","Cocaina","Metanfetamina","Crack","Eroina","Oppio","LSD",
         "MDMA / Ecstasy","Funghi","Speed / Anfetamine","Ketamina","Fentanyl","Hashish",
-        "Semi","Sostanze chimiche","Confezioni / Buste","Bilancino","Taglierino / Lametta",
+        "Semi","Sostanze chimiche","Confezioni / Buste","Bilancino",
         "Acetone","Ammoniaca"
       ],
       varie: [
-        "Radio","Grimaldello","Bende","Medikit","Telecamera","Cibo","Bevande","Altri oggetti"
+        "Radio","Grimaldello","Bende","Medikit","Telecamera","Cibo","Bevande"
       ]
     };
 
@@ -2995,12 +3098,14 @@ table.invTable td:last-child{
     // Gestione Armi/Droga
 
     const INV_KEY = "vn_inv_v1";
+    let invTotalsOpen = false;
 
  
 
     // Contabilità
 
     const ACC_KEY = "vn_accounting_v1";
+    const ACC_SALARY_MISSING_KEY = "vn_acc_salary_missing_v1";
     const ACTION_ITEMS_CUSTOM_KEY = "vn_action_items_custom_v2";
     const INV_ITEMS_CUSTOM_KEY = "vn_inv_items_custom_v1";
 
@@ -3166,13 +3271,13 @@ table.invTable td:last-child{
 
     function loadSession() {
 
-      try { return JSON.parse(vnRemoteStore.getItem(SESSION_KEY)) || null; } catch { return null; }
+      try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch { return null; }
 
     }
 
-    function saveSession(s) { vnRemoteStore.setItem(SESSION_KEY, JSON.stringify(s)); }
+    function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
 
-    function clearSession() { vnRemoteStore.removeItem(SESSION_KEY); }
+    function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
  
 
@@ -3291,6 +3396,141 @@ table.invTable td:last-child{
     }
 
     function isAdmin() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+
+    function isUserPendingRole(u) {
+      return !!u?.email && !String(u.role || "").trim();
+    }
+
+    function pendingRoleUsersCount() {
+      return loadUsers().filter(isUserPendingRole).length;
+    }
+
+    function isUserDeleteRequested(u) {
+      return !!u?.email && !!u.deleteRequested;
+    }
+
+    function deleteRequestUsersCount() {
+      return loadUsers().filter(isUserDeleteRequested).length;
+    }
+
+    function apiSyncJson(method, url, body) {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url, false);
+      xhr.withCredentials = true;
+      if (body !== undefined) xhr.setRequestHeader("Content-Type", "application/json");
+      try {
+        xhr.send(body === undefined ? undefined : JSON.stringify(body));
+        if (xhr.status < 200 || xhr.status >= 300) return null;
+        return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function authEmailExists(email) {
+      const out = apiSyncJson("GET", `/api/auth/exists?email=${encodeURIComponent(email)}`);
+      return out?.ok && out.exists ? out.user : null;
+    }
+
+    function syncSupabaseUsersToLocal() {
+      if (!isAdmin()) return;
+      const out = apiSyncJson("GET", "/api/admin/list-users");
+      if (!out?.ok || !Array.isArray(out.users)) return;
+      const users = loadUsers();
+      let changed = false;
+      out.users.forEach(remote => {
+        const email = String(remote.email || "").toLowerCase();
+        if (!email) return;
+        let u = users.find(x => (x.email || "").toLowerCase() === email);
+        if (!u) {
+          u = { id: uid(), email, blocked: false, passwordHash: null, gameName: "", totpSecret: null, totpNeedsSetup: false, role: "" };
+          users.push(u);
+          changed = true;
+        }
+        const remoteName = remote.name || remote.email || "";
+        const remoteRole = roleLabelFromApi(remote.role);
+        const localRole = u.role || "";
+        const hasDetailedLocalMemberRole = !!localRole && !["Owner","Boss","Vice Boss","Soldato"].includes(localRole);
+        if (remoteName && !u.gameName) { u.gameName = remoteName; changed = true; }
+        if ((u.email || "").toLowerCase() === OWNER_EMAIL.toLowerCase() && u.role !== "Owner") { u.role = "Owner"; changed = true; }
+        else if (remoteRole === "Soldato" && hasDetailedLocalMemberRole) { /* mantieni ruolo dettagliato locale */ }
+        else if ((u.role || "") !== remoteRole) { u.role = remoteRole; changed = true; }
+      });
+      if (changed) saveUsers(users);
+    }
+
+    function updateUsersPendingBadge(reloadFromStore = false) {
+      const btn = document.getElementById("btnUtenti");
+      if (!btn) return;
+      let badge = document.getElementById("usersPendingBadge");
+      if (reloadFromStore && isAdmin() && vnRemoteStore.reload) vnRemoteStore.reload();
+      if (reloadFromStore) syncSupabaseUsersToLocal();
+      const count = isAdmin() ? pendingRoleUsersCount() : 0;
+      if (!count) {
+        if (badge) badge.remove();
+      } else if (!badge) {
+        badge = document.createElement("span");
+        badge.id = "usersPendingBadge";
+        badge.className = "userNotifyBadge";
+        btn.appendChild(badge);
+      }
+      if (count && badge) {
+        badge.textContent = String(count);
+        badge.title = `${count} utent${count === 1 ? "e" : "i"} senza ruolo`;
+      }
+
+      let deleteBadge = document.getElementById("usersDeleteBadge");
+      const deleteCount = isAdmin() ? deleteRequestUsersCount() : 0;
+      if (!deleteCount) {
+        if (deleteBadge) deleteBadge.remove();
+      } else if (!deleteBadge) {
+        deleteBadge = document.createElement("span");
+        deleteBadge.id = "usersDeleteBadge";
+        deleteBadge.className = "userDeleteBadge";
+        btn.appendChild(deleteBadge);
+      }
+      if (deleteCount && deleteBadge) {
+        deleteBadge.textContent = String(deleteCount);
+        deleteBadge.title = `${deleteCount} richiesta${deleteCount === 1 ? "" : "e"} eliminazione`;
+      }
+    }
+
+    function configurePendingUsersRefresh(reloadNow = true) {
+      if (!isAdmin()) {
+        updateUsersPendingBadge();
+        return;
+      }
+      updateUsersPendingBadge(reloadNow);
+    }
+
+    function sendPendingUserMessage(email) {
+      const to = String(email || "").trim();
+      if (!to) return alert("Email utente non disponibile.");
+      const subject = "Registrazione Velo Nero";
+      const body = [
+        "Ciao!",
+        "Ti sei registrato nel sistema privato di Velo Nero.",
+        "Da chi sei stato autorizzato ad iscriverti?"
+      ].join("\n");
+      window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      logEvent("USER_PENDING_MESSAGE", `Email(${to})`);
+    }
+
+    function requestOwnUserDeletion(userId) {
+      const me = getMyUser();
+      const users = loadUsers();
+      const u = users.find(x => x.id === userId);
+      if (!me || !u || (u.email || "").toLowerCase() !== (me.email || "").toLowerCase()) {
+        return alert("Puoi richiedere la cancellazione solo della tua utenza.");
+      }
+      u.deleteRequested = true;
+      u.deleteRequestedAt = Date.now();
+      saveUsers(users);
+      logEvent("USER_DELETE_REQUEST", `Utente(${u.gameName || "—"} .. ${u.email || "—"})`);
+      updateUsersPendingBadge();
+      renderUsersTable(false);
+      alert("Richiesta eliminazione inviata.");
+    }
 
  
 
@@ -4190,13 +4430,13 @@ function logTagsLine(tagNames) {
 
     function getDeviceId() {
 
-      let id = vnRemoteStore.getItem(DEVICE_ID_KEY);
+      let id = localStorage.getItem(DEVICE_ID_KEY);
 
       if (!id) {
 
         id = (Math.random().toString(16).slice(2) + Date.now().toString(16));
 
-        vnRemoteStore.setItem(DEVICE_ID_KEY, id);
+        localStorage.setItem(DEVICE_ID_KEY, id);
 
       }
 
@@ -4206,11 +4446,11 @@ function logTagsLine(tagNames) {
 
     function loadTrusted() {
 
-      try { return JSON.parse(vnRemoteStore.getItem(TRUST_KEY)) || {}; } catch { return {}; }
+      try { return JSON.parse(localStorage.getItem(TRUST_KEY)) || {}; } catch { return {}; }
 
     }
 
-    function saveTrusted(obj) { vnRemoteStore.setItem(TRUST_KEY, JSON.stringify(obj)); }
+    function saveTrusted(obj) { localStorage.setItem(TRUST_KEY, JSON.stringify(obj)); }
 
     function isTrustedForEmail(email) {
 
@@ -4483,6 +4723,9 @@ function logTagsLine(tagNames) {
         if (btn) btn.textContent = "Mostra QR";
 
         if (confirm) confirm.checked = false;
+      } else {
+        if (wrap) wrap.style.display = "block";
+        if (btn) btn.textContent = "Nascondi QR";
 
       }
 
@@ -4584,18 +4827,42 @@ function logTagsLine(tagNames) {
       if (!email || !email.includes("@")) return alert("Inserisci un'email valida");
 
       pendingEmail = email;
+      pendingUser = null;
+
+      const existing = findUserByEmail(email);
+      if (!existing) {
+        const remoteUser = authEmailExists(email);
+        if (remoteUser) {
+          document.getElementById("pwEmail").value = email;
+          document.getElementById("loginPassword").value = "";
+          document.getElementById("pwResetBox").style.display = "none";
+          showLoginStep("stepPassword");
+          return;
+        }
+        document.getElementById("regEmail").value = email;
+        document.getElementById("regGameName").value = "";
+        document.getElementById("regPassword").value = "";
+        document.getElementById("regPassword2").value = "";
+        showLoginStep("stepRegister");
+        return;
+      }
+
       document.getElementById("pwEmail").value = email;
       document.getElementById("loginPassword").value = "";
-      document.getElementById("pwResetBox").style.display = "none";
+      document.getElementById("pwResetBox").style.display = existing.passwordHash ? "none" : "flex";
       showLoginStep("stepPassword");
 
     }
 
  
 
-    function registerAccount() {
+    async function registerAccount() {
 
       if (!pendingEmail) return backToEmail();
+      if (findUserByEmail(pendingEmail)) {
+        alert("Email già registrata. Effettua il login.");
+        return loginStepEmail();
+      }
 
  
 
@@ -4610,6 +4877,19 @@ function logTagsLine(tagNames) {
       if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
 
       if (p1 !== p2) return alert("Le password non coincidono");
+
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: pendingEmail, password: p1, name: gameName })
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || !out.ok) throw new Error(out.error || "Registrazione non riuscita");
+      } catch (err) {
+        return alert(err?.message || "Registrazione non riuscita");
+      }
 
  
 
@@ -4626,6 +4906,7 @@ function logTagsLine(tagNames) {
       ref.totpNeedsSetup = true;
 
       saveUsers(users);
+      updateUsersPendingBadge();
 
       pendingUser = ref;
 
@@ -4660,6 +4941,38 @@ function logTagsLine(tagNames) {
       const pw = document.getElementById("loginPassword").value || "";
       if (!pw) return alert("Inserisci la password");
 
+      const localUser = findUserByEmail(pendingEmail);
+      if (localUser && localUser.passwordHash) {
+        if (localUser.blocked) return alert("Account bloccato.");
+        if (localUser.passwordHash !== simpleHash(pw)) return alert("Email o password errata");
+        if (!localUser.totpSecret) {
+          const users = loadUsers();
+          const ref = users.find(x => (x.email || "").toLowerCase() === localUser.email);
+          if (ref) {
+            ref.totpSecret = generateTotpSecret();
+            ref.totpNeedsSetup = true;
+            saveUsers(users);
+            localUser.totpSecret = ref.totpSecret;
+            localUser.totpNeedsSetup = true;
+          }
+        }
+        if (!localUser.totpNeedsSetup && isTrustedForEmail(localUser.email)) {
+          finishLogin(localUser);
+          return;
+        }
+        pendingUser = localUser;
+        document.getElementById("twofaEmailInline").value = localUser.email;
+        document.getElementById("twofaSecretInline").value = localUser.totpSecret || "";
+        if (localUser.totpSecret) generate2FAQRCode(localUser.email, localUser.totpSecret);
+        show2FASetupUI(true);
+        document.getElementById("twofaHintInline").textContent = localUser.totpNeedsSetup
+          ? "Scansiona il QR (o inserisci la chiave), poi inserisci il codice 2FA."
+          : "Se non hai Authenticator configurato, scansiona il QR. Altrimenti inserisci il codice 2FA.";
+        document.getElementById("login2fa").value = "";
+        showLoginStep("step2FA");
+        return;
+      }
+
       try {
         const res = await fetch("/api/auth/login", {
           method: "POST",
@@ -4676,8 +4989,47 @@ function logTagsLine(tagNames) {
         };
         finishLogin(pendingUser);
       } catch (err) {
+        const remoteUser = authEmailExists(pendingEmail);
+        if (remoteUser) {
+          try {
+            const reg = await fetch("/api/auth/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ email: pendingEmail, password: pw, name: remoteUser.name || pendingEmail })
+            });
+            const created = await reg.json().catch(() => ({}));
+            if (reg.ok && created.ok) {
+              finishLogin({ email: created.user.email, gameName: created.user.name || created.user.email, roleApi: created.user.role || "none" });
+              return;
+            }
+          } catch {}
+        }
         alert(err?.message || "Email o password errata");
       }
+
+    }
+
+    function saveNewPassword() {
+
+      if (!pendingEmail) return backToEmail();
+
+      const p1 = document.getElementById("newPassword").value || "";
+      const p2 = document.getElementById("newPassword2").value || "";
+      if (!p1 || p1.length < 6) return alert("Password troppo corta (min 6)");
+      if (p1 !== p2) return alert("Le password non coincidono");
+
+      const users = loadUsers();
+      const u = users.find(x => (x.email || "").toLowerCase() === pendingEmail);
+      if (!u) return backToEmail();
+
+      u.passwordHash = simpleHash(p1);
+      saveUsers(users);
+      document.getElementById("newPassword").value = "";
+      document.getElementById("newPassword2").value = "";
+      document.getElementById("pwResetBox").style.display = "none";
+      alert("Password salvata. Ora puoi accedere.");
+      updateUsersPendingBadge();
 
     }
 
@@ -4874,13 +5226,13 @@ function logTagsLine(tagNames) {
 
  
 
-      if (!hasAssignedRole() && id !== "dashboard") {
+      if (!hasAssignedRole() && id !== "dashboard" && id !== "utenti") {
 
         return showOnly("dashboard");
 
       }
 
-      if ((id === "utenti" || id === "log") && !isAdmin()) {
+      if (id === "log" && !isAdmin()) {
 
         return showOnly("dashboard");
 
@@ -4892,7 +5244,7 @@ function logTagsLine(tagNames) {
 
  
 
-      if (id === "utenti") renderUsersTable();
+      if (id === "utenti") renderUsersTable(true);
 
  
 
@@ -4971,8 +5323,10 @@ if (id === "contabilita") {
       logEvent("LOGOUT", "Uscita");
 
       clearSession();
+      fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => null);
 
       setHeaderUser();
+      configurePendingUsersRefresh(false);
 
       showOnly("login");
 
@@ -4988,7 +5342,7 @@ if (id === "contabilita") {
 
     // =========================
 
-    function initAfterLogin(keepCurrentSection = false) {
+    function initAfterLogin(keepCurrentSection = false, reloadPendingUsers = true) {
 
       const btnUtenti = document.getElementById("btnUtenti");
 
@@ -5015,9 +5369,9 @@ if (id === "contabilita") {
 
       if (!isAdmin()) {
 
-        btnUtenti.style.display = "none";
+        btnUtenti.style.display = "inline-block";
 
-        cardUtenti.style.display = "none";
+        cardUtenti.style.display = "block";
 
         btnLog.style.display = "none";
         if (cardLog) cardLog.style.display = "none";
@@ -5051,6 +5405,8 @@ if (id === "contabilita") {
 
  
 
+      configurePendingUsersRefresh(reloadPendingUsers);
+
       if (!keepCurrentSection) showOnly("dashboard");
 
     }
@@ -5067,13 +5423,17 @@ if (id === "contabilita") {
 
  
 
-    function renderUsersTable() {
+    function renderUsersTable(reloadFromStore = false) {
 
-      if (!isAdmin()) return;
+      const me = getMyUser();
+      if (!me) return;
+      if (reloadFromStore && vnRemoteStore.reload) vnRemoteStore.reload();
+      if (reloadFromStore) syncSupabaseUsersToLocal();
 
  
 
       const users = loadUsers()
+        .filter(u => isAdmin() || (u.email || "").toLowerCase() === (me.email || "").toLowerCase())
 
         .slice()
 
@@ -5096,6 +5456,8 @@ if (id === "contabilita") {
       users.forEach(u => {
 
         const tr = document.createElement("tr");
+        const isPending = isUserPendingRole(u);
+        if (isPending) tr.classList.add("userPending");
 
  
 
@@ -5170,7 +5532,7 @@ if (id === "contabilita") {
 
  
 
-        if ((u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) sel.disabled = true;
+        if (!isAdmin() || (u.role || "") === "Owner" || (u.email||"").toLowerCase() === OWNER_EMAIL.toLowerCase()) sel.disabled = true;
 
  
 
@@ -5188,15 +5550,32 @@ sel.onchange = () => {
 
  
 
-  const oldRole = u.role || "—";
+  const oldRoleRaw = u.role || "";
 
-  const newRole = sel.value || "—";
+  const newRoleRaw = sel.value || "";
 
-  u.role = sel.value || "";
+  const oldRole = oldRoleRaw || "—";
+
+  const newRole = newRoleRaw || "—";
+
+  const okRoleChange = confirm(`Confermi modifica ruolo per ${u.gameName || u.email || "utente"}?\n\nDa: ${oldRole}\nA: ${newRole}`);
+
+  if (!okRoleChange) {
+    sel.value = oldRoleRaw;
+    return;
+  }
+
+  u.role = newRoleRaw;
 
  
 
   saveUsers(users);
+  fetch("/api/admin/set-role", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email: u.email, role: apiRoleFromLocal(u.role) })
+  }).catch(() => null);
 
  
 
@@ -5214,7 +5593,8 @@ sel.onchange = () => {
 
   setHeaderUser();
 
-  initAfterLogin(true);
+  initAfterLogin(true, false);
+  updateUsersPendingBadge();
   renderUsersTable();
 
   renderTagList();
@@ -5236,7 +5616,9 @@ sel.onchange = () => {
 
         const tdState = document.createElement("td");
 
-        tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
+        if (isUserDeleteRequested(u)) tdState.innerHTML = `<span class="deleteRequestState">RICHIESTA ELIMINAZIONE</span>`;
+        else if (isPending) tdState.innerHTML = `<span class="pendingState">IN ATTESA</span>`;
+        else tdState.textContent = u.blocked ? "BLOCCATO" : "ATTIVO";
 
  
 
@@ -5245,6 +5627,8 @@ sel.onchange = () => {
         const wrap = document.createElement("div");
 
         wrap.style.position = "relative";
+        wrap.style.display = "inline-block";
+        if (!isAdmin()) wrap.style.display = "none";
 
  
 
@@ -5512,6 +5896,31 @@ if (s?.email === u.email) logout();
 
         tdActions.appendChild(wrap);
 
+        if (isPending && isAdmin()) {
+          const msgBtn = document.createElement("button");
+          msgBtn.className = "btn small pendingMail";
+          msgBtn.textContent = "Invia messaggio";
+          msgBtn.onclick = (e) => {
+            e.stopPropagation();
+            sendPendingUserMessage(u.email);
+          };
+          tdActions.appendChild(msgBtn);
+        }
+
+        const canRequestDelete = (u.email || "").toLowerCase() === (me.email || "").toLowerCase() && !isUserDeleteRequested(u);
+        if (canRequestDelete) {
+          const delReqBtn = document.createElement("button");
+          delReqBtn.className = "btn small deleteRequestBtn";
+          delReqBtn.textContent = "✕";
+          delReqBtn.title = "Richiedi cancellazione";
+          delReqBtn.setAttribute("aria-label", "Richiedi cancellazione");
+          delReqBtn.onclick = (e) => {
+            e.stopPropagation();
+            requestOwnUserDeletion(u.id);
+          };
+          tdActions.appendChild(delReqBtn);
+        }
+
  
 
         tr.appendChild(tdGameName);
@@ -5529,6 +5938,7 @@ if (s?.email === u.email) logout();
         usersTableBody.appendChild(tr);
 
       });
+      updateUsersPendingBadge();
 
     }
 
@@ -7655,8 +8065,6 @@ logEvent(
 
         "Bilancino",
 
-        "Taglierino / Lametta",
-
         "Acetone",
 
         "Ammoniaca"
@@ -7667,7 +8075,7 @@ logEvent(
 
         "Radio","Grimaldello","Bende","Medikit","Telecamera",
 
-        "Cibo","Bevande","Altri oggetti"
+        "Cibo","Bevande"
 
       ]
 
@@ -8517,13 +8925,22 @@ function invComputeTotals() {
 
  
 
+    function toggleInvTotals() {
+      invTotalsOpen = !invTotalsOpen;
+      invRenderTotals();
+    }
+
     function invRenderTotals() {
 
       const body = document.getElementById("invTotalsBody");
 
       const moneyBox = document.getElementById("invMoneySummary");
+      const tableWrap = document.getElementById("invTotalsTableWrap");
+      const toggleBtn = document.getElementById("btnInvTotalsToggle");
 
       if (!body || !moneyBox) return;
+      if (toggleBtn) toggleBtn.textContent = invTotalsOpen ? "Chiudi" : "Apri";
+      if (tableWrap) tableWrap.style.display = invTotalsOpen ? "block" : "none";
 
  
 
@@ -8740,6 +9157,27 @@ function invComputeTotals() {
     }
 
     function accSave(arr) { vnRemoteStore.setItem(ACC_KEY, JSON.stringify(arr || [])); }
+
+    function accSalaryMissingAmount() {
+      return Math.max(0, Math.floor(Number(vnRemoteStore.getItem(ACC_SALARY_MISSING_KEY) || 0) || 0));
+    }
+
+    function accSalaryMissingDeductionAmount() {
+      return Math.floor(accSalaryMissingAmount() * 0.5);
+    }
+
+    function accSetSalaryMissingAmount(value) {
+      const amount = Math.max(0, Math.floor(Number(value || 0) || 0));
+      vnRemoteStore.setItem(ACC_SALARY_MISSING_KEY, String(amount));
+      accRenderSalaryTotalsTable();
+    }
+
+    function accConsumeSalaryMissingDeduction(appliedDeduction) {
+      const applied = Math.max(0, Math.floor(Number(appliedDeduction || 0) || 0));
+      if (!applied) return;
+      const remainingRaw = Math.max(0, accSalaryMissingAmount() - (applied * 2));
+      vnRemoteStore.setItem(ACC_SALARY_MISSING_KEY, String(remainingRaw));
+    }
 
     function accIsSalaryRow(r) {
       return r && r.kind === "salary" && r.source !== "inv";
@@ -8972,6 +9410,15 @@ p.innerHTML = `
           p.innerHTML = `
             <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totale Stipendi</h3>
             <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni.</div>
+            <div class="row" style="margin-top:10px; align-items:flex-end;">
+              <div class="field" style="max-width:260px;">
+                <label>Ammanco cassa da scalare</label>
+                <input id="accSalaryMissingAmount" type="number" min="0" step="1" placeholder="es. 10000" oninput="accSetSalaryMissingAmount(this.value)" />
+              </div>
+              <div class="muted" id="accSalaryMissingHint">Diviso sugli stipendi ancora da pagare.</div>
+            </div>
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale stipendi da pagare</h4>
+            <div class="muted">Somma degli stipendi ancora da saldare per ogni persona.</div>
             <div class="tableWrap" style="margin-top:12px;">
               <table class="accTable">
                 <thead>
@@ -8985,7 +9432,27 @@ p.innerHTML = `
                     <th style="width:180px;">Azioni</th>
                   </tr>
                 </thead>
-                <tbody id="accSalaryTotalsBody">
+                <tbody id="accSalaryTotalsDueBody">
+                  <tr><td class="muted" colspan="7">Nessun dato</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale ultimi stipendi (pagati)</h4>
+            <div class="muted">Somma degli stipendi già pagati per ogni persona.</div>
+            <div class="tableWrap" style="margin-top:12px;">
+              <table class="accTable">
+                <thead>
+                  <tr>
+                    <th style="width:240px;">Nome</th>
+                    <th style="width:160px;">Puliti</th>
+                    <th style="width:160px;">Sporchi</th>
+                    <th style="width:160px;">Spaccio</th>
+                    <th style="width:120px;">Righe</th>
+                    <th style="width:160px;">Stato</th>
+                    <th style="width:180px;">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="accSalaryTotalsPaidBody">
                   <tr><td class="muted" colspan="7">Nessun dato</td></tr>
                 </tbody>
               </table>
@@ -9521,27 +9988,88 @@ function accSalaryTotalsGroups() {
     g.count += 1;
     g.latestTs = Math.max(g.latestTs, Number(r.ts || 0));
   });
-  return Array.from(groups.values()).sort((a,b) => {
+  const out = Array.from(groups.values());
+  accApplySalaryMissingDeduction(out);
+  return out.sort((a,b) => {
     if (a.status !== b.status) return a.status === "due" ? -1 : 1;
     return (b.latestTs || 0) - (a.latestTs || 0);
   });
 }
 
+function accSalaryGroupTotal(g) {
+  return Number(g.clean || 0) + Number(g.dirty || 0) + Number(g.drug || 0);
+}
+
+function accDeductFromSalaryGroup(g, amount) {
+  let left = Math.max(0, Math.floor(Number(amount || 0) || 0));
+  ["clean", "dirty", "drug"].forEach(k => {
+    if (left <= 0) return;
+    const take = Math.min(Number(g[k] || 0), left);
+    g[k] = Number(g[k] || 0) - take;
+    left -= take;
+  });
+}
+
+function accApplySalaryMissingDeduction(groups) {
+  const missing = accSalaryMissingDeductionAmount();
+  const due = groups.filter(g => g.status === "due" && accSalaryGroupTotal(g) > 0);
+  if (!missing || !due.length) return;
+  const maxDeduction = due.reduce((sum, g) => sum + accSalaryGroupTotal(g), 0);
+  let amount = Math.min(missing, maxDeduction);
+  const base = Math.floor(amount / due.length);
+  let rem = amount - (base * due.length);
+  due.forEach(g => {
+    const deduction = Math.min(accSalaryGroupTotal(g), base + (rem > 0 ? 1 : 0));
+    if (rem > 0) rem--;
+    g.missingDeduction = deduction;
+    accDeductFromSalaryGroup(g, deduction);
+  });
+}
+
+function accApplySalaryMissingToRows(all, personKey) {
+  const group = accSalaryTotalsGroups().find(g => g.status === "due" && g.key === personKey);
+  let left = Math.max(0, Math.floor(Number(group?.missingDeduction || 0) || 0));
+  if (!left) return 0;
+  let applied = 0;
+  ["clean", "dirty", "drug"].forEach(payType => {
+    if (left <= 0) return;
+    all
+      .filter(r => accIsSalaryRow(r) && (r.status || "paid") === "due" && accSalaryPersonKey(r) === personKey && (r.payType || "clean") === payType)
+      .forEach(r => {
+        if (left <= 0) return;
+        const amount = Math.max(0, Number(r.amount || 0) || 0);
+        const take = Math.min(amount, left);
+        r.amount = amount - take;
+        r.ammancoApplied = Math.max(0, Number(r.ammancoApplied || 0) || 0) + take;
+        left -= take;
+        applied += take;
+      });
+  });
+  return applied;
+}
+
 function accRenderSalaryTotalsTable() {
-  const body = document.getElementById("accSalaryTotalsBody");
-  if (!body) return;
-  const rows = accSalaryTotalsGroups();
-  if (!rows.length) {
-    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
-    return;
+  const fallbackBody = document.getElementById("accSalaryTotalsBody");
+  const dueBody = document.getElementById("accSalaryTotalsDueBody");
+  const paidBody = document.getElementById("accSalaryTotalsPaidBody");
+  if (!fallbackBody && !dueBody && !paidBody) return;
+  const missingInput = document.getElementById("accSalaryMissingAmount");
+  const missingHint = document.getElementById("accSalaryMissingHint");
+  const missingAmount = accSalaryMissingAmount();
+  const deductionAmount = accSalaryMissingDeductionAmount();
+  if (missingInput && document.activeElement !== missingInput) missingInput.value = missingAmount ? String(missingAmount) : "";
+  if (missingHint) {
+    missingHint.textContent = missingAmount
+      ? `Calcolo 50% ammanco: ${formatMoney(deductionAmount)} divisi sugli stipendi ancora da pagare.`
+      : "Viene calcolato il 50% e diviso sugli stipendi ancora da pagare.";
   }
-  body.innerHTML = "";
-  rows.forEach(g => {
+  const rows = accSalaryTotalsGroups();
+  function buildTotalsRow(g) {
     const tr = document.createElement("tr");
     const nextStatus = g.status === "due" ? "paid" : "due";
     const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
     tr.innerHTML = `
-      <td style="font-weight:900;">${escapeHtml(g.to || "—")}</td>
+      <td style="font-weight:900;">${escapeHtml(g.to || "—")}${g.missingDeduction ? `<div class="muted" style="font-size:11px;">Ammanco -${formatMoney(g.missingDeduction)}</div>` : ""}</td>
       <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
       <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
       <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
@@ -9549,8 +10077,20 @@ function accRenderSalaryTotalsTable() {
       <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
       <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
     `;
-    body.appendChild(tr);
-  });
+    return tr;
+  }
+  function fillTotalsBody(body, list) {
+    if (!body) return;
+    if (!list.length) {
+      body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+      return;
+    }
+    body.innerHTML = "";
+    list.forEach(g => body.appendChild(buildTotalsRow(g)));
+  }
+  if (fallbackBody) fillTotalsBody(fallbackBody, rows);
+  fillTotalsBody(dueBody, rows.filter(g => g.status === "due"));
+  fillTotalsBody(paidBody, rows.filter(g => g.status === "paid"));
 }
 
 function accSetSalaryGroupStatus(encodedKey, status) {
@@ -9558,6 +10098,8 @@ function accSetSalaryGroupStatus(encodedKey, status) {
   const all = accLoad();
   const nextStatus = status === "paid" ? "paid" : "due";
   const now = Date.now();
+  const appliedMissing = nextStatus === "paid" ? accApplySalaryMissingToRows(all, key) : 0;
+  if (appliedMissing) accConsumeSalaryMissingDeduction(appliedMissing);
   all.forEach(r => {
     if (!accIsSalaryRow(r)) return;
     if (accSalaryPersonKey(r) !== key) return;
@@ -9565,7 +10107,7 @@ function accSetSalaryGroupStatus(encodedKey, status) {
     r.paidAt = nextStatus === "paid" ? now : null;
   });
   accSave(all);
-  logEvent("ACC_SALARY_TOTAL_STATUS", `Persona(${key}) .. Stato(${nextStatus})`);
+  logEvent("ACC_SALARY_TOTAL_STATUS", `Persona(${key}) .. Stato(${nextStatus})${appliedMissing ? ` .. Ammanco(${formatMoney(appliedMissing)})` : ""}`);
   accRenderDueTable();
   accRenderTable("Stipendi");
   accRenderSalaryTotalsTable();
@@ -9657,6 +10199,8 @@ function accSetSalaryStatus(id, status) {
  
 
   const s = (status === "paid") ? "paid" : "due";
+  const appliedMissing = s === "paid" ? accApplySalaryMissingToRows(all, accSalaryPersonKey(r)) : 0;
+  if (appliedMissing) accConsumeSalaryMissingDeduction(appliedMissing);
 
   r.status = s;
 
@@ -9676,7 +10220,7 @@ function accSetSalaryStatus(id, status) {
 
     "ACC_SALARY_STATUS",
 
-    `A(${r.to || "—"}) .. Importo(${Number(r.amount || 0).toLocaleString("it-IT")}) .. Stato(${s}) .. Tipo(${r.payType || "clean"})`
+    `A(${r.to || "—"}) .. Importo(${Number(r.amount || 0).toLocaleString("it-IT")}) .. Stato(${s}) .. Tipo(${r.payType || "clean"})${appliedMissing ? ` .. Ammanco(${formatMoney(appliedMissing)})` : ""}`
 
   );
 
