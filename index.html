@@ -2522,15 +2522,6 @@ table.invTable td:last-child{
 
         <div id="invPanels"></div>
 
-        <div id="invManagePanel" class="panel" style="display:none;">
-          <h3 style="margin:0 0 8px 0; color:var(--red2); font-weight:900;">Gestione (Owner/Boss/Vice Boss)</h3>
-          <div class="muted">Pulizia righe gestione senza modificare resoconto soldi o item.</div>
-          <div class="row" style="margin-top:14px;">
-            <button class="btn danger" onclick="invResetAll()">AZZERA GESTIONE</button>
-            <div class="muted">Cancella solo le registrazioni visibili.</div>
-          </div>
-        </div>
-
       </div>
 
  
@@ -2598,7 +2589,8 @@ table.invTable td:last-child{
           </div>
 
           <div class="summaryActionsRow">
-            <button class="btn danger small" id="btnInvReset" onclick="invResetAll()" style="display:none;">AZZERA GESTIONE</button>
+            <button class="btn danger small" id="btnInvMoneyReset" onclick="invResetMoneyTotals()" style="display:none;">AZZERA IMPORTI</button>
+            <button class="btn danger small" id="btnInvReset" onclick="invResetAll()" style="display:none;">AZZERA REGISTRAZIONI</button>
           </div>
 
         </div>
@@ -9066,10 +9058,10 @@ function invComputeTotals() {
 
       animateMoneyValue(sS, sal.drug, "invMoneyDrugSal");
 
-      const invManagePanel = document.getElementById("invManagePanel");
-      if (invManagePanel) invManagePanel.style.display = canResetAccounting() ? "block" : "none";
       const invResetBtn = document.getElementById("btnInvReset");
       if (invResetBtn) invResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
+      const invMoneyResetBtn = document.getElementById("btnInvMoneyReset");
+      if (invMoneyResetBtn) invMoneyResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
       const invTotalsResetBtn = document.getElementById("btnInvTotalsReset");
       if (invTotalsResetBtn) invTotalsResetBtn.style.display = canResetAccounting() ? "inline-flex" : "none";
       accRenderSummary();
@@ -9077,6 +9069,37 @@ function invComputeTotals() {
     }
 
  
+
+    function invResetMoneyTotals() {
+      if (!canResetAccounting()) return alert("Permesso negato");
+      const { addMoney, remMoney } = invComputeTotals();
+      const sal = {
+        clean: addMoney.clean - remMoney.clean,
+        dirty: addMoney.dirty - remMoney.dirty,
+        drug: addMoney.drug - remMoney.drug
+      };
+      if (!sal.clean && !sal.dirty && !sal.drug) return alert("Resoconto importi già a zero.");
+      const ok = confirm("Confermi AZZERA IMPORTI? Verranno azzerati solo i soldi del resoconto Gestione, senza cancellare registrazioni o item.");
+      if (!ok) return;
+      const addCorrection = { clean: 0, dirty: 0, drug: 0 };
+      const remCorrection = { clean: 0, dirty: 0, drug: 0 };
+      ["clean", "dirty", "drug"].forEach(k => {
+        if (sal[k] > 0) remCorrection[k] = sal[k];
+        else if (sal[k] < 0) addCorrection[k] = Math.abs(sal[k]);
+      });
+      const records = invLoad();
+      const now = Date.now();
+      if (addCorrection.clean || addCorrection.dirty || addCorrection.drug) {
+        records.push({ id: uid(), ts: now, kind: "inv_money_reset", category: "__money_reset", type: "add", money: addCorrection, items: [], note: "Reset importi resoconto Gestione" });
+      }
+      if (remCorrection.clean || remCorrection.dirty || remCorrection.drug) {
+        records.push({ id: uid(), ts: now, kind: "inv_money_reset", category: "__money_reset", type: "rem", money: remCorrection, items: [], note: "Reset importi resoconto Gestione" });
+      }
+      invSave(records);
+      logEvent("INV_MONEY_RESET", `Azzera importi Gestione .. Puliti(${formatMoney(sal.clean)}) .. Sporchi(${formatMoney(sal.dirty)}) .. Spaccio(${formatMoney(sal.drug)})`);
+      INV_CATEGORIES.forEach(c => invRenderTable(c));
+      invRenderTotals();
+    }
 
     function invResetAll() {
 
