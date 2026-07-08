@@ -3105,6 +3105,7 @@ table.invTable td:last-child{
     // Contabilità
 
     const ACC_KEY = "vn_accounting_v1";
+    const ACC_SALARY_MISSING_KEY = "vn_acc_salary_missing_v1";
     const ACTION_ITEMS_CUSTOM_KEY = "vn_action_items_custom_v2";
     const INV_ITEMS_CUSTOM_KEY = "vn_inv_items_custom_v1";
 
@@ -9157,6 +9158,16 @@ function invComputeTotals() {
 
     function accSave(arr) { vnRemoteStore.setItem(ACC_KEY, JSON.stringify(arr || [])); }
 
+    function accSalaryMissingAmount() {
+      return Math.max(0, Math.floor(Number(vnRemoteStore.getItem(ACC_SALARY_MISSING_KEY) || 0) || 0));
+    }
+
+    function accSetSalaryMissingAmount(value) {
+      const amount = Math.max(0, Math.floor(Number(value || 0) || 0));
+      vnRemoteStore.setItem(ACC_SALARY_MISSING_KEY, String(amount));
+      accRenderSalaryTotalsTable();
+    }
+
     function accIsSalaryRow(r) {
       return r && r.kind === "salary" && r.source !== "inv";
     }
@@ -9387,10 +9398,14 @@ p.innerHTML = `
 
           p.innerHTML = `
             <h3 style="margin:0 0 6px 0; color:var(--red2); font-weight:900;">Totale Stipendi</h3>
-            <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni, divisi per stato.</div>
-
-            <h4 style="margin:16px 0 6px 0; font-weight:900;">Totale stipendi da pagare</h4>
-            <div class="muted">Somma degli stipendi ancora da saldare per ogni persona.</div>
+            <div class="muted">Riepilogo totale per persona degli stipendi generati dalle Azioni.</div>
+            <div class="row" style="margin-top:10px; align-items:flex-end;">
+              <div class="field" style="max-width:260px;">
+                <label>Ammanco cassa da scalare</label>
+                <input id="accSalaryMissingAmount" type="number" min="0" step="1" placeholder="es. 10000" oninput="accSetSalaryMissingAmount(this.value)" />
+              </div>
+              <div class="muted" id="accSalaryMissingHint">Diviso sugli stipendi ancora da pagare.</div>
+            </div>
             <div class="tableWrap" style="margin-top:12px;">
               <table class="accTable">
                 <thead>
@@ -9961,45 +9976,77 @@ function accSalaryTotalsGroups() {
     g.count += 1;
     g.latestTs = Math.max(g.latestTs, Number(r.ts || 0));
   });
-  return Array.from(groups.values()).sort((a,b) => {
+  const out = Array.from(groups.values());
+  accApplySalaryMissingDeduction(out);
+  return out.sort((a,b) => {
     if (a.status !== b.status) return a.status === "due" ? -1 : 1;
     return (b.latestTs || 0) - (a.latestTs || 0);
   });
 }
 
+function accSalaryGroupTotal(g) {
+  return Number(g.clean || 0) + Number(g.dirty || 0) + Number(g.drug || 0);
+}
+
+function accDeductFromSalaryGroup(g, amount) {
+  let left = Math.max(0, Math.floor(Number(amount || 0) || 0));
+  ["clean", "dirty", "drug"].forEach(k => {
+    if (left <= 0) return;
+    const take = Math.min(Number(g[k] || 0), left);
+    g[k] = Number(g[k] || 0) - take;
+    left -= take;
+  });
+}
+
+function accApplySalaryMissingDeduction(groups) {
+  const missing = accSalaryMissingAmount();
+  const due = groups.filter(g => g.status === "due" && accSalaryGroupTotal(g) > 0);
+  if (!missing || !due.length) return;
+  const maxDeduction = due.reduce((sum, g) => sum + accSalaryGroupTotal(g), 0);
+  let amount = Math.min(missing, maxDeduction);
+  const base = Math.floor(amount / due.length);
+  let rem = amount - (base * due.length);
+  due.forEach(g => {
+    const deduction = Math.min(accSalaryGroupTotal(g), base + (rem > 0 ? 1 : 0));
+    if (rem > 0) rem--;
+    g.missingDeduction = deduction;
+    accDeductFromSalaryGroup(g, deduction);
+  });
+}
+
 function accRenderSalaryTotalsTable() {
-  const dueBody = document.getElementById("accSalaryTotalsDueBody");
-  const paidBody = document.getElementById("accSalaryTotalsPaidBody");
-  if (!dueBody && !paidBody) return;
-
+  const body = document.getElementById("accSalaryTotalsBody");
+  if (!body) return;
+  const missingInput = document.getElementById("accSalaryMissingAmount");
+  const missingHint = document.getElementById("accSalaryMissingHint");
+  const missingAmount = accSalaryMissingAmount();
+  if (missingInput && document.activeElement !== missingInput) missingInput.value = missingAmount ? String(missingAmount) : "";
+  if (missingHint) {
+    missingHint.textContent = missingAmount
+      ? `${formatMoney(missingAmount)} scalati e divisi sugli stipendi ancora da pagare.`
+      : "Diviso sugli stipendi ancora da pagare.";
+  }
   const rows = accSalaryTotalsGroups();
-  const renderBody = (body, status) => {
-    if (!body) return;
-    const filtered = rows.filter(g => g.status === status);
-    if (!filtered.length) {
-      body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
-      return;
-    }
-    body.innerHTML = "";
-    filtered.forEach(g => {
-      const tr = document.createElement("tr");
-      const nextStatus = g.status === "due" ? "paid" : "due";
-      const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
-      tr.innerHTML = `
-        <td style="font-weight:900;">${escapeHtml(g.to || "—")}</td>
-        <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
-        <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
-        <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
-        <td style="font-weight:900;">${g.count}</td>
-        <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
-        <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
-      `;
-      body.appendChild(tr);
-    });
-  };
-
-  renderBody(dueBody, "due");
-  renderBody(paidBody, "paid");
+  if (!rows.length) {
+    body.innerHTML = `<tr><td class="muted" colspan="7">Nessun dato</td></tr>`;
+    return;
+  }
+  body.innerHTML = "";
+  rows.forEach(g => {
+    const tr = document.createElement("tr");
+    const nextStatus = g.status === "due" ? "paid" : "due";
+    const btnLabel = g.status === "due" ? "PAGATO" : "DA PAGARE";
+    tr.innerHTML = `
+      <td style="font-weight:900;">${escapeHtml(g.to || "—")}${g.missingDeduction ? `<div class="muted" style="font-size:11px;">Ammanco -${formatMoney(g.missingDeduction)}</div>` : ""}</td>
+      <td style="font-weight:900;">${g.clean ? formatMoney(g.clean) : "—"}</td>
+      <td style="font-weight:900;">${g.dirty ? formatMoney(g.dirty) : "—"}</td>
+      <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
+      <td style="font-weight:900;">${g.count}</td>
+      <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
+      <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
+    `;
+    body.appendChild(tr);
+  });
 }
 
 function accSetSalaryGroupStatus(encodedKey, status) {
