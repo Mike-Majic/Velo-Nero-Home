@@ -3060,7 +3060,7 @@ table.invTable td:last-child{
       droga: [
         "Marijuana / Erba","Cocaina","Metanfetamina","Crack","Eroina","Oppio","LSD",
         "MDMA / Ecstasy","Funghi","Speed / Anfetamine","Ketamina","Fentanyl","Hashish",
-        "Semi","Sostanze chimiche","Confezioni / Buste","Bilancino","Taglierino / Lametta",
+        "Semi","Sostanze chimiche","Confezioni / Buste","Bilancino",
         "Acetone","Ammoniaca"
       ],
       varie: [
@@ -3410,8 +3410,6 @@ table.invTable td:last-child{
       return loadUsers().filter(isUserDeleteRequested).length;
     }
 
-    let pendingUsersRefreshTimer = null;
-
     function apiSyncJson(method, url, body) {
       const xhr = new XMLHttpRequest();
       xhr.open(method, url, false);
@@ -3495,24 +3493,11 @@ table.invTable td:last-child{
     }
 
     function configurePendingUsersRefresh(reloadNow = true) {
-      if (pendingUsersRefreshTimer) {
-        clearInterval(pendingUsersRefreshTimer);
-        pendingUsersRefreshTimer = null;
-      }
       if (!isAdmin()) {
         updateUsersPendingBadge();
         return;
       }
       updateUsersPendingBadge(reloadNow);
-      pendingUsersRefreshTimer = setInterval(() => {
-        if (!isAdmin()) {
-          configurePendingUsersRefresh();
-          return;
-        }
-        const utentiSection = document.getElementById("utenti");
-        if (utentiSection?.classList.contains("active")) renderUsersTable(true);
-        else updateUsersPendingBadge(true);
-      }, 10000);
     }
 
     function sendPendingUserMessage(email) {
@@ -8076,8 +8061,6 @@ logEvent(
         "Confezioni / Buste",
 
         "Bilancino",
-
-        "Taglierino / Lametta",
 
         "Acetone",
 
