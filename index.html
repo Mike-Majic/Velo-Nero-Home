@@ -3448,8 +3448,11 @@ table.invTable td:last-child{
         }
         const remoteName = remote.name || remote.email || "";
         const remoteRole = roleLabelFromApi(remote.role);
+        const localRole = u.role || "";
+        const hasDetailedLocalMemberRole = !!localRole && !["Owner","Boss","Vice Boss","Soldato"].includes(localRole);
         if (remoteName && !u.gameName) { u.gameName = remoteName; changed = true; }
         if ((u.email || "").toLowerCase() === OWNER_EMAIL.toLowerCase() && u.role !== "Owner") { u.role = "Owner"; changed = true; }
+        else if (remoteRole === "Soldato" && hasDetailedLocalMemberRole) { /* mantieni ruolo dettagliato locale */ }
         else if ((u.role || "") !== remoteRole) { u.role = remoteRole; changed = true; }
       });
       if (changed) saveUsers(users);
@@ -5559,11 +5562,22 @@ sel.onchange = () => {
 
  
 
-  const oldRole = u.role || "—";
+  const oldRoleRaw = u.role || "";
 
-  const newRole = sel.value || "—";
+  const newRoleRaw = sel.value || "";
 
-  u.role = sel.value || "";
+  const oldRole = oldRoleRaw || "—";
+
+  const newRole = newRoleRaw || "—";
+
+  const okRoleChange = confirm(`Confermi modifica ruolo per ${u.gameName || u.email || "utente"}?\n\nDa: ${oldRole}\nA: ${newRole}`);
+
+  if (!okRoleChange) {
+    sel.value = oldRoleRaw;
+    return;
+  }
+
+  u.role = newRoleRaw;
 
  
 
