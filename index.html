@@ -3088,6 +3088,7 @@ table.invTable td:last-child{
     const USERS_KEY = "vn_users_v2";
 
     const OPS_KEY = "vn_ops_v6";
+    const OPS_MONEY_RESET_AT_KEY = "vn_ops_money_reset_at_v1";
 
     const SESSION_KEY = "vn_session_v1";
 
@@ -3114,6 +3115,7 @@ table.invTable td:last-child{
     // Contabilità
 
     const ACC_KEY = "vn_accounting_v1";
+    const ACC_MONEY_RESET_AT_KEY = "vn_acc_money_reset_at_v1";
     const ACC_SALARY_MISSING_KEY = "vn_acc_salary_missing_v1";
     const ACTION_ITEMS_CUSTOM_KEY = "vn_action_items_custom_v2";
     const INV_ITEMS_CUSTOM_KEY = "vn_inv_items_custom_v1";
@@ -6392,10 +6394,12 @@ if (s?.email === u.email) logout();
       const add = { clean:0, dirty:0, drug:0 };
 
       const rem = { clean:0, dirty:0, drug:0 };
+      const moneyResetAt = Number(vnRemoteStore.getItem(OPS_MONEY_RESET_AT_KEY) || 0) || 0;
 
  
 
       loadOps().forEach(r => {
+        if (moneyResetAt && Number(r.ts || 0) <= moneyResetAt) return;
 
         const mm = opsMoneyObj(r.money);
 
@@ -7579,8 +7583,9 @@ logEvent(
 
       if (!ok) return;
 
-      const records = loadOps();
-      const archives = records.filter(r => r.kind === "ops_archive");
+	      const records = loadOps();
+	      const moneyResetAt = Number(vnRemoteStore.getItem(OPS_MONEY_RESET_AT_KEY) || 0) || 0;
+	      const archives = records.filter(r => r.kind === "ops_archive");
       const addMoney = { clean: 0, dirty: 0, drug: 0 };
       const remMoney = { clean: 0, dirty: 0, drug: 0 };
       const addItems = new Map();
@@ -7601,10 +7606,16 @@ logEvent(
         return Array.from(map.entries()).map(([name, qty]) => ({ name, qty })).filter(x => x.qty);
       }
 
-      records.filter(r => r.kind !== "ops_archive").forEach(r => {
-        if (r.type === "ottenuto") { addMoneyTo(addMoney, r.money); addItemsTo(addItems, r.items); }
-        else { addMoneyTo(remMoney, r.money); addItemsTo(remItems, r.items); }
-      });
+	      records.filter(r => r.kind !== "ops_archive").forEach(r => {
+	        const includeMoney = !moneyResetAt || Number(r.ts || 0) > moneyResetAt;
+	        if (r.type === "ottenuto") {
+	          if (includeMoney) addMoneyTo(addMoney, r.money);
+	          addItemsTo(addItems, r.items);
+	        } else {
+	          if (includeMoney) addMoneyTo(remMoney, r.money);
+	          addItemsTo(remItems, r.items);
+	        }
+	      });
 
       if (addMoney.clean || addMoney.dirty || addMoney.drug || addItems.size) {
         archives.push({ id: uid(), ts: Date.now(), kind: "ops_archive", type: "ottenuto", money: addMoney, items: mapToItems(addItems) });
@@ -7631,11 +7642,12 @@ logEvent(
 
       if (!ok) return;
 
-      logEvent("OPS_RESET", "Reset Resoconto Azioni");
+	      logEvent("OPS_RESET", "Reset Resoconto Azioni");
 
-      vnRemoteStore.removeItem(OPS_KEY);
+	      vnRemoteStore.removeItem(OPS_KEY);
+	      vnRemoteStore.setItem(OPS_MONEY_RESET_AT_KEY, String(Date.now()));
 
-      CATEGORIES.forEach(c => renderCategory(c));
+	      CATEGORIES.forEach(c => renderCategory(c));
       renderOpsMoneySummary();
       invRenderTotals();
 
@@ -10293,6 +10305,7 @@ function accComputeSummary() {
   const now = Date.now();
 
   const days30 = 30 * 24 * 60 * 60 * 1000;
+  const moneyResetAt = Number(vnRemoteStore.getItem(ACC_MONEY_RESET_AT_KEY) || 0) || 0;
 
  
 
@@ -10320,9 +10333,10 @@ function accComputeSummary() {
 
   all.forEach(r => {
 
-    if (r.kind === "balance") {
+	    if (r.kind === "balance") {
+	      if (moneyResetAt && Number(r.ts || 0) <= moneyResetAt) return;
 
-      const mm = moneyObj(r.amount);
+	      const mm = moneyObj(r.amount);
 
  
 
@@ -10340,9 +10354,10 @@ function accComputeSummary() {
 
  
 
-    if (accIsSalaryRow(r)) {
+	    if (accIsSalaryRow(r)) {
+	      if (moneyResetAt && Number(r.ts || 0) <= moneyResetAt) return;
 
-      const amt = Number(r.amount || 0);
+	      const amt = Number(r.amount || 0);
       const payType = (r.payType || "clean");
       const isPaid = (r.status || "paid") === "paid";
 
@@ -10358,8 +10373,9 @@ function accComputeSummary() {
 
     }
 
-    if (r.kind === "salary_archive") {
-      const mm = moneyObj(r.amount);
+	    if (r.kind === "salary_archive") {
+	      if (moneyResetAt && Number(r.ts || 0) <= moneyResetAt) return;
+	      const mm = moneyObj(r.amount);
       expense.clean += mm.clean;
       expense.dirty += mm.dirty;
       expense.drug += mm.drug;
@@ -10371,9 +10387,10 @@ function accComputeSummary() {
 
   // 2) Azioni (OPS_KEY) -> OTTENUTO = Entrata, PERSO = Uscita
 
-  loadOps().forEach(op => {
+	  loadOps().forEach(op => {
+	    if (moneyResetAt && Number(op.ts || 0) <= moneyResetAt) return;
 
-    const mm = moneyObj(op.money);
+	    const mm = moneyObj(op.money);
 
     if (op.type === "ottenuto") {
 
@@ -10393,9 +10410,10 @@ function accComputeSummary() {
 
   // soldi: add/sold = Entrata .. rem/buy = Uscita
 
-  invLoad().forEach(r => {
+	  invLoad().forEach(r => {
+	    if (moneyResetAt && Number(r.ts || 0) <= moneyResetAt) return;
 
-    const mm = moneyObj(r.money);
+	    const mm = moneyObj(r.money);
 
     const isIncome = (r.type === "add" || r.type === "sold");
 
@@ -10547,11 +10565,12 @@ function accRenderSummary() {
 
       if (!ok) return;
 
-      logEvent("ACC_MONEY_RESET", "Reset Resoconto Soldi");
+	      logEvent("ACC_MONEY_RESET", "Reset Resoconto Soldi");
 
-      vnRemoteStore.removeItem(ACC_KEY);
+	      vnRemoteStore.removeItem(ACC_KEY);
+	      vnRemoteStore.setItem(ACC_MONEY_RESET_AT_KEY, String(Date.now()));
 
-      accRenderTable("Stipendi");
+	      accRenderTable("Stipendi");
       accRenderDueTable();
       accRenderSalaryTotalsTable();
       accRenderSummary();
