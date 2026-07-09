@@ -3106,6 +3106,7 @@ table.invTable td:last-child{
     // Gestione Armi/Droga
 
     const INV_KEY = "vn_inv_v1";
+    const INV_MONEY_RESET_AT_KEY = "vn_inv_money_reset_at_v1";
     let invTotalsOpen = false;
 
  
@@ -8857,7 +8858,9 @@ function invComputeTotals() {
 
   let addMoney = { clean:0, dirty:0, drug:0 };
 
-  let remMoney = { clean:0, dirty:0, drug:0 };
+	  let remMoney = { clean:0, dirty:0, drug:0 };
+
+	  const moneyResetAt = Number(vnRemoteStore.getItem(INV_MONEY_RESET_AT_KEY) || 0) || 0;
 
  
 
@@ -8877,7 +8880,9 @@ function invComputeTotals() {
 
  
 
-    const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
+	    if (moneyResetAt && Number(r.ts || 0) <= moneyResetAt) return;
+
+	    const signMoney = (r.type === "add" || r.type === "sold") ? 1 : -1;
 
  
 
@@ -9078,25 +9083,12 @@ function invComputeTotals() {
         dirty: addMoney.dirty - remMoney.dirty,
         drug: addMoney.drug - remMoney.drug
       };
-      if (!sal.clean && !sal.dirty && !sal.drug) return alert("Resoconto importi già a zero.");
+      const hasGrossMoney = addMoney.clean || addMoney.dirty || addMoney.drug || remMoney.clean || remMoney.dirty || remMoney.drug;
+      if (!hasGrossMoney) return alert("Resoconto importi già a zero.");
       const ok = confirm("Confermi AZZERA IMPORTI? Verranno azzerati solo i soldi del resoconto Gestione, senza cancellare registrazioni o item.");
       if (!ok) return;
-      const addCorrection = { clean: 0, dirty: 0, drug: 0 };
-      const remCorrection = { clean: 0, dirty: 0, drug: 0 };
-      ["clean", "dirty", "drug"].forEach(k => {
-        if (sal[k] > 0) remCorrection[k] = sal[k];
-        else if (sal[k] < 0) addCorrection[k] = Math.abs(sal[k]);
-      });
-      const records = invLoad();
-      const now = Date.now();
-      if (addCorrection.clean || addCorrection.dirty || addCorrection.drug) {
-        records.push({ id: uid(), ts: now, kind: "inv_money_reset", category: "__money_reset", type: "add", money: addCorrection, items: [], note: "Reset importi resoconto Gestione" });
-      }
-      if (remCorrection.clean || remCorrection.dirty || remCorrection.drug) {
-        records.push({ id: uid(), ts: now, kind: "inv_money_reset", category: "__money_reset", type: "rem", money: remCorrection, items: [], note: "Reset importi resoconto Gestione" });
-      }
-      invSave(records);
-      logEvent("INV_MONEY_RESET", `Azzera importi Gestione .. Puliti(${formatMoney(sal.clean)}) .. Sporchi(${formatMoney(sal.dirty)}) .. Spaccio(${formatMoney(sal.drug)})`);
+      vnRemoteStore.setItem(INV_MONEY_RESET_AT_KEY, String(Date.now()));
+      logEvent("INV_MONEY_RESET", `Azzera importi Gestione .. Entrate(${formatMoney(addMoney.clean + addMoney.dirty + addMoney.drug)}) .. Uscite(${formatMoney(remMoney.clean + remMoney.dirty + remMoney.drug)}) .. Saldo Puliti(${formatMoney(sal.clean)}) .. Saldo Sporchi(${formatMoney(sal.dirty)}) .. Saldo Spaccio(${formatMoney(sal.drug)})`);
       INV_CATEGORIES.forEach(c => invRenderTable(c));
       invRenderTotals();
     }
@@ -9109,8 +9101,9 @@ function invComputeTotals() {
 
       if (!ok) return;
 
-      const records = invLoad();
-      const archives = records.filter(r => r.kind === "inv_archive");
+	      const records = invLoad();
+	      const moneyResetAt = Number(vnRemoteStore.getItem(INV_MONEY_RESET_AT_KEY) || 0) || 0;
+	      const archives = records.filter(r => r.kind === "inv_archive");
       const addMoney = { clean: 0, dirty: 0, drug: 0 };
       const remMoney = { clean: 0, dirty: 0, drug: 0 };
       const addItems = new Map();
@@ -9131,11 +9124,17 @@ function invComputeTotals() {
         return Array.from(map.entries()).map(([name, qty]) => ({ name, qty })).filter(x => x.qty);
       }
 
-      records.filter(r => r.kind !== "inv_archive").forEach(r => {
-        const isAdd = (r.type === "add" || r.type === "sold");
-        if (isAdd) { addMoneyTo(addMoney, r.money); addItemsTo(addItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : [])); }
-        else { addMoneyTo(remMoney, r.money); addItemsTo(remItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : [])); }
-      });
+	      records.filter(r => r.kind !== "inv_archive").forEach(r => {
+	        const isAdd = (r.type === "add" || r.type === "sold");
+	        const includeMoney = !moneyResetAt || Number(r.ts || 0) > moneyResetAt;
+	        if (isAdd) {
+	          if (includeMoney) addMoneyTo(addMoney, r.money);
+	          addItemsTo(addItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : []));
+	        } else {
+	          if (includeMoney) addMoneyTo(remMoney, r.money);
+	          addItemsTo(remItems, r.items || (r.item ? [{ name: r.item, qty: r.qty }] : []));
+	        }
+	      });
 
       if (addMoney.clean || addMoney.dirty || addMoney.drug || addItems.size) {
         archives.push({ id: uid(), ts: Date.now(), kind: "inv_archive", type: "add", money: addMoney, items: mapToItems(addItems) });
@@ -9161,11 +9160,12 @@ function invComputeTotals() {
 
       if (!ok) return;
 
-      logEvent("INV_RESET", "Reset Resoconto Gestione armi-droga");
+	      logEvent("INV_RESET", "Reset Resoconto Gestione armi-droga");
 
-      vnRemoteStore.removeItem(INV_KEY);
+	      vnRemoteStore.removeItem(INV_KEY);
+	      vnRemoteStore.removeItem(INV_MONEY_RESET_AT_KEY);
 
-      INV_CATEGORIES.forEach(c => invRenderTable(c));
+	      INV_CATEGORIES.forEach(c => invRenderTable(c));
       invRenderTotals();
 
     }
