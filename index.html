@@ -3549,6 +3549,19 @@ table.invTable td:last-child{
 
     function canEditOps() { return myRole() !== ""; }
 
+    function canEditOthersRecords() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
+
+    function isOwnRecord(r) {
+      const sessionEmail = String(loadSession()?.email || "").trim().toLowerCase();
+      const recordEmail = String(r?.createdByEmail || r?.by_email || r?.email || "").trim().toLowerCase();
+      if (sessionEmail && recordEmail && sessionEmail === recordEmail) return true;
+      const me = String(myGameNameOrEmail() || "").trim().toLowerCase();
+      const who = String(r?.createdByName || r?.who || "").trim().toLowerCase();
+      return !!me && !!who && me === who;
+    }
+
+    function canModifyRecord(r) { return canEditOps() && (canEditOthersRecords() || isOwnRecord(r)); }
+
     function canAddDiaryNote() { return myRole() !== ""; }
 
     function canEditDiaryNote() { return ["Owner","Boss","Vice Boss"].includes(myRole()); }
@@ -3668,6 +3681,9 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
   const after = accLoad();
 
   const tsNow = Date.now();
+  const sourceRec = loadOps().find(r => r.id === sourceId);
+  const generatedByName = sourceRec?.createdByName || sourceRec?.who || myGameNameOrEmail();
+  const generatedByEmail = sourceRec?.createdByEmail || "";
 
  
 
@@ -3703,7 +3719,9 @@ function accUpsertDueSalariesFromSource(source, sourceId, money, tagUserIds, not
 
         status: "due",
 
-        who: myGameNameOrEmail(),         // chi ha generato (chi ha registrato)
+        who: generatedByName,         // chi ha generato (chi ha registrato)
+        createdByEmail: generatedByEmail,
+        createdByName: generatedByName,
 
         to: (u.gameName || u.email || "—"),
 
@@ -6957,6 +6975,7 @@ logEvent(
 try {
 
   const rec = loadOps().find(r => r.id === id);
+  if (rec && !canModifyRecord(rec)) return alert("Puoi modificare/eliminare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
 
   if (rec) {
 
@@ -7138,6 +7157,7 @@ accRenderSalaryTotalsTable();
       const rec = ops.find(r => r.id === id);
 
       if (!rec) return;
+      if (!canModifyRecord(rec)) return alert("Puoi modificare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
 
  
 
@@ -7371,6 +7391,7 @@ accRenderSalaryTotalsTable();
       const rec = ops.find(r => r.id === editingId);
 
       if (!rec) return;
+      if (!canModifyRecord(rec)) return alert("Puoi modificare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
 
  
 
@@ -7495,7 +7516,7 @@ logEvent(
 
         const tnames = (r.tagNames && r.tagNames.length) ? r.tagNames : (r.tagName ? [r.tagName] : []);
 
-        const actionsHtml = canEditOps()
+        const actionsHtml = canModifyRecord(r)
 
           ? `<div class="actionsButtons"><button class="btn small iconBtn" title="Modifica" aria-label="Modifica" onclick="openEdit('${r.id}')">✏️</button><button class="btn danger small iconBtn" title="Elimina" aria-label="Elimina" onclick="deleteRecord('${r.id}','${escapeHtml(r.category)}')">🗑️</button></div>`
 
@@ -8524,6 +8545,8 @@ logEvent(
         money: { clean: moneyClean, dirty: moneyDirty, drug: moneyDrug },
         note,
         who,
+        createdByEmail: loadSession()?.email || "",
+        createdByName: who,
         tagUserIds,
         tagNames,
         tagName: tagNames.length ? tagNames[0] : null
@@ -8590,7 +8613,7 @@ logEvent(
         const dirty = (typeof m === "number") ? 0 : Number(m?.dirty || 0);
         const drug  = (typeof m === "number") ? 0 : Number(m?.drug  || 0);
 
-        const actionsHtml = canEditOps()
+        const actionsHtml = canModifyRecord(r)
           ? `<div class="actionsButtons"><button class="btn small iconBtn" title="Modifica" aria-label="Modifica" onclick="openInvEdit('${r.id}','${escapeHtml(cat)}')">✏️</button><button class="btn small iconBtn" title="Elimina" aria-label="Elimina" onclick="invDeleteRecord('${r.id}','${escapeHtml(cat)}')">🗑️</button></div>`
           : `<span class="muted">—</span>`;
 
@@ -8621,6 +8644,9 @@ logEvent(
 
     function invDeleteRecord(id, cat) {
       if (!canEditOps()) return;
+      const rec = invLoad().find(r => r.id === id && r.category === cat);
+      if (!rec) return;
+      if (!canModifyRecord(rec)) return alert("Puoi modificare/eliminare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
       if (!confirm("Confermi eliminazione registrazione?")) return;
       const all = invLoad().filter(r => r.id !== id);
       invSave(all);
@@ -8655,6 +8681,7 @@ logEvent(
       if (!canEditOps()) return alert("Sei in attesa di ruolo: non puoi inserire/modificare.");
       const rec = invLoad().find(x => x.id === id && x.category === cat);
       if (!rec) return;
+      if (!canModifyRecord(rec)) return alert("Puoi modificare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
       setModalOpen(true);
 
       invEditingId = id;
@@ -8797,6 +8824,7 @@ logEvent(
       const all = invLoad();
       const rec = all.find(x => x.id === invEditingId && x.category === invEditingCategory);
       if (!rec) return;
+      if (!canModifyRecord(rec)) return alert("Puoi modificare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
 
       rec.type = invEditType?.value || rec.type;
       rec.money = {
@@ -9740,6 +9768,8 @@ all.push({
   status: "paid",            // manuale = già pagato
 
   who: myGameNameOrEmail(),
+  createdByEmail: loadSession()?.email || "",
+  createdByName: myGameNameOrEmail(),
 
   to,
 
@@ -9837,6 +9867,8 @@ logEvent(
         kind: "balance",
 
         who: myGameNameOrEmail(),
+        createdByEmail: loadSession()?.email || "",
+        createdByName: myGameNameOrEmail(),
 
         type, // in/out
 
@@ -9959,7 +9991,7 @@ tr.innerHTML = `
 
   <td>${r.note ? `<div style="white-space:pre-wrap; font-size:13px; font-weight:800;">${escapeHtml(r.note)}</div>` : `<span class="muted">—</span>`}</td>
 
-  <td>${(r.status || "paid") === "paid" ? `<button class="btn small salaryDue" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
+  <td>${(r.status || "paid") === "paid" && canModifyRecord(r) ? `<button class="btn small salaryDue" onclick="accSetSalaryStatus('${r.id}', 'due')">DA PAGARE</button>` : `<span class="muted">—</span>`}</td>
 
 `;
 
@@ -10029,7 +10061,7 @@ function accSalaryTotalsGroups() {
     const personKey = accSalaryPersonKey(r);
     const key = `${status}::${personKey}`;
     if (!groups.has(key)) {
-      groups.set(key, { key: personKey, status, to: r.to || "—", clean: 0, dirty: 0, drug: 0, count: 0, latestTs: 0 });
+      groups.set(key, { key: personKey, status, to: r.to || "—", clean: 0, dirty: 0, drug: 0, count: 0, latestTs: 0, canModify: true });
     }
     const g = groups.get(key);
     const amt = Number(r.amount || 0);
@@ -10039,6 +10071,7 @@ function accSalaryTotalsGroups() {
     else g.clean += amt;
     g.count += 1;
     g.latestTs = Math.max(g.latestTs, Number(r.ts || 0));
+    g.canModify = g.canModify && canModifyRecord(r);
   });
   const out = Array.from(groups.values());
   accApplySalaryMissingDeduction(out);
@@ -10127,7 +10160,7 @@ function accRenderSalaryTotalsTable() {
       <td style="font-weight:900;">${g.drug ? formatMoney(g.drug) : "—"}</td>
       <td style="font-weight:900;">${g.count}</td>
       <td><span class="tagRole ${g.status === "due" ? "salaryStatusDue" : "salaryStatusPaid"}">${g.status === "due" ? "DA PAGARE" : "PAGATO"}</span></td>
-      <td><button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button></td>
+      <td>${g.canModify ? `<button class="btn small ${g.status === "due" ? "salaryPaid" : "salaryDue"}" onclick="accSetSalaryGroupStatus('${escapeHtml(encodeURIComponent(g.key))}', '${nextStatus}')">${btnLabel}</button>` : `<span class="muted">—</span>`}</td>
     `;
     return tr;
   }
@@ -10150,6 +10183,9 @@ function accSetSalaryGroupStatus(encodedKey, status) {
   const all = accLoad();
   const nextStatus = status === "paid" ? "paid" : "due";
   const now = Date.now();
+  const targetRows = all.filter(r => accIsSalaryRow(r) && accSalaryPersonKey(r) === key);
+  if (!targetRows.length) return;
+  if (!targetRows.every(canModifyRecord)) return alert("Puoi modificare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
   const appliedMissing = nextStatus === "paid" ? accApplySalaryMissingToRows(all, key) : 0;
   if (appliedMissing) accConsumeSalaryMissingDeduction(appliedMissing);
   all.forEach(r => {
@@ -10226,7 +10262,7 @@ function accRenderDueTable() {
 
       <td>
 
-        <button class="btn small salaryPaid" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>
+        ${canModifyRecord(r) ? `<button class="btn small salaryPaid" onclick="accSetSalaryStatus('${r.id}', 'paid')">PAGATO</button>` : `<span class="muted">—</span>`}
 
       </td>
 
@@ -10247,6 +10283,7 @@ function accSetSalaryStatus(id, status) {
   const r = all.find(x => x.id === id);
 
   if (!accIsSalaryRow(r)) return;
+  if (!canModifyRecord(r)) return alert("Puoi modificare solo le tue registrazioni. Owner, Boss e Vice Boss possono modificare quelle altrui.");
 
  
 
@@ -10498,7 +10535,9 @@ function accRenderSummary() {
         type: signed > 0 ? "in" : "out",
         amount: money,
         note: "Correttivo resoconto soldi",
-        who: myGameNameOrEmail()
+        who: myGameNameOrEmail(),
+        createdByEmail: loadSession()?.email || "",
+        createdByName: myGameNameOrEmail()
       });
       accSave(all);
       const label = type === "dirty" ? "Sporchi" : type === "drug" ? "Spaccio" : "Puliti";
